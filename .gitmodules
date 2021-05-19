@@ -1,0 +1,4 @@
+[submodule "kkommon"]
+    path = kkommon
+    url = https://github.com/erxkk/kkommon.git
+    ignore = dirty

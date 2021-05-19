@@ -1,0 +1,6 @@
+# configuration
+config.yaml
+
+# dotnet output
+bin/
+obj/

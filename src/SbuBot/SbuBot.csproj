@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net5.0</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Disqord.Bot" Version="1.0.0-05152021-31" />
+      <PackageReference Include="HumanTimeParser.English" Version="2.0.1-dev-835860444" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.0-preview.3.21201.2">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
+      <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.0-preview.3.21201.4" />
+      <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.0-preview3" />
+      <PackageReference Include="Serilog.Extensions.Hosting" Version="4.1.2" />
+      <PackageReference Include="Serilog.Sinks.Console" Version="4.0.0-dev-00839" />
+      <PackageReference Include="Serilog.Sinks.RollingFile" Version="3.3.1-dev-00771" />
+    </ItemGroup>
+
+</Project>
