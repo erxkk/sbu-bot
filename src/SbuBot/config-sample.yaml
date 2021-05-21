@@ -1,13 +1,9 @@
-Dev: &dev_anchor
-  Discord:
-    Token: dev-token
+Discord:
+  Token: dev-token
 
-  Db:
-    Host: 127.0.0.1
-    Port: 5432
-    Database: sbu-bot-db
-    Username: postgres
-    Password: postgres
-
-# use dev until deployed
-Prod: *dev_anchor
+Postgres:
+  Host: 127.0.0.1
+  Port: 5432
+  Database: sbu-bot-db
+  Username: postgres
+  Password: postgres

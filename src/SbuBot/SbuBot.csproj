@@ -3,6 +3,7 @@
     <PropertyGroup>
         <OutputType>Exe</OutputType>
         <TargetFramework>net5.0</TargetFramework>
+        <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <ItemGroup>
@@ -13,10 +14,15 @@
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
       <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.0-preview.3.21201.4" />
+      <PackageReference Include="NetEscapades.Configuration.Yaml" Version="2.1.0" />
       <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.0-preview3" />
       <PackageReference Include="Serilog.Extensions.Hosting" Version="4.1.2" />
       <PackageReference Include="Serilog.Sinks.Console" Version="4.0.0-dev-00839" />
       <PackageReference Include="Serilog.Sinks.RollingFile" Version="3.3.1-dev-00771" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Migrations" />
     </ItemGroup>
 
 </Project>
