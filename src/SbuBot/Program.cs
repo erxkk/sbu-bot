@@ -22,6 +22,11 @@ try
                 .AddYamlFile("config.yaml")
                 .Build()
         )
+        .UseSerilog(
+            (ctx, services, logging) => logging.WriteTo.Console(
+                outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [{SourceContext}] {Message:ljk}{NewLine}{Exception}"
+            )
+        )
         .ConfigureServices(
             (ctx, services) => services
                 .AddDbContextFactory<DbContext>()
