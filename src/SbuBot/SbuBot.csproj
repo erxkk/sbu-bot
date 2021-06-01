@@ -4,11 +4,18 @@
         <OutputType>Exe</OutputType>
         <TargetFramework>net5.0</TargetFramework>
         <Nullable>enable</Nullable>
+        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     </PropertyGroup>
+    
+    <ItemGroup>
+      <ProjectReference Include="../../kkommon/src/Kkommon/Kkommon.csproj" />
+    </ItemGroup>
 
     <ItemGroup>
       <PackageReference Include="Disqord.Bot" Version="1.0.0-05152021-31" />
+      <PackageReference Include="EFCoreSecondLevelCacheInterceptor" Version="3.0.0" />
       <PackageReference Include="HumanTimeParser.English" Version="2.0.1-dev-835860444" />
+      <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="3.10.0-3.final" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.0-preview.3.21201.2">
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -17,8 +24,9 @@
       <PackageReference Include="NetEscapades.Configuration.Yaml" Version="2.1.0" />
       <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.0-preview3" />
       <PackageReference Include="Serilog.Extensions.Hosting" Version="4.1.2" />
+      <PackageReference Include="Serilog.Extras.Attributed" Version="2.0.0" />
       <PackageReference Include="Serilog.Sinks.Console" Version="4.0.0-dev-00839" />
-      <PackageReference Include="Serilog.Sinks.RollingFile" Version="3.3.1-dev-00771" />
+      <PackageReference Include="Serilog.Sinks.File" Version="5.0.0-dev-00909" />
     </ItemGroup>
 
     <ItemGroup>

@@ -34,7 +34,7 @@ namespace SbuBot.Extensions
     }
 
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public static class ModuleBuilderValueExtensions
+    public static class EntityFrameworkCoreValueExtensions
     {
         public static ModelBuilder UseValueConverterForType<TClr, TDb>(
             this ModelBuilder modelBuilder,
