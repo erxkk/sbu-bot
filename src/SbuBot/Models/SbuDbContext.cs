@@ -16,11 +16,10 @@ namespace SbuBot.Models
     {
         private readonly SbuBotConfiguration _configuration;
 
-        public DbSet<SbuMember> Members { get; }
-        public DbSet<SbuColorRole> ColorRoles { get; }
-        public DbSet<SbuNicknameLog> NicknameLogs { get; }
-        public DbSet<SbuTag> Tags { get; }
-        public DbSet<SbuReminder> Reminders { get; }
+        public DbSet<SbuMember> Members { get; set; }
+        public DbSet<SbuColorRole> ColorRoles { get; set; }
+        public DbSet<SbuTag> Tags { get; set; }
+        public DbSet<SbuReminder> Reminders { get; set; }
 
         public SbuDbContext(SbuBotConfiguration configuration) => _configuration = configuration;
 

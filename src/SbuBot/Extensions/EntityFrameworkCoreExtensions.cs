@@ -11,7 +11,7 @@ namespace SbuBot.Extensions
     // stolen from Zackattack01 :^)
     // improved to include nullable for value types and use generics for compile time safety
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public static class ModuleBuilderExtensions
+    public static class EntityFrameworkCoreExtensions
     {
         public static ModelBuilder UseValueConverterForType<TClr, TDb>(
             this ModelBuilder modelBuilder,

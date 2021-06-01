@@ -1,15 +1,21 @@
 ﻿using System;
 using System.IO;
 
+using Disqord;
 using Disqord.Bot.Hosting;
 
-using Microsoft.EntityFrameworkCore;
+using EFCoreSecondLevelCacheInterceptor;
+
+using HumanTimeParser.Core.TimeConstructs;
+using HumanTimeParser.English;
+
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 using SbuBot;
+using SbuBot.Models;
 
 using Serilog;
 
@@ -23,21 +29,40 @@ try
                 .Build()
         )
         .UseSerilog(
-            (ctx, services, logging) => logging.WriteTo.Console(
-                outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [{SourceContext}] {Message:ljk}{NewLine}{Exception}"
-            )
+            (ctx, services, logging) => logging
+                .MinimumLevel.Verbose()
+                .Destructure.ToMaximumDepth(2)
+                .Destructure.ToMaximumCollectionCount(5)
+                .Destructure.ToMaximumStringLength(50)
+                .Destructure.ByTransforming<Snowflake>(snowflake => snowflake.RawValue)
+                .WriteTo.File(
+                    "logs/log.txt",
+                    outputTemplate:
+                    "[{Timestamp:HH:mm:ss:fff zzz} {Level:u3} : {SourceContext}] {Message:ljk}{NewLine}{Exception}",
+                    rollingInterval: RollingInterval.Day
+                )
+                .WriteTo.Console(
+                    outputTemplate:
+                    "[{Timestamp:HH:mm:ss} {Level:u3} : {SourceContext}] {Message:ljk}{NewLine}{Exception}"
+                )
         )
         .ConfigureServices(
             (ctx, services) => services
-                .AddDbContextFactory<DbContext>()
+                .AddDbContext<SbuDbContext>()
+                .AddEFSecondLevelCache(
+                    cache => cache
+                        .CacheAllQueries(CacheExpirationMode.Sliding, TimeSpan.FromMinutes(15))
+                        .DisableLogging()
+                )
                 .AddSingleton(new SbuBotConfiguration(ctx.Configuration))
                 .AddSingleton(typeof(ILogger<>), typeof(ShortContextLogger<>))
+                .AddSingleton(new EnglishTimeParser(new(new("en-US"), ClockType.TwentyFourHour)))
         )
         .ConfigureDiscordBot<SbuBot.SbuBot>(
             (ctx, bot) =>
             {
                 bot.Token = ctx.Configuration["Discord:Token"];
-                bot.Prefixes = new[] { "sbu" };
+                bot.Prefixes = new[] { SbuBotGlobals.DEFAULT_PREFIX };
             }
         );
 

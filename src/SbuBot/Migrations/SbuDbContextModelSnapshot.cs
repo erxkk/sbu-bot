@@ -25,18 +25,10 @@ namespace SbuBot.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<int>("Color")
-                        .HasColumnType("integer");
-
                     b.Property<ulong>("DiscordId")
                         .HasColumnType("numeric(20,0)");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<ulong>("OwnerId")
+                    b.Property<ulong?>("OwnerId")
                         .HasColumnType("numeric(20,0)");
 
                     b.HasKey("Id");
@@ -59,38 +51,16 @@ namespace SbuBot.Migrations
                     b.Property<ulong>("DiscordId")
                         .HasColumnType("numeric(20,0)");
 
+                    b.Property<string>("InheritanceCode")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.HasKey("Id");
 
                     b.HasIndex("DiscordId")
                         .IsUnique();
 
                     b.ToTable("Members");
-                });
-
-            modelBuilder.Entity("SbuBot.Models.SbuNicknameLog", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Nickname")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
-
-                    b.Property<ulong>("OwnerId")
-                        .HasColumnType("numeric(20,0)");
-
-                    b.Property<long>("Timestamp")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.None);
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OwnerId");
-
-                    b.ToTable("NicknameLogs");
                 });
 
             modelBuilder.Entity("SbuBot.Models.SbuReminder", b =>
@@ -108,8 +78,8 @@ namespace SbuBot.Migrations
                     b.Property<long>("DueAt")
                         .HasColumnType("bigint");
 
-                    b.Property<long>("IsDispatched")
-                        .HasColumnType("bigint");
+                    b.Property<bool>("IsDispatched")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Message")
                         .HasMaxLength(1024)
@@ -118,7 +88,7 @@ namespace SbuBot.Migrations
                     b.Property<ulong>("MessageId")
                         .HasColumnType("numeric(20,0)");
 
-                    b.Property<ulong>("OwnerId")
+                    b.Property<ulong?>("OwnerId")
                         .HasColumnType("numeric(20,0)");
 
                     b.HasKey("Id");
@@ -134,18 +104,18 @@ namespace SbuBot.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasMaxLength(2048)
+                        .HasColumnType("character varying(2048)");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(128)
                         .HasColumnType("character varying(128)");
 
-                    b.Property<ulong>("OwnerId")
+                    b.Property<ulong?>("OwnerId")
                         .HasColumnType("numeric(20,0)");
-
-                    b.Property<string>("Value")
-                        .IsRequired()
-                        .HasMaxLength(2048)
-                        .HasColumnType("character varying(2048)");
 
                     b.HasKey("Id");
 
@@ -163,20 +133,7 @@ namespace SbuBot.Migrations
                         .WithOne("ColorRole")
                         .HasForeignKey("SbuBot.Models.SbuColorRole", "OwnerId")
                         .HasPrincipalKey("SbuBot.Models.SbuMember", "DiscordId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Owner");
-                });
-
-            modelBuilder.Entity("SbuBot.Models.SbuNicknameLog", b =>
-                {
-                    b.HasOne("SbuBot.Models.SbuMember", "Owner")
-                        .WithMany("Nicknames")
-                        .HasForeignKey("OwnerId")
-                        .HasPrincipalKey("DiscordId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Owner");
                 });
@@ -187,8 +144,7 @@ namespace SbuBot.Migrations
                         .WithMany("Reminders")
                         .HasForeignKey("OwnerId")
                         .HasPrincipalKey("DiscordId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Owner");
                 });
@@ -199,8 +155,7 @@ namespace SbuBot.Migrations
                         .WithMany("Tags")
                         .HasForeignKey("OwnerId")
                         .HasPrincipalKey("DiscordId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Owner");
                 });
@@ -208,8 +163,6 @@ namespace SbuBot.Migrations
             modelBuilder.Entity("SbuBot.Models.SbuMember", b =>
                 {
                     b.Navigation("ColorRole");
-
-                    b.Navigation("Nicknames");
 
                     b.Navigation("Reminders");
 

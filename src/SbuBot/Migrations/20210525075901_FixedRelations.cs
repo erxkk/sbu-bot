@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace SbuBot.Migrations
 {
-    public partial class InitialCreate : Migration
+    public partial class FixedRelations : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -12,7 +12,8 @@ namespace SbuBot.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    DiscordId = table.Column<ulong>(type: "numeric(20,0)", nullable: false)
+                    DiscordId = table.Column<ulong>(type: "numeric(20,0)", nullable: false),
+                    InheritanceCode = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -26,9 +27,7 @@ namespace SbuBot.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     DiscordId = table.Column<ulong>(type: "numeric(20,0)", nullable: false),
-                    OwnerId = table.Column<ulong>(type: "numeric(20,0)", nullable: false),
-                    Color = table.Column<int>(type: "integer", nullable: false),
-                    Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false)
+                    OwnerId = table.Column<ulong>(type: "numeric(20,0)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -38,27 +37,7 @@ namespace SbuBot.Migrations
                         column: x => x.OwnerId,
                         principalTable: "Members",
                         principalColumn: "DiscordId",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "NicknameLogs",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Timestamp = table.Column<long>(type: "bigint", nullable: false),
-                    OwnerId = table.Column<ulong>(type: "numeric(20,0)", nullable: false),
-                    Nickname = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_NicknameLogs", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_NicknameLogs_Members_OwnerId",
-                        column: x => x.OwnerId,
-                        principalTable: "Members",
-                        principalColumn: "DiscordId",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.SetNull);
                 });
 
             migrationBuilder.CreateTable(
@@ -66,13 +45,13 @@ namespace SbuBot.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    OwnerId = table.Column<ulong>(type: "numeric(20,0)", nullable: false),
+                    OwnerId = table.Column<ulong>(type: "numeric(20,0)", nullable: true),
                     ChannelId = table.Column<ulong>(type: "numeric(20,0)", nullable: false),
                     MessageId = table.Column<ulong>(type: "numeric(20,0)", nullable: false),
                     Message = table.Column<string>(type: "character varying(1024)", maxLength: 1024, nullable: true),
                     CreatedAt = table.Column<long>(type: "bigint", nullable: false),
                     DueAt = table.Column<long>(type: "bigint", nullable: false),
-                    IsDispatched = table.Column<long>(type: "bigint", nullable: false)
+                    IsDispatched = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -90,9 +69,9 @@ namespace SbuBot.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    OwnerId = table.Column<ulong>(type: "numeric(20,0)", nullable: false),
+                    OwnerId = table.Column<ulong>(type: "numeric(20,0)", nullable: true),
                     Name = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
-                    Value = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: false)
+                    Content = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -102,7 +81,7 @@ namespace SbuBot.Migrations
                         column: x => x.OwnerId,
                         principalTable: "Members",
                         principalColumn: "DiscordId",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.SetNull);
                 });
 
             migrationBuilder.CreateIndex(
@@ -122,11 +101,6 @@ namespace SbuBot.Migrations
                 table: "Members",
                 column: "DiscordId",
                 unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_NicknameLogs_OwnerId",
-                table: "NicknameLogs",
-                column: "OwnerId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Reminders_OwnerId",
@@ -149,9 +123,6 @@ namespace SbuBot.Migrations
         {
             migrationBuilder.DropTable(
                 name: "ColorRoles");
-
-            migrationBuilder.DropTable(
-                name: "NicknameLogs");
 
             migrationBuilder.DropTable(
                 name: "Reminders");

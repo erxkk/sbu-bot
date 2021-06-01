@@ -1,5 +1,7 @@
 using System;
 
+using Destructurama.Attributed;
+
 using Disqord;
 
 using Microsoft.EntityFrameworkCore;
@@ -7,29 +9,32 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace SbuBot.Models
 {
-    public sealed record SbuTag : SbuEntity
+    public sealed class SbuTag : SbuEntityBase, ISbuOwnedEntity
     {
-        public Snowflake OwnerId { get; }
+        public const int MIN_NAME_LENGTH = 3;
+
+        public Snowflake? OwnerId { get; set; }
         public string Name { get; }
-        public string Value { get; set; }
+        public string Content { get; set; }
 
         // nav properties
-        public SbuMember Owner { get; }
+        [HideOnSerialize, NotLogged]
+        public SbuMember? Owner { get; }
 
-        // new
-        public SbuTag(Snowflake ownerId, string name, string value)
+        public SbuTag(Snowflake ownerId, string name, string content)
         {
             OwnerId = ownerId;
             Name = name;
-            Value = value;
+            Content = content;
         }
 
-        // ef core
-        internal SbuTag(Guid id, Snowflake ownerId, string name, string value) : base(id)
+#region EFCore
+
+        internal SbuTag(Guid id, Snowflake? ownerId, string name, string content) : base(id)
         {
             OwnerId = ownerId;
             Name = name;
-            Value = value;
+            Content = content;
         }
 
         internal sealed class EntityTypeConfiguration : IEntityTypeConfiguration<SbuTag>
@@ -38,24 +43,20 @@ namespace SbuBot.Models
             {
                 builder.HasKey(t => t.Id);
                 builder.HasIndex(t => t.OwnerId);
-
-                builder.HasIndex(t => t.Name)
-                    .IsUnique();
+                builder.HasIndex(t => t.Name).IsUnique();
 
                 builder.Property(t => t.OwnerId);
-
-                builder.Property(t => t.Name)
-                    .HasMaxLength(128);
-
-                builder.Property(t => t.Value)
-                    .IsRequired()
-                    .HasMaxLength(2048);
+                builder.Property(t => t.Name).HasMaxLength(128);
+                builder.Property(t => t.Content).HasMaxLength(2048).IsRequired();
 
                 builder.HasOne(t => t.Owner)
                     .WithMany(m => m.Tags)
                     .HasForeignKey(t => t.OwnerId)
-                    .HasPrincipalKey(m => m.DiscordId);
+                    .HasPrincipalKey(m => m.DiscordId)
+                    .OnDelete(DeleteBehavior.SetNull);
             }
         }
+
+#endregion
     }
 }
