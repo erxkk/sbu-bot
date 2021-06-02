@@ -36,6 +36,8 @@ namespace SbuBot
             Commands.AddTypeParser(new ReminderTypeParser());
             Commands.AddTypeParser(new TagTypeParser());
             Commands.AddTypeParser(new TimeSpanTypeParser());
+            Commands.AddTypeParser(new MessageTypeParser());
+            Commands.AddTypeParser(new UserMessageTypeParser());
 
             return base.AddTypeParsersAsync(cancellationToken);
         }
@@ -55,7 +57,7 @@ namespace SbuBot
             return await base.BeforeExecutedAsync(context);
         }
 
-        public override ValueTask<bool> IsOwnerAsync(Snowflake userId) => new(userId == SbuBotGlobals.OWNER_ID);
+        public override ValueTask<bool> IsOwnerAsync(Snowflake userId) => new(userId == SbuBotGlobals.Bot.OWNER_ID);
 
         protected override void MutateModule(ModuleBuilder moduleBuilder)
         {

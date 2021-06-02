@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 
 using Disqord;
 using Disqord.Gateway;
@@ -11,8 +12,32 @@ namespace SbuBot
     public static class Utility
     {
         private static readonly Random RANDOM = new();
-        private static readonly char[] RANDOM_SOURCE_CHARS = "abcdefghijklmnopkrstuvwxyz1234567890_-!?*".ToCharArray();
-        private const int RANDOM_STRING_LENGTH = 5;
+
+        public const int RANDOM_STRING_LENGTH = 5;
+        public static readonly char[] RANDOM_SOURCE_CHARS = "abcdefghijklmnopkrstuvwxyz1234567890_-!?*".ToCharArray();
+
+        public static readonly Regex MESSAGE_LINK_REGEX
+            = new(@"https://(?:.*?\.)?discord(?:app)?.com/channels/(?:\d{15, 20})/(\d{15, 20})/(\d{15, 20})",
+                RegexOptions.Compiled);
+
+        public static string GetJumpUrl(IGatewayUserMessage userMessage) =>
+            string.Format(
+                "https://discord.com/channels/{0}/{1}/{2}",
+                userMessage.GetChannel().Id,
+                userMessage.ChannelId,
+                userMessage.Id
+            );
+
+        public static bool TryParseMessageLink(string value, out (Snowflake ChannelId, Snowflake MessageId) idPair)
+        {
+            if (value.Length >= 76 && Utility.MESSAGE_LINK_REGEX.Match(value) is { Success: true } matches)
+            {
+                idPair = (ulong.Parse(matches.Groups[1].Value), ulong.Parse(matches.Groups[2].Value));
+                return true;
+            }
+
+            return false;
+        }
 
         public static string GeneratePseudoRandomString()
         {

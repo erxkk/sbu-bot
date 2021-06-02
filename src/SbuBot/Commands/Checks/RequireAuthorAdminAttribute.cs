@@ -13,7 +13,7 @@ namespace SbuBot.Commands.Checks
             if (context.Author.GetRoles() is not { Count: > 0 } roles)
                 throw new RequiredCacheException("Could not find user roles in cache.");
 
-            return roles.ContainsKey(SbuBotGlobals.Guild.Roles.Permissions.ADMIN)
+            return roles.ContainsKey(SbuBotGlobals.Roles.ADMIN)
                 ? CheckAttribute.Failure("You require the administrator role to use this command.")
                 : CheckAttribute.Success();
         }

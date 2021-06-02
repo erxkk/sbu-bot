@@ -15,7 +15,7 @@ namespace SbuBot.Commands.Checks
                 throw new RequiredCacheException("Could not find color role separator in cache.");
 
             if (!context.Guild.Roles.TryGetValue(
-                SbuBotGlobals.Guild.Roles.Separators.COLOR,
+                SbuBotGlobals.Roles.Categories.COLOR,
                 out var colorRoleSeparator
             )) throw new RequiredCacheException("Could not find color role separator in cache.");
 

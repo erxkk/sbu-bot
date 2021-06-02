@@ -1,71 +1,77 @@
-using Disqord;
-
 namespace SbuBot
 {
     public static class SbuBotGlobals
     {
-        public static readonly Snowflake OWNER_ID = 356017256481685506ul;
-        public const string DEFAULT_PREFIX = "sbu";
-
         public static readonly string[] RESERVED_NAMES =
         {
             "help", "cancel", "new", "create", "make", "delete", "remove", "list", "show", "claim", "gift", "all",
             "none", "mine",
         };
 
-        public static class Guild
+        public const string DEFAULT_PREFIX = "sbu";
+
+        public static class Bot
         {
-            public static readonly Snowflake OWNER_ID = 356017256481685506ul;
-            public static readonly Snowflake ID = 681285811945340959ul; // original: 732210852849123418ul;
-            public const string NAME = "Siege Bad Uninstall";
-
-            public static class Roles
-            {
-                public static readonly Snowflake BOOSTER = 732232124714713229ul;
-
-                public static class Separators
-                {
-                    public static readonly Snowflake PERM = 776790664436383794ul;
-                    public static readonly Snowflake MENTION = 732238126998880267ul;
-                    public static readonly Snowflake COLOR = 753986150724534404ul;
-                }
-
-                public static class Permissions
-                {
-                    public static readonly Snowflake ADMIN = 741033629613948961ul;
-                    public static readonly Snowflake BOT = 755086820471210086ul; // test server role
-                    public static readonly Snowflake MUTED = 772062437490294784ul;
-                    public static readonly Snowflake NO_SERIOUS_CHANNEL = 776789839793618984ul;
-                    public static readonly Snowflake THE_SENATE_SUBMISSION = 775428028771598346ul;
-                    public static readonly Snowflake SHIT_SBU_SAYS_SUBMISSION = 759189942730883083ul;
-                    public static readonly Snowflake ANNOUNCEMENT_SUBMISSION = 773225941551153182ul;
-                    public static readonly Snowflake SERIOUS_CHANNEL_GUARDIAN = 789078423385407488ul;
-                    public static readonly Snowflake PIN_BRIGADE = 817448908095488000ul;
-                }
-            }
-
-            public static class Channels
-            {
-                public static readonly Snowflake HELP = 732210852849123421ul;
-                public static readonly Snowflake ANNOUNCEMENTS = 732231139233759324ul;
-                public static readonly Snowflake SENATE = 775427903206457365ul;
-                public static readonly Snowflake PIN_ARCHIVE = 775826206410407937ul;
-                public static readonly Snowflake SHIT_SBU_SAYS = 759153822806310912ul;
-                public static readonly Snowflake CRUMPET_SERVER = 790542075346944020ul;
-            }
-
-            public static class Categories
-            {
-                public static readonly Snowflake NORMAL = 732210852849123419ul;
-                public static readonly Snowflake BASED = 760469720741969950ul;
-                public static readonly Snowflake SERIOUS = 732215815537164309ul;
-                public static readonly Snowflake VOICE = 732210852849123420ul;
-            }
+            public const ulong ID = 0ul;
+            public const ulong OWNER_ID = 356017256481685506ul;
+            public const string NAME = "Allah 2";
         }
 
+        public static class Guild
+        {
+            // original: 732210852849123418ul
+            // currently using: retard#8283
+            public const ulong ID = 681285811945340959ul;
+            public const ulong OWNER_ID = 356017256481685506ul;
+            public const string NAME = "Siege Bad Uninstall";
+        }
+
+        public static class Roles
+        {
+            public const ulong BOOSTER = 732232124714713229ul;
+
+            // empty roles that are above the roles they annotate
+            public static class Categories
+            {
+                public const ulong PERM = 776790664436383794ul;
+                public const ulong MENTION = 732238126998880267ul;
+                public const ulong COLOR = 753986150724534404ul;
+            }
+
+            public const ulong ADMIN = 741033629613948961ul;
+            public const ulong BOT = 755086820471210086ul; // test server role
+            public const ulong MUTED = 772062437490294784ul;
+            public const ulong NO_SERIOUS_CHANNEL = 776789839793618984ul;
+            public const ulong THE_SENATE_SUBMISSION = 775428028771598346ul;
+            public const ulong SHIT_SBU_SAYS_SUBMISSION = 759189942730883083ul;
+            public const ulong ANNOUNCEMENT_SUBMISSION = 773225941551153182ul;
+            public const ulong SERIOUS_CHANNEL_GUARDIAN = 789078423385407488ul;
+            public const ulong PIN_BRIGADE = 817448908095488000ul;
+        }
+
+        public static class Channels
+        {
+            // actual category channels
+            public static class Categories
+            {
+                public const ulong NORMAL = 732210852849123419ul;
+                public const ulong BASED = 760469720741969950ul;
+                public const ulong SERIOUS = 732215815537164309ul;
+                public const ulong VOICE = 732210852849123420ul;
+            }
+
+            public const ulong HELP = 732210852849123421ul;
+            public const ulong ANNOUNCEMENTS = 732231139233759324ul;
+            public const ulong SENATE = 775427903206457365ul;
+            public const ulong PIN_ARCHIVE = 775826206410407937ul;
+            public const ulong SHIT_SBU_SAYS = 759153822806310912ul;
+            public const ulong CRUMPET_SERVER = 790542075346944020ul;
+        }
+
+        // saved on different guild to make sure they exist when used
         public static class Emotes
         {
-            public static readonly Snowflake GUILD_ID = 846789266041470977ul;
+            public const ulong GUILD_ID = 846789266041470977ul;
         }
     }
 }

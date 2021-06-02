@@ -15,6 +15,8 @@ namespace SbuBot.Commands
     {
         private SbuDbContext? _dbContext;
 
+        public override SbuBot Bot => (base.Bot as SbuBot)!;
+
         public SbuDbContext Db => _dbContext ??= Services.GetRequiredService<SbuDbContext>();
 
         public SbuMember? Invoker { get; private set; }
