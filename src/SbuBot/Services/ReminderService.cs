@@ -105,10 +105,10 @@ namespace SbuBot.Services
                 {
                     await Bot.SendMessageAsync(
                         reminder.ChannelId,
-                        new LocalMessageBuilder()
+                        new LocalMessage()
                             .WithReply(reminder.MessageId, reminder.ChannelId, SbuBotGlobals.Guild.ID, false)
                             .WithEmbed(
-                                new LocalEmbedBuilder()
+                                new LocalEmbed()
                                     .WithTitle("Reminder")
                                     .WithDescription(
                                         (reminder.Message ?? "No message given")
@@ -116,7 +116,6 @@ namespace SbuBot.Services
                                     )
                                     .WithTimestamp(reminder.CreatedAt)
                             )
-                            .Build()
                     );
 
                     Logger.LogDebug("Dispatched {@Reminder}", reminder.Id);

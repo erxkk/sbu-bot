@@ -82,7 +82,7 @@ namespace SbuBot.Commands.Modules
                     return Reply("Could not find the given entity.");
 
                 return Reply(
-                    new LocalEmbedBuilder()
+                    new LocalEmbed()
                         .WithTitle($"{entityName} : {entity.Id}")
                         .WithDescription(entity.ToString())
                 );
@@ -109,7 +109,7 @@ namespace SbuBot.Commands.Modules
                     return Reply("Could not find the given entity.");
 
                 return Reply(
-                    new LocalEmbedBuilder()
+                    new LocalEmbed()
                         .WithTitle($"{entityName} : ({entity.DiscordId}) {entity.Id}")
                         .WithDescription(entity.ToString())
                 );
@@ -129,7 +129,7 @@ namespace SbuBot.Commands.Modules
                     return Reply("Could not find the given member.");
 
                 return Reply(
-                    new LocalEmbedBuilder()
+                    new LocalEmbed()
                         .WithTitle($"Member : ({dbMember.DiscordId}) {dbMember.Id}")
                         .WithDescription(dbMember.ToString())
                 );
@@ -149,7 +149,7 @@ namespace SbuBot.Commands.Modules
                     return Reply("Could not find the given role.");
 
                 return Reply(
-                    new LocalEmbedBuilder()
+                    new LocalEmbed()
                         .WithTitle($"Role : ({dbRole.DiscordId}) {dbRole.Id}")
                         .WithDescription(dbRole.ToString())
                 );

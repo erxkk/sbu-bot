@@ -21,7 +21,7 @@ namespace SbuBot.Commands.Modules
 
         [Command("guide")]
         public DiscordCommandResult Guide() => Pages(
-            new LocalEmbedBuilder()
+            new LocalEmbed()
                 .WithTitle("Commands")
                 .WithFooter("1/5")
                 .WithDescription(
@@ -30,7 +30,7 @@ namespace SbuBot.Commands.Modules
                     + "optional and does not influence the command execution, both `sbu ping` and "
                     + "`sbuping` will work just fine."
                 ),
-            new LocalEmbedBuilder()
+            new LocalEmbed()
                 .WithTitle("Parameters")
                 .WithFooter("2/5")
                 .WithDescription(
@@ -41,7 +41,7 @@ namespace SbuBot.Commands.Modules
                     + "\n> - `[params…]` indicates a collection of values, if left out none will be passed."
                     + "\n> - All parameters but the last of each command are separated by spaces by default."
                 ),
-            new LocalEmbedBuilder()
+            new LocalEmbed()
                 .WithTitle("Parameters Examples")
                 .WithFooter("3/5")
                 .WithDescription(
@@ -50,7 +50,7 @@ namespace SbuBot.Commands.Modules
                     + "\n> `gift <user> <tag> [additional tags…]` can be used like:\n"
                     + Markdown.CodeBlock("sbu gift @joemama tag1\nsbu gift @joemama tag1 tag2 tag3")
                 ),
-            new LocalEmbedBuilder()
+            new LocalEmbed()
                 .WithTitle("Parsing")
                 .WithFooter("4/5")
                 .WithDescription(
@@ -61,7 +61,7 @@ namespace SbuBot.Commands.Modules
                     + "> - To use quotes or slashes as literal values anywhere they have to be escaped `\\\"`, "
                     + "will be parsed as `\"`."
                 ),
-            new LocalEmbedBuilder()
+            new LocalEmbed()
                 .WithTitle("Parsing Examples")
                 .WithFooter("5/5")
                 .WithDescription(
@@ -121,7 +121,7 @@ namespace SbuBot.Commands.Modules
                 return null!;
             }
 
-            LocalEmbedBuilder embedBuilder = new();
+            LocalEmbed embed = new();
             StringBuilder builder = new();
             IReadOnlyList<CommandMatch> matches = Context.Bot.Commands.FindCommands(command);
 
@@ -140,7 +140,7 @@ namespace SbuBot.Commands.Modules
                     builder.AppendLine("Remarks:").AppendLine(commandMatch.Remarks);
             }
 
-            return Reply(embedBuilder.WithDescription(builder.ToString()));
+            return Reply(embed.WithDescription(builder.ToString()));
         }
     }
 }

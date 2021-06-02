@@ -121,7 +121,7 @@ namespace SbuBot.Commands.Modules
                 await using (Context.BeginYield())
                 {
                     tags = await Context.Db.Tags.Include(t => t.Owner)
-                        .Where(t => t.Owner.DiscordId == owner.Id)
+                        .Where(t => t.Owner!.DiscordId == owner.Id)
                         .ToListAsync();
                 }
 
@@ -146,7 +146,7 @@ namespace SbuBot.Commands.Modules
 
                 return tag is null
                     ? Reply("No tag with this name exists.")
-                    : Reply(new LocalEmbedBuilder().WithTitle("Tag").WithDescription($"{tag.Name}\n{tag.Content}"));
+                    : Reply(new LocalEmbed().WithTitle("Tag").WithDescription($"{tag.Name}\n{tag.Content}"));
             }
         }
     }

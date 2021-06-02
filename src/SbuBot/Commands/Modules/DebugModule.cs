@@ -30,7 +30,7 @@ namespace SbuBot.Commands.Modules
             public async Task EchoAsync(ITextChannel target, string content)
             {
                 await Context.Message.DeleteAsync();
-                await target.SendMessageAsync(new LocalMessageBuilder().WithContent(content).Build());
+                await target.SendMessageAsync(new LocalMessage().WithContent(content));
             }
         }
 
@@ -45,7 +45,7 @@ namespace SbuBot.Commands.Modules
             // Context.Yield()/BeginYield() with delay could be used here but this is for testing the scheduler service
             service.Schedule(
                 _ => Context.Channel.SendMessageAsync(
-                    new LocalMessageBuilder().WithContent($"Ping was scheduled at: `{DateTime.Now}`, Pong!").Build()
+                    new LocalMessage().WithContent($"Ping was scheduled at: `{DateTime.Now}`, Pong!")
                 ),
                 timespan.Value
             );

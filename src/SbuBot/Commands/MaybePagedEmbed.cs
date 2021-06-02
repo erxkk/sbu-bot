@@ -22,7 +22,7 @@ namespace SbuBot.Commands
         ) : base(userId, new MaybePageEmbedProvider(pages, title, footer, timestamp), pages.Minimum(2)) { }
     }
 
-    public class MaybePageEmbedProvider : IPageProvider, IEnumerable<LocalEmbedBuilder>
+    public class MaybePageEmbedProvider : IPageProvider, IEnumerable<LocalEmbed>
     {
         private readonly List<Page> _pages;
 
@@ -41,7 +41,7 @@ namespace SbuBot.Commands
             for (var i = 0; i < pageContentList.Count; i++)
             {
                 _pages.Add(
-                    new LocalEmbedBuilder()
+                    new LocalEmbed()
                         .WithTitle(title)
                         .WithDescription(pageContentList[i])
                         .WithFooter($"{(footer is { } ? $"{footer} • " : "")}{i + 1}/{pageContentList.Count}")
@@ -53,7 +53,7 @@ namespace SbuBot.Commands
 
         public ValueTask<Page> GetPageAsync(PagedMenu menu) => ValueTask.FromResult(_pages[menu.CurrentPageIndex]);
 
-        public IEnumerator<LocalEmbedBuilder> GetEnumerator() => _pages.Select(page => page.Embed).GetEnumerator();
+        public IEnumerator<LocalEmbed> GetEnumerator() => _pages.Select(page => page.Embed).GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }

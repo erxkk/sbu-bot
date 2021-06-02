@@ -43,6 +43,24 @@ namespace SbuBot
                     public static readonly Snowflake PIN_BRIGADE = 817448908095488000ul;
                 }
             }
+
+            public static class Channels
+            {
+                public static readonly Snowflake HELP = 732210852849123421ul;
+                public static readonly Snowflake ANNOUNCEMENTS = 732231139233759324ul;
+                public static readonly Snowflake SENATE = 775427903206457365ul;
+                public static readonly Snowflake PIN_ARCHIVE = 775826206410407937ul;
+                public static readonly Snowflake SHIT_SBU_SAYS = 759153822806310912ul;
+                public static readonly Snowflake CRUMPET_SERVER = 790542075346944020ul;
+            }
+
+            public static class Categories
+            {
+                public static readonly Snowflake NORMAL = 732210852849123419ul;
+                public static readonly Snowflake BASED = 760469720741969950ul;
+                public static readonly Snowflake SERIOUS = 732215815537164309ul;
+                public static readonly Snowflake VOICE = 732210852849123420ul;
+            }
         }
 
         public static class Emotes

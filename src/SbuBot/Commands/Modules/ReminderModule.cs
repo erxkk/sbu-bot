@@ -36,7 +36,7 @@ namespace SbuBot.Commands.Modules
             }
 
             return Reply(
-                new LocalEmbedBuilder()
+                new LocalEmbed()
                     .WithTitle("Reminder Scheduled")
                     .WithDescription(message)
                     .WithFooter("Due at")
@@ -77,7 +77,7 @@ namespace SbuBot.Commands.Modules
             }
 
             return Reply(
-                new LocalEmbedBuilder()
+                new LocalEmbed()
                     .WithTitle("Reminder Scheduled")
                     .WithDescription(message)
                     .WithFooter("Due at")
@@ -128,7 +128,7 @@ namespace SbuBot.Commands.Modules
             }
 
             return Reply(
-                new LocalEmbedBuilder()
+                new LocalEmbed()
                     .WithTitle("Reminder Rescheduled")
                     .WithDescription(reminder.Message)
                     .WithFooter("Due at")
@@ -145,7 +145,7 @@ namespace SbuBot.Commands.Modules
             }
 
             return Reply(
-                new LocalEmbedBuilder()
+                new LocalEmbed()
                     .WithTitle("Reminder Unscheduled")
                     .WithDescription(reminder.Message)
                     .WithFooter("Cancelled at")
@@ -156,7 +156,7 @@ namespace SbuBot.Commands.Modules
         [Command("list", "show", "l")]
         public DiscordCommandResult ListReminders([AuthorMustOwn] SbuReminder? reminder = null) => reminder is { }
             ? Reply(
-                new LocalEmbedBuilder()
+                new LocalEmbed()
                     .WithTitle("Reminder")
                     .WithDescription(reminder.Message)
                     .WithFooter("Due at")

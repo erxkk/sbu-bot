@@ -8,7 +8,7 @@ namespace SbuBot.Extensions
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class DiscordExtensions
     {
-        public static LocalEmbedBuilder WithCurrentTimestamp(this LocalEmbedBuilder @this)
+        public static LocalEmbed WithCurrentTimestamp(this LocalEmbed @this)
             => @this.WithTimestamp(DateTimeOffset.Now);
     }
 }

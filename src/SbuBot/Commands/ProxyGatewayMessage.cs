@@ -16,10 +16,12 @@ namespace SbuBot.Commands
         public Snowflake ChannelId { get; }
 
         public IReadOnlyList<IUser> MentionedUsers => _originalGatewayUserMessage.MentionedUsers;
-        public Optional<IReadOnlyDictionary<IEmoji, Reaction>> Reactions => _originalGatewayUserMessage.Reactions;
+
+        public Optional<IReadOnlyDictionary<IEmoji, MessageReaction>> Reactions
+            => _originalGatewayUserMessage.Reactions;
+
         public IClient Client => _originalGatewayUserMessage.Client;
         public Snowflake Id => _originalGatewayUserMessage.Id;
-        public DateTimeOffset CreatedAt => _originalGatewayUserMessage.CreatedAt;
         public Snowflake? GuildId => _originalGatewayUserMessage.GuildId;
         public DateTimeOffset? EditedAt => _originalGatewayUserMessage.EditedAt;
         public Snowflake? WebhookId => _originalGatewayUserMessage.WebhookId;
@@ -36,6 +38,7 @@ namespace SbuBot.Commands
         public MessageFlag Flags => _originalGatewayUserMessage.Flags;
         public IReadOnlyList<Sticker> Stickers => _originalGatewayUserMessage.Stickers;
         public Optional<IUserMessage> ReferencedMessage => _originalGatewayUserMessage.ReferencedMessage;
+        public IReadOnlyList<IComponent> Components => _originalGatewayUserMessage.Components;
 
         internal ProxyMessage(
             IGatewayUserMessage originalGatewayUserMessage,
