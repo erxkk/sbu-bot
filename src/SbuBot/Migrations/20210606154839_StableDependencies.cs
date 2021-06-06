@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace SbuBot.Migrations
 {
-    public partial class FixedRelations : Migration
+    public partial class StableDependencies : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

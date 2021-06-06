@@ -2,23 +2,23 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SbuBot.Models;
 
 namespace SbuBot.Migrations
 {
     [DbContext(typeof(SbuDbContext))]
-    [Migration("20210525075901_FixedRelations")]
-    partial class FixedRelations
+    [Migration("20210606154839_StableDependencies")]
+    partial class StableDependencies
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("Relational:MaxIdentifierLength", 63)
-                .HasAnnotation("ProductVersion", "6.0.0-preview.3.21201.2")
+                .HasAnnotation("ProductVersion", "5.0.6")
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
             modelBuilder.Entity("SbuBot.Models.SbuColorRole", b =>
