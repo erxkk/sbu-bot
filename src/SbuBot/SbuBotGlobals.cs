@@ -2,26 +2,26 @@ namespace SbuBot
 {
     public static class SbuBotGlobals
     {
-        public static readonly string[] RESERVED_NAMES =
+        public const char DESCRIPTOR_SEPARATOR = '|';
+
+        public static readonly string[] RESERVED_KEYWORDS =
         {
-            "help", "cancel", "new", "create", "make", "delete", "remove", "list", "show", "claim", "gift", "all",
-            "none", "mine",
+            "help", "cancel", "create", "make", "delete", "remove", "list", "claim", "transfer", "all", "none", "mine",
+            "reserved", "abort",
         };
 
         public const string DEFAULT_PREFIX = "sbu";
 
         public static class Bot
         {
-            public const ulong ID = 0ul;
+            public const ulong ID = 849571821930283018ul;
             public const ulong OWNER_ID = 356017256481685506ul;
             public const string NAME = "Allah 2";
         }
 
         public static class Guild
         {
-            // original: 732210852849123418ul
-            // currently using: retard#8283
-            public const ulong ID = 681285811945340959ul;
+            public const ulong ID = 732210852849123418ul;
             public const ulong OWNER_ID = 356017256481685506ul;
             public const string NAME = "Siege Bad Uninstall";
         }
@@ -39,7 +39,7 @@ namespace SbuBot
             }
 
             public const ulong ADMIN = 741033629613948961ul;
-            public const ulong BOT = 755086820471210086ul; // test server role
+            public const ulong BOT = 851039575476273193ul;
             public const ulong MUTED = 772062437490294784ul;
             public const ulong NO_SERIOUS_CHANNEL = 776789839793618984ul;
             public const ulong THE_SENATE_SUBMISSION = 775428028771598346ul;
@@ -71,7 +71,8 @@ namespace SbuBot
         // saved on different guild to make sure they exist when used
         public static class Emotes
         {
-            public const ulong GUILD_ID = 846789266041470977ul;
+            public const ulong ID = 846789266041470977ul;
+            public const ulong OWNER_ID = 356017256481685506ul;
         }
     }
 }

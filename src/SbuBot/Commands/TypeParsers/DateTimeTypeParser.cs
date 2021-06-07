@@ -10,7 +10,7 @@ using Qmmands;
 
 namespace SbuBot.Commands.TypeParsers
 {
-    public sealed class DateTimeTypeParser : SbuTypeParser<DateTime>
+    public sealed class DateTimeTypeParser : SbuTypeParserBase<DateTime>
     {
         protected override ValueTask<TypeParserResult<DateTime>> ParseAsync(
             Parameter parameter,

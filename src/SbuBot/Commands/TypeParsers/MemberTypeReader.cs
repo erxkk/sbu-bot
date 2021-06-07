@@ -11,7 +11,7 @@ using SbuBot.Models;
 
 namespace SbuBot.Commands.TypeParsers
 {
-    public sealed class MemberTypeReader : SbuTypeParser<SbuMember>
+    public sealed class MemberTypeReader : SbuTypeParserBase<SbuMember>
     {
         protected override async ValueTask<TypeParserResult<SbuMember>> ParseAsync(
             Parameter parameter,

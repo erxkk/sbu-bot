@@ -18,7 +18,6 @@ namespace SbuBot.Models
         public string InheritanceCode { get; } = Utility.GeneratePseudoRandomString();
 
         // nav properties
-
         [HideOnSerialize, NotLogged]
         public SbuColorRole? ColorRole { get; }
 

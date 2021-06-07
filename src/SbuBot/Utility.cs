@@ -2,10 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
 
 using Disqord;
 using Disqord.Gateway;
+
+using Kkommon;
 
 namespace SbuBot
 {
@@ -16,26 +17,44 @@ namespace SbuBot
         public const int RANDOM_STRING_LENGTH = 5;
         public static readonly char[] RANDOM_SOURCE_CHARS = "abcdefghijklmnopkrstuvwxyz1234567890_-!?*".ToCharArray();
 
-        public static readonly Regex MESSAGE_LINK_REGEX
-            = new(@"https://(?:.*?\.)?discord(?:app)?.com/channels/(?:\d{15, 20})/(\d{15, 20})/(\d{15, 20})",
-                RegexOptions.Compiled);
+        public static Result<LocalMessage, string> TryCreatePinMessage(IUserMessage message, bool force)
+        {
+            LocalEmbed embed = new LocalEmbed()
+                .WithAuthor(message.Author)
+                .AddField(
+                    "Link to Original",
+                    Markdown.Link(
+                        "Click here!",
+                        Discord.MessageJumpLink(SbuBotGlobals.Guild.ID, message.ChannelId, message.Id)
+                    )
+                )
+                .WithFooter("Posted at")
+                .WithTimestamp(message.CreatedAt());
 
-        public static string GetJumpUrl(IGatewayUserMessage userMessage) =>
-            string.Format(
-                "https://discord.com/channels/{0}/{1}/{2}",
-                userMessage.GetChannel().Id,
-                userMessage.ChannelId,
-                userMessage.Id
-            );
+            LocalMessage pinMessage = new LocalMessage().WithEmbed(embed);
+
+            if (message.Embeds.Count != 0 && !force)
+                return new Result<LocalMessage, string>.Error("Could not determine content embed type.");
+
+            if (message.Embeds[0].Image is { } image)
+                embed.WithImageUrl(image.Url);
+            else if (message.Embeds[0].Video is { } video)
+                pinMessage.WithContent($"{video.Url}");
+            else if (!force)
+                return new Result<LocalMessage, string>.Error("Could not determine content embed type.");
+
+            return new Result<LocalMessage, string>.Success(pinMessage);
+        }
 
         public static bool TryParseMessageLink(string value, out (Snowflake ChannelId, Snowflake MessageId) idPair)
         {
-            if (value.Length >= 76 && Utility.MESSAGE_LINK_REGEX.Match(value) is { Success: true } matches)
+            if (value.Length >= 76 && Discord.MessageJumpLinkRegex.Match(value) is { Success: true } matches)
             {
                 idPair = (ulong.Parse(matches.Groups[1].Value), ulong.Parse(matches.Groups[2].Value));
                 return true;
             }
 
+            idPair = default;
             return false;
         }
 
@@ -44,7 +63,7 @@ namespace SbuBot
             StringBuilder buffer = new(Utility.RANDOM_STRING_LENGTH);
 
             for (int i = 0; i < Utility.RANDOM_STRING_LENGTH; i++)
-                buffer[i] = Utility.RANDOM_SOURCE_CHARS[Utility.RANDOM.Next(0, Utility.RANDOM_SOURCE_CHARS.Length)];
+                buffer.Append(Utility.RANDOM_SOURCE_CHARS[Utility.RANDOM.Next(0, Utility.RANDOM_SOURCE_CHARS.Length)]);
 
             return buffer.ToString();
         }
@@ -64,7 +83,7 @@ namespace SbuBot
                     throw new ArgumentOutOfRangeException(
                         nameof(source),
                         item.Length,
-                        $"An Item in collection was longer than maximum page length of {maxPageLength}."
+                        $"An item in the collection was longer than maximum page length of {maxPageLength}."
                     );
 
                 if ((maxElementsPerPage == -1 || elements <= maxElementsPerPage)
@@ -133,10 +152,10 @@ namespace SbuBot
 
             if (!sbuColorRole.GetGatewayClient()
                 .GetGuild(sbuColorRole.GuildId)
-                .Roles.TryGetValue(sbuColorRole.Id, out var colorSeparatorRole))
+                .Roles.TryGetValue(SbuBotGlobals.Roles.Categories.COLOR, out var colorSeparatorRole))
                 throw new RequiredCacheException("Could not find required color separator role in cache.");
 
-            return sbuColorRole.Position < colorSeparatorRole.Position || sbuColorRole.Color is null;
+            return sbuColorRole.Position < colorSeparatorRole.Position && sbuColorRole.Color is { };
         }
     }
 }

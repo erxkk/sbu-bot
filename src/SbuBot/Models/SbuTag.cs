@@ -12,6 +12,8 @@ namespace SbuBot.Models
     public sealed class SbuTag : SbuEntityBase, ISbuOwnedEntity
     {
         public const int MIN_NAME_LENGTH = 3;
+        public const int MAX_NAME_LENGTH = 128;
+        public const int MAX_CONTENT_LENGTH = 2048;
 
         public Snowflake? OwnerId { get; set; }
         public string Name { get; }
@@ -46,8 +48,8 @@ namespace SbuBot.Models
                 builder.HasIndex(t => t.Name).IsUnique();
 
                 builder.Property(t => t.OwnerId);
-                builder.Property(t => t.Name).HasMaxLength(128);
-                builder.Property(t => t.Content).HasMaxLength(2048).IsRequired();
+                builder.Property(t => t.Name).HasMaxLength(SbuTag.MAX_NAME_LENGTH);
+                builder.Property(t => t.Content).HasMaxLength(SbuTag.MAX_CONTENT_LENGTH).IsRequired();
 
                 builder.HasOne(t => t.Owner)
                     .WithMany(m => m.Tags)

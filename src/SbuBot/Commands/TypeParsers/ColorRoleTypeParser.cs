@@ -11,7 +11,7 @@ using SbuBot.Models;
 
 namespace SbuBot.Commands.TypeParsers
 {
-    public sealed class ColorRoleTypeParser : SbuTypeParser<SbuColorRole>
+    public sealed class ColorRoleTypeParser : SbuTypeParserBase<SbuColorRole>
     {
         protected override async ValueTask<TypeParserResult<SbuColorRole>> ParseAsync(
             Parameter parameter,

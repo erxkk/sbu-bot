@@ -17,7 +17,7 @@ using SbuBot.Models;
 
 namespace SbuBot.Services
 {
-    public sealed class ReminderService : DiscordBotService
+    public sealed class ReminderService : SbuBotServiceBase
     {
         private readonly SchedulerService _schedulerService;
 
@@ -50,8 +50,10 @@ namespace SbuBot.Services
         {
             List<SbuReminder> notDispatchedReminders;
 
-            await using (SbuDbContext context = Bot.Services.CreateScope().ServiceProvider.GetRequiredService<SbuDbContext>())
+            using (IServiceScope scope = Bot.Services.CreateScope())
             {
+                SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
+
                 notDispatchedReminders = await context.Reminders
                     .Where(r => !r.IsDispatched)
                     .ToListAsync(stoppingToken);
@@ -83,8 +85,10 @@ namespace SbuBot.Services
 
             if (isNewReminder)
             {
-                await using (SbuDbContext context = Bot.Services.CreateScope().ServiceProvider.GetRequiredService<SbuDbContext>())
+                using (IServiceScope scope = Bot.Services.CreateScope())
                 {
+                    SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
+
                     context.Add(reminder);
                     await context.SaveChangesAsync();
                 }
@@ -131,8 +135,10 @@ namespace SbuBot.Services
                         _currentReminders.Remove(reminder.Id);
                     }
 
-                    await using (SbuDbContext context = Bot.Services.GetRequiredService<SbuDbContext>())
+                    using (IServiceScope scope = Bot.Services.CreateScope())
                     {
+                        SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
+
                         reminder.IsDispatched = true;
                         context.Reminders.Update(reminder);
                         await context.SaveChangesAsync();
@@ -153,8 +159,10 @@ namespace SbuBot.Services
                     return;
             }
 
-            await using (SbuDbContext context = Bot.Services.GetRequiredService<SbuDbContext>())
+            using (IServiceScope scope = Bot.Services.CreateScope())
             {
+                SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
+
                 reminder.DueAt = newTimestamp;
                 context.Reminders.Update(reminder);
                 await context.SaveChangesAsync();
@@ -182,8 +190,10 @@ namespace SbuBot.Services
                     return;
             }
 
-            await using (SbuDbContext context = Bot.Services.GetRequiredService<SbuDbContext>())
+            using (IServiceScope scope = Bot.Services.CreateScope())
             {
+                SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
+
                 reminder.IsDispatched = true;
                 context.Reminders.Update(reminder);
                 await context.SaveChangesAsync();

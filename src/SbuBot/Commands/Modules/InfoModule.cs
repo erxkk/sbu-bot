@@ -1,9 +1,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 using Disqord;
 using Disqord.Bot;
+using Disqord.Gateway;
+
+using Kkommon.Extensions.AsyncLinq;
 
 using Qmmands;
 
@@ -13,12 +17,7 @@ namespace SbuBot.Commands.Modules
 {
     public sealed class InfoModule : SbuModuleBase
     {
-        [Command("reserved")]
-        public DiscordCommandResult ReservedKeywords() => Reply(
-            "The following keywords are not allowed for tag names, but tags may contain them:\n"
-            + string.Join("\n", SbuBotGlobals.RESERVED_NAMES.Select(rn => $"> {rn}"))
-        );
-
+        // TODO: improve with buttons
         [Command("guide")]
         public DiscordCommandResult Guide() => Pages(
             new LocalEmbed()
@@ -73,13 +72,12 @@ namespace SbuBot.Commands.Modules
                 )
         );
 
-        [Group("command", "commands", "cmd")]
+        [Group("command", "commands")]
         public class CommandGroup : SbuModuleBase
         {
             [Command("find")]
             public DiscordCommandResult FindCommand(string command)
             {
-                // TODO: interactive?
                 IReadOnlyList<CommandMatch> matches = Context.Bot.Commands.FindCommands(command);
 
                 if (!matches.Any())
@@ -89,13 +87,25 @@ namespace SbuBot.Commands.Modules
             }
 
             [Command("list")]
-            public DiscordCommandResult ListCommands()
+            public async Task<DiscordCommandResult> ListCommandsAsync()
             {
-                return Reply("");
+                IEnumerable<Command> enumerable = Context.Bot.Commands.GetAllCommands();
+
+                if (!Context.Author.GetGuildPermissions().Administrator)
+                {
+                    enumerable = await enumerable
+                        .AsyncWhere(async cmd => await cmd.RunChecksAsync(Context) is { IsSuccessful: true })
+                        .CollectAsync();
+                }
+
+                return MaybePages(
+                    enumerable.Select(cmd => cmd.IsEnabled ? $"`{cmd.GetSignature()}`" : $"~~`{cmd.GetSignature()}`~~"),
+                    "Command List"
+                );
             }
         }
 
-        [Command("help", "h", "how", "howto")]
+        [Command("help", "h", "how")]
         public DiscordCommandResult Help([OverrideDefault("show all commands")] string? command = null)
         {
             if (command is null)
@@ -121,26 +131,36 @@ namespace SbuBot.Commands.Modules
                 return null!;
             }
 
-            LocalEmbed embed = new();
-            StringBuilder builder = new();
             IReadOnlyList<CommandMatch> matches = Context.Bot.Commands.FindCommands(command);
 
-            // TODO: handle multiple commands
+            // TODO: create proper handling for commands
             if (matches.Count == 0)
                 return Reply("No commands found.");
 
-            foreach (Command commandMatch in matches.Select(c => c.Command))
-            {
-                builder.AppendLine($"`{commandMatch.GetSignature()}`");
+            return MaybePages(
+                matches.Select(c => c.Command)
+                    .Select(
+                        cmd =>
+                        {
+                            StringBuilder builder = new();
 
-                if (commandMatch.Description is { })
-                    builder.AppendLine("Description:").AppendLine(commandMatch.Description);
+                            builder.Append(cmd.IsEnabled ? "`" : "~~`")
+                                .Append(cmd.GetSignature())
+                                .AppendLine(cmd.IsEnabled ? "`" : "`~~");
 
-                if (commandMatch.Remarks is { })
-                    builder.AppendLine("Remarks:").AppendLine(commandMatch.Remarks);
-            }
+                            if (!cmd.IsEnabled)
+                                return builder.ToString();
 
-            return Reply(embed.WithDescription(builder.ToString()));
+                            if (cmd.Description is { })
+                                builder.AppendLine("Description:").AppendLine(cmd.Description);
+
+                            if (cmd.Remarks is { })
+                                builder.AppendLine("Remarks:").AppendLine(cmd.Remarks);
+
+                            return builder.ToString();
+                        }
+                    )
+            );
         }
     }
 }

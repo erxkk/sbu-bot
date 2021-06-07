@@ -10,13 +10,14 @@ using Microsoft.Extensions.DependencyInjection;
 
 using Qmmands;
 
+using SbuBot.Commands.Information;
 using SbuBot.Services;
 
 namespace SbuBot.Commands.Modules
 {
     public sealed class DebugModule : SbuModuleBase
     {
-        [Group("echo")]
+        [Group("echo"), PureGroup]
         public sealed class EchoGroup : SbuModuleBase
         {
             [Command]
@@ -35,7 +36,7 @@ namespace SbuBot.Commands.Modules
         }
 
         [Command("ping")]
-        public DiscordCommandResult Send(TimeSpan? timespan = null)
+        public DiscordCommandResult Send([OverrideDefault("now")] TimeSpan? timespan = null)
         {
             if (timespan is null)
                 return Reply("Pong!");
@@ -53,6 +54,7 @@ namespace SbuBot.Commands.Modules
             return Reply($"Scheduled pong to be sent in `{timespan}`.");
         }
 
+        // TODO: TEST
         [Command("eval"), RequireBotOwner]
         public async Task<DiscordCommandResult> EvalAsync([Remainder] string expression)
         {
@@ -67,17 +69,14 @@ namespace SbuBot.Commands.Modules
                 {
                     ScriptResult scriptResult = await compilationCompleted.RunAsync();
 
-                    switch (scriptResult)
+                    return scriptResult switch
                     {
-                        case ScriptResult.Completed scriptCompleted:
-                            return Reply(scriptCompleted.ReturnValue?.ToString() ?? "<null>");
-
-                        case ScriptResult.Failed scriptFailed:
-                            return Reply(scriptFailed.Exception.ToString());
-
-                        default:
-                            throw new ArgumentOutOfRangeException(nameof(scriptResult), scriptResult, null);
-                    }
+                        ScriptResult.Completed scriptCompleted => Reply(
+                            scriptCompleted.ReturnValue?.ToString() ?? "<null>"
+                        ),
+                        ScriptResult.Failed scriptFailed => Reply(scriptFailed.Exception.ToString()),
+                        _ => throw new ArgumentOutOfRangeException(nameof(scriptResult), scriptResult, null),
+                    };
                 }
 
                 case CompilationResult.Failed compilationFailed:
@@ -95,72 +94,77 @@ namespace SbuBot.Commands.Modules
             }
         }
 
+        // currently not before/after execute is done etc
         [Group("do"), RequireBotOwner]
         public sealed class ProxyGroup : SbuModuleBase
         {
             [Command]
             [Description("Send a proxy command as a different author in a different channel.")]
-            public void DoAsync(
+            public async Task DoAsync(
                 [Description("The proxy author.")] IMember member,
                 [Description("The proxy channel.")] ITextChannel channel,
                 [Description("The proxy message.")] string command = "ping"
             )
             {
-                Context.Bot.Queue.Post(
-                    new SbuCommandContext(
-                        Context.Bot,
-                        Context.Prefix,
-                        command,
-                        new ProxyMessage(Context.Message, command, member, channel.Id),
-                        Context.Channel,
-                        Context.Services,
-                        Context.Invoker
-                    ),
-                    context => context.Bot.ExecuteAsync(context)
+                var ctx = new SbuCommandContext(
+                    Context.Bot,
+                    Context.Prefix,
+                    command,
+                    new ProxyMessage(Context.Message, command, member, channel.Id),
+                    Context.Channel,
+                    Context.Services
                 );
+
+                await ctx.InitializeAsync();
+                Context.Bot.Queue.Post(ctx, context => context.Bot.ExecuteAsync(context));
             }
 
             [Command("as")]
             [Description("Send a proxy command as a different author.")]
-            public void DoAsUserAsync(
+            public async Task DoAsUserAsync(
                 [Description("The proxy author.")] IMember member,
                 [Description("The proxy command.")] string command = "ping"
             )
             {
-                Context.Bot.Queue.Post(
-                    new SbuCommandContext(
-                        Context.Bot,
-                        Context.Prefix,
-                        command,
-                        new ProxyMessage(Context.Message, command, member),
-                        Context.Channel,
-                        Context.Services,
-                        Context.Invoker
-                    ),
-                    context => context.Bot.ExecuteAsync(context)
+                var ctx = new SbuCommandContext(
+                    Context.Bot,
+                    Context.Prefix,
+                    command,
+                    new ProxyMessage(Context.Message, command, member),
+                    Context.Channel,
+                    Context.Services
                 );
+
+                await ctx.InitializeAsync();
+                Context.Bot.Queue.Post(ctx, context => context.Bot.ExecuteAsync(context));
             }
 
             [Command("in")]
             [Description("Send a proxy command in a different channel.")]
-            public void DoInChannelAsync(
+            public async Task DoInChannelAsync(
                 [Description("The proxy channel.")] ITextChannel channel,
                 [Description("The proxy command.")] string command = "ping"
             )
             {
-                Context.Bot.Queue.Post(
-                    new SbuCommandContext(
-                        Context.Bot,
-                        Context.Prefix,
-                        command,
-                        new ProxyMessage(Context.Message, command, proxyChannelId: channel.Id),
-                        Context.Channel,
-                        Context.Services,
-                        Context.Invoker
-                    ),
-                    context => context.Bot.ExecuteAsync(context)
+                var ctx = new SbuCommandContext(
+                    Context.Bot,
+                    Context.Prefix,
+                    command,
+                    new ProxyMessage(Context.Message, command, proxyChannelId: channel.Id),
+                    Context.Channel,
+                    Context.Services
                 );
+
+                await ctx.InitializeAsync();
+                Context.Bot.Queue.Post(ctx, context => context.Bot.ExecuteAsync(context));
             }
+        }
+
+        [Command("lock")]
+        public DiscordCommandResult Lock(bool? set = null)
+        {
+            Context.Bot.IsLocked = set ?? !Context.Bot.IsLocked;
+            return Reply($"{(Context.Bot.IsLocked ? "Locked" : "Unlocked")} the bot.");
         }
     }
 }

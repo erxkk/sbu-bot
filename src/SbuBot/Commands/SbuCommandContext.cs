@@ -19,7 +19,7 @@ namespace SbuBot.Commands
 
         public SbuDbContext Db => _dbContext ??= Services.GetRequiredService<SbuDbContext>();
 
-        public SbuMember? Invoker { get; private set; }
+        public SbuMember Invoker { get; private set; }
 
         public SbuCommandContext(
             DiscordBotBase bot,
@@ -28,7 +28,7 @@ namespace SbuBot.Commands
             IGatewayUserMessage message,
             CachedTextChannel channel,
             IServiceProvider services,
-            SbuMember? invoker = null
+            SbuMember invoker = null!
         ) : base(bot, prefix, input, message, channel, services)
             => Invoker = invoker;
 
@@ -39,11 +39,11 @@ namespace SbuBot.Commands
             IGatewayUserMessage message,
             CachedTextChannel channel,
             IServiceScope serviceScope,
-            SbuMember? invoker = null
+            SbuMember invoker = null!
         ) : base(bot, prefix, input, message, channel, serviceScope)
             => Invoker = invoker;
 
-        public SbuCommandContext(DiscordGuildCommandContext context, SbuMember? invoker = null) : base(
+        public SbuCommandContext(DiscordGuildCommandContext context, SbuMember invoker = null!) : base(
             context.Bot,
             context.Prefix,
             context.Input,
@@ -54,10 +54,7 @@ namespace SbuBot.Commands
 
         public async Task InitializeAsync()
         {
-            Invoker = await Services
-                .GetRequiredService<SbuDbContext>()
-                .Members
-                .FirstOrDefaultAsync(m => m.DiscordId == Author.Id);
+            Invoker ??= await Db.Members.Include(m => m.ColorRole).FirstAsync(m => m.DiscordId == Author.Id);
         }
     }
 }

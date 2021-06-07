@@ -7,7 +7,7 @@ using SbuBot.Commands.TypeParsers;
 
 namespace SbuBot.Commands
 {
-    public sealed class GuidTypeParser : SbuTypeParser<Guid>
+    public sealed class GuidTypeParser : SbuTypeParserBase<Guid>
     {
         protected override ValueTask<TypeParserResult<Guid>> ParseAsync(
             Parameter parameter,

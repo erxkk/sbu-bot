@@ -23,6 +23,7 @@ namespace SbuBot
         public static string GetSignature(this Parameter @this)
         {
             StringBuilder builder = new(16);
+
             builder.Append(@this.IsOptional ? '[' : '<').Append(@this.Name);
 
             if (@this.IsMultiple)
@@ -84,7 +85,7 @@ namespace SbuBot
                         val switch
                         {
                             null => "none",
-                            _ => parameter.DefaultValue,
+                            { } value => value,
                         }
                     );
                 }
@@ -92,7 +93,9 @@ namespace SbuBot
                 builder.Append(parameter.IsOptional ? ']' : '>').Append(' ');
             }
 
-            return builder.Remove(builder.Length - 1, 1).ToString();
+            builder.Remove(builder.Length - 1, 1);
+
+            return builder.ToString();
         }
     }
 }

@@ -3,6 +3,7 @@ using System.IO;
 
 using Disqord;
 using Disqord.Bot.Hosting;
+using Disqord.Gateway;
 
 using EFCoreSecondLevelCacheInterceptor;
 
@@ -63,6 +64,7 @@ try
             {
                 bot.Token = ctx.Configuration["Discord:Token"];
                 bot.Prefixes = new[] { SbuBotGlobals.DEFAULT_PREFIX };
+                bot.Intents = GatewayIntents.Recommended;
             }
         );
 

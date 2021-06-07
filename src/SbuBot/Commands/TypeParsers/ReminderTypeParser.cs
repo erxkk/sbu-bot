@@ -11,7 +11,7 @@ using SbuBot.Services;
 
 namespace SbuBot.Commands.TypeParsers
 {
-    public sealed class ReminderTypeParser : SbuTypeParser<SbuReminder>
+    public sealed class ReminderTypeParser : SbuTypeParserBase<SbuReminder>
     {
         protected override async ValueTask<TypeParserResult<SbuReminder>> ParseAsync(
             Parameter parameter,

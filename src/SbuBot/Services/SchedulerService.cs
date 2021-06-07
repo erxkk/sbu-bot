@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 
 namespace SbuBot.Services
 {
-    public sealed class SchedulerService : DiscordBotService
+    public sealed class SchedulerService : SbuBotServiceBase
     {
         private readonly Dictionary<Guid, ScheduleEntry> _scheduleEntries = new();
         private readonly object _lock = new();

@@ -1,6 +1,9 @@
 using System;
 using System.Threading.Tasks;
 
+using Disqord;
+using Disqord.Bot;
+
 using HumanTimeParser.Core.Parsing;
 using HumanTimeParser.English;
 
@@ -10,12 +13,12 @@ using Qmmands;
 
 namespace SbuBot.Commands.TypeParsers
 {
-    public sealed class TimeSpanTypeParser : SbuTypeParser<TimeSpan>
+    public sealed class TimeSpanTypeParser : DiscordTypeParser<TimeSpan>
     {
-        protected override ValueTask<TypeParserResult<TimeSpan>> ParseAsync(
+        public override ValueTask<TypeParserResult<TimeSpan>> ParseAsync(
             Parameter parameter,
             string value,
-            SbuCommandContext context
+            DiscordCommandContext context
         )
         {
             EnglishTimeParser timeParser = context.Services.GetRequiredService<EnglishTimeParser>();

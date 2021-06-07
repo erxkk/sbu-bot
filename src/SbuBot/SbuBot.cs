@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 
 using Disqord;
 using Disqord.Bot;
-using Disqord.Bot.Parsers;
 using Disqord.Gateway;
 
 using Microsoft.Extensions.Logging;
@@ -20,12 +19,22 @@ namespace SbuBot
 {
     public sealed class SbuBot : DiscordBot
     {
+        private readonly SbuBotConfiguration _config;
+        public bool IsLocked { get; set; }
+
+        public CachedRole ColorRoleSeparator => this.GetRole(
+            SbuBotGlobals.Guild.ID,
+            SbuBotGlobals.Roles.Categories.COLOR
+        );
+
         public SbuBot(
+            SbuBotConfiguration config,
             IOptions<DiscordBotConfiguration> options,
             ILogger<SbuBot> logger,
             IServiceProvider services,
             DiscordClient client
-        ) : base(options, logger, services, client) { }
+        ) : base(options, logger, services, client)
+            => _config = config;
 
         protected override ValueTask AddTypeParsersAsync(CancellationToken cancellationToken = new())
         {
@@ -38,8 +47,18 @@ namespace SbuBot
             Commands.AddTypeParser(new TimeSpanTypeParser());
             Commands.AddTypeParser(new MessageTypeParser());
             Commands.AddTypeParser(new UserMessageTypeParser());
+            Commands.AddTypeParser(new ReminderDescriptorTypeParser());
+            Commands.AddTypeParser(new TagDescriptorTypeParser());
 
             return base.AddTypeParsersAsync(cancellationToken);
+        }
+
+        protected override ValueTask<bool> CheckMessageAsync(IGatewayUserMessage message)
+        {
+            if (message.Author.Id != SbuBotGlobals.Bot.OWNER_ID && (!_config.IsProduction || IsLocked))
+                return ValueTask.FromResult(false);
+
+            return base.CheckMessageAsync(message);
         }
 
         public override DiscordCommandContext CreateCommandContext(
@@ -69,7 +88,7 @@ namespace SbuBot
 
                 // avoid command shadowing
                 if (commandBuilder.Aliases.Count == 0 && commandBuilder.Parameters.Count == 1)
-                    commandBuilder.Priority--;
+                    commandBuilder.Priority -= (commandBuilder.Parameters[0].Type == typeof(string) ? 2 : 1);
             }
 
             base.MutateModule(moduleBuilder);

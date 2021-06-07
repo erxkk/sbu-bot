@@ -1,9 +1,10 @@
-using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 using Disqord;
 using Disqord.Bot;
+using Disqord.Rest;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -11,6 +12,7 @@ using Qmmands;
 
 using SbuBot.Commands.Checks;
 using SbuBot.Commands.Checks.Parameters;
+using SbuBot.Commands.Information;
 using SbuBot.Models;
 
 namespace SbuBot.Commands.Modules
@@ -18,156 +20,148 @@ namespace SbuBot.Commands.Modules
     [Group("db")]
     public sealed class DatabaseModule : SbuModuleBase
     {
-        [Group("register")]
-        public sealed  class RegisterGroup : SbuModuleBase
+        [Command("register"), RequireBotOwner]
+        public async Task<DiscordCommandResult> RegisterMemberAsync(
+            [NotAuthor, MustExistInDb(false)] IMember member
+        )
         {
-            [Command, RequireAuthorInDb(false)]
-            public async Task<DiscordCommandResult> RegisterAuthorAsync()
-                => await _registerMemberOrAuthorAsync(Context.Author);
+            SbuMember newMember = new(member);
 
+            if (Utility.GetSbuColorRole(member) is { } colorRole)
+                Context.Db.ColorRoles.Add(new(colorRole, newMember.DiscordId));
+
+            await using (Context.BeginYield())
+            {
+                Context.Db.Members.Add(newMember);
+                await Context.Db.SaveChangesAsync();
+            }
+
+            return Reply($"{member.Mention} is now registered in the database.");
+        }
+
+        [Command("init"), RequireBotOwner]
+        public async Task<DiscordCommandResult> InitAsync()
+        {
+            int userCount = 0, roleCount = 0;
+
+            IEnumerable<(IMember m, IRole?)> userRolePairs = Context.Guild.Members.Values
+                .Where(m => !m.IsBot)
+                .Select(m => (m, Utility.GetSbuColorRole(m)));
+
+            foreach ((IMember member, IRole? role) in userRolePairs)
+            {
+                Context.Db.Members.Add(new(member));
+                userCount++;
+
+                if (role is null)
+                    continue;
+
+                Context.Db.ColorRoles.Add(new(role, member.Id));
+                roleCount++;
+            }
+
+            await Context.Db.SaveChangesAsync();
+            return Reply($"Found {userCount} users, {roleCount} of which have a suitable color role.");
+        }
+
+        // TODO: TEST
+        [Group("transfer"), PureGroup]
+        public sealed class TransferGroup : SbuModuleBase
+        {
             [Command, RequireAuthorAdmin]
-            public async Task<DiscordCommandResult> RegisterMemberAsync(
-                [NotAuthor, MustExistInDb(false)] IMember member
-            ) => await _registerMemberOrAuthorAsync(member);
-
-            private async Task<DiscordCommandResult> _registerMemberOrAuthorAsync(IMember member)
+            public async Task<DiscordCommandResult> TransferAllAsync(SbuMember owner, [NotAuthor] SbuMember inheritor)
             {
-                bool notAuthor = member.Id != Context.Author.Id;
-
-                if (Context.Invoker is { })
-                {
-                    return Reply(
-                        $"{(notAuthor ? "This member already exists" : "You already exist")} in the database."
-                    );
-                }
-
-                SbuMember newMember = new(member);
-
-                if (Utility.GetSbuColorRole(member) is { } colorRole)
-                    Context.Db.ColorRoles.Add(new(colorRole, newMember.DiscordId));
+                List<SbuTag> tags;
 
                 await using (Context.BeginYield())
                 {
-                    Context.Db.Members.Add(newMember);
-                    await Context.Db.SaveChangesAsync();
+                    tags = await Context.Db.Tags.Where(t => t.OwnerId == owner.DiscordId).ToListAsync();
                 }
 
-                return Reply($"{(notAuthor ? "This member is" : "You are")} now registered in the database.");
-            }
-        }
-
-        [Group("show"), RequireAuthorAdmin]
-        public sealed class ShowGroup : SbuModuleBase
-        {
-            [Command]
-            public async Task<DiscordCommandResult> ShowDbEntityAsync(DbEntityType entityType, Guid id)
-            {
-                (IQueryable<SbuEntityBase> queryable, string entityName) = (entityType switch
+                foreach (SbuTag tag in tags)
                 {
-                    DbEntityType.Member => (Context.Db.Members as IQueryable<SbuEntityBase>, "Member"),
-                    DbEntityType.Role => (Context.Db.ColorRoles, "Role"),
-                    DbEntityType.Tag => (Context.Db.Tags, "Tag"),
-                    DbEntityType.Reminder => (Context.Db.Reminders, "Reminder"),
-                    _ => throw new ArgumentOutOfRangeException(nameof(entityType), entityType, null),
-                });
-
-                SbuEntityBase? entity;
-
-                await using (Context.BeginYield())
-                {
-                    entity = await queryable.FirstOrDefaultAsync(e => e.Id == id);
+                    tag.OwnerId = inheritor.DiscordId;
                 }
 
-                if (entity is null)
-                    return Reply("Could not find the given entity.");
+                owner.ColorRole!.OwnerId = inheritor.DiscordId;
+                Context.Db.Tags.UpdateRange(tags);
+                Context.Db.ColorRoles.Update(owner.ColorRole);
+                await Context.Db.SaveChangesAsync();
+
+                await Context.Guild.GrantRoleAsync(inheritor.DiscordId, owner.ColorRole!.DiscordId);
 
                 return Reply(
-                    new LocalEmbed()
-                        .WithTitle($"{entityName} : {entity.Id}")
-                        .WithDescription(entity.ToString())
+                    string.Format(
+                        "{0} now owns all of {1}'s db entries.",
+                        Mention.User(inheritor.DiscordId),
+                        Mention.User(owner.DiscordId)
+                    )
                 );
             }
 
             [Command]
-            public async Task<DiscordCommandResult> ShowDiscordEntityAsync(DbDiscordEntityType entityType, Snowflake id)
+            public async Task<DiscordCommandResult> AuthorTransferAllAsync([NotAuthor] SbuMember member)
             {
-                (IQueryable<ISbuDiscordEntity> queryable, string entityName) = (entityType switch
-                {
-                    DbDiscordEntityType.Member => (Context.Db.Members as IQueryable<ISbuDiscordEntity>, "Member"),
-                    DbDiscordEntityType.Role => (Context.Db.ColorRoles, "Role"),
-                    _ => throw new ArgumentOutOfRangeException(nameof(entityType), entityType, null),
-                });
-
-                ISbuDiscordEntity? entity;
+                List<SbuTag> tags;
 
                 await using (Context.BeginYield())
                 {
-                    entity = await queryable.FirstOrDefaultAsync(e => e.DiscordId == id);
+                    tags = await Context.Db.Tags.Where(t => t.OwnerId == Context.Author.Id).ToListAsync();
                 }
 
-                if (entity is null)
-                    return Reply("Could not find the given entity.");
-
-                return Reply(
-                    new LocalEmbed()
-                        .WithTitle($"{entityName} : ({entity.DiscordId}) {entity.Id}")
-                        .WithDescription(entity.ToString())
-                );
-            }
-
-            [Command]
-            public async Task<DiscordCommandResult> ShowMemberAsync([NotAuthor] IMember member)
-            {
-                ISbuDiscordEntity? dbMember;
-
-                await using (Context.BeginYield())
+                foreach (SbuTag tag in tags)
                 {
-                    dbMember = await Context.Db.Members.FirstOrDefaultAsync(e => e.DiscordId == member.Id);
+                    tag.OwnerId = member.DiscordId;
                 }
 
-                if (dbMember is null)
-                    return Reply("Could not find the given member.");
+                Context.Invoker!.ColorRole!.OwnerId = member.DiscordId;
+                Context.Db.Tags.UpdateRange(tags);
+                Context.Db.ColorRoles.Update(Context.Invoker!.ColorRole);
+                await Context.Db.SaveChangesAsync();
+
+                await Context.Author.GrantRoleAsync(Context.Invoker!.ColorRole!.DiscordId);
 
                 return Reply(
-                    new LocalEmbed()
-                        .WithTitle($"Member : ({dbMember.DiscordId}) {dbMember.Id}")
-                        .WithDescription(dbMember.ToString())
-                );
-            }
-
-            [Command]
-            public async Task<DiscordCommandResult> ShowRoleAsync(IRole role)
-            {
-                ISbuDiscordEntity? dbRole;
-
-                await using (Context.BeginYield())
-                {
-                    dbRole = await Context.Db.ColorRoles.FirstOrDefaultAsync(e => e.DiscordId == role.Id);
-                }
-
-                if (dbRole is null)
-                    return Reply("Could not find the given role.");
-
-                return Reply(
-                    new LocalEmbed()
-                        .WithTitle($"Role : ({dbRole.DiscordId}) {dbRole.Id}")
-                        .WithDescription(dbRole.ToString())
+                    $"{Mention.User(member.DiscordId)} now owns all of {Context.Author.Mention}'s db entries."
                 );
             }
         }
 
-        public enum DbEntityType
+        [Group("inspect"), PureGroup, RequireBotOwner]
+        public sealed class InspectGroup : SbuModuleBase
         {
-            Member,
-            Role,
-            Tag,
-            Reminder,
-        }
+            [Command]
+            public DiscordCommandResult InspectMember(SbuMember member) => Reply(
+                new LocalEmbed()
+                    .WithTitle($"Member : ({member.DiscordId}) {member.Id}")
+                    .WithDescription(member.ToString())
+            );
 
-        public enum DbDiscordEntityType
-        {
-            Member,
-            Role,
+            [Command]
+            public DiscordCommandResult InspectRole(SbuColorRole role) => Reply(
+                new LocalEmbed()
+                    .WithTitle($"Role : ({role.DiscordId}) {role.Id}")
+                    .WithDescription(role.ToString())
+                    .AddField("Owner", role.OwnerId is { } ? Mention.User(role.OwnerId.Value) : "None")
+            );
+
+            [Command]
+            public DiscordCommandResult InspectTag(SbuTag tag) => Reply(
+                new LocalEmbed()
+                    .WithTitle($"Tag : {tag.Id}")
+                    .WithDescription($"Name: {tag.Name}\n{Markdown.CodeBlock(tag.Content)}")
+                    .AddField("Owner", tag.OwnerId is { } ? Mention.User(tag.OwnerId.Value) : "None")
+            );
+
+            [Command]
+            public DiscordCommandResult InspectTag(SbuReminder reminder) => Reply(
+                new LocalEmbed()
+                    .WithTitle($"Reminder : {reminder.Id}")
+                    .WithDescription("\nreminder.Message")
+                    .AddField("Owner", Mention.User(reminder.OwnerId.Value), true)
+                    .AddField("CreatedAt", reminder.CreatedAt, true)
+                    .AddField("DueAt", reminder.DueAt, true)
+            );
         }
     }
 }

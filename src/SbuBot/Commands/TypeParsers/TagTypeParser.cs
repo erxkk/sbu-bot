@@ -9,7 +9,7 @@ using SbuBot.Models;
 
 namespace SbuBot.Commands.TypeParsers
 {
-    public sealed class TagTypeParser : SbuTypeParser<SbuTag>
+    public sealed class TagTypeParser : SbuTypeParserBase<SbuTag>
     {
         protected override async ValueTask<TypeParserResult<SbuTag>> ParseAsync(
             Parameter parameter,

@@ -1,11 +1,13 @@
 using System;
 using System.Threading.Tasks;
 
+using Disqord.Bot;
+
 using Qmmands;
 
 namespace SbuBot.Commands.TypeParsers
 {
-    public abstract class SbuTypeParser<T> : TypeParser<T>
+    public abstract class SbuTypeParserBase<T> : DiscordTypeParser<T>
     {
         protected abstract ValueTask<TypeParserResult<T>> ParseAsync(
             Parameter parameter,
@@ -16,7 +18,7 @@ namespace SbuBot.Commands.TypeParsers
         public sealed override ValueTask<TypeParserResult<T>> ParseAsync(
             Parameter parameter,
             string value,
-            CommandContext context
+            DiscordCommandContext context
         )
         {
             if (context is not SbuCommandContext ctx)

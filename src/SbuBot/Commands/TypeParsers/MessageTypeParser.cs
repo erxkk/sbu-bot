@@ -1,20 +1,18 @@
-using System;
 using System.Threading.Tasks;
 
 using Disqord;
-using Disqord.Bot;
 using Disqord.Rest;
 
 using Qmmands;
 
 namespace SbuBot.Commands.TypeParsers
 {
-    public sealed class MessageTypeParser : DiscordTypeParser<IMessage>
+    public sealed class MessageTypeParser : SbuTypeParserBase<IMessage>
     {
-        public override async ValueTask<TypeParserResult<IMessage>> ParseAsync(
+        protected override async ValueTask<TypeParserResult<IMessage>> ParseAsync(
             Parameter parameter,
             string value,
-            DiscordCommandContext context
+            SbuCommandContext context
         )
         {
             if (value.Length >= 15)
