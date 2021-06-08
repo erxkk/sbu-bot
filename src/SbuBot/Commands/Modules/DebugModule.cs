@@ -19,30 +19,42 @@ namespace SbuBot.Commands.Modules
     public sealed class DebugModule : SbuModuleBase
     {
         [Group("echo")]
+        [Description("A group of commands for testing the bots channel access.")]
         public sealed class EchoGroup : SbuModuleBase
         {
             [Command]
-            [Description("Replies with the given content.")]
-            public async Task<DiscordCommandResult> EchoAsync(string content)
+            [Description("Replies with the given message.")]
+            public async Task<DiscordCommandResult> EchoAsync(
+                [Description("The message to reply with.")]
+                string message
+            )
             {
                 await Context.Message.DeleteAsync();
-                return Reply(content);
+                return Reply(message);
             }
 
             [Command, RequireBotOwner]
             [Description(
-                "Removes the original message and replies with the given content in the given target channel."
+                "Removes the original message and replies with the given message in the given target channel."
             )]
-            public async Task EchoAsync(ITextChannel target, string content)
+            public async Task EchoAsync(
+                [Description("The target channel in which to send the message in.")]
+                ITextChannel target,
+                [Description("The message to reply with.")]
+                string message
+            )
             {
                 await Context.Message.DeleteAsync();
-                await target.SendMessageAsync(new LocalMessage().WithContent(content));
+                await target.SendMessageAsync(new LocalMessage().WithContent(message));
             }
         }
 
         [Command("ping")]
         [Description("Replies with `Pong!` after the given timespan or instantly if no timespan is specified.")]
-        public DiscordCommandResult Send([OverrideDefault("now")] TimeSpan? timespan = null)
+        public DiscordCommandResult Send(
+            [OverrideDefault("now")][Description("The timestamp at which to send the reply.")]
+            DateTime? timespan = null
+        )
         {
             if (timespan is null)
                 return Reply("Pong!");
@@ -54,7 +66,7 @@ namespace SbuBot.Commands.Modules
                 _ => Context.Channel.SendMessageAsync(
                     new LocalMessage().WithContent($"Ping was scheduled at: `{DateTime.Now}`, Pong!")
                 ),
-                timespan.Value
+                timespan.Value - DateTime.Now
             );
 
             return Reply($"Scheduled pong to be sent in `{timespan}`.");
@@ -62,7 +74,10 @@ namespace SbuBot.Commands.Modules
 
         [Command("eval"), RequireBotOwner]
         [Description("Compiles and runs a C#-Script and returns the script result.")]
-        public async Task<DiscordCommandResult> EvalAsync([Remainder] string expression)
+        public async Task<DiscordCommandResult> EvalAsync(
+            [Description("The expression to evaluate.")]
+            string expression
+        )
         {
             EvalService service = Context.Services.GetRequiredService<EvalService>();
             DateTimeOffset startTime = DateTimeOffset.Now;
@@ -171,7 +186,10 @@ namespace SbuBot.Commands.Modules
 
         [Command("lock")]
         [Description("Sets the bot lock state to the given state, or switches it if no state is specified.")]
-        public DiscordCommandResult Lock(bool? set = null)
+        public DiscordCommandResult Lock(
+            [OverrideDefault("!state")][Description("THe new lock state to set the bot to.")]
+            bool? set = null
+        )
         {
             Context.Bot.IsLocked = set ?? !Context.Bot.IsLocked;
             return Reply($"{(Context.Bot.IsLocked ? "Locked" : "Unlocked")} the bot.");

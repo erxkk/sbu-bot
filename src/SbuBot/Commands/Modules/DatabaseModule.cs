@@ -25,8 +25,9 @@ namespace SbuBot.Commands.Modules
     {
         [Command("register"), RequireBotOwner]
         [Description("Registers a member and their color role in the database.")]
-        public async Task<DiscordCommandResult> RegisterMemberAsync(
-            [NotAuthor, MustExistInDb(false)] IMember member
+        public async Task<DiscordCommandResult> RegisterAsync(
+            [NotAuthor, MustExistInDb(false)][Description("The member to register in the database.")]
+            IMember member
         )
         {
             SbuMember newMember = new(member);
@@ -71,7 +72,12 @@ namespace SbuBot.Commands.Modules
 
         [Command("transfer"), RequireAuthorAdmin]
         [Description("Transfers a members database entries to another member.")]
-        public async Task<DiscordCommandResult> TransferAllAsync(SbuMember owner, SbuMember receiver)
+        public async Task<DiscordCommandResult> TransferAllAsync(
+            [Description("The member that owns the database entries.")]
+            SbuMember owner,
+            [Description("The member that should receive the database entries.")]
+            SbuMember receiver
+        )
         {
             if (owner.DiscordId == receiver.DiscordId)
                 return Reply("The given members cannot be the same");
@@ -130,14 +136,19 @@ namespace SbuBot.Commands.Modules
         public sealed class InspectGroup : SbuModuleBase
         {
             [Command]
-            public DiscordCommandResult InspectMember(SbuMember member) => Reply(
+            public DiscordCommandResult InspectMember(
+                [Description("The member to inspect.")]
+                SbuMember member
+            ) => Reply(
                 new LocalEmbed()
                     .WithTitle($"Member : ({member.DiscordId}) {member.Id}")
                     .WithDescription(member.ToString())
             );
 
             [Command]
-            public DiscordCommandResult InspectRole(SbuColorRole role) => Reply(
+            public DiscordCommandResult InspectRole(
+                [Description("The role to inspect.")] SbuColorRole role
+            ) => Reply(
                 new LocalEmbed()
                     .WithTitle($"Role : ({role.DiscordId}) {role.Id}")
                     .WithDescription(role.ToString())
@@ -145,7 +156,9 @@ namespace SbuBot.Commands.Modules
             );
 
             [Command]
-            public DiscordCommandResult InspectTag(SbuTag tag) => Reply(
+            public DiscordCommandResult InspectTag(
+                [Description("The tag to inspect.")] SbuTag tag
+            ) => Reply(
                 new LocalEmbed()
                     .WithTitle($"Tag : {tag.Id}")
                     .WithDescription($"Name: {tag.Name}\n{Markdown.CodeBlock(tag.Content)}")
@@ -153,7 +166,10 @@ namespace SbuBot.Commands.Modules
             );
 
             [Command]
-            public DiscordCommandResult InspectTag(SbuReminder reminder) => Reply(
+            public DiscordCommandResult InspectTag(
+                [Description("The reminder to inspect.")]
+                SbuReminder reminder
+            ) => Reply(
                 new LocalEmbed()
                     .WithTitle($"Reminder : {reminder.Id}")
                     .WithDescription("\nreminder.Message")

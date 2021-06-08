@@ -11,6 +11,8 @@ namespace SbuBot.Models
 {
     public sealed class SbuColorRole : SbuEntityBase, ISbuDiscordEntity, ISbuOwnedEntity
     {
+        public const int MAX_NAME_LENGTH = 100;
+
         public Snowflake DiscordId { get; }
         public Snowflake? OwnerId { get; set; }
 

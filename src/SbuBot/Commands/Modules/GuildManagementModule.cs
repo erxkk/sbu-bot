@@ -31,7 +31,9 @@ namespace SbuBot.Commands.Modules
                 + "replying to the message. In this case the message id/link must be used as message argument."
             )]
             public async Task<DiscordCommandResult> ArchiveMessageAsync(
-                [OverrideDefault("@reply")] IUserMessage? message = null,
+                [OverrideDefault("@reply")][Description("The message that should be archived.")]
+                IUserMessage? message = null,
+                [Description("Whether or not the original message should be unpinned.")]
                 bool unpinOriginal = true
             )
             {
@@ -75,8 +77,10 @@ namespace SbuBot.Commands.Modules
                 + "specifying the channel. In this case the channel id/mention/name must be used as message argument."
             )]
             public async Task<DiscordCommandResult> ArchiveAllAsync(
-                [OverrideDefault("#here")] ITextChannel? channel = null,
-                bool unpinOriginals = false
+                [OverrideDefault("#here")][Description("The channel of which the pins should be archived.")]
+                ITextChannel? channel = null,
+                [Description("Whether or not the original messages should be unpinned.")]
+                bool unpinOriginals = true
             )
             {
                 channel ??= Context.Channel;

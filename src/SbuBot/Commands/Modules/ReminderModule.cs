@@ -30,7 +30,10 @@ namespace SbuBot.Commands.Modules
         public sealed class CreateGroup : SbuModuleBase
         {
             [Command]
-            public async Task<DiscordCommandResult> CreateAsync(ReminderDescriptor reminderDescriptor)
+            public async Task<DiscordCommandResult> CreateAsync(
+                [Description("The reminder descriptor.")][Remarks("This descriptor is a 2-part descriptor.")]
+                ReminderDescriptor reminderDescriptor
+            )
             {
                 var newReminder = new SbuReminder(Context, reminderDescriptor.Message, reminderDescriptor.Timestamp);
 
@@ -46,7 +49,10 @@ namespace SbuBot.Commands.Modules
             }
 
             [Command]
-            public async Task<DiscordCommandResult> CreateInteractiveAsync(string message)
+            public async Task<DiscordCommandResult> CreateInteractiveAsync(
+                [Description("The optional message of the reminder.")]
+                string? message = null
+            )
             {
                 TypeParser<DateTime> parser = Context.Bot.Commands.GetTypeParser<DateTime>();
                 MessageReceivedEventArgs? waitResult;
@@ -91,40 +97,13 @@ namespace SbuBot.Commands.Modules
         [Description("Reschedules the given reminder.")]
         public async Task<DiscordCommandResult> RescheduleAsync(
             [AuthorMustOwn] SbuReminder reminder,
-            DateTime? newTimestamp = null
+            DateTime newTimestamp
         )
         {
-            if (newTimestamp is null)
-            {
-                await Reply("When do you want to be reminded.");
-
-                TypeParser<DateTime> parser = Context.Bot.Commands.GetTypeParser<DateTime>();
-                MessageReceivedEventArgs? waitResult;
-
-                await using (Context.BeginYield())
-                {
-                    waitResult = await Context.WaitForMessageAsync(e => e.Member.Id == Context.Author.Id);
-                }
-
-                if (waitResult is null)
-                    return Reply("Aborted: You did not provide a timestamp.");
-
-                TypeParserResult<DateTime>? parseResult = await parser.ParseAsync(
-                    null,
-                    waitResult.Message.Content,
-                    Context
-                );
-
-                if (!parseResult.IsSuccessful)
-                    return Reply($"Aborted: {parseResult.FailureReason}.");
-
-                newTimestamp = parseResult.Value;
-            }
-
             if (newTimestamp + TimeSpan.FromMilliseconds(500) >= DateTimeOffset.Now)
             {
                 await Context.Services.GetRequiredService<ReminderService>()
-                    .RescheduleReminderAsync(reminder.Id, newTimestamp.Value);
+                    .RescheduleReminderAsync(reminder.Id, newTimestamp);
             }
 
             return Reply(
@@ -136,51 +115,82 @@ namespace SbuBot.Commands.Modules
             );
         }
 
-        [Command("cancel", "remove", "delete")]
-        [Description("Cancels the given reminder.")]
-        public async Task<DiscordCommandResult> CancelAsync([AuthorMustOwn] SbuReminder reminder)
+        [Group("remove", "delete", "cancel")]
+        [Description("A group of commands for cancelling reminders.")]
+        public sealed class RemoveGroup : SbuModuleBase
         {
-            await Context.Services.GetRequiredService<ReminderService>().UnscheduledReminderAsync(reminder.Id);
-
-            return Reply(
-                new LocalEmbed()
-                    .WithTitle("Reminder Cancelled")
-                    .WithDescription(reminder.Message)
-                    .WithFooter("Cancelled")
-                    .WithCurrentTimestamp()
-            );
-        }
-
-        [Command("list")]
-        [Description("Lists the given reminder, or all if no reminder is specified.")]
-        public DiscordCommandResult List(
-            [OverrideDefault("all"), AuthorMustOwn]
-            SbuReminder? reminder = null
-        )
-        {
-            if (reminder is { })
+            [Command]
+            [Description("Cancels the given reminder.")]
+            public async Task<DiscordCommandResult> CancelAsync(
+                [AuthorMustOwn][Description("The reminder that should be canceled.")]
+                SbuReminder reminder
+            )
             {
+                await Context.Services.GetRequiredService<ReminderService>().UnscheduledReminderAsync(reminder.Id);
+
                 return Reply(
                     new LocalEmbed()
-                        .WithTitle("Reminder")
+                        .WithTitle("Reminder Cancelled")
                         .WithDescription(reminder.Message)
-                        .WithFooter("Due")
-                        .WithTimestamp(reminder.DueAt)
+                        .WithFooter("Cancelled")
+                        .WithCurrentTimestamp()
                 );
             }
 
-            if (Context.Services.GetRequiredService<ReminderService>().CurrentReminders is not { Count: > 0 } reminders)
-                return Reply("You have no reminders.");
+            [Command("all")]
+            [Description("Cancels all of the command author's reminders.")]
+            public async Task<DiscordCommandResult> CancelAllAsync()
+            {
+                // TODO: remove all for
+                // await Context.Services.GetRequiredService<ReminderService>().UnscheduledReminderAsync(reminder.Id);
 
-            return MaybePages(
-                reminders.Values
-                    .Where(r => r.OwnerId == Context.Author.Id)
-                    .Select(
-                        r => $"[`{r.Id}`]({r.JumpUrl})\n{r.DueAt}\n"
-                            + $"{(r.Message is { } ? $"\"{r.Message}\"" : "No Message")}\n"
-                    ),
-                "Your Reminders"
+                return Reply(
+                    new LocalEmbed()
+                        .WithTitle("Reminder Cancelled")
+
+                        // .WithDescription(reminder.Message)
+                        .WithFooter("Cancelled")
+                        .WithCurrentTimestamp()
+                );
+            }
+        }
+
+        [Group("list")]
+        [Description("A group of commands for listing reminders.")]
+        public sealed class ListGroup : SbuModuleBase
+        {
+            [Command]
+            [Description("Lists the given reminder.")]
+            public DiscordCommandResult List(
+                [AuthorMustOwn][Description("The reminder that should be listed.")]
+                SbuReminder reminder
+            ) => Reply(
+                new LocalEmbed()
+                    .WithTitle("Reminder")
+                    .WithDescription(reminder.Message)
+                    .WithFooter("Due")
+                    .WithTimestamp(reminder.DueAt)
             );
+
+            [Command("all")]
+            [Description("Lists all of the command author's reminders.")]
+            public DiscordCommandResult ListAll()
+            {
+                if (Context.Services.GetRequiredService<ReminderService>().CurrentReminders is not
+                    { Count: > 0 }
+                        reminders)
+                    return Reply("You have no reminders.");
+
+                return MaybePages(
+                    reminders.Values
+                        .Where(r => r.OwnerId == Context.Author.Id)
+                        .Select(
+                            r => $"[`{r.Id}`]({r.JumpUrl})\n{r.DueAt}\n"
+                                + $"{(r.Message is { } ? $"\"{r.Message}\"" : "No Message")}\n"
+                        ),
+                    "Your Reminders"
+                );
+            }
         }
     }
 }

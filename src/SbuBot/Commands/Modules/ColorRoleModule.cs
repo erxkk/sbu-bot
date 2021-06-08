@@ -20,7 +20,10 @@ namespace SbuBot.Commands.Modules
 {
     [Group("role")]
     [Description("A collection of commands for creation, modification, removal and usage of color roles.")]
-    [Remarks("A user may only have one color role at a time.")]
+    [Remarks(
+        "A user may only have one color role at a time, role colors can be given as hex codes starting with `#` or as "
+        + "color name literals."
+    )]
     public sealed class ColorRoleModule : SbuModuleBase
     {
         [Group("claim", "take"), PureGroup, RequireAuthorColorRole(false)]
@@ -28,12 +31,15 @@ namespace SbuBot.Commands.Modules
         public sealed class ClaimGroup : SbuModuleBase
         {
             [Command]
-            public async Task<DiscordCommandResult> ClaimAsync([MustBeOwned(false)] SbuColorRole colorRole)
+            public async Task<DiscordCommandResult> ClaimAsync(
+                [MustBeOwned(false)][Description("The role to claim")][Remarks("Must be a color role.")]
+                SbuColorRole role
+            )
             {
-                await Context.Author.GrantRoleAsync(colorRole.DiscordId);
+                await Context.Author.GrantRoleAsync(role.DiscordId);
 
-                colorRole.OwnerId = Context.Author.Id;
-                Context.Db.ColorRoles.Update(colorRole);
+                role.OwnerId = Context.Author.Id;
+                Context.Db.ColorRoles.Update(role);
                 await Context.Db.SaveChangesAsync();
 
                 return Reply("Color role claimed.");
@@ -42,12 +48,14 @@ namespace SbuBot.Commands.Modules
             [Command]
             public async Task<DiscordCommandResult> ClaimNewAsync(
                 [MustBeColorRole, MustExistInDb(false)]
-                IRole colorRole
+                [Description("The role to claim")]
+                [Remarks("Must be a color role.")]
+                IRole role
             )
             {
-                await Context.Author.GrantRoleAsync(colorRole.Id);
+                await Context.Author.GrantRoleAsync(role.Id);
 
-                Context.Db.ColorRoles.Add(new(colorRole, Context.Author.Id));
+                Context.Db.ColorRoles.Add(new(role, Context.Author.Id));
                 await Context.Db.SaveChangesAsync();
 
                 return Reply("Color role claimed.");
@@ -56,7 +64,13 @@ namespace SbuBot.Commands.Modules
 
         [Command("create", "make", "new"), RequireAuthorColorRole(false)]
         [Description("Creates a new color role.")]
-        public async Task<DiscordCommandResult> CreateAsync(Color color, [Maximum(100)] string? name = null)
+        public async Task<DiscordCommandResult> CreateAsync(
+            [Description("The role color.")] Color color,
+            [Maximum(SbuColorRole.MAX_NAME_LENGTH)]
+            [Description("The role name.")]
+            [Remarks("Cannot be longer than 100 characters.")]
+            string? name = null
+        )
         {
             if (name is null)
             {
@@ -101,7 +115,13 @@ namespace SbuBot.Commands.Modules
         {
             [Command]
             [Description("Modifies the authors color role's color and name.")]
-            public async Task<DiscordCommandResult> EditAsync(Color color, [Maximum(100)] string name)
+            public async Task<DiscordCommandResult> EditAsync(
+                [Description("The new color.")] Color color,
+                [Maximum(SbuColorRole.MAX_NAME_LENGTH)]
+                [Description("The new name.")]
+                [Remarks("Cannot be longer than 100 characters.")]
+                string name
+            )
             {
                 await Context.Guild.Roles[Context.Invoker.ColorRole!.DiscordId]
                     .ModifyAsync(
@@ -117,17 +137,22 @@ namespace SbuBot.Commands.Modules
 
             [Command("name")]
             [Description("Modifies the authors color role's name.")]
-            public async Task<DiscordCommandResult> SetNameAsync([Maximum(100)] string newName)
+            public async Task<DiscordCommandResult> SetNameAsync(
+                [Maximum(SbuColorRole.MAX_NAME_LENGTH)]
+                [Description("The new name.")]
+                [Remarks("Cannot be longer than 100 characters.")]
+                string name
+            )
             {
-                await Context.Guild.Roles[Context.Invoker.ColorRole!.DiscordId].ModifyAsync(r => r.Name = newName);
+                await Context.Guild.Roles[Context.Invoker.ColorRole!.DiscordId].ModifyAsync(r => r.Name = name);
                 return Reply("Your role has been modified.");
             }
 
             [Command("color")]
             [Description("Modifies the authors color role's color.")]
-            public async Task<DiscordCommandResult> SetColorAsync(Color newColor)
+            public async Task<DiscordCommandResult> SetColorAsync([Description("The new color.")] Color color)
             {
-                await Context.Guild.Roles[Context.Invoker.ColorRole!.DiscordId].ModifyAsync(r => r.Color = newColor);
+                await Context.Guild.Roles[Context.Invoker.ColorRole!.DiscordId].ModifyAsync(r => r.Color = color);
                 return Reply("Your role has been modified.");
             }
         }
@@ -150,7 +175,8 @@ namespace SbuBot.Commands.Modules
         [Command("transfer"), RequireAuthorColorRole]
         [Description("Transfers the authors color role to the given member.")]
         public async Task<DiscordCommandResult> TransferColorRoleAsync(
-            [NotAuthor, MustHaveColorRole(false)] SbuMember receiver
+            [NotAuthor, MustHaveColorRole(false)][Description("The member that should receive the color role.")]
+            SbuMember receiver
         )
         {
             SbuColorRole role = Context.Invoker.ColorRole!;
