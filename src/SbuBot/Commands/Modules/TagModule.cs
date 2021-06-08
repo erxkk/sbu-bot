@@ -270,7 +270,7 @@ namespace SbuBot.Commands.Modules
             )
             {
                 MessageReceivedEventArgs? waitConfirmResult;
-                await Reply("Are you sure you want to remove this tag? Respond with `yes` to continue.");
+                await Reply("Are you sure you want to remove this tag? Respond `yes` to confirm.");
 
                 await using (Context.BeginYield())
                 {
@@ -292,7 +292,7 @@ namespace SbuBot.Commands.Modules
             public async Task<DiscordCommandResult> RemoveAllAsync()
             {
                 MessageReceivedEventArgs? waitConfirmResult;
-                await Reply("Are you sure you want to remove all your tags? Respond with `yes` to continue.");
+                await Reply("Are you sure you want to remove all your tags? Respond `yes` to confirm.");
 
                 await using (Context.BeginYield())
                 {
@@ -348,7 +348,7 @@ namespace SbuBot.Commands.Modules
 
                 await Reply(
                     string.Format(
-                        "Are you sure you want to transfer all your tags to {0}? Respond with `yes` to continue.",
+                        "Are you sure you want to transfer all your tags to {0}? Respond `yes` to confirm.",
                         Mention.User(receiver.DiscordId)
                     )
                 );

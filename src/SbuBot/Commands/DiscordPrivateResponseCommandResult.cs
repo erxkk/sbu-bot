@@ -13,6 +13,6 @@ namespace SbuBot.Commands
         public DiscordPrivateResponseCommandResult(DiscordCommandContext context, LocalMessage message) : base(context)
             => Message = message;
 
-        public override Task ExecuteAsync() => Context.Author.SendMessageAsync(Message);
+        public override Task<IUserMessage> ExecuteAsync() => Context.Author.SendMessageAsync(Message);
     }
 }

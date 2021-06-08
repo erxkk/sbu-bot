@@ -37,7 +37,7 @@ namespace SbuBot.Commands.Modules
             {
                 var newReminder = new SbuReminder(Context, reminderDescriptor.Message, reminderDescriptor.Timestamp);
 
-                await Context.Services.GetRequiredService<ReminderService>().ScheduleReminderAsync(newReminder);
+                await Context.Services.GetRequiredService<ReminderService>().ScheduleAsync(newReminder);
 
                 return Reply(
                     new LocalEmbed()
@@ -80,7 +80,7 @@ namespace SbuBot.Commands.Modules
 
                 await using (Context.BeginYield())
                 {
-                    await Context.Services.GetRequiredService<ReminderService>().ScheduleReminderAsync(newReminder);
+                    await Context.Services.GetRequiredService<ReminderService>().ScheduleAsync(newReminder);
                 }
 
                 return Reply(
@@ -103,7 +103,7 @@ namespace SbuBot.Commands.Modules
             if (newTimestamp + TimeSpan.FromMilliseconds(500) >= DateTimeOffset.Now)
             {
                 await Context.Services.GetRequiredService<ReminderService>()
-                    .RescheduleReminderAsync(reminder.Id, newTimestamp);
+                    .RescheduleAsync(reminder.Id, newTimestamp);
             }
 
             return Reply(
@@ -126,7 +126,7 @@ namespace SbuBot.Commands.Modules
                 SbuReminder reminder
             )
             {
-                await Context.Services.GetRequiredService<ReminderService>().UnscheduledReminderAsync(reminder.Id);
+                await Context.Services.GetRequiredService<ReminderService>().UnscheduleAsync(reminder.Id);
 
                 return Reply(
                     new LocalEmbed()
@@ -141,17 +141,21 @@ namespace SbuBot.Commands.Modules
             [Description("Cancels all of the command author's reminders.")]
             public async Task<DiscordCommandResult> CancelAllAsync()
             {
-                // TODO: remove all for
-                // await Context.Services.GetRequiredService<ReminderService>().UnscheduledReminderAsync(reminder.Id);
+                MessageReceivedEventArgs? waitResult;
 
-                return Reply(
-                    new LocalEmbed()
-                        .WithTitle("Reminder Cancelled")
+                await Reply("Are yous ure you want to cancel all your reminders? Respond `yes` to confirm.");
 
-                        // .WithDescription(reminder.Message)
-                        .WithFooter("Cancelled")
-                        .WithCurrentTimestamp()
-                );
+                await using (Context.BeginYield())
+                {
+                    waitResult = await Context.WaitForMessageAsync(e => e.Member.Id == Context.Author.Id);
+                }
+
+                if (waitResult is null || !waitResult.Message.Content.Equals("yes", StringComparison.OrdinalIgnoreCase))
+                    return Reply("Aborted.");
+
+                await Context.Services.GetRequiredService<ReminderService>().UnscheduleAsync(Context.Author.Id);
+
+                return Reply("Cancelled all reminders.");
             }
         }
 

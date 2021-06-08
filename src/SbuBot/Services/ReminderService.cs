@@ -66,13 +66,13 @@ namespace SbuBot.Services
                 if (notDispatchedReminder.DueAt + TimeSpan.FromMilliseconds(500) <= DateTimeOffset.Now)
                     notDispatchedReminder.DueAt = DateTimeOffset.Now + TimeSpan.FromSeconds(5);
 
-                await ScheduleReminderAsync(notDispatchedReminder, false);
+                await ScheduleAsync(notDispatchedReminder, false);
             }
 
             await base.ExecuteAsync(stoppingToken);
         }
 
-        public async Task ScheduleReminderAsync(SbuReminder reminder, bool isNewReminder = true)
+        public async Task ScheduleAsync(SbuReminder reminder, bool isNewReminder = true)
         {
             if (reminder.DueAt + TimeSpan.FromMilliseconds(500) <= DateTimeOffset.Now)
             {
@@ -149,7 +149,7 @@ namespace SbuBot.Services
             }
         }
 
-        public async Task RescheduleReminderAsync(Guid id, DateTimeOffset newTimestamp)
+        public async Task RescheduleAsync(Guid id, DateTimeOffset newTimestamp)
         {
             SbuReminder reminder;
 
@@ -180,7 +180,7 @@ namespace SbuBot.Services
             );
         }
 
-        public async Task UnscheduledReminderAsync(Guid id)
+        public async Task UnscheduleAsync(Guid id)
         {
             SbuReminder reminder;
 
@@ -202,6 +202,35 @@ namespace SbuBot.Services
             _schedulerService.Unschedule(id);
 
             Logger.LogDebug("Unscheduled {@Reminder}", reminder.Id);
+        }
+
+        public async Task UnscheduleAsync(Snowflake ownerId)
+        {
+            int count = 0;
+
+            IEnumerable<KeyValuePair<Guid, SbuReminder>> reminders = CurrentReminders
+                .Where(r => r.Value.OwnerId == ownerId);
+
+            lock (_lock)
+            {
+                foreach ((Guid id, SbuReminder reminder) in reminders)
+                {
+                    count++;
+                    reminder.IsDispatched = true;
+                    _currentReminders.Remove(id);
+                    _schedulerService.Unschedule(id);
+                }
+            }
+
+            using (IServiceScope scope = Bot.Services.CreateScope())
+            {
+                SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
+
+                context.Reminders.UpdateRange(reminders.Select(r => r.Value));
+                await context.SaveChangesAsync();
+            }
+
+            Logger.LogDebug("Unscheduled {@Count} reminders for {@Owner}", count, ownerId);
         }
     }
 }
