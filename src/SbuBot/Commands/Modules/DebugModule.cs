@@ -54,7 +54,6 @@ namespace SbuBot.Commands.Modules
             return Reply($"Scheduled pong to be sent in `{timespan}`.");
         }
 
-        // TODO: TEST
         [Command("eval"), RequireBotOwner]
         public async Task<DiscordCommandResult> EvalAsync([Remainder] string expression)
         {

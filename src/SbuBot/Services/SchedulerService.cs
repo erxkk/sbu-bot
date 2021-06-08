@@ -122,7 +122,7 @@ namespace SbuBot.Services
                 entry.Timer.Dispose();
             }
 
-            Logger.LogTrace("Could not unscheduled {0}", id);
+            Logger.LogTrace("Unscheduled {0}", id);
         }
 
         public sealed record ScheduleEntry(Func<ScheduleEntry, Task> Callback, Timer Timer, int RecurringCount);

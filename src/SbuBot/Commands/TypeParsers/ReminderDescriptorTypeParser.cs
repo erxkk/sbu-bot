@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Qmmands;
 
 using SbuBot.Commands.Descriptors;
+using SbuBot.Models;
 
 namespace SbuBot.Commands.TypeParsers
 {
@@ -24,6 +25,13 @@ namespace SbuBot.Commands.TypeParsers
             {
                 return TypeParser<ReminderDescriptor>.Failure(
                     $"One separator `{SbuBotGlobals.DESCRIPTOR_SEPARATOR}` is expected, found {values.Length}."
+                );
+            }
+
+            if (values[2].Length > SbuReminder.MAX_MESSAGE_LENGTH)
+            {
+                return TypeParser<ReminderDescriptor>.Failure(
+                    $"The given message must at most be {SbuReminder.MAX_MESSAGE_LENGTH} characters long."
                 );
             }
 

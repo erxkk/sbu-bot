@@ -8,8 +8,6 @@ using Disqord.Bot;
 using Disqord.Extensions.Interactivity;
 using Disqord.Gateway;
 
-using Kkommon.Extensions;
-
 using Microsoft.EntityFrameworkCore;
 
 using Qmmands;
@@ -27,7 +25,6 @@ namespace SbuBot.Commands.Modules
         [Command]
         public DiscordCommandResult Get(SbuTag tag) => Reply(tag.Content);
 
-        // TODO: TEST
         [Command("claim", "take")]
         public async Task<DiscordCommandResult> ClaimTagAsync([MustBeOwned(false)] SbuTag tag)
         {
@@ -38,14 +35,23 @@ namespace SbuBot.Commands.Modules
             return Reply($"You now own `{tag.Name}`.");
         }
 
-        // TODO: TEST
-        [Group("create", "make", "new")]
+        [Group("create", "make", "new"), PureGroup]
         public sealed class CreateGroup : SbuModuleBase
         {
             [Command]
-            public async Task<DiscordCommandResult> CreateAsync(TagDescriptor descriptor)
+            public async Task<DiscordCommandResult> CreateAsync(TagDescriptor tagDescriptor)
             {
-                Context.Db.Tags.Add(new(Context.Author.Id, descriptor.Name, descriptor.Content));
+                SbuTag? tag;
+
+                await using (Context.BeginYield())
+                {
+                    tag = await Context.Db.Tags.FirstOrDefaultAsync(t => t.Name == tagDescriptor.Name);
+                }
+
+                if (tag is { })
+                    return Reply("Tag with same name already exists.");
+
+                Context.Db.Tags.Add(new(Context.Author.Id, tagDescriptor.Name, tagDescriptor.Content));
                 await Context.Db.SaveChangesAsync();
 
                 return Reply("Tag created.");
@@ -66,15 +72,27 @@ namespace SbuBot.Commands.Modules
                 if (waitNameResult is null)
                     return Reply("Aborted, you did not provide a tag name.");
 
-                if (waitNameResult.Message.Content.Length.IsInRange(
-                    SbuTag.MIN_NAME_LENGTH,
-                    SbuTag.MAX_NAME_LENGTH,
-                    rightExclusive: false
-                )) return Reply($"Aborted, the tag name must be at least {SbuTag.MIN_NAME_LENGTH} characters long.");
+                switch (SbuTag.IsValidTagName(waitNameResult.Message.Content))
+                {
+                    case SbuTag.ValidNameType.TooShort:
+                        return Reply(
+                            $"Aborted, the tag name must be at least {SbuTag.MIN_NAME_LENGTH} characters long."
+                        );
 
-                if (SbuBotGlobals.RESERVED_KEYWORDS.Any(
-                    rn => rn.Equals(waitNameResult.Message.Content, StringComparison.OrdinalIgnoreCase)
-                )) return Reply("The tag name cannot start with a reserved keyword.");
+                    case SbuTag.ValidNameType.TooLong:
+                        return Reply(
+                            $"Aborted, the tag name must be at most {SbuTag.MAX_NAME_LENGTH} characters long."
+                        );
+
+                    case SbuTag.ValidNameType.Reserved:
+                        return Reply("The tag name cannot be a reserved keyword.");
+
+                    case SbuTag.ValidNameType.Valid:
+                        break;
+
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
 
                 SbuTag? tag;
 
@@ -97,6 +115,13 @@ namespace SbuBot.Commands.Modules
                 if (waitContentResult is null)
                     return Reply("Aborted, you did not provide tag content.");
 
+                if (waitContentResult.Message.Content.Length > SbuTag.MAX_CONTENT_LENGTH)
+                {
+                    return Reply(
+                        $"Aborted, the tag content must be at most {SbuTag.MAX_CONTENT_LENGTH} characters long."
+                    );
+                }
+
                 Context.Db.Tags.Add(
                     new(Context.Author.Id, waitNameResult.Message.Content, waitContentResult.Message.Content)
                 );
@@ -111,26 +136,26 @@ namespace SbuBot.Commands.Modules
         public sealed class ListGroup : SbuModuleBase
         {
             [Command]
-            public async Task<DiscordCommandResult> ListFromOwnerAsync([OverrideDefault("@you")] IMember? owner = null)
+            public async Task<DiscordCommandResult> ListFromOwnerAsync(
+                [OverrideDefault("@you")] SbuMember? owner = null
+            )
             {
-                owner ??= Context.Author;
-                bool notAuthor = owner.Id != Context.Author.Id;
+                owner ??= Context.Invoker;
+                bool notAuthor = owner.DiscordId != Context.Author.Id;
 
-                IEnumerable<SbuTag> tags;
+                List<SbuTag> tags;
 
                 await using (Context.BeginYield())
                 {
-                    tags = await Context.Db.Tags.Include(t => t.Owner)
-                        .Where(t => t.Owner!.DiscordId == owner.Id)
-                        .ToListAsync();
+                    tags = await Context.Db.Tags.Where(t => t.OwnerId == owner.DiscordId).ToListAsync();
                 }
 
-                if (tags.Any())
-                    return Reply($"Couldn't find any tags for {(notAuthor ? "this member" : "you")}.");
+                if (tags.Count == 0)
+                    return Reply($"Couldn't find any tags for {(notAuthor ? Mention.User(owner.DiscordId) : "you")}.");
 
                 return MaybePages(
-                    tags.Select(t => $"{t.Name}\n{t.Content}"),
-                    $"{(notAuthor ? $"{owner.Mention}'s" : "Your")} Tags"
+                    tags.Select(t => $"**Name:** {t.Name}\n**Content:** {t.Content}"),
+                    $"{(notAuthor ? $"{Mention.User(owner.DiscordId)}'s" : "Your")} Tags"
                 );
             }
 
@@ -140,12 +165,60 @@ namespace SbuBot.Commands.Modules
             );
         }
 
-        // TODO: TEST
-        [Command("edit", "change")]
-        public async Task<DiscordCommandResult> EditAsync([AuthorMustOwn] SbuTag tag, string? newContent = null)
+        [Group("edit", "change"), PureGroup]
+        public class Group : SbuModuleBase
         {
-            if (newContent is null)
+            [Command]
+            public async Task<DiscordCommandResult> EditAsync(TagDescriptor tagDescriptor)
             {
+                SbuTag? tag;
+
+                await using (Context.BeginYield())
+                {
+                    tag = await Context.Db.Tags.FirstOrDefaultAsync(t => t.Name == tagDescriptor.Name);
+                }
+
+                if (tag is null)
+                    return Reply("No tag found.");
+
+                if (tag.OwnerId != Context.Invoker.DiscordId)
+                    return Reply("You must be the owner of this tag.");
+
+                tag.Content = tagDescriptor.Content;
+                Context.Db.Tags.Update(tag);
+                await Context.Db.SaveChangesAsync();
+
+                return Reply("The tag has been updated.");
+            }
+
+            [Command]
+            public async Task<DiscordCommandResult> EditInteractiveAsync([AuthorMustOwn] SbuTag? tag = null)
+            {
+                if (tag is null)
+                {
+                    MessageReceivedEventArgs? waitNameResult;
+                    await Reply("What tag do you want to edit?");
+
+                    await using (Context.BeginYield())
+                    {
+                        waitNameResult = await Context.WaitForMessageAsync(e => e.Member.Id == Context.Author.Id);
+                    }
+
+                    if (waitNameResult is null)
+                        return Reply("Aborted, you did not provide tag.");
+
+                    await using (Context.BeginYield())
+                    {
+                        tag = await Context.Db.Tags.FirstOrDefaultAsync(t => t.Name == waitNameResult.Message.Content);
+                    }
+
+                    if (tag is null)
+                        return Reply("No tag found.");
+
+                    if (tag.OwnerId != Context.Invoker.DiscordId)
+                        return Reply("You must be the owner of this tag.");
+                }
+
                 MessageReceivedEventArgs? waitContentResult;
                 await Reply("What do you want the new tag content to be?");
 
@@ -157,44 +230,107 @@ namespace SbuBot.Commands.Modules
                 if (waitContentResult is null)
                     return Reply("Aborted, you did not provide tag content.");
 
-                newContent = waitContentResult.Message.Content;
+                tag.Content = waitContentResult.Message.Content;
+                Context.Db.Tags.Update(tag);
+                await Context.Db.SaveChangesAsync();
+
+                return Reply("The tag has been updated.");
             }
-
-            tag.Content = newContent;
-            Context.Db.Tags.Update(tag);
-            await Context.Db.SaveChangesAsync();
-
-            return Reply($"Tag `{tag.Name}` has been updated.");
         }
 
-        // TODO: TEST
         [Command("remove", "delete")]
-        public async Task<DiscordCommandResult> RemoveAsync([AuthorMustOwn] SbuTag tag)
-        {
-            Context.Db.Tags.Remove(tag);
-            await Context.Db.SaveChangesAsync();
-
-            return Reply($"Tag `{tag.Name}` has been removed.");
-        }
-
-        // TODO: TEST
-        [Command("transfer")]
-        public async Task<DiscordCommandResult> TransferAsync(
-            [NotAuthor] SbuMember member,
-            [AuthorMustOwn] SbuTag tag
+        public async Task<DiscordCommandResult> RemoveAsync(
+            [OverrideDefault("all"), AuthorMustOwn]
+            SbuTag? tag = null
         )
         {
-            tag.OwnerId = member.DiscordId;
-            Context.Db.Tags.Update(tag);
+            if (tag is { })
+            {
+                Context.Db.Tags.Remove(tag);
+                await Context.Db.SaveChangesAsync();
+
+                return Reply($"Tag `{tag.Name}` has been removed.");
+            }
+
+            MessageReceivedEventArgs? waitConfirmResult;
+            await Reply("Are you sure you want to remove all your tags? Respond with `yes` to continue.");
+
+            await using (Context.BeginYield())
+            {
+                waitConfirmResult = await Context.WaitForMessageAsync(e => e.Member.Id == Context.Author.Id);
+            }
+
+            if (waitConfirmResult is null || waitConfirmResult.Message.Content != "yes")
+                return Reply("Aborted.");
+
+            List<SbuTag> tags;
+
+            await using (Context.BeginYield())
+            {
+                tags = await Context.Db.Tags.Where(t => t.OwnerId == Context.Author.Id).ToListAsync();
+            }
+
+            Context.Db.Tags.RemoveRange(tags);
             await Context.Db.SaveChangesAsync();
 
-            return Reply($"{Mention.User(member.DiscordId)} now owns `{tag.Name}`.");
+            return Reply("Removed all of your tags.");
+        }
+
+        [Command("transfer")]
+        public async Task<DiscordCommandResult> TransferAllAsync(
+            [NotAuthor] SbuMember receiver,
+            [OverrideDefault("all"), AuthorMustOwn]
+            SbuTag? tag = null
+        )
+        {
+            if (tag is { })
+            {
+                tag.OwnerId = receiver.DiscordId;
+                Context.Db.Tags.Update(tag);
+                await Context.Db.SaveChangesAsync();
+
+                return Reply($"{Mention.User(receiver.DiscordId)} now owns `{tag.Name}`.");
+            }
+
+            MessageReceivedEventArgs? waitConfirmResult;
+
+            await Reply(
+                string.Format(
+                    "Are you sure you want to transfer all your tags to {0}? Respond with `yes` to continue.",
+                    Mention.User(receiver.DiscordId)
+                )
+            );
+
+            await using (Context.BeginYield())
+            {
+                waitConfirmResult = await Context.WaitForMessageAsync(e => e.Member.Id == Context.Author.Id);
+            }
+
+            if (waitConfirmResult is null || waitConfirmResult.Message.Content != "yes")
+                return Reply("Aborted.");
+
+            List<SbuTag> tags;
+
+            await using (Context.BeginYield())
+            {
+                tags = await Context.Db.Tags.Where(t => t.OwnerId == Context.Author.Id).ToListAsync();
+            }
+
+            foreach (SbuTag dbTag in tags)
+            {
+                dbTag.OwnerId = receiver.DiscordId;
+            }
+
+            Context.Db.Tags.UpdateRange(tags);
+            await Context.Db.SaveChangesAsync();
+
+            return Reply($"{Mention.User(receiver.DiscordId)} now owns all of your tags.");
         }
 
         [Command("reserved")]
         public DiscordCommandResult GetReservedKeywords() => Reply(
             "The following keywords are not allowed to be tags, but tags may contain them:\n"
-            + string.Join("\n", SbuBotGlobals.RESERVED_KEYWORDS.Select(rn => $"> {rn}"))
+            + string.Join("\n", SbuBotGlobals.RESERVED_KEYWORDS.Select(rn => $"> `{rn}`"))
         );
     }
 }

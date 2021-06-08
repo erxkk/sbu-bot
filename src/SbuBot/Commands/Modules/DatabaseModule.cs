@@ -7,6 +7,7 @@ using Disqord.Bot;
 using Disqord.Rest;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 using Qmmands;
 
@@ -14,6 +15,7 @@ using SbuBot.Commands.Checks;
 using SbuBot.Commands.Checks.Parameters;
 using SbuBot.Commands.Information;
 using SbuBot.Models;
+using SbuBot.Services;
 
 namespace SbuBot.Commands.Modules
 {
@@ -64,67 +66,59 @@ namespace SbuBot.Commands.Modules
             return Reply($"Found {userCount} users, {roleCount} of which have a suitable color role.");
         }
 
-        // TODO: TEST
-        [Group("transfer"), PureGroup]
-        public sealed class TransferGroup : SbuModuleBase
+        [Command("transfer"), RequireAuthorAdmin]
+        public async Task<DiscordCommandResult> TransferAllAsync(SbuMember owner, SbuMember receiver)
         {
-            [Command, RequireAuthorAdmin]
-            public async Task<DiscordCommandResult> TransferAllAsync(SbuMember owner, [NotAuthor] SbuMember inheritor)
+            if (owner.DiscordId == receiver.DiscordId)
+                return Reply("The given members cannot be the same");
+
+            List<SbuTag> tags;
+
+            await using (Context.BeginYield())
             {
-                List<SbuTag> tags;
-
-                await using (Context.BeginYield())
-                {
-                    tags = await Context.Db.Tags.Where(t => t.OwnerId == owner.DiscordId).ToListAsync();
-                }
-
-                foreach (SbuTag tag in tags)
-                {
-                    tag.OwnerId = inheritor.DiscordId;
-                }
-
-                owner.ColorRole!.OwnerId = inheritor.DiscordId;
-                Context.Db.Tags.UpdateRange(tags);
-                Context.Db.ColorRoles.Update(owner.ColorRole);
-                await Context.Db.SaveChangesAsync();
-
-                await Context.Guild.GrantRoleAsync(inheritor.DiscordId, owner.ColorRole!.DiscordId);
-
-                return Reply(
-                    string.Format(
-                        "{0} now owns all of {1}'s db entries.",
-                        Mention.User(inheritor.DiscordId),
-                        Mention.User(owner.DiscordId)
-                    )
-                );
+                tags = await Context.Db.Tags.Where(t => t.OwnerId == owner.DiscordId).ToListAsync();
             }
 
-            [Command]
-            public async Task<DiscordCommandResult> AuthorTransferAllAsync([NotAuthor] SbuMember member)
+            foreach (SbuTag tag in tags)
             {
-                List<SbuTag> tags;
+                tag.OwnerId = receiver.DiscordId;
+            }
 
-                await using (Context.BeginYield())
+            bool hadRole = false;
+
+            if (owner.ColorRole is { })
+            {
+                hadRole = true;
+                SbuColorRole role = Context.Invoker.ColorRole!;
+
+                if (receiver.ColorRole is null)
                 {
-                    tags = await Context.Db.Tags.Where(t => t.OwnerId == Context.Author.Id).ToListAsync();
+                    ConsistencyService service = Context.Services.GetRequiredService<ConsistencyService>();
+                    service.IgnoreAddedRole(role.DiscordId);
+
+                    await Context.Guild.GrantRoleAsync(receiver.DiscordId, role.DiscordId);
+
+                    role.OwnerId = receiver.DiscordId;
+                }
+                else
+                {
+                    role.OwnerId = null;
                 }
 
-                foreach (SbuTag tag in tags)
-                {
-                    tag.OwnerId = member.DiscordId;
-                }
+                Context.Db.ColorRoles.Update(role);
+                await Context.Author.RevokeRoleAsync(role.DiscordId);
+            }
 
-                Context.Invoker!.ColorRole!.OwnerId = member.DiscordId;
-                Context.Db.Tags.UpdateRange(tags);
-                Context.Db.ColorRoles.Update(Context.Invoker!.ColorRole);
+            if (tags.Count != 0 || hadRole)
                 await Context.Db.SaveChangesAsync();
 
-                await Context.Author.GrantRoleAsync(Context.Invoker!.ColorRole!.DiscordId);
-
-                return Reply(
-                    $"{Mention.User(member.DiscordId)} now owns all of {Context.Author.Mention}'s db entries."
-                );
-            }
+            return Reply(
+                string.Format(
+                    "{0} now owns all of {1}'s db entries.",
+                    Mention.User(receiver.DiscordId),
+                    Mention.User(owner.DiscordId)
+                )
+            );
         }
 
         [Group("inspect"), PureGroup, RequireBotOwner]

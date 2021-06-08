@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 
 using Disqord;
 using Disqord.Gateway;
@@ -12,36 +13,42 @@ namespace SbuBot
 {
     public static class Utility
     {
-        private static readonly Random RANDOM = new();
+        public static readonly Regex IMAGE_FILE_REGEX = new(@"\.(gif|jpeg|jpg|png)$", RegexOptions.Compiled);
 
-        public const int RANDOM_STRING_LENGTH = 5;
-        public static readonly char[] RANDOM_SOURCE_CHARS = "abcdefghijklmnopkrstuvwxyz1234567890_-!?*".ToCharArray();
-
-        public static Result<LocalMessage, string> TryCreatePinMessage(IUserMessage message, bool force)
+        public static Result<LocalMessage, string> TryCreatePinMessage(IUserMessage message)
         {
             LocalEmbed embed = new LocalEmbed()
                 .WithAuthor(message.Author)
+                .WithDescription(message.Content)
+                .WithFooter("Original posted")
+                .WithTimestamp(message.CreatedAt())
                 .AddField(
                     "Link to Original",
                     Markdown.Link(
                         "Click here!",
                         Discord.MessageJumpLink(SbuBotGlobals.Guild.ID, message.ChannelId, message.Id)
-                    )
-                )
-                .WithFooter("Posted at")
-                .WithTimestamp(message.CreatedAt());
+                    ),
+                    true
+                );
 
             LocalMessage pinMessage = new LocalMessage().WithEmbed(embed);
 
-            if (message.Embeds.Count != 0 && !force)
-                return new Result<LocalMessage, string>.Error("Could not determine content embed type.");
+            if (message.Embeds.Count != 0)
+            {
+                if (message.Embeds[0].Image is { } image)
+                    embed.WithImageUrl(image.Url);
+                else if (message.Embeds[0].Video is { } video)
+                    embed.AddField("Video-Url", Markdown.Link("Click here!", video.Url), true);
+            }
+            else if (message.Attachments.Count != 0)
+            {
+                Attachment attachment = message.Attachments[0];
 
-            if (message.Embeds[0].Image is { } image)
-                embed.WithImageUrl(image.Url);
-            else if (message.Embeds[0].Video is { } video)
-                pinMessage.WithContent($"{video.Url}");
-            else if (!force)
-                return new Result<LocalMessage, string>.Error("Could not determine content embed type.");
+                if (Utility.IMAGE_FILE_REGEX.IsMatch(attachment.Filename))
+                    embed.WithImageUrl(attachment.Url);
+                else
+                    embed.AddField("Unknown-Media-Type-Url", Markdown.Link("Click here!", attachment.Url), true);
+            }
 
             return new Result<LocalMessage, string>.Success(pinMessage);
         }
@@ -56,16 +63,6 @@ namespace SbuBot
 
             idPair = default;
             return false;
-        }
-
-        public static string GeneratePseudoRandomString()
-        {
-            StringBuilder buffer = new(Utility.RANDOM_STRING_LENGTH);
-
-            for (int i = 0; i < Utility.RANDOM_STRING_LENGTH; i++)
-                buffer.Append(Utility.RANDOM_SOURCE_CHARS[Utility.RANDOM.Next(0, Utility.RANDOM_SOURCE_CHARS.Length)]);
-
-            return buffer.ToString();
         }
 
         public static IEnumerable<string> FillPages(

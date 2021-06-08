@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 using Disqord;
@@ -9,20 +11,21 @@ using Kkommon;
 
 using Qmmands;
 
+using SbuBot.Commands.Checks;
 using SbuBot.Commands.Information;
 
 namespace SbuBot.Commands.Modules
 {
     public sealed class GuildManagementModule : SbuModuleBase
     {
-        // TODO: TEST
-        [Group("pin"), RequireAuthorRole(SbuBotGlobals.Roles.PIN_BRIGADE)]
+        [Group("archive"), RequireAuthorRole(SbuBotGlobals.Roles.PIN_BRIGADE, Group = "AdminOrPinBrigade"),
+         RequireAuthorAdmin(Group = "AdminOrPinBrigade")]
         public sealed class PinGroup : SbuModuleBase
         {
             [Command]
-            public async Task<DiscordCommandResult> PinMessageAsync(
+            public async Task<DiscordCommandResult> ArchiveMessageAsync(
                 [OverrideDefault("@reply")] IUserMessage? message = null,
-                bool force = false
+                bool unpinOriginal = true
             )
             {
                 if (message is null)
@@ -37,16 +40,13 @@ namespace SbuBot.Commands.Modules
                     is not ITextChannel pinArchive)
                     throw new RequiredCacheException("Could not find required pin archive channel.");
 
-                if (message is not IGatewayUserMessage gatewayUserMessage)
-                    throw new RequiredCacheException("Message was not a gateway user message.");
-
-                switch (Utility.TryCreatePinMessage(gatewayUserMessage, force))
+                switch (Utility.TryCreatePinMessage(message))
                 {
                     case Result<LocalMessage, string>.Success pinMessage:
                         await pinArchive.SendMessageAsync(pinMessage);
 
-                        if (gatewayUserMessage.IsPinned)
-                            await gatewayUserMessage.UnpinAsync();
+                        if (unpinOriginal && message.IsPinned)
+                            await message.UnpinAsync();
 
                         return null!;
 
@@ -59,9 +59,9 @@ namespace SbuBot.Commands.Modules
             }
 
             [Command("all")]
-            public async Task<DiscordCommandResult> PinAllAsync(
+            public async Task<DiscordCommandResult> ArchiveAllAsync(
                 [OverrideDefault("#here")] ITextChannel? channel = null,
-                bool force = false
+                bool unpinOriginals = false
             )
             {
                 channel ??= Context.Channel;
@@ -70,13 +70,17 @@ namespace SbuBot.Commands.Modules
                     is not ITextChannel pinArchive)
                     throw new RequiredCacheException("Could not find required pin archive channel.");
 
-                foreach (IUserMessage message in await channel.FetchPinnedMessagesAsync())
+                IReadOnlyList<IUserMessage> pins = await channel.FetchPinnedMessagesAsync();
+
+                foreach (IUserMessage message in pins.OrderBy(m => m.CreatedAt()))
                 {
-                    switch (Utility.TryCreatePinMessage(message, force))
+                    switch (Utility.TryCreatePinMessage(message))
                     {
                         case Result<LocalMessage, string>.Success pinMessage:
                             await pinArchive.SendMessageAsync(pinMessage);
-                            await message.UnpinAsync();
+
+                            if (unpinOriginals)
+                                await message.UnpinAsync();
 
                             break;
 

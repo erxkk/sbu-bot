@@ -76,18 +76,21 @@ namespace SbuBot.Commands.Modules
         public class CommandGroup : SbuModuleBase
         {
             [Command("find")]
-            public DiscordCommandResult FindCommand(string command)
+            public DiscordCommandResult Find(string command)
             {
-                IReadOnlyList<CommandMatch> matches = Context.Bot.Commands.FindCommands(command);
+                IEnumerable<Command> matches = Context.Bot.Commands.FindCommands(command).Select(m => m.Command);
 
                 if (!matches.Any())
                     return Reply("Couldn't find any commands for that input");
 
-                return MaybePages(matches.Select(c => c.Command.GetSignature()), "Commands Found");
+                return MaybePages(
+                    matches.Select(cmd => cmd.IsEnabled ? $"`{cmd.GetSignature()}`" : $"~~`{cmd.GetSignature()}`~~"),
+                    "Command List"
+                );
             }
 
             [Command("list")]
-            public async Task<DiscordCommandResult> ListCommandsAsync()
+            public async Task<DiscordCommandResult> ListAsync()
             {
                 IEnumerable<Command> enumerable = Context.Bot.Commands.GetAllCommands();
 

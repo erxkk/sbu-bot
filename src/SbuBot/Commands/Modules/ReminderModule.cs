@@ -26,19 +26,18 @@ namespace SbuBot.Commands.Modules
         [PureGroup]
         public sealed class DefaultGroup : SbuModuleBase
         {
-            // TODO: TEST
             [Command]
-            public async Task<DiscordCommandResult> CreateAsync(ReminderDescriptor descriptor)
+            public async Task<DiscordCommandResult> CreateAsync(ReminderDescriptor reminderDescriptor)
             {
-                var newReminder = new SbuReminder(Context, descriptor.Message, descriptor.Timestamp);
+                var newReminder = new SbuReminder(Context, reminderDescriptor.Message, reminderDescriptor.Timestamp);
 
                 await Context.Services.GetRequiredService<ReminderService>().ScheduleReminderAsync(newReminder);
 
                 return Reply(
                     new LocalEmbed()
                         .WithTitle("Reminder Scheduled")
-                        .WithDescription(descriptor.Message)
-                        .WithFooter("Due at")
+                        .WithDescription(reminderDescriptor.Message)
+                        .WithFooter("Due")
                         .WithTimestamp(newReminder.DueAt)
                 );
             }
@@ -63,7 +62,7 @@ namespace SbuBot.Commands.Modules
                 );
 
                 if (!parseResult.IsSuccessful)
-                    return Reply($"Aborted, reason: \"{parseResult.FailureReason}\".");
+                    return Reply($"Aborted, reason: {parseResult.FailureReason}.");
 
                 var newReminder = new SbuReminder(Context, message, parseResult.Value);
 
@@ -76,7 +75,7 @@ namespace SbuBot.Commands.Modules
                     new LocalEmbed()
                         .WithTitle("Reminder Scheduled")
                         .WithDescription(message)
-                        .WithFooter("Due at")
+                        .WithFooter("Due")
                         .WithTimestamp(newReminder.DueAt)
                 );
             }
@@ -125,7 +124,7 @@ namespace SbuBot.Commands.Modules
                 new LocalEmbed()
                     .WithTitle("Reminder Rescheduled")
                     .WithDescription(reminder.Message)
-                    .WithFooter("Due at")
+                    .WithFooter("Due")
                     .WithTimestamp(newTimestamp)
             );
         }
@@ -137,9 +136,9 @@ namespace SbuBot.Commands.Modules
 
             return Reply(
                 new LocalEmbed()
-                    .WithTitle("Reminder Unscheduled")
+                    .WithTitle("Reminder Cancelled")
                     .WithDescription(reminder.Message)
-                    .WithFooter("Cancelled at")
+                    .WithFooter("Cancelled")
                     .WithCurrentTimestamp()
             );
         }
@@ -148,23 +147,31 @@ namespace SbuBot.Commands.Modules
         public DiscordCommandResult List(
             [OverrideDefault("show all"), AuthorMustOwn]
             SbuReminder? reminder = null
-        ) => reminder is { }
-            ? Reply(
-                new LocalEmbed()
-                    .WithTitle("Reminder")
-                    .WithDescription(reminder.Message)
-                    .WithFooter("Due at")
-                    .WithTimestamp(reminder.DueAt)
-            )
-            : MaybePages(
-                Context.Services.GetRequiredService<ReminderService>()
-                    .CurrentReminders.Values
+        )
+        {
+            if (reminder is { })
+            {
+                return Reply(
+                    new LocalEmbed()
+                        .WithTitle("Reminder")
+                        .WithDescription(reminder.Message)
+                        .WithFooter("Due")
+                        .WithTimestamp(reminder.DueAt)
+                );
+            }
+
+            if (Context.Services.GetRequiredService<ReminderService>().CurrentReminders is not { Count: > 0 } reminders)
+                return Reply("You have no reminders.");
+
+            return MaybePages(
+                reminders.Values
                     .Where(r => r.OwnerId == Context.Author.Id)
                     .Select(
-                        r => $"{r.DueAt}[`{r.Id}`]({r.JumpUrl})\n"
+                        r => $"[`{r.Id}`]({r.JumpUrl})\n{r.DueAt}\n"
                             + $"{(r.Message is { } ? $"\"{r.Message}\"" : "No Message")}\n"
                     ),
                 "Your Reminders"
             );
+        }
     }
 }

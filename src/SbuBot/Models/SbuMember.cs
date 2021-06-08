@@ -14,9 +14,6 @@ namespace SbuBot.Models
     {
         public Snowflake DiscordId { get; set; }
 
-        [HideOnSerialize]
-        public string InheritanceCode { get; } = Utility.GeneratePseudoRandomString();
-
         // nav properties
         [HideOnSerialize, NotLogged]
         public SbuColorRole? ColorRole { get; }
@@ -33,11 +30,7 @@ namespace SbuBot.Models
 
 #region EFCore
 
-        internal SbuMember(Guid id, Snowflake discordId, string inheritanceCode) : base(id)
-        {
-            DiscordId = discordId;
-            InheritanceCode = inheritanceCode;
-        }
+        internal SbuMember(Guid id, Snowflake discordId) : base(id) => DiscordId = discordId;
 
         internal sealed class EntityTypeConfiguration : IEntityTypeConfiguration<SbuMember>
         {
@@ -47,7 +40,6 @@ namespace SbuBot.Models
                 builder.HasIndex(m => m.DiscordId).IsUnique();
 
                 builder.Property(m => m.DiscordId);
-                builder.Property(m => m.InheritanceCode);
 
                 builder.HasOne(m => m.ColorRole)
                     .WithOne(cr => cr.Owner)

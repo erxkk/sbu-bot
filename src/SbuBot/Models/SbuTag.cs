@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 
 using Destructurama.Attributed;
 
@@ -57,6 +58,30 @@ namespace SbuBot.Models
                     .HasPrincipalKey(m => m.DiscordId)
                     .OnDelete(DeleteBehavior.SetNull);
             }
+        }
+
+#endregion
+
+#region Validation
+
+        public enum ValidNameType
+        {
+            Valid,
+            TooShort,
+            TooLong,
+            Reserved,
+        }
+
+        public static ValidNameType IsValidTagName(string name)
+        {
+            return name.Length switch
+            {
+                < SbuTag.MIN_NAME_LENGTH => ValidNameType.TooShort,
+                > SbuTag.MAX_NAME_LENGTH => ValidNameType.TooLong,
+                _ => SbuBotGlobals.RESERVED_KEYWORDS.Any(rn => rn.Equals(name, StringComparison.OrdinalIgnoreCase))
+                    ? ValidNameType.Reserved
+                    : ValidNameType.Valid
+            };
         }
 
 #endregion

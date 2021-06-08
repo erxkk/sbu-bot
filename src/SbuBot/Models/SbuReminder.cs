@@ -14,6 +14,8 @@ namespace SbuBot.Models
 {
     public sealed class SbuReminder : SbuEntityBase, ISbuOwnedEntity
     {
+        public const int MAX_MESSAGE_LENGTH = 1024;
+
         [NotNull]
         public Snowflake? OwnerId { get; set; }
 
@@ -101,7 +103,7 @@ namespace SbuBot.Models
 
                 builder.Property(t => t.ChannelId);
                 builder.Property(t => t.MessageId);
-                builder.Property(t => t.Message).HasMaxLength(1024);
+                builder.Property(t => t.Message).HasMaxLength(SbuReminder.MAX_MESSAGE_LENGTH);
                 builder.Property(t => t.CreatedAt);
                 builder.Property(t => t.DueAt);
                 builder.Property(t => t.IsDispatched);

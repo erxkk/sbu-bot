@@ -16,37 +16,55 @@ namespace SbuBot.Services
 {
     public sealed class ConsistencyService : SbuBotServiceBase
     {
+        private readonly HashSet<Snowflake> _handledAddedRoles = new();
+        private readonly HashSet<Snowflake> _handledRemovedRoles = new();
+
         public override int Priority => int.MaxValue;
 
         public ConsistencyService(ILogger<ConsistencyService> logger, DiscordBotBase bot) : base(logger, bot) { }
 
+        public void IgnoreAddedRole(Snowflake roleId) => _handledAddedRoles.Add(roleId);
+        public void IgnoreRemovedRole(Snowflake roleId) => _handledRemovedRoles.Add(roleId);
+
         protected override async ValueTask OnGuildAvailable(GuildAvailableEventArgs e)
         {
-            if (e.GuildId == SbuBotGlobals.Guild.ID)
-                await Bot.Chunker.ChunkAsync(e.Guild, Bot.StoppingToken);
+            if (e.GuildId != SbuBotGlobals.Guild.ID)
+                return;
+
+            await Bot.Chunker.ChunkAsync(e.Guild, Bot.StoppingToken);
 
             await base.OnGuildAvailable(e);
         }
 
         protected override async ValueTask OnMemberJoined(MemberJoinedEventArgs e)
         {
+            if (e.GuildId != SbuBotGlobals.Guild.ID)
+                return;
+
             using (IServiceScope scope = Bot.Services.CreateScope())
             {
                 SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
 
-                context.Members.Update(
-                    await context.Members.FirstOrDefaultAsync(m => m.DiscordId == e.Member.Id, Bot.StoppingToken)
-                    ?? new(e.Member.Id)
-                );
-
-                await context.SaveChangesAsync(Bot.StoppingToken);
+                if (await context.Members.FirstOrDefaultAsync(
+                    m => m.DiscordId == e.Member.Id,
+                    Bot.StoppingToken
+                ) is null)
+                {
+                    context.Members.Update(new(e.Member.Id));
+                    await context.SaveChangesAsync(Bot.StoppingToken);
+                }
             }
+
+            Logger.LogDebug("Inserted: {@Member}", e.Member.Id);
 
             await base.OnMemberJoined(e);
         }
 
         protected override async ValueTask OnMemberUpdated(MemberUpdatedEventArgs e)
         {
+            if (e.NewMember.GuildId != SbuBotGlobals.Guild.ID)
+                return;
+
             if (e.OldMember is null)
                 return;
 
@@ -66,6 +84,9 @@ namespace SbuBot.Services
             if (addedRole.Position >= Bot.ColorRoleSeparator.Position)
                 return;
 
+            if (_handledAddedRoles.Remove(addedRoleId))
+                return;
+
             using (IServiceScope scope = Bot.Services.CreateScope())
             {
                 SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
@@ -83,7 +104,7 @@ namespace SbuBot.Services
                 await context.SaveChangesAsync(Bot.StoppingToken);
             }
 
-            Logger.LogInformation(
+            Logger.LogDebug(
                 "Color role assigned, established owner ship: {@ColorRole}",
                 new { Id = addedRoleId, Owner = e.MemberId }
             );
@@ -93,6 +114,9 @@ namespace SbuBot.Services
 
         protected override async ValueTask OnMemberLeft(MemberLeftEventArgs e)
         {
+            if (e.GuildId != SbuBotGlobals.Guild.ID)
+                return;
+
             using (IServiceScope scope = Bot.Services.CreateScope())
             {
                 SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
@@ -133,11 +157,22 @@ namespace SbuBot.Services
                 await context.SaveChangesAsync(Bot.StoppingToken);
             }
 
+            Logger.LogDebug("Removed: {@Member}", e.User.Id);
+
             await base.OnMemberLeft(e);
         }
 
         protected override async ValueTask OnRoleDeleted(RoleDeletedEventArgs e)
         {
+            if (e.GuildId != SbuBotGlobals.Guild.ID)
+                return;
+
+            if (e.Role.Position >= Bot.ColorRoleSeparator.Position)
+                return;
+
+            if (_handledRemovedRoles.Remove(e.RoleId))
+                return;
+
             using (IServiceScope scope = Bot.Services.CreateScope())
             {
                 SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
@@ -151,6 +186,8 @@ namespace SbuBot.Services
                     await context.SaveChangesAsync(Bot.StoppingToken);
                 }
             }
+
+            Logger.LogDebug("Removed: {@ColorRole}", e.RoleId);
 
             await base.OnRoleDeleted(e);
         }

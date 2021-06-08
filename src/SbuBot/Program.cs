@@ -32,19 +32,19 @@ try
         .UseSerilog(
             (ctx, services, logging) => logging
                 .MinimumLevel.Verbose()
-                .Destructure.ToMaximumDepth(2)
+                .Destructure.ToMaximumDepth(3)
                 .Destructure.ToMaximumCollectionCount(5)
                 .Destructure.ToMaximumStringLength(50)
                 .Destructure.ByTransforming<Snowflake>(snowflake => snowflake.RawValue)
                 .WriteTo.File(
                     "logs/log.txt",
                     outputTemplate:
-                    "[{Timestamp:HH:mm:ss:fff zzz} {Level:u3} : {SourceContext}] {Message:ljk}{NewLine}{Exception}",
+                    "[{Timestamp:HH:mm:ss:fff zzz} {Level:u3} : {SourceContext}] {Message:l}{NewLine}{Exception}",
                     rollingInterval: RollingInterval.Day
                 )
                 .WriteTo.Console(
                     outputTemplate:
-                    "[{Timestamp:HH:mm:ss} {Level:u3} : {SourceContext}] {Message:ljk}{NewLine}{Exception}"
+                    "[{Timestamp:HH:mm:ss} {Level:u3} : {SourceContext}] {Message:l}{NewLine}{Exception}"
                 )
         )
         .ConfigureServices(
