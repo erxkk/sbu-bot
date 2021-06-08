@@ -13,6 +13,8 @@ namespace SbuBot.Commands.TypeParsers
 {
     public sealed class ReminderTypeParser : SbuTypeParserBase<SbuReminder>
     {
+        public static readonly string[] ACCEPTED_KEYWORDS = new[] { "last" };
+
         protected override async ValueTask<TypeParserResult<SbuReminder>> ParseAsync(
             Parameter parameter,
             string value,
@@ -21,7 +23,7 @@ namespace SbuBot.Commands.TypeParsers
         {
             ReminderService service = context.Services.GetRequiredService<ReminderService>();
 
-            if (value.Equals("last", StringComparison.OrdinalIgnoreCase) || value == "--")
+            if (value.Equals("last", StringComparison.OrdinalIgnoreCase))
             {
                 return service.CurrentReminders.Values.FirstOrDefault(r => r.OwnerId == context.Author.Id)
                     is { } queriedReminder

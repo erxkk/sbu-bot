@@ -15,9 +15,13 @@ using SbuBot.Commands.Information;
 
 namespace SbuBot.Commands.Modules
 {
+    // TODO: annotate when finished
+    // TODO: improve syntax explanation, add descriptor explanation
+    // TODO: add dynamic menu with navigation when buttons are finished
+    // TODO: add informational commands
+    [Description("A collection of commands for help and general server/member/bot information.")]
     public sealed class InfoModule : SbuModuleBase
     {
-        // TODO: improve with buttons
         [Command("guide")]
         public DiscordCommandResult Guide() => Pages(
             new LocalEmbed()

@@ -12,15 +12,19 @@ using Qmmands;
 
 using SbuBot.Commands.Checks;
 using SbuBot.Commands.Checks.Parameters;
+using SbuBot.Commands.Information;
 using SbuBot.Models;
 using SbuBot.Services;
 
 namespace SbuBot.Commands.Modules
 {
     [Group("role")]
+    [Description("A collection of commands for creation, modification, removal and usage of color roles.")]
+    [Remarks("A user may only have one color role at a time.")]
     public sealed class ColorRoleModule : SbuModuleBase
     {
-        [Group("claim", "take"), RequireAuthorColorRole(false)]
+        [Group("claim", "take"), PureGroup, RequireAuthorColorRole(false)]
+        [Description("Claims the given color role if it has no owner.")]
         public sealed class ClaimGroup : SbuModuleBase
         {
             [Command]
@@ -32,7 +36,7 @@ namespace SbuBot.Commands.Modules
                 Context.Db.ColorRoles.Update(colorRole);
                 await Context.Db.SaveChangesAsync();
 
-                return Reply($"You now own {Mention.Role(colorRole.DiscordId)}.");
+                return Reply("Color role claimed.");
             }
 
             [Command]
@@ -46,11 +50,12 @@ namespace SbuBot.Commands.Modules
                 Context.Db.ColorRoles.Add(new(colorRole, Context.Author.Id));
                 await Context.Db.SaveChangesAsync();
 
-                return Reply($"You now own {colorRole.Mention}.");
+                return Reply("Color role claimed.");
             }
         }
 
         [Command("create", "make", "new"), RequireAuthorColorRole(false)]
+        [Description("Creates a new color role.")]
         public async Task<DiscordCommandResult> CreateAsync(Color color, [Maximum(100)] string? name = null)
         {
             if (name is null)
@@ -91,9 +96,11 @@ namespace SbuBot.Commands.Modules
         }
 
         [Group("edit", "change"), RequireAuthorColorRole]
+        [Description("A group of commands for editing color roles.")]
         public class EditGroup : SbuModuleBase
         {
             [Command]
+            [Description("Modifies the authors color role's color and name.")]
             public async Task<DiscordCommandResult> EditAsync(Color color, [Maximum(100)] string name)
             {
                 await Context.Guild.Roles[Context.Invoker.ColorRole!.DiscordId]
@@ -109,6 +116,7 @@ namespace SbuBot.Commands.Modules
             }
 
             [Command("name")]
+            [Description("Modifies the authors color role's name.")]
             public async Task<DiscordCommandResult> SetNameAsync([Maximum(100)] string newName)
             {
                 await Context.Guild.Roles[Context.Invoker.ColorRole!.DiscordId].ModifyAsync(r => r.Name = newName);
@@ -116,6 +124,7 @@ namespace SbuBot.Commands.Modules
             }
 
             [Command("color")]
+            [Description("Modifies the authors color role's color.")]
             public async Task<DiscordCommandResult> SetColorAsync(Color newColor)
             {
                 await Context.Guild.Roles[Context.Invoker.ColorRole!.DiscordId].ModifyAsync(r => r.Color = newColor);
@@ -124,6 +133,7 @@ namespace SbuBot.Commands.Modules
         }
 
         [Command("remove", "delete"), RequireAuthorColorRole]
+        [Description("Removes the authors color role.")]
         public async Task<DiscordCommandResult> RemoveAsync()
         {
             ConsistencyService service = Context.Services.GetRequiredService<ConsistencyService>();
@@ -134,10 +144,11 @@ namespace SbuBot.Commands.Modules
             Context.Db.ColorRoles.Remove(Context.Invoker.ColorRole);
             await Context.Db.SaveChangesAsync();
 
-            return Reply("Your role has been removed.");
+            return Reply("Your color role has been removed.");
         }
 
         [Command("transfer"), RequireAuthorColorRole]
+        [Description("Transfers the authors color role to the given member.")]
         public async Task<DiscordCommandResult> TransferColorRoleAsync(
             [NotAuthor, MustHaveColorRole(false)] SbuMember receiver
         )
@@ -154,13 +165,7 @@ namespace SbuBot.Commands.Modules
             Context.Db.ColorRoles.Update(role);
             await Context.Db.SaveChangesAsync();
 
-            return Reply(
-                string.Format(
-                    "{0} now owns {1}.",
-                    Mention.User(receiver.DiscordId),
-                    Mention.Role(role.DiscordId)
-                )
-            );
+            return Reply($"You transferred your color role to {Mention.User(receiver.DiscordId)}.");
         }
     }
 }

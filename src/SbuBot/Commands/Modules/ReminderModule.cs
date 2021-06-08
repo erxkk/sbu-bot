@@ -21,10 +21,13 @@ using SbuBot.Services;
 namespace SbuBot.Commands.Modules
 {
     [Group("reminder", "remind", "remindme", "r")]
+    [Description("A collection of commands for creating modifying and removing reminders.")]
+    [Remarks("Reminder timestamps may be given as human readable timespans or strictly colon `:` separated integers.")]
     public sealed class ReminderModule : SbuModuleBase
     {
-        [PureGroup]
-        public sealed class DefaultGroup : SbuModuleBase
+        [Group("create", "make", "new"), PureGroup]
+        [Description("Creates a new reminder with the given timestamp and optional message.")]
+        public sealed class CreateGroup : SbuModuleBase
         {
             [Command]
             public async Task<DiscordCommandResult> CreateAsync(ReminderDescriptor reminderDescriptor)
@@ -48,12 +51,15 @@ namespace SbuBot.Commands.Modules
                 TypeParser<DateTime> parser = Context.Bot.Commands.GetTypeParser<DateTime>();
                 MessageReceivedEventArgs? waitResult;
 
-                await Reply("Please provide a timestamp next.");
+                await Reply("When do you want to be reminded?");
 
-                waitResult = await Context.WaitForMessageAsync(e => e.Member.Id == Context.Author.Id);
+                await using (Context.BeginYield())
+                {
+                    waitResult = await Context.WaitForMessageAsync(e => e.Member.Id == Context.Author.Id);
+                }
 
                 if (waitResult is null)
-                    return Reply("Aborted, you did not provide a timestamp.");
+                    return Reply("Aborted: You did not provide a timestamp.");
 
                 TypeParserResult<DateTime>? parseResult = await parser.ParseAsync(
                     null,
@@ -62,7 +68,7 @@ namespace SbuBot.Commands.Modules
                 );
 
                 if (!parseResult.IsSuccessful)
-                    return Reply($"Aborted, reason: {parseResult.FailureReason}.");
+                    return Reply($"Aborted: {parseResult.FailureReason}.");
 
                 var newReminder = new SbuReminder(Context, message, parseResult.Value);
 
@@ -82,6 +88,7 @@ namespace SbuBot.Commands.Modules
         }
 
         [Command("edit", "change")]
+        [Description("Reschedules the given reminder.")]
         public async Task<DiscordCommandResult> RescheduleAsync(
             [AuthorMustOwn] SbuReminder reminder,
             DateTime? newTimestamp = null
@@ -89,7 +96,7 @@ namespace SbuBot.Commands.Modules
         {
             if (newTimestamp is null)
             {
-                await Reply("Please provide a timestamp next.");
+                await Reply("When do you want to be reminded.");
 
                 TypeParser<DateTime> parser = Context.Bot.Commands.GetTypeParser<DateTime>();
                 MessageReceivedEventArgs? waitResult;
@@ -100,7 +107,7 @@ namespace SbuBot.Commands.Modules
                 }
 
                 if (waitResult is null)
-                    return Reply("Aborted, you did not provide a timestamp.");
+                    return Reply("Aborted: You did not provide a timestamp.");
 
                 TypeParserResult<DateTime>? parseResult = await parser.ParseAsync(
                     null,
@@ -109,7 +116,7 @@ namespace SbuBot.Commands.Modules
                 );
 
                 if (!parseResult.IsSuccessful)
-                    return Reply($"Aborted, reason: \"{parseResult.FailureReason}\".");
+                    return Reply($"Aborted: {parseResult.FailureReason}.");
 
                 newTimestamp = parseResult.Value;
             }
@@ -130,6 +137,7 @@ namespace SbuBot.Commands.Modules
         }
 
         [Command("cancel", "remove", "delete")]
+        [Description("Cancels the given reminder.")]
         public async Task<DiscordCommandResult> CancelAsync([AuthorMustOwn] SbuReminder reminder)
         {
             await Context.Services.GetRequiredService<ReminderService>().UnscheduledReminderAsync(reminder.Id);
@@ -144,8 +152,9 @@ namespace SbuBot.Commands.Modules
         }
 
         [Command("list")]
+        [Description("Lists the given reminder, or all if no reminder is specified.")]
         public DiscordCommandResult List(
-            [OverrideDefault("show all"), AuthorMustOwn]
+            [OverrideDefault("all"), AuthorMustOwn]
             SbuReminder? reminder = null
         )
         {

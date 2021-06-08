@@ -15,12 +15,14 @@ using SbuBot.Services;
 
 namespace SbuBot.Commands.Modules
 {
+    [Description("A collection of commands for debugging and testing.")]
     public sealed class DebugModule : SbuModuleBase
     {
-        [Group("echo"), PureGroup]
+        [Group("echo")]
         public sealed class EchoGroup : SbuModuleBase
         {
             [Command]
+            [Description("Replies with the given content.")]
             public async Task<DiscordCommandResult> EchoAsync(string content)
             {
                 await Context.Message.DeleteAsync();
@@ -28,6 +30,9 @@ namespace SbuBot.Commands.Modules
             }
 
             [Command, RequireBotOwner]
+            [Description(
+                "Removes the original message and replies with the given content in the given target channel."
+            )]
             public async Task EchoAsync(ITextChannel target, string content)
             {
                 await Context.Message.DeleteAsync();
@@ -36,6 +41,7 @@ namespace SbuBot.Commands.Modules
         }
 
         [Command("ping")]
+        [Description("Replies with `Pong!` after the given timespan or instantly if no timespan is specified.")]
         public DiscordCommandResult Send([OverrideDefault("now")] TimeSpan? timespan = null)
         {
             if (timespan is null)
@@ -55,6 +61,7 @@ namespace SbuBot.Commands.Modules
         }
 
         [Command("eval"), RequireBotOwner]
+        [Description("Compiles and runs a C#-Script and returns the script result.")]
         public async Task<DiscordCommandResult> EvalAsync([Remainder] string expression)
         {
             EvalService service = Context.Services.GetRequiredService<EvalService>();
@@ -95,14 +102,17 @@ namespace SbuBot.Commands.Modules
 
         // currently not before/after execute is done etc
         [Group("do"), RequireBotOwner]
+        [Description("A group of commands that invoke other commands with a proxy context.")]
         public sealed class ProxyGroup : SbuModuleBase
         {
             [Command]
-            [Description("Send a proxy command as a different author in a different channel.")]
+            [Description(
+                "Sends a given proxy command, or `ping` if not specified, as a given author in a given channel."
+            )]
             public async Task DoAsync(
                 [Description("The proxy author.")] IMember member,
                 [Description("The proxy channel.")] ITextChannel channel,
-                [Description("The proxy message.")] string command = "ping"
+                [Description("The proxy command.")] string command = "ping"
             )
             {
                 var ctx = new SbuCommandContext(
@@ -119,7 +129,7 @@ namespace SbuBot.Commands.Modules
             }
 
             [Command("as")]
-            [Description("Send a proxy command as a different author.")]
+            [Description("Sends a given proxy command, or `ping` if not specified, as a given author.")]
             public async Task DoAsUserAsync(
                 [Description("The proxy author.")] IMember member,
                 [Description("The proxy command.")] string command = "ping"
@@ -139,7 +149,7 @@ namespace SbuBot.Commands.Modules
             }
 
             [Command("in")]
-            [Description("Send a proxy command in a different channel.")]
+            [Description("Sends a given proxy command, or `ping` if not specified, in a given channel.")]
             public async Task DoInChannelAsync(
                 [Description("The proxy channel.")] ITextChannel channel,
                 [Description("The proxy command.")] string command = "ping"
@@ -160,6 +170,7 @@ namespace SbuBot.Commands.Modules
         }
 
         [Command("lock")]
+        [Description("Sets the bot lock state to the given state, or switches it if no state is specified.")]
         public DiscordCommandResult Lock(bool? set = null)
         {
             Context.Bot.IsLocked = set ?? !Context.Bot.IsLocked;

@@ -20,9 +20,11 @@ using SbuBot.Services;
 namespace SbuBot.Commands.Modules
 {
     [Group("db")]
+    [Description("A collection of commands for managing the database.")]
     public sealed class DatabaseModule : SbuModuleBase
     {
         [Command("register"), RequireBotOwner]
+        [Description("Registers a member and their color role in the database.")]
         public async Task<DiscordCommandResult> RegisterMemberAsync(
             [NotAuthor, MustExistInDb(false)] IMember member
         )
@@ -42,6 +44,7 @@ namespace SbuBot.Commands.Modules
         }
 
         [Command("init"), RequireBotOwner]
+        [Description("Initializes the database, loading members and color roles into it.")]
         public async Task<DiscordCommandResult> InitAsync()
         {
             int userCount = 0, roleCount = 0;
@@ -67,6 +70,7 @@ namespace SbuBot.Commands.Modules
         }
 
         [Command("transfer"), RequireAuthorAdmin]
+        [Description("Transfers a members database entries to another member.")]
         public async Task<DiscordCommandResult> TransferAllAsync(SbuMember owner, SbuMember receiver)
         {
             if (owner.DiscordId == receiver.DiscordId)
@@ -122,6 +126,7 @@ namespace SbuBot.Commands.Modules
         }
 
         [Group("inspect"), PureGroup, RequireBotOwner]
+        [Description("Inspects a given entity's database entry.")]
         public sealed class InspectGroup : SbuModuleBase
         {
             [Command]
