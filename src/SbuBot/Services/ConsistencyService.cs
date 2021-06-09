@@ -28,7 +28,7 @@ namespace SbuBot.Services
 
         protected override async ValueTask OnGuildAvailable(GuildAvailableEventArgs e)
         {
-            if (e.GuildId != SbuBotGlobals.Guild.ID)
+            if (e.GuildId != SbuGlobals.Guild.SELF)
                 return;
 
             await Bot.Chunker.ChunkAsync(e.Guild, Bot.StoppingToken);
@@ -38,7 +38,7 @@ namespace SbuBot.Services
 
         protected override async ValueTask OnMemberJoined(MemberJoinedEventArgs e)
         {
-            if (e.GuildId != SbuBotGlobals.Guild.ID)
+            if (e.GuildId != SbuGlobals.Guild.SELF)
                 return;
 
             using (IServiceScope scope = Bot.Services.CreateScope())
@@ -62,7 +62,7 @@ namespace SbuBot.Services
 
         protected override async ValueTask OnMemberUpdated(MemberUpdatedEventArgs e)
         {
-            if (e.NewMember.GuildId != SbuBotGlobals.Guild.ID)
+            if (e.NewMember.GuildId != SbuGlobals.Guild.SELF)
                 return;
 
             if (e.OldMember is null)
@@ -114,7 +114,7 @@ namespace SbuBot.Services
 
         protected override async ValueTask OnMemberLeft(MemberLeftEventArgs e)
         {
-            if (e.GuildId != SbuBotGlobals.Guild.ID)
+            if (e.GuildId != SbuGlobals.Guild.SELF)
                 return;
 
             using (IServiceScope scope = Bot.Services.CreateScope())
@@ -164,7 +164,7 @@ namespace SbuBot.Services
 
         protected override async ValueTask OnRoleDeleted(RoleDeletedEventArgs e)
         {
-            if (e.GuildId != SbuBotGlobals.Guild.ID)
+            if (e.GuildId != SbuGlobals.Guild.SELF)
                 return;
 
             if (e.Role.Position >= Bot.ColorRoleSeparator.Position)

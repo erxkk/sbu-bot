@@ -15,6 +15,15 @@ namespace SbuBot
     {
         public static readonly Regex IMAGE_FILE_REGEX = new(@"\.(gif|jpeg|jpg|png)$", RegexOptions.Compiled);
 
+        public static int CustomEmojiSlots(IGuild guild) => guild.BoostTier switch
+        {
+            BoostTier.None => 50,
+            BoostTier.First => 100,
+            BoostTier.Second => 150,
+            BoostTier.Third => 250,
+            _ => throw new ArgumentOutOfRangeException(nameof(guild), guild.BoostTier, null),
+        };
+
         public static Result<LocalMessage, string> TryCreatePinMessage(IUserMessage message)
         {
             LocalEmbed embed = new LocalEmbed()
@@ -26,7 +35,7 @@ namespace SbuBot
                     "Link to Original",
                     Markdown.Link(
                         "Click here!",
-                        Discord.MessageJumpLink(SbuBotGlobals.Guild.ID, message.ChannelId, message.Id)
+                        Discord.MessageJumpLink(SbuGlobals.Guild.SELF, message.ChannelId, message.Id)
                     ),
                     true
                 );
@@ -77,11 +86,13 @@ namespace SbuBot
             foreach (string item in source)
             {
                 if (item.Length + 1 > maxPageLength)
+                {
                     throw new ArgumentOutOfRangeException(
                         nameof(source),
                         item.Length,
                         $"An item in the collection was longer than maximum page length of {maxPageLength}."
                     );
+                }
 
                 if ((maxElementsPerPage == -1 || elements <= maxElementsPerPage)
                     && builder.Length + item.Length + 1 <= maxPageLength)
@@ -109,11 +120,8 @@ namespace SbuBot
             if (sbuMember is null)
                 throw new ArgumentNullException(nameof(sbuMember));
 
-            if (sbuMember.GuildId != SbuBotGlobals.Guild.ID)
+            if (sbuMember.GuildId != SbuGlobals.Guild.SELF)
                 throw new ArgumentException("SbuMember must be from SBU.", nameof(sbuMember));
-
-            if (sbuMember is not IGatewayEntity)
-                throw new ArgumentException("SbuMember must be of type IGatewayEntity.", nameof(sbuMember));
 
             return sbuMember.GetRoles()
                 .Values.OrderByDescending(role => role.Position)
@@ -125,11 +133,8 @@ namespace SbuBot
             if (sbuColorRole is null)
                 throw new ArgumentNullException(nameof(sbuColorRole));
 
-            if (sbuColorRole.GuildId != SbuBotGlobals.Guild.ID)
+            if (sbuColorRole.GuildId != SbuGlobals.Guild.SELF)
                 throw new ArgumentException("SbuColorRole must be from SBU.", nameof(sbuColorRole));
-
-            if (sbuColorRole is not IGatewayEntity)
-                throw new ArgumentException("SbuColorRole must be of type IGatewayEntity.", nameof(sbuColorRole));
 
             return sbuColorRole.GetGatewayClient()
                 .GetGuild(sbuColorRole.GuildId)
@@ -141,15 +146,16 @@ namespace SbuBot
             if (sbuColorRole is null)
                 throw new ArgumentNullException(nameof(sbuColorRole));
 
-            if (sbuColorRole.GuildId != SbuBotGlobals.Guild.ID)
+            if (sbuColorRole.GuildId != SbuGlobals.Guild.SELF)
                 throw new ArgumentException("SbuColorRole must be from SBU.", nameof(sbuColorRole));
 
+            // TODO: remove dependency on gateway client
             if (sbuColorRole is not IGatewayEntity)
                 throw new ArgumentException("SbuColorRole must be of type IGatewayEntity.", nameof(sbuColorRole));
 
             if (!sbuColorRole.GetGatewayClient()
                 .GetGuild(sbuColorRole.GuildId)
-                .Roles.TryGetValue(SbuBotGlobals.Roles.Categories.COLOR, out var colorSeparatorRole))
+                .Roles.TryGetValue(SbuGlobals.Role.Color.SELF, out var colorSeparatorRole))
                 throw new RequiredCacheException("Could not find required color separator role in cache.");
 
             return sbuColorRole.Position < colorSeparatorRole.Position && sbuColorRole.Color is { };

@@ -23,8 +23,8 @@ namespace SbuBot
         public bool IsLocked { get; set; }
 
         public CachedRole ColorRoleSeparator => this.GetRole(
-            SbuBotGlobals.Guild.ID,
-            SbuBotGlobals.Roles.Categories.COLOR
+            SbuGlobals.Guild.SELF,
+            SbuGlobals.Role.Color.SELF
         );
 
         public SbuBot(
@@ -53,9 +53,20 @@ namespace SbuBot
             return base.AddTypeParsersAsync(cancellationToken);
         }
 
+        public override ValueTask SetupAsync(CancellationToken cancellationToken = default)
+        {
+            TaskScheduler.UnobservedTaskException += (sender, e) =>
+            {
+                e.SetObserved();
+                Logger.LogError(e.Exception, "Unobserved Exception: {@Sender}", sender);
+            };
+
+            return base.SetupAsync(cancellationToken);
+        }
+
         protected override ValueTask<bool> CheckMessageAsync(IGatewayUserMessage message)
         {
-            if (message.Author.Id != SbuBotGlobals.Bot.OWNER_ID && (!_config.IsProduction || IsLocked))
+            if (message.Author.Id != SbuGlobals.Bot.OWNER && (!_config.IsProduction || IsLocked))
                 return ValueTask.FromResult(false);
 
             return base.CheckMessageAsync(message);
@@ -76,7 +87,7 @@ namespace SbuBot
             return await base.BeforeExecutedAsync(context);
         }
 
-        public override ValueTask<bool> IsOwnerAsync(Snowflake userId) => new(userId == SbuBotGlobals.Bot.OWNER_ID);
+        public override ValueTask<bool> IsOwnerAsync(Snowflake userId) => new(userId == SbuGlobals.Bot.OWNER);
 
         protected override void MutateModule(ModuleBuilder moduleBuilder)
         {

@@ -29,7 +29,7 @@ namespace SbuBot.Commands.Modules
                 .WithFooter("1/5")
                 .WithDescription(
                     "To use Commands ping the bot or send a message that starts with "
-                    + $"'{SbuBotGlobals.DEFAULT_PREFIX}', the space between the prefix and the command is "
+                    + $"'{SbuGlobals.DEFAULT_PREFIX}', the space between the prefix and the command is "
                     + "optional and does not influence the command execution, both `sbu ping` and "
                     + "`sbuping` will work just fine."
                 ),
@@ -77,7 +77,7 @@ namespace SbuBot.Commands.Modules
         );
 
         [Group("command", "commands")]
-        public class CommandGroup : SbuModuleBase
+        public sealed class CommandGroup : SbuModuleBase
         {
             [Command("find")]
             public DiscordCommandResult Find(string command)

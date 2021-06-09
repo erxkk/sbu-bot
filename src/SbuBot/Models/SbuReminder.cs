@@ -32,7 +32,7 @@ namespace SbuBot.Models
         [HideOnSerialize, NotLogged]
         public string JumpUrl => string.Format(
             "https://discord.com/channels/{0}/{1}/{2}",
-            SbuBotGlobals.Guild.ID,
+            SbuGlobals.Guild.SELF,
             ChannelId,
             MessageId
         );

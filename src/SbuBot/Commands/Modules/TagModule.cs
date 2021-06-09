@@ -69,7 +69,6 @@ namespace SbuBot.Commands.Modules
             public async Task<DiscordCommandResult> CreateInteractiveAsync()
             {
                 MessageReceivedEventArgs? waitNameResult;
-
                 await Reply("How should the tag be called? (spaces are allowed)");
 
                 await using (Context.BeginYield())
@@ -80,7 +79,9 @@ namespace SbuBot.Commands.Modules
                 if (waitNameResult is null)
                     return Reply("Aborted: You did not provide a tag name.");
 
-                switch (SbuTag.IsValidTagName(waitNameResult.Message.Content))
+                string name = waitNameResult.Message.Content.Trim();
+
+                switch (SbuTag.IsValidTagName(name))
                 {
                     case SbuTag.ValidNameType.TooShort:
                         return Reply(
@@ -106,7 +107,7 @@ namespace SbuBot.Commands.Modules
 
                 await using (Context.BeginYield())
                 {
-                    tag = await Context.Db.Tags.FirstOrDefaultAsync(t => t.Name == waitNameResult.Message.Content);
+                    tag = await Context.Db.Tags.FirstOrDefaultAsync(t => t.Name == name);
                 }
 
                 if (tag is { })
@@ -205,7 +206,7 @@ namespace SbuBot.Commands.Modules
 
         [Group("edit", "change"), PureGroup]
         [Description("Modifies the content of a given tag.")]
-        public class EditGroup : SbuModuleBase
+        public sealed class EditGroup : SbuModuleBase
         {
             [Command]
             public async Task<DiscordCommandResult> EditAsync(
@@ -388,7 +389,7 @@ namespace SbuBot.Commands.Modules
         )]
         public DiscordCommandResult GetReservedKeywords() => Reply(
             "The following keywords are not allowed to be tags, but tags may contain them:\n"
-            + string.Join("\n", SbuBotGlobals.RESERVED_KEYWORDS.Select(rn => $"> `{rn}`"))
+            + string.Join("\n", SbuGlobals.RESERVED_KEYWORDS.Select(rn => $"> `{rn}`"))
         );
     }
 }

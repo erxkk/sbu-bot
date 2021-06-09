@@ -34,21 +34,12 @@ namespace SbuBot.Models
             {
                 foreach (MemberInfo memberInfo in members)
                 {
-                    object? value;
-
-                    switch (memberInfo)
+                    object? value = memberInfo switch
                     {
-                        case PropertyInfo { CanRead: true } propertyInfo:
-                            value = propertyInfo.GetValue(this);
-                            break;
-
-                        case FieldInfo fieldInfo:
-                            value = fieldInfo.GetValue(this);
-                            break;
-
-                        default:
-                            return;
-                    }
+                        PropertyInfo { CanRead: true } propertyInfo => propertyInfo.GetValue(this),
+                        FieldInfo fieldInfo => fieldInfo.GetValue(this),
+                        _ => throw new ArgumentOutOfRangeException(nameof(members), memberInfo, null)
+                    };
 
                     value = memberInfo.GetCustomAttribute<HideOnSerializeAttribute>() is { }
                         ? HiddenValue.INSTANCE

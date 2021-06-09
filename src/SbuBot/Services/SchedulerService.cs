@@ -72,6 +72,7 @@ namespace SbuBot.Services
                         return;
                     }
 
+                    // unawaited task
                     _ = entry.Callback(entry);
 
                     if (entry.RecurringCount == 0)

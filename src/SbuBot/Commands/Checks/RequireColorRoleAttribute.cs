@@ -4,11 +4,11 @@ using Qmmands;
 
 namespace SbuBot.Commands.Checks
 {
-    public sealed class RequireAuthorColorRoleAttribute : SbuCheckAttribute
+    public sealed class RequireColorRoleAttribute : SbuCheckAttribute
     {
         public bool RequireColorRole { get; }
 
-        public RequireAuthorColorRoleAttribute(bool requireColorRole = true) => RequireColorRole = requireColorRole;
+        public RequireColorRoleAttribute(bool requireColorRole = true) => RequireColorRole = requireColorRole;
 
         protected override ValueTask<CheckResult> CheckAsync(SbuCommandContext context)
             => context.Invoker!.ColorRole is { } == RequireColorRole

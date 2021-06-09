@@ -26,7 +26,7 @@ namespace SbuBot.Commands.Modules
     )]
     public sealed class ColorRoleModule : SbuModuleBase
     {
-        [Group("claim", "take"), PureGroup, RequireAuthorColorRole(false)]
+        [Group("claim", "take"), PureGroup, RequireColorRole(false)]
         [Description("Claims the given color role if it has no owner.")]
         public sealed class ClaimGroup : SbuModuleBase
         {
@@ -62,7 +62,7 @@ namespace SbuBot.Commands.Modules
             }
         }
 
-        [Command("create", "make", "new"), RequireAuthorColorRole(false)]
+        [Command("create", "make", "new"), RequireColorRole(false)]
         [Description("Creates a new color role.")]
         public async Task<DiscordCommandResult> CreateAsync(
             [Description("The role color.")] Color color,
@@ -109,9 +109,9 @@ namespace SbuBot.Commands.Modules
             return Reply($"{role.Mention} is your new color role.");
         }
 
-        [Group("edit", "change"), RequireAuthorColorRole]
+        [Group("edit", "change"), RequireColorRole]
         [Description("A group of commands for editing color roles.")]
-        public class EditGroup : SbuModuleBase
+        public sealed class EditGroup : SbuModuleBase
         {
             [Command]
             [Description("Modifies the authors color role's color and name.")]
@@ -157,7 +157,7 @@ namespace SbuBot.Commands.Modules
             }
         }
 
-        [Command("remove", "delete"), RequireAuthorColorRole]
+        [Command("remove", "delete"), RequireColorRole]
         [Description("Removes the authors color role.")]
         public async Task<DiscordCommandResult> RemoveAsync()
         {
@@ -172,7 +172,7 @@ namespace SbuBot.Commands.Modules
             return Reply("Your color role has been removed.");
         }
 
-        [Command("transfer"), RequireAuthorColorRole]
+        [Command("transfer"), RequireColorRole]
         [Description("Transfers the authors color role to the given member.")]
         public async Task<DiscordCommandResult> TransferColorRoleAsync(
             [NotAuthor, MustHaveColorRole(false)][Description("The member that should receive the color role.")]

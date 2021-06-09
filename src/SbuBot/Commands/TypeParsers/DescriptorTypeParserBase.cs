@@ -23,7 +23,7 @@ namespace SbuBot.Commands.TypeParsers
             SbuCommandContext context
         ) => ParseAsync(
             parameter,
-            value.Split(SbuBotGlobals.DESCRIPTOR_SEPARATOR).Select(s => s.Trim()).ToArray(),
+            value.Split(SbuGlobals.DESCRIPTOR_SEPARATOR).Select(s => s.Trim()).ToArray(),
             context
         );
     }

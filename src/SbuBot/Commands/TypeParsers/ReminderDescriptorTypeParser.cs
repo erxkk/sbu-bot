@@ -24,7 +24,7 @@ namespace SbuBot.Commands.TypeParsers
             if (values.Length != 2)
             {
                 return TypeParser<ReminderDescriptor>.Failure(
-                    $"One separator `{SbuBotGlobals.DESCRIPTOR_SEPARATOR}` is expected, found {values.Length}."
+                    $"One separator `{SbuGlobals.DESCRIPTOR_SEPARATOR}` is expected, found {values.Length}."
                 );
             }
 

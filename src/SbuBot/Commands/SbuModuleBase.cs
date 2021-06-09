@@ -6,6 +6,7 @@ using Disqord.Bot;
 
 namespace SbuBot.Commands
 {
+    [RequireGuild(SbuGlobals.Guild.SELF)]
     public abstract class SbuModuleBase : DiscordGuildModuleBase<SbuCommandContext>
     {
         protected DiscordMenuCommandResult MaybePages(

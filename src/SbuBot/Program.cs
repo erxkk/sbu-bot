@@ -63,7 +63,7 @@ try
             (ctx, bot) =>
             {
                 bot.Token = ctx.Configuration["Discord:Token"];
-                bot.Prefixes = new[] { SbuBotGlobals.DEFAULT_PREFIX };
+                bot.Prefixes = new[] { SbuGlobals.DEFAULT_PREFIX };
                 bot.Intents = GatewayIntents.Recommended;
             }
         );
