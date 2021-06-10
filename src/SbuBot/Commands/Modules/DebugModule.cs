@@ -66,7 +66,9 @@ namespace SbuBot.Commands.Modules
                 _ => Context.Channel.SendMessageAsync(
                     new LocalMessage().WithContent($"Ping was scheduled at: `{DateTime.Now}`, Pong!")
                 ),
-                timespan.Value - DateTime.Now
+                timespan.Value - DateTime.Now,
+                0,
+                Context.Bot.StoppingToken
             );
 
             return Reply($"Scheduled pong to be sent in `{timespan}`.");

@@ -31,10 +31,15 @@ namespace SbuBot.Services
 
         public SchedulerService(ILogger<SchedulerService> logger, DiscordBotBase bot) : base(logger, bot) { }
 
-        public Guid Schedule(Func<Entry, Task> callback, TimeSpan timeSpan, int recurringCount = 0)
+        public Guid Schedule(
+            Func<Entry, Task> callback,
+            TimeSpan timeSpan,
+            int recurringCount = 0,
+            CancellationToken cancellationToken = default
+        )
         {
             var guid = Guid.NewGuid();
-            Schedule(guid, callback, timeSpan, recurringCount);
+            Schedule(guid, callback, timeSpan, recurringCount, cancellationToken);
             return guid;
         }
 
@@ -43,7 +48,7 @@ namespace SbuBot.Services
             Func<Entry, Task> callback,
             TimeSpan timeSpan,
             int recurringCount = 0,
-            CancellationToken unschedulingToken = default
+            CancellationToken cancellationToken = default
         )
         {
             if (callback is null)
@@ -58,9 +63,9 @@ namespace SbuBot.Services
 
             lock (_lock)
             {
-                _linkIfNotStoppingToken(ref unschedulingToken);
-                unschedulingToken.Register(() => Unschedule(id));
-                _scheduleEntries[id] = new(callback, timer, recurringCount, unschedulingToken);
+                _linkIfNotStoppingToken(ref cancellationToken);
+                cancellationToken.Register(() => Cancel(id));
+                _scheduleEntries[id] = new(callback, timer, recurringCount, cancellationToken);
             }
 
             Logger.LogTrace("Scheduled {@Entry} to {@Timespan}", id, timeSpan);
@@ -98,7 +103,7 @@ namespace SbuBot.Services
             }
         }
 
-        public void Reschedule(Guid id, TimeSpan timeSpan, CancellationToken unschedulingToken = default)
+        public void Reschedule(Guid id, TimeSpan timeSpan, CancellationToken cancellationToken = default)
         {
             lock (_lock)
             {
@@ -109,16 +114,16 @@ namespace SbuBot.Services
                     return;
                 }
 
-                _linkIfNotStoppingToken(ref unschedulingToken);
-                unschedulingToken.Register(() => Unschedule(id));
+                _linkIfNotStoppingToken(ref cancellationToken);
+                cancellationToken.Register(() => Cancel(id));
                 entry.Timer.Change(timeSpan, timeSpan);
-                _scheduleEntries[id] = entry with { CancellationToken = unschedulingToken };
+                _scheduleEntries[id] = entry with { CancellationToken = cancellationToken };
             }
 
             Logger.LogTrace("Rescheduled {0} to {1}", id, timeSpan);
         }
 
-        public void Unschedule(Guid id)
+        public void Cancel(Guid id)
         {
             lock (_lock)
             {

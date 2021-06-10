@@ -147,7 +147,7 @@ namespace SbuBot.Services
 
                 foreach (SbuReminder reminder in reminders)
                 {
-                    service.Unschedule(reminder.Id);
+                    service.Cancel(reminder.Id);
                     reminder.IsDispatched = true;
                 }
 

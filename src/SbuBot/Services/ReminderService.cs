@@ -18,8 +18,6 @@ using SbuBot.Models;
 
 namespace SbuBot.Services
 {
-    // TODO: add propagation
-    // TODO: remove reminders
     public sealed class ReminderService : SbuBotServiceBase
     {
         private readonly SchedulerService _schedulerService;
@@ -194,14 +192,14 @@ namespace SbuBot.Services
             _schedulerService.Reschedule(id, reminder.DueAt - DateTimeOffset.Now, cancellationToken);
 
             Logger.LogDebug(
-                "Rescheduled: {0} -> {1} : {@Reminder}",
+                "Rescheduled: {@PreviousTimespan} -> {@NewTimespan} : {@Reminder}",
                 previousDueAt,
                 reminder.DueAt,
                 reminder.Id
             );
         }
 
-        public async Task UnscheduleAsync(Guid id)
+        public async Task CancelAsync(Guid id)
         {
             SbuReminder reminder;
 
@@ -220,12 +218,12 @@ namespace SbuBot.Services
                 await context.SaveChangesAsync();
             }
 
-            _schedulerService.Unschedule(id);
+            _schedulerService.Cancel(id);
 
             Logger.LogDebug("Unscheduled: {@Reminder}", reminder.Id);
         }
 
-        public async Task UnscheduleAsync(Snowflake ownerId)
+        public async Task CancelForAsync(Snowflake ownerId)
         {
             int count = 0;
 
@@ -239,7 +237,7 @@ namespace SbuBot.Services
                     count++;
                     reminder.IsDispatched = true;
                     _currentReminders.Remove(id);
-                    _schedulerService.Unschedule(id);
+                    _schedulerService.Cancel(id);
                 }
             }
 
