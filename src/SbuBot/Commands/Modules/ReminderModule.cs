@@ -133,8 +133,7 @@ namespace SbuBot.Commands.Modules
                 SbuReminder reminder
             )
             {
-                await Context.Services.GetRequiredService<ReminderService>()
-                    .UnscheduleAsync(reminder.Id, Context.Bot.StoppingToken);
+                await Context.Services.GetRequiredService<ReminderService>().UnscheduleAsync(reminder.Id);
 
                 return Reply(
                     new LocalEmbed()
@@ -164,9 +163,7 @@ namespace SbuBot.Commands.Modules
                 if (waitResult is null || !waitResult.Message.Content.Equals("yes", StringComparison.OrdinalIgnoreCase))
                     return Reply("Aborted.");
 
-                await Context.Services.GetRequiredService<ReminderService>()
-                    .UnscheduleAsync(Context.Author.Id, Context.Bot.StoppingToken);
-
+                await Context.Services.GetRequiredService<ReminderService>().UnscheduleAsync(Context.Author.Id);
                 return Reply("Cancelled all reminders.");
             }
         }

@@ -4,7 +4,6 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Disqord.Bot;
-using Disqord.Bot.Hosting;
 
 using Microsoft.Extensions.Logging;
 
@@ -12,14 +11,14 @@ namespace SbuBot.Services
 {
     public sealed class SchedulerService : SbuBotServiceBase
     {
-        private readonly Dictionary<Guid, ScheduleEntry> _scheduleEntries = new();
+        private readonly Dictionary<Guid, Entry> _scheduleEntries = new();
         private readonly object _lock = new();
 
-        public IReadOnlyDictionary<Guid, ScheduleEntry> ScheduleEntries
+        public IReadOnlyDictionary<Guid, Entry> ScheduleEntries
         {
             get
             {
-                Dictionary<Guid, ScheduleEntry> copy;
+                Dictionary<Guid, Entry> copy;
 
                 lock (_lock)
                 {
@@ -32,14 +31,20 @@ namespace SbuBot.Services
 
         public SchedulerService(ILogger<SchedulerService> logger, DiscordBotBase bot) : base(logger, bot) { }
 
-        public Guid Schedule(Func<ScheduleEntry, Task> callback, TimeSpan timeSpan, int recurringCount = 0)
+        public Guid Schedule(Func<Entry, Task> callback, TimeSpan timeSpan, int recurringCount = 0)
         {
             var guid = Guid.NewGuid();
             Schedule(guid, callback, timeSpan, recurringCount);
             return guid;
         }
 
-        public void Schedule(Guid id, Func<ScheduleEntry, Task> callback, TimeSpan timeSpan, int recurringCount = 0)
+        public void Schedule(
+            Guid id,
+            Func<Entry, Task> callback,
+            TimeSpan timeSpan,
+            int recurringCount = 0,
+            CancellationToken unschedulingToken = default
+        )
         {
             if (callback is null)
                 throw new ArgumentNullException(nameof(callback));
@@ -53,21 +58,23 @@ namespace SbuBot.Services
 
             lock (_lock)
             {
-                _scheduleEntries[id] = new(callback, timer, recurringCount);
+                _linkIfNotStoppingToken(ref unschedulingToken);
+                unschedulingToken.Register(() => Unschedule(id));
+                _scheduleEntries[id] = new(callback, timer, recurringCount, unschedulingToken);
             }
 
-            Logger.LogTrace("Scheduled {0} to {1}", id, timeSpan);
+            Logger.LogTrace("Scheduled {@Entry} to {@Timespan}", id, timeSpan);
 
             void timerCallback(object? sender)
             {
                 var identifier = (Guid) sender!;
-                ScheduleEntry entry;
+                Entry entry;
 
                 lock (_lock)
                 {
                     if (!_scheduleEntries.TryGetValue(identifier, out entry!))
                     {
-                        Logger.LogWarning("Could not dispatch, not found : {0}", id);
+                        Logger.LogWarning("Could not dispatch, not found : {@Entry}", id);
 
                         return;
                     }
@@ -91,18 +98,21 @@ namespace SbuBot.Services
             }
         }
 
-        public void Reschedule(Guid id, TimeSpan timeSpan)
+        public void Reschedule(Guid id, TimeSpan timeSpan, CancellationToken unschedulingToken = default)
         {
             lock (_lock)
             {
                 if (!_scheduleEntries.TryGetValue(id, out var entry))
                 {
-                    Logger.LogWarning("Could not reschedule to {0}, not found : {1}", timeSpan, id);
+                    Logger.LogWarning("Could not reschedule to {@Timespan}, not found : {@Entry}", timeSpan, id);
 
                     return;
                 }
 
+                _linkIfNotStoppingToken(ref unschedulingToken);
+                unschedulingToken.Register(() => Unschedule(id));
                 entry.Timer.Change(timeSpan, timeSpan);
+                _scheduleEntries[id] = entry with { CancellationToken = unschedulingToken };
             }
 
             Logger.LogTrace("Rescheduled {0} to {1}", id, timeSpan);
@@ -114,7 +124,7 @@ namespace SbuBot.Services
             {
                 if (!_scheduleEntries.Remove(id, out var entry))
                 {
-                    Logger.LogWarning("Could not unschedule, not found : {0}", id);
+                    Logger.LogWarning("Could not unschedule, not found : {@Entry}", id);
 
                     return;
                 }
@@ -126,6 +136,21 @@ namespace SbuBot.Services
             Logger.LogTrace("Unscheduled {0}", id);
         }
 
-        public sealed record ScheduleEntry(Func<ScheduleEntry, Task> Callback, Timer Timer, int RecurringCount);
+        private void _linkIfNotStoppingToken(ref CancellationToken cancellationToken)
+        {
+            if (cancellationToken != Bot.StoppingToken)
+            {
+                cancellationToken = CancellationTokenSource
+                    .CreateLinkedTokenSource(Bot.StoppingToken, cancellationToken)
+                    .Token;
+            }
+        }
+
+        public sealed record Entry(
+            Func<Entry, Task> Callback,
+            Timer Timer,
+            int RecurringCount,
+            CancellationToken CancellationToken = default
+        );
     }
 }

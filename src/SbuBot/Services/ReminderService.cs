@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Disqord;
 using Disqord.Bot;
 using Disqord.Bot.Hosting;
+using Disqord.Gateway;
 using Disqord.Rest;
 
 using Microsoft.EntityFrameworkCore;
@@ -77,9 +78,12 @@ namespace SbuBot.Services
         public async Task ScheduleAsync(
             SbuReminder reminder,
             bool isNewReminder = true,
-            CancellationToken cancellationToken = default
+            CancellationToken cancellationToken = default,
+            CancellationToken stoppingToken = default
         )
         {
+            _linkIfNotStoppingToken(ref cancellationToken);
+
             if (reminder.DueAt + TimeSpan.FromMilliseconds(500) <= DateTimeOffset.Now)
             {
                 throw new ArgumentOutOfRangeException(
@@ -105,11 +109,17 @@ namespace SbuBot.Services
                 _currentReminders[reminder.Id] = reminder;
             }
 
-            _schedulerService.Schedule(reminder.Id, reminderCallback, reminder.DueAt - DateTimeOffset.Now);
+            _schedulerService.Schedule(
+                reminder.Id,
+                reminderCallback,
+                reminder.DueAt - DateTimeOffset.Now,
+                0,
+                stoppingToken
+            );
 
             Logger.LogDebug("Scheduled {@Reminder}", reminder.Id);
 
-            async Task reminderCallback(SchedulerService.ScheduleEntry entry)
+            async Task reminderCallback(SchedulerService.Entry entry)
             {
                 try
                 {
@@ -147,7 +157,7 @@ namespace SbuBot.Services
 
                         reminder.IsDispatched = true;
                         context.Reminders.Update(reminder);
-                        await context.SaveChangesAsync(Bot.StoppingToken);
+                        await context.SaveChangesAsync(entry.CancellationToken);
                     }
 
                     Logger.LogTrace("Removed internally {@Reminder}", reminder.Id);
@@ -161,6 +171,7 @@ namespace SbuBot.Services
             CancellationToken cancellationToken = default
         )
         {
+            _linkIfNotStoppingToken(ref cancellationToken);
             SbuReminder reminder;
 
             lock (_lock)
@@ -180,17 +191,17 @@ namespace SbuBot.Services
 
             DateTimeOffset previousDueAt = reminder.DueAt;
             reminder.DueAt = newTimestamp;
-            _schedulerService.Reschedule(id, reminder.DueAt - DateTimeOffset.Now);
+            _schedulerService.Reschedule(id, reminder.DueAt - DateTimeOffset.Now, cancellationToken);
 
             Logger.LogDebug(
-                "Rescheduled from {0} to {1} : {@Reminder}",
+                "Rescheduled: {0} -> {1} : {@Reminder}",
                 previousDueAt,
                 reminder.DueAt,
                 reminder.Id
             );
         }
 
-        public async Task UnscheduleAsync(Guid id, CancellationToken cancellationToken = default)
+        public async Task UnscheduleAsync(Guid id)
         {
             SbuReminder reminder;
 
@@ -206,15 +217,15 @@ namespace SbuBot.Services
 
                 reminder.IsDispatched = true;
                 context.Reminders.Update(reminder);
-                await context.SaveChangesAsync(cancellationToken);
+                await context.SaveChangesAsync();
             }
 
             _schedulerService.Unschedule(id);
 
-            Logger.LogDebug("Unscheduled {@Reminder}", reminder.Id);
+            Logger.LogDebug("Unscheduled: {@Reminder}", reminder.Id);
         }
 
-        public async Task UnscheduleAsync(Snowflake ownerId, CancellationToken cancellationToken = default)
+        public async Task UnscheduleAsync(Snowflake ownerId)
         {
             int count = 0;
 
@@ -237,10 +248,20 @@ namespace SbuBot.Services
                 SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
 
                 context.Reminders.UpdateRange(reminders.Select(r => r.Value));
-                await context.SaveChangesAsync(cancellationToken);
+                await context.SaveChangesAsync();
             }
 
-            Logger.LogDebug("Unscheduled {@Count} reminders for {@Owner}", count, ownerId);
+            Logger.LogDebug("Unscheduled: {@Reminders}", new { Amount = count, Owner = ownerId });
+        }
+
+        private void _linkIfNotStoppingToken(ref CancellationToken cancellationToken)
+        {
+            if (cancellationToken != Bot.StoppingToken)
+            {
+                cancellationToken = CancellationTokenSource
+                    .CreateLinkedTokenSource(Bot.StoppingToken, cancellationToken)
+                    .Token;
+            }
         }
     }
 }
