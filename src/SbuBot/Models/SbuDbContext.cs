@@ -1,5 +1,7 @@
 using System;
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 
 using Disqord;
 
@@ -14,6 +16,7 @@ namespace SbuBot.Models
 {
     public sealed class SbuDbContext : DbContext
     {
+        private readonly SbuBot? _sbuBot;
         private readonly SbuBotConfiguration _configuration;
 
 #nullable disable
@@ -23,7 +26,11 @@ namespace SbuBot.Models
         public DbSet<SbuReminder> Reminders { get; set; }
 #nullable enable
 
-        public SbuDbContext(SbuBotConfiguration configuration) => _configuration = configuration;
+        public SbuDbContext(SbuBot? sbuBot, SbuBotConfiguration configuration)
+        {
+            _sbuBot = sbuBot;
+            _configuration = configuration;
+        }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
             => optionsBuilder.UseNpgsql(_configuration.DbConnectionString);
@@ -35,24 +42,24 @@ namespace SbuBot.Models
                 static @ulong => new(@ulong)
             );
 
-            modelBuilder.UseValueConverterForType(snowflakeConverter);
-
             var colorConverter = new ValueConverter<Color, int>(
                 static color => color.RawValue,
                 static @int => new(@int)
             );
-
-            modelBuilder.UseValueConverterForType(colorConverter);
 
             var datetimeConverter = new ValueConverter<DateTimeOffset, long>(
                 static datetime => datetime.ToUnixTimeMilliseconds(),
                 static @long => DateTimeOffset.FromUnixTimeMilliseconds(@long)
             );
 
+            modelBuilder.UseValueConverterForType(snowflakeConverter);
+            modelBuilder.UseValueConverterForType(colorConverter);
             modelBuilder.UseValueConverterForType(datetimeConverter);
-
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(SbuDbContext).Assembly);
         }
+
+        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+            => base.SaveChangesAsync(_sbuBot?.StoppingToken ?? cancellationToken);
 
         internal sealed class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<SbuDbContext>
         {
@@ -65,7 +72,7 @@ namespace SbuBot.Models
                     .AddCommandLine(args)
                     .Build();
 
-                return new(new(configuration));
+                return new(null, new(configuration));
             }
         }
     }

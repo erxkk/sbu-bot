@@ -13,31 +13,31 @@ using Qmmands;
 
 using SbuBot.Commands.Checks.Parameters;
 using SbuBot.Commands.Descriptors;
-using SbuBot.Commands.Information;
 using SbuBot.Extensions;
 using SbuBot.Models;
 using SbuBot.Services;
 
 namespace SbuBot.Commands.Modules
 {
-    [Group("reminder", "remind", "remindme", "r")]
+    [Group("reminder", "remind", "remindme")]
     [Description("A collection of commands for creating modifying and removing reminders.")]
     [Remarks("Reminder timestamps may be given as human readable timespans or strictly colon `:` separated integers.")]
     public sealed class ReminderModule : SbuModuleBase
     {
-        [Group("create", "make", "new"), PureGroup]
+        [Group("create", "make", "new")]
         [Description("Creates a new reminder with the given timestamp and optional message.")]
         public sealed class CreateGroup : SbuModuleBase
         {
             [Command]
             public async Task<DiscordCommandResult> CreateAsync(
-                [Description("The reminder descriptor.")][Remarks("This descriptor is a 2-part descriptor.")]
+                [Description("The reminder descriptor.")]
                 ReminderDescriptor reminderDescriptor
             )
             {
                 var newReminder = new SbuReminder(Context, reminderDescriptor.Message, reminderDescriptor.Timestamp);
 
-                await Context.Services.GetRequiredService<ReminderService>().ScheduleAsync(newReminder);
+                await Context.Services.GetRequiredService<ReminderService>()
+                    .ScheduleAsync(newReminder, cancellationToken: Context.Bot.StoppingToken);
 
                 return Reply(
                     new LocalEmbed()
@@ -50,18 +50,22 @@ namespace SbuBot.Commands.Modules
 
             [Command]
             public async Task<DiscordCommandResult> CreateInteractiveAsync(
-                [Description("The optional message of the reminder.")]
+                [Maximum(SbuReminder.MAX_MESSAGE_LENGTH)][Description("The optional message of the reminder.")]
                 string? message = null
             )
             {
                 TypeParser<DateTime> parser = Context.Bot.Commands.GetTypeParser<DateTime>();
-                MessageReceivedEventArgs? waitResult;
 
                 await Reply("When do you want to be reminded?");
 
+                MessageReceivedEventArgs? waitResult;
+
                 await using (Context.BeginYield())
                 {
-                    waitResult = await Context.WaitForMessageAsync(e => e.Member.Id == Context.Author.Id);
+                    waitResult = await Context.WaitForMessageAsync(
+                        e => e.Member.Id == Context.Author.Id,
+                        cancellationToken: Context.Bot.StoppingToken
+                    );
                 }
 
                 if (waitResult is null)
@@ -80,7 +84,8 @@ namespace SbuBot.Commands.Modules
 
                 await using (Context.BeginYield())
                 {
-                    await Context.Services.GetRequiredService<ReminderService>().ScheduleAsync(newReminder);
+                    await Context.Services.GetRequiredService<ReminderService>()
+                        .ScheduleAsync(newReminder, cancellationToken: Context.Bot.StoppingToken);
                 }
 
                 return Reply(
@@ -96,14 +101,16 @@ namespace SbuBot.Commands.Modules
         [Command("edit", "change")]
         [Description("Reschedules the given reminder.")]
         public async Task<DiscordCommandResult> RescheduleAsync(
-            [AuthorMustOwn] SbuReminder reminder,
+            [AuthorMustOwn][Description("The reminder to reschedule.")]
+            SbuReminder reminder,
+            [MustBeFuture][Description("The new timestamp.")]
             DateTime newTimestamp
         )
         {
             if (newTimestamp + TimeSpan.FromMilliseconds(500) >= DateTimeOffset.Now)
             {
                 await Context.Services.GetRequiredService<ReminderService>()
-                    .RescheduleAsync(reminder.Id, newTimestamp);
+                    .RescheduleAsync(reminder.Id, newTimestamp, Context.Bot.StoppingToken);
             }
 
             return Reply(
@@ -126,7 +133,8 @@ namespace SbuBot.Commands.Modules
                 SbuReminder reminder
             )
             {
-                await Context.Services.GetRequiredService<ReminderService>().UnscheduleAsync(reminder.Id);
+                await Context.Services.GetRequiredService<ReminderService>()
+                    .UnscheduleAsync(reminder.Id, Context.Bot.StoppingToken);
 
                 return Reply(
                     new LocalEmbed()
@@ -141,19 +149,23 @@ namespace SbuBot.Commands.Modules
             [Description("Cancels all of the command author's reminders.")]
             public async Task<DiscordCommandResult> CancelAllAsync()
             {
-                MessageReceivedEventArgs? waitResult;
-
                 await Reply("Are yous ure you want to cancel all your reminders? Respond `yes` to confirm.");
+
+                MessageReceivedEventArgs? waitResult;
 
                 await using (Context.BeginYield())
                 {
-                    waitResult = await Context.WaitForMessageAsync(e => e.Member.Id == Context.Author.Id);
+                    waitResult = await Context.WaitForMessageAsync(
+                        e => e.Member.Id == Context.Author.Id,
+                        cancellationToken: Context.Bot.StoppingToken
+                    );
                 }
 
                 if (waitResult is null || !waitResult.Message.Content.Equals("yes", StringComparison.OrdinalIgnoreCase))
                     return Reply("Aborted.");
 
-                await Context.Services.GetRequiredService<ReminderService>().UnscheduleAsync(Context.Author.Id);
+                await Context.Services.GetRequiredService<ReminderService>()
+                    .UnscheduleAsync(Context.Author.Id, Context.Bot.StoppingToken);
 
                 return Reply("Cancelled all reminders.");
             }
@@ -180,9 +192,8 @@ namespace SbuBot.Commands.Modules
             [Description("Lists all of the command author's reminders.")]
             public DiscordCommandResult ListAll()
             {
-                if (Context.Services.GetRequiredService<ReminderService>().CurrentReminders is not
-                    { Count: > 0 }
-                        reminders)
+                if (Context.Services.GetRequiredService<ReminderService>().CurrentReminders
+                    is not { Count: > 0 } reminders)
                     return Reply("You have no reminders.");
 
                 return MaybePages(

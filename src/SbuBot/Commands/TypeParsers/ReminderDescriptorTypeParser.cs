@@ -37,9 +37,12 @@ namespace SbuBot.Commands.TypeParsers
 
             EnglishTimeParser timeParser = context.Services.GetRequiredService<EnglishTimeParser>();
 
-            return timeParser.Parse(values[0]) is ISuccessfulTimeParsingResult<DateTime> result
+            if (timeParser.Parse(values[0]) is not ISuccessfulTimeParsingResult<DateTime> result)
+                return TypeParser<ReminderDescriptor>.Failure("Could not parse timestamp.");
+
+            return result.Value > DateTimeOffset.Now
                 ? TypeParser<ReminderDescriptor>.Success(new() { Timestamp = result.Value, Message = values[1] })
-                : TypeParser<ReminderDescriptor>.Failure("Could not parse timestamp.");
+                : TypeParser<ReminderDescriptor>.Failure("The given timestamp must be in the future.");
         }
     }
 }

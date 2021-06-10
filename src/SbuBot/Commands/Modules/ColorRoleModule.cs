@@ -12,13 +12,12 @@ using Qmmands;
 
 using SbuBot.Commands.Checks;
 using SbuBot.Commands.Checks.Parameters;
-using SbuBot.Commands.Information;
 using SbuBot.Models;
 using SbuBot.Services;
 
 namespace SbuBot.Commands.Modules
 {
-    [Group("role")]
+    [Group("role", "r")]
     [Description("A collection of commands for creation, modification, removal and usage of color roles.")]
     [Remarks(
         "A user may only have one color role at a time, role colors can be given as hex codes starting with `#` or as "
@@ -26,7 +25,7 @@ namespace SbuBot.Commands.Modules
     )]
     public sealed class ColorRoleModule : SbuModuleBase
     {
-        [Group("claim", "take"), PureGroup, RequireColorRole(false)]
+        [Group("claim", "take"), RequireColorRole(false)]
         [Description("Claims the given color role if it has no owner.")]
         public sealed class ClaimGroup : SbuModuleBase
         {
@@ -74,12 +73,16 @@ namespace SbuBot.Commands.Modules
         {
             if (name is null)
             {
-                MessageReceivedEventArgs? waitNameResult;
                 await Reply("What do you want the role name to be?");
+
+                MessageReceivedEventArgs? waitNameResult;
 
                 await using (Context.BeginYield())
                 {
-                    waitNameResult = await Context.WaitForMessageAsync(e => e.Member.Id == Context.Author.Id);
+                    waitNameResult = await Context.WaitForMessageAsync(
+                        e => e.Member.Id == Context.Author.Id,
+                        cancellationToken: Context.Bot.StoppingToken
+                    );
                 }
 
                 if (waitNameResult is null)

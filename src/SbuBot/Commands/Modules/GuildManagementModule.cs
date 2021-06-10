@@ -99,6 +99,9 @@ namespace SbuBot.Commands.Modules
 
                 foreach (IUserMessage message in pins.OrderBy(m => m.CreatedAt()))
                 {
+                    if (Context.Bot.StoppingToken.IsCancellationRequested)
+                        throw new OperationCanceledException();
+
                     switch (Utility.TryCreatePinMessage(message))
                     {
                         case Result<LocalMessage, string>.Success pinMessage:
@@ -170,7 +173,11 @@ namespace SbuBot.Commands.Modules
                         await currentStream.CopyToAsync(uploadBuffer, cts.Token);
                         await Context.Guild.CreateEmojiAsync(customEmoji.Name, uploadBuffer);
                     }
-                    catch (OperationCanceledException) { }
+                    catch (OperationCanceledException)
+                    {
+                        if (Context.Bot.StoppingToken.IsCancellationRequested)
+                            throw;
+                    }
                     finally
                     {
                         await uploadBuffer.FlushAsync(Context.Bot.StoppingToken);
@@ -202,7 +209,10 @@ namespace SbuBot.Commands.Modules
 
                 await using (_ = Context.BeginYield())
                 {
-                    waitConfirmResult = await Context.WaitForMessageAsync(e => e.Member.Id == Context.Author.Id);
+                    waitConfirmResult = await Context.WaitForMessageAsync(
+                        e => e.Member.Id == Context.Author.Id,
+                        cancellationToken: Context.Bot.StoppingToken
+                    );
                 }
 
                 if (waitConfirmResult is null

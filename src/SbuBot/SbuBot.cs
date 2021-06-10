@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -13,6 +14,7 @@ using Microsoft.Extensions.Options;
 using Qmmands;
 
 using SbuBot.Commands;
+using SbuBot.Commands.Descriptors;
 using SbuBot.Commands.TypeParsers;
 
 namespace SbuBot
@@ -94,12 +96,26 @@ namespace SbuBot
             foreach (CommandBuilder commandBuilder in CommandUtilities.EnumerateAllCommands(moduleBuilder))
             {
                 // last parameter always remainder
-                if (commandBuilder.Parameters.LastOrDefault() is { IsMultiple: false } parameterBuilder)
-                    parameterBuilder.IsRemainder = true;
+                if (commandBuilder.Parameters.LastOrDefault() is { IsMultiple: false } remainderParameterBuilder)
+                    remainderParameterBuilder.IsRemainder = true;
 
                 // avoid command shadowing
                 if (commandBuilder.Aliases.Count == 0 && commandBuilder.Parameters.Count == 1)
                     commandBuilder.Priority -= (commandBuilder.Parameters[0].Type == typeof(string) ? 2 : 1);
+
+                // assign remarks dynamically on descriptors to allow for constant integer stringification lmao
+                // [Remarks("literal" + constantNonString)] will not work unless the value is specified as string as
+                // well, although the string should be pasted upon compilation
+                foreach (ParameterBuilder parameterBuilder in commandBuilder.Parameters
+                    .Where(p => p.Type.IsAssignableTo(typeof(IDescriptor)))
+                )
+                {
+                    if (parameterBuilder.Type
+                            .GetField("REMARKS", BindingFlags.Static | BindingFlags.Public)
+                            ?.GetValue(null)
+                        is string remarks)
+                        parameterBuilder.Remarks = remarks;
+                }
             }
 
             base.MutateModule(moduleBuilder);

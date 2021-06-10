@@ -17,6 +17,8 @@ using SbuBot.Models;
 
 namespace SbuBot.Services
 {
+    // TODO: add propagation
+    // TODO: remove reminders
     public sealed class ReminderService : SbuBotServiceBase
     {
         private readonly SchedulerService _schedulerService;
@@ -66,13 +68,17 @@ namespace SbuBot.Services
                 if (notDispatchedReminder.DueAt + TimeSpan.FromMilliseconds(500) <= DateTimeOffset.Now)
                     notDispatchedReminder.DueAt = DateTimeOffset.Now + TimeSpan.FromSeconds(5);
 
-                await ScheduleAsync(notDispatchedReminder, false);
+                await ScheduleAsync(notDispatchedReminder, false, stoppingToken);
             }
 
             await base.ExecuteAsync(stoppingToken);
         }
 
-        public async Task ScheduleAsync(SbuReminder reminder, bool isNewReminder = true)
+        public async Task ScheduleAsync(
+            SbuReminder reminder,
+            bool isNewReminder = true,
+            CancellationToken cancellationToken = default
+        )
         {
             if (reminder.DueAt + TimeSpan.FromMilliseconds(500) <= DateTimeOffset.Now)
             {
@@ -90,7 +96,7 @@ namespace SbuBot.Services
                     SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
 
                     context.Add(reminder);
-                    await context.SaveChangesAsync();
+                    await context.SaveChangesAsync(cancellationToken);
                 }
             }
 
@@ -141,7 +147,7 @@ namespace SbuBot.Services
 
                         reminder.IsDispatched = true;
                         context.Reminders.Update(reminder);
-                        await context.SaveChangesAsync();
+                        await context.SaveChangesAsync(Bot.StoppingToken);
                     }
 
                     Logger.LogTrace("Removed internally {@Reminder}", reminder.Id);
@@ -149,7 +155,11 @@ namespace SbuBot.Services
             }
         }
 
-        public async Task RescheduleAsync(Guid id, DateTimeOffset newTimestamp)
+        public async Task RescheduleAsync(
+            Guid id,
+            DateTimeOffset newTimestamp,
+            CancellationToken cancellationToken = default
+        )
         {
             SbuReminder reminder;
 
@@ -165,7 +175,7 @@ namespace SbuBot.Services
 
                 reminder.DueAt = newTimestamp;
                 context.Reminders.Update(reminder);
-                await context.SaveChangesAsync();
+                await context.SaveChangesAsync(cancellationToken);
             }
 
             DateTimeOffset previousDueAt = reminder.DueAt;
@@ -180,7 +190,7 @@ namespace SbuBot.Services
             );
         }
 
-        public async Task UnscheduleAsync(Guid id)
+        public async Task UnscheduleAsync(Guid id, CancellationToken cancellationToken = default)
         {
             SbuReminder reminder;
 
@@ -196,7 +206,7 @@ namespace SbuBot.Services
 
                 reminder.IsDispatched = true;
                 context.Reminders.Update(reminder);
-                await context.SaveChangesAsync();
+                await context.SaveChangesAsync(cancellationToken);
             }
 
             _schedulerService.Unschedule(id);
@@ -204,7 +214,7 @@ namespace SbuBot.Services
             Logger.LogDebug("Unscheduled {@Reminder}", reminder.Id);
         }
 
-        public async Task UnscheduleAsync(Snowflake ownerId)
+        public async Task UnscheduleAsync(Snowflake ownerId, CancellationToken cancellationToken = default)
         {
             int count = 0;
 
@@ -227,7 +237,7 @@ namespace SbuBot.Services
                 SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
 
                 context.Reminders.UpdateRange(reminders.Select(r => r.Value));
-                await context.SaveChangesAsync();
+                await context.SaveChangesAsync(cancellationToken);
             }
 
             Logger.LogDebug("Unscheduled {@Count} reminders for {@Owner}", count, ownerId);

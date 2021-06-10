@@ -25,14 +25,14 @@ namespace SbuBot.Commands.TypeParsers
             {
                 await using (context.BeginYield())
                 {
-                    tag = await context.Db.Tags.FirstOrDefaultAsync(t => t.Id == guidParseResult.Value);
+                    tag = await context.Db.Tags.FirstOrDefaultAsync(t => t.Id == guidParseResult.Value, context.Bot.StoppingToken);
                 }
             }
             else
             {
                 await using (context.BeginYield())
                 {
-                    tag = await context.Db.Tags.FirstOrDefaultAsync(t => t.Name == value);
+                    tag = await context.Db.Tags.FirstOrDefaultAsync(t => t.Name == value, context.Bot.StoppingToken);
                 }
             }
 

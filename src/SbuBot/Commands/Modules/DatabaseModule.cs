@@ -13,7 +13,6 @@ using Qmmands;
 
 using SbuBot.Commands.Checks;
 using SbuBot.Commands.Checks.Parameters;
-using SbuBot.Commands.Information;
 using SbuBot.Models;
 using SbuBot.Services;
 
@@ -35,11 +34,8 @@ namespace SbuBot.Commands.Modules
             if (Utility.GetSbuColorRole(member) is { } colorRole)
                 Context.Db.ColorRoles.Add(new(colorRole, newMember.DiscordId));
 
-            await using (Context.BeginYield())
-            {
-                Context.Db.Members.Add(newMember);
-                await Context.Db.SaveChangesAsync();
-            }
+            Context.Db.Members.Add(newMember);
+            await Context.Db.SaveChangesAsync();
 
             return Reply($"{member.Mention} is now registered in the database.");
         }
@@ -82,12 +78,9 @@ namespace SbuBot.Commands.Modules
             if (owner.DiscordId == receiver.DiscordId)
                 return Reply("The given members cannot be the same");
 
-            List<SbuTag> tags;
-
-            await using (Context.BeginYield())
-            {
-                tags = await Context.Db.Tags.Where(t => t.OwnerId == owner.DiscordId).ToListAsync();
-            }
+            List<SbuTag> tags = await Context.Db.Tags
+                .Where(t => t.OwnerId == owner.DiscordId)
+                .ToListAsync(Context.Bot.StoppingToken);
 
             foreach (SbuTag tag in tags)
             {
@@ -131,7 +124,7 @@ namespace SbuBot.Commands.Modules
             );
         }
 
-        [Group("inspect"), PureGroup, RequireBotOwner]
+        [Group("inspect"), RequireBotOwner]
         [Description("Inspects a given entity's database entry.")]
         public sealed class InspectGroup : SbuModuleBase
         {

@@ -28,7 +28,10 @@ namespace SbuBot.Commands.TypeParsers
             {
                 await using (context.BeginYield())
                 {
-                    member = await context.Db.Members.FirstOrDefaultAsync(t => t.Id == guidParseResult.Value);
+                    member = await context.Db.Members.FirstOrDefaultAsync(
+                        t => t.Id == guidParseResult.Value,
+                        context.Bot.StoppingToken
+                    );
                 }
             }
             else if (await roleParser.ParseAsync(parameter, value, context) is { IsSuccessful: true } roleParseResult)
@@ -36,7 +39,8 @@ namespace SbuBot.Commands.TypeParsers
                 await using (context.BeginYield())
                 {
                     member = await context.Db.Members.FirstOrDefaultAsync(
-                        t => t.DiscordId == roleParseResult.Value.Id
+                        t => t.DiscordId == roleParseResult.Value.Id,
+                        context.Bot.StoppingToken
                     );
                 }
             }
