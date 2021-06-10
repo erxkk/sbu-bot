@@ -61,14 +61,16 @@ namespace SbuBot.Services
                 recurringCount != 0 ? timeSpan : Timeout.InfiniteTimeSpan
             );
 
+            Entry newEntry;
+
             lock (_lock)
             {
                 _linkIfNotStoppingToken(ref cancellationToken);
                 cancellationToken.Register(() => Cancel(id));
-                _scheduleEntries[id] = new(callback, timer, recurringCount, cancellationToken);
+                _scheduleEntries[id] = newEntry = new(id, callback, timer, recurringCount, cancellationToken);
             }
 
-            Logger.LogTrace("Scheduled {@Entry} to {@Timespan}", id, timeSpan);
+            Logger.LogTrace("Scheduled: {@Entry} ", newEntry);
 
             void timerCallback(object? sender)
             {
@@ -99,7 +101,7 @@ namespace SbuBot.Services
                     }
                 }
 
-                Logger.LogTrace("Dispatched {0} with {@Entry}", id, entry);
+                Logger.LogTrace("Dispatched: {@Entry}", entry);
             }
         }
 
@@ -109,7 +111,7 @@ namespace SbuBot.Services
             {
                 if (!_scheduleEntries.TryGetValue(id, out var entry))
                 {
-                    Logger.LogWarning("Could not reschedule to {@Timespan}, not found : {@Entry}", timeSpan, id);
+                    Logger.LogWarning("Could not reschedule to {@NewTimespan}, not found : {@Entry}", timeSpan, id);
 
                     return;
                 }
@@ -120,7 +122,7 @@ namespace SbuBot.Services
                 _scheduleEntries[id] = entry with { CancellationToken = cancellationToken };
             }
 
-            Logger.LogTrace("Rescheduled {0} to {1}", id, timeSpan);
+            Logger.LogTrace("Rescheduled: {@Entry} -> {@NewTimespan}", id, timeSpan);
         }
 
         public void Cancel(Guid id)
@@ -129,7 +131,7 @@ namespace SbuBot.Services
             {
                 if (!_scheduleEntries.Remove(id, out var entry))
                 {
-                    Logger.LogWarning("Could not unschedule, not found : {@Entry}", id);
+                    Logger.LogWarning("Could not cancel, not found : {@Entry}", id);
 
                     return;
                 }
@@ -138,7 +140,7 @@ namespace SbuBot.Services
                 entry.Timer.Dispose();
             }
 
-            Logger.LogTrace("Unscheduled {0}", id);
+            Logger.LogTrace("Unscheduled: {@Entry}", id);
         }
 
         private void _linkIfNotStoppingToken(ref CancellationToken cancellationToken)
@@ -152,6 +154,7 @@ namespace SbuBot.Services
         }
 
         public sealed record Entry(
+            Guid Id,
             Func<Entry, Task> Callback,
             Timer Timer,
             int RecurringCount,
