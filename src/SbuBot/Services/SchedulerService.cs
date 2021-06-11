@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
 
 using Disqord.Bot;
+
+using Kkommon;
 
 using Microsoft.Extensions.Logging;
 
@@ -32,7 +33,7 @@ namespace SbuBot.Services
         public SchedulerService(ILogger<SchedulerService> logger, DiscordBotBase bot) : base(logger, bot) { }
 
         public Guid Schedule(
-            Func<Entry, Task> callback,
+            AsyncAction<Entry> callback,
             TimeSpan timeSpan,
             int recurringCount = 0,
             CancellationToken cancellationToken = default
@@ -45,7 +46,7 @@ namespace SbuBot.Services
 
         public void Schedule(
             Guid id,
-            Func<Entry, Task> callback,
+            AsyncAction<Entry> callback,
             TimeSpan timeSpan,
             int recurringCount = 0,
             CancellationToken cancellationToken = default
@@ -155,7 +156,7 @@ namespace SbuBot.Services
 
         public sealed record Entry(
             Guid Id,
-            Func<Entry, Task> Callback,
+            AsyncAction<Entry> Callback,
             Timer Timer,
             int RecurringCount,
             CancellationToken CancellationToken = default

@@ -19,7 +19,7 @@ namespace SbuBot.Commands
         ) => Menu(
             new MaybePagedEmbed(
                 Context.Author.Id,
-                filled ? Utility.FillPages(contents, itemsPerPage) : contents,
+                filled ? SbuUtility.FillPages(contents, itemsPerPage) : contents,
                 title,
                 footer,
                 timestamp

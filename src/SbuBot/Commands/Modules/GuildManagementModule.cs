@@ -55,7 +55,7 @@ namespace SbuBot.Commands.Modules
                     is not ITextChannel pinArchive)
                     throw new RequiredCacheException("Could not find required pin archive channel.");
 
-                switch (Utility.TryCreatePinMessage(message))
+                switch (SbuUtility.TryCreatePinMessage(message))
                 {
                     case Result<LocalMessage, string>.Success pinMessage:
                         await pinArchive.SendMessageAsync(pinMessage);
@@ -102,7 +102,7 @@ namespace SbuBot.Commands.Modules
                     if (Context.Bot.StoppingToken.IsCancellationRequested)
                         throw new OperationCanceledException();
 
-                    switch (Utility.TryCreatePinMessage(message))
+                    switch (SbuUtility.TryCreatePinMessage(message))
                     {
                         case Result<LocalMessage, string>.Success pinMessage:
                             await pinArchive.SendMessageAsync(pinMessage);
@@ -141,7 +141,7 @@ namespace SbuBot.Commands.Modules
                 HashSet<ICustomEmoji> emoteSet = additionalEmotes.ToHashSet();
                 emoteSet.Add(emote);
 
-                int slots = Utility.CustomEmojiSlots(Context.Guild);
+                int slots = SbuUtility.CustomEmojiSlots(Context.Guild);
 
                 if (Context.Guild.Emojis.Count(e => !e.Value.IsAnimated) + emoteSet.Count(e => !e.IsAnimated) > slots)
                     return Reply("This would exceed the maximum amount of emotes.");

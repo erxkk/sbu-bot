@@ -31,7 +31,7 @@ namespace SbuBot.Commands.TypeParsers
                         : TypeParser<IMessage>.Failure("Could not find message.");
                 }
 
-                if (Utility.TryParseMessageLink(value, out var idPair))
+                if (SbuUtility.TryParseMessageLink(value, out var idPair))
                 {
                     await using (_ = context.BeginYield())
                     {

@@ -54,7 +54,7 @@ namespace SbuBot.Commands
 
         public async Task InitializeAsync()
         {
-            Invoker ??= await Db.Members.Include(m => m.ColorRole).FirstAsync(m => m.DiscordId == Author.Id);
+            Invoker ??= await Db.Members.Include(m => m.ColorRole).FirstOrDefaultAsync(m => m.DiscordId == Author.Id);
         }
     }
 }

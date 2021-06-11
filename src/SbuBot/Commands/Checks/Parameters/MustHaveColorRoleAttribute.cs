@@ -37,7 +37,7 @@ namespace SbuBot.Commands.Checks.Parameters
                     throw new ArgumentNullException(nameof(argument));
             }
 
-            return Utility.GetSbuColorRole(member) is { } == MustHaveColorRole
+            return SbuUtility.GetSbuColorRole(member) is { } == MustHaveColorRole
                 ? ParameterCheckAttribute.Success()
                 : ParameterCheckAttribute.Failure(
                     string.Format("The given member must {0}have a color role.", MustHaveColorRole ? "" : "no ")

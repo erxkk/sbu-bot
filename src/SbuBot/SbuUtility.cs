@@ -11,7 +11,7 @@ using Kkommon;
 
 namespace SbuBot
 {
-    public static class Utility
+    public static class SbuUtility
     {
         public static readonly Regex IMAGE_FILE_REGEX = new(@"\.(gif|jpeg|jpg|png)$", RegexOptions.Compiled);
 
@@ -53,7 +53,7 @@ namespace SbuBot
             {
                 Attachment attachment = message.Attachments[0];
 
-                if (Utility.IMAGE_FILE_REGEX.IsMatch(attachment.Filename))
+                if (SbuUtility.IMAGE_FILE_REGEX.IsMatch(attachment.Filename))
                     embed.WithImageUrl(attachment.Url);
                 else
                     embed.AddField("Unknown-Media-Type-Url", Markdown.Link("Click here!", attachment.Url), true);

@@ -31,7 +31,7 @@ namespace SbuBot.Commands.Modules
         {
             SbuMember newMember = new(member);
 
-            if (Utility.GetSbuColorRole(member) is { } colorRole)
+            if (SbuUtility.GetSbuColorRole(member) is { } colorRole)
                 Context.Db.ColorRoles.Add(new(colorRole, newMember.DiscordId));
 
             Context.Db.Members.Add(newMember);
@@ -48,7 +48,7 @@ namespace SbuBot.Commands.Modules
 
             IEnumerable<(IMember m, IRole?)> userRolePairs = Context.Guild.Members.Values
                 .Where(m => !m.IsBot)
-                .Select(m => (m, Utility.GetSbuColorRole(m)));
+                .Select(m => (m, SbuUtility.GetSbuColorRole(m)));
 
             foreach ((IMember member, IRole? role) in userRolePairs)
             {
