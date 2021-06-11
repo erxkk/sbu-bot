@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace SbuBot.Migrations
 {
-    public partial class StableDependencies : Migration
+    public partial class FixedMigration : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -12,8 +12,7 @@ namespace SbuBot.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    DiscordId = table.Column<ulong>(type: "numeric(20,0)", nullable: false),
-                    InheritanceCode = table.Column<string>(type: "text", nullable: false)
+                    DiscordId = table.Column<ulong>(type: "numeric(20,0)", nullable: false)
                 },
                 constraints: table =>
                 {

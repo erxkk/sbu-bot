@@ -10,8 +10,8 @@ using SbuBot.Models;
 namespace SbuBot.Migrations
 {
     [DbContext(typeof(SbuDbContext))]
-    [Migration("20210606154839_StableDependencies")]
-    partial class StableDependencies
+    [Migration("20210611142729_FixedMigration")]
+    partial class FixedMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -52,10 +52,6 @@ namespace SbuBot.Migrations
 
                     b.Property<ulong>("DiscordId")
                         .HasColumnType("numeric(20,0)");
-
-                    b.Property<string>("InheritanceCode")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.HasKey("Id");
 

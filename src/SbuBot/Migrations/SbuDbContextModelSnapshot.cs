@@ -51,10 +51,6 @@ namespace SbuBot.Migrations
                     b.Property<ulong>("DiscordId")
                         .HasColumnType("numeric(20,0)");
 
-                    b.Property<string>("InheritanceCode")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.HasKey("Id");
 
                     b.HasIndex("DiscordId")

@@ -27,11 +27,7 @@ namespace SbuBot.Commands.Modules
             public async Task<DiscordCommandResult> EchoAsync(
                 [Description("The message to reply with.")]
                 string message
-            )
-            {
-                await Context.Message.DeleteAsync();
-                return Reply(message);
-            }
+            ) => Reply(message);
 
             [Command, RequireBotOwner]
             [Description(

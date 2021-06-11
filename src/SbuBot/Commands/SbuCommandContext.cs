@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
 using Disqord.Bot;
@@ -55,6 +56,13 @@ namespace SbuBot.Commands
         public async Task InitializeAsync()
         {
             Invoker ??= await Db.Members.Include(m => m.ColorRole).FirstOrDefaultAsync(m => m.DiscordId == Author.Id);
+
+            if (Invoker is null)
+            {
+                Invoker = new(CurrentMember);
+                Db.Members.Add(Invoker);
+                await Db.SaveChangesAsync();
+            }
         }
     }
 }
