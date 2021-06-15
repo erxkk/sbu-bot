@@ -141,7 +141,7 @@ namespace SbuBot
                 .Members.Values.FirstOrDefault(m => m.RoleIds.Contains(sbuColorRole.Id));
         }
 
-        public static bool IsSbuColorRole(IRole sbuColorRole)
+        public static bool IsSbuColorRole(IRole sbuColorRole, SbuBot bot)
         {
             if (sbuColorRole is null)
                 throw new ArgumentNullException(nameof(sbuColorRole));
@@ -149,16 +149,7 @@ namespace SbuBot
             if (sbuColorRole.GuildId != SbuGlobals.Guild.SELF)
                 throw new ArgumentException("SbuColorRole must be from SBU.", nameof(sbuColorRole));
 
-            // TODO: remove dependency on gateway client
-            if (sbuColorRole is not IGatewayEntity)
-                throw new ArgumentException("SbuColorRole must be of type IGatewayEntity.", nameof(sbuColorRole));
-
-            if (!sbuColorRole.GetGatewayClient()
-                .GetGuild(sbuColorRole.GuildId)
-                .Roles.TryGetValue(SbuGlobals.Role.Color.SELF, out var colorSeparatorRole))
-                throw new RequiredCacheException("Could not find required color separator role in cache.");
-
-            return sbuColorRole.Position < colorSeparatorRole.Position && sbuColorRole.Color is { };
+            return sbuColorRole.Position < bot.ColorRoleSeparator.Position && sbuColorRole.Color is { };
         }
     }
 }

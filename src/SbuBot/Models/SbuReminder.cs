@@ -81,7 +81,7 @@ namespace SbuBot.Models
         internal SbuReminder(
             Guid id,
             Guid? ownerId,
-            Guid guildId,
+            Guid? guildId,
             Snowflake channelId,
             Snowflake messageId,
             string? message,
@@ -116,13 +116,13 @@ namespace SbuBot.Models
                 builder.HasOne(r => r.Owner)
                     .WithMany(m => m.Reminders)
                     .HasForeignKey(r => r.OwnerId)
-                    .HasPrincipalKey(m => m.DiscordId)
+                    .HasPrincipalKey(m => m.Id)
                     .OnDelete(DeleteBehavior.Cascade);
 
                 builder.HasOne(r => r.Guild)
                     .WithMany(g => g.Reminders)
                     .HasForeignKey(r => r.GuildId)
-                    .HasPrincipalKey(g => g.DiscordId)
+                    .HasPrincipalKey(g => g.Id)
                     .OnDelete(DeleteBehavior.Cascade);
             }
         }

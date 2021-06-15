@@ -1,9 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 using Disqord.Bot;
 using Disqord.Gateway;
+
+using Kkommon;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,6 +20,7 @@ namespace SbuBot.Commands
         private SbuDbContext? _dbContext;
         private SbuGuild? _sbuGuild;
         private SbuMember? _sbuMember;
+        private readonly List<AsyncAction<SbuCommandContext>> _actions = new(1);
 
         public override SbuBot Bot => (base.Bot as SbuBot)!;
         public SbuDbContext Db => _dbContext ??= Services.GetRequiredService<SbuDbContext>();
@@ -109,5 +113,21 @@ namespace SbuBot.Commands
             ),
             context => context.Bot.ExecuteAsync(context)
         );
+
+        public void AttachCleanUp(AsyncAction<SbuCommandContext> action)
+        {
+            if (action == null)
+                throw new ArgumentNullException(nameof(action));
+
+            _actions.Add(action);
+        }
+
+        public override async ValueTask DisposeAsync()
+        {
+            foreach (AsyncAction<SbuCommandContext> func in _actions)
+                await func(this);
+
+            await base.DisposeAsync();
+        }
     }
 }

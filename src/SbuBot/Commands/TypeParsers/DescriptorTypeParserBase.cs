@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -7,8 +8,7 @@ using SbuBot.Commands.Descriptors;
 
 namespace SbuBot.Commands.TypeParsers
 {
-    public abstract class DescriptorTypeParserBase<T> : SbuTypeParserBase<T>
-        where T : struct, IDescriptor
+    public abstract class DescriptorTypeParserBase<T> : SbuTypeParserBase<T> where T : struct, IDescriptor
     {
         protected abstract ValueTask<TypeParserResult<T>> ParseAsync(
             Parameter parameter,
@@ -23,7 +23,11 @@ namespace SbuBot.Commands.TypeParsers
             SbuCommandContext context
         ) => ParseAsync(
             parameter,
-            value.Split(SbuGlobals.DESCRIPTOR_SEPARATOR).Select(s => s.Trim()).ToArray(),
+            value.Split(
+                    SbuGlobals.DESCRIPTOR_SEPARATOR,
+                    StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries
+                )
+                .ToArray(),
             context
         );
     }

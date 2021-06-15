@@ -25,11 +25,22 @@ namespace SbuBot.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<int?>("Color")
+                        .HasColumnType("integer");
+
                     b.Property<ulong>("DiscordId")
                         .HasColumnType("numeric(20,0)");
 
-                    b.Property<ulong?>("OwnerId")
-                        .HasColumnType("numeric(20,0)");
+                    b.Property<Guid?>("GuildId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<Guid?>("OwnerId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -42,7 +53,7 @@ namespace SbuBot.Migrations
                     b.ToTable("ColorRoles");
                 });
 
-            modelBuilder.Entity("SbuBot.Models.SbuMember", b =>
+            modelBuilder.Entity("SbuBot.Models.SbuGuild", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -55,6 +66,29 @@ namespace SbuBot.Migrations
 
                     b.HasIndex("DiscordId")
                         .IsUnique();
+
+                    b.ToTable("Guilds");
+                });
+
+            modelBuilder.Entity("SbuBot.Models.SbuMember", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<ulong>("DiscordId")
+                        .HasColumnType("numeric(20,0)");
+
+                    b.Property<Guid?>("GuildId")
+                        .IsRequired()
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DiscordId")
+                        .IsUnique();
+
+                    b.HasIndex("GuildId");
 
                     b.ToTable("Members");
                 });
@@ -74,8 +108,8 @@ namespace SbuBot.Migrations
                     b.Property<long>("DueAt")
                         .HasColumnType("bigint");
 
-                    b.Property<bool>("IsDispatched")
-                        .HasColumnType("boolean");
+                    b.Property<Guid?>("GuildId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Message")
                         .HasMaxLength(1024)
@@ -84,10 +118,12 @@ namespace SbuBot.Migrations
                     b.Property<ulong>("MessageId")
                         .HasColumnType("numeric(20,0)");
 
-                    b.Property<ulong?>("OwnerId")
-                        .HasColumnType("numeric(20,0)");
+                    b.Property<Guid?>("OwnerId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("GuildId");
 
                     b.HasIndex("OwnerId");
 
@@ -105,55 +141,100 @@ namespace SbuBot.Migrations
                         .HasMaxLength(2048)
                         .HasColumnType("character varying(2048)");
 
+                    b.Property<Guid?>("GuildId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(128)
                         .HasColumnType("character varying(128)");
 
-                    b.Property<ulong?>("OwnerId")
-                        .HasColumnType("numeric(20,0)");
+                    b.Property<Guid?>("OwnerId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Name")
-                        .IsUnique();
+                    b.HasIndex("GuildId");
 
                     b.HasIndex("OwnerId");
+
+                    b.HasIndex("Name", "GuildId")
+                        .IsUnique();
 
                     b.ToTable("Tags");
                 });
 
             modelBuilder.Entity("SbuBot.Models.SbuColorRole", b =>
                 {
+                    b.HasOne("SbuBot.Models.SbuGuild", "Guild")
+                        .WithMany("ColorRoles")
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("SbuBot.Models.SbuMember", "Owner")
                         .WithOne("ColorRole")
                         .HasForeignKey("SbuBot.Models.SbuColorRole", "OwnerId")
-                        .HasPrincipalKey("SbuBot.Models.SbuMember", "DiscordId")
                         .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Guild");
 
                     b.Navigation("Owner");
                 });
 
+            modelBuilder.Entity("SbuBot.Models.SbuMember", b =>
+                {
+                    b.HasOne("SbuBot.Models.SbuGuild", "Guild")
+                        .WithMany("Members")
+                        .HasForeignKey("GuildId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .IsRequired();
+
+                    b.Navigation("Guild");
+                });
+
             modelBuilder.Entity("SbuBot.Models.SbuReminder", b =>
                 {
+                    b.HasOne("SbuBot.Models.SbuGuild", "Guild")
+                        .WithMany("Reminders")
+                        .HasForeignKey("GuildId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
                     b.HasOne("SbuBot.Models.SbuMember", "Owner")
                         .WithMany("Reminders")
                         .HasForeignKey("OwnerId")
-                        .HasPrincipalKey("DiscordId")
                         .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("Guild");
 
                     b.Navigation("Owner");
                 });
 
             modelBuilder.Entity("SbuBot.Models.SbuTag", b =>
                 {
+                    b.HasOne("SbuBot.Models.SbuGuild", "Guild")
+                        .WithMany("Tags")
+                        .HasForeignKey("GuildId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("SbuBot.Models.SbuMember", "Owner")
                         .WithMany("Tags")
                         .HasForeignKey("OwnerId")
-                        .HasPrincipalKey("DiscordId")
                         .OnDelete(DeleteBehavior.SetNull);
 
+                    b.Navigation("Guild");
+
                     b.Navigation("Owner");
+                });
+
+            modelBuilder.Entity("SbuBot.Models.SbuGuild", b =>
+                {
+                    b.Navigation("ColorRoles");
+
+                    b.Navigation("Members");
+
+                    b.Navigation("Reminders");
+
+                    b.Navigation("Tags");
                 });
 
             modelBuilder.Entity("SbuBot.Models.SbuMember", b =>

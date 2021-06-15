@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using HumanTimeParser.Core.Parsing;
@@ -22,11 +23,7 @@ namespace SbuBot.Commands.TypeParsers
         )
         {
             if (values.Length != 2)
-            {
-                return TypeParser<ReminderDescriptor>.Failure(
-                    $"One separator `{SbuGlobals.DESCRIPTOR_SEPARATOR}` is expected, found {values.Length}."
-                );
-            }
+                return TypeParser<ReminderDescriptor>.Failure($"Two parts were expected, found {values.Length}.");
 
             if (values[2].Length > SbuReminder.MAX_MESSAGE_LENGTH)
             {

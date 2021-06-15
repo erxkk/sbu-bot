@@ -10,7 +10,7 @@ namespace SbuBot.Commands.Checks.Parameters
     public sealed class MustBeColorRoleAttribute : SbuParameterCheckAttribute
     {
         protected override ValueTask<CheckResult> CheckAsync(object argument, SbuCommandContext context)
-            => SbuUtility.IsSbuColorRole((argument as IRole)!)
+            => SbuUtility.IsSbuColorRole((argument as IRole)!, context.Bot)
                 ? ParameterCheckAttribute.Success()
                 : ParameterCheckAttribute.Failure("The given role must be a color role.");
 

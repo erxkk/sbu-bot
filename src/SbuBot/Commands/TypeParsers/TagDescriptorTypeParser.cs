@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using Qmmands;
@@ -17,11 +18,7 @@ namespace SbuBot.Commands.TypeParsers
         )
         {
             if (values.Length != 2)
-            {
-                return TypeParser<TagDescriptor>.Failure(
-                    $"One separator `{SbuGlobals.DESCRIPTOR_SEPARATOR}` is expected, found {values.Length}."
-                );
-            }
+                return TypeParser<TagDescriptor>.Failure($"Two parts were expected, found {values.Length}.");
 
             switch (SbuTag.IsValidTagName(values[0]))
             {

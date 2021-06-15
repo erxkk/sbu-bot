@@ -46,7 +46,7 @@ namespace SbuBot.Models
 
 #region EFCore
 
-        internal SbuColorRole(Guid id, Snowflake discordId, Guid? ownerId, Guid guildId) : base(id)
+        internal SbuColorRole(Guid id, Snowflake discordId, Guid? ownerId, Guid? guildId) : base(id)
         {
             DiscordId = discordId;
             OwnerId = ownerId;
@@ -67,13 +67,13 @@ namespace SbuBot.Models
                 builder.HasOne(cr => cr.Owner)
                     .WithOne(m => m.ColorRole)
                     .HasForeignKey<SbuColorRole>(cr => cr.OwnerId)
-                    .HasPrincipalKey<SbuMember>(m => m.DiscordId)
+                    .HasPrincipalKey<SbuMember>(m => m.Id)
                     .OnDelete(DeleteBehavior.SetNull);
 
                 builder.HasOne(cr => cr.Guild)
                     .WithMany(m => m.ColorRoles)
                     .HasForeignKey(cr => cr.OwnerId)
-                    .HasPrincipalKey(m => m.DiscordId)
+                    .HasPrincipalKey(m => m.Id)
                     .OnDelete(DeleteBehavior.SetNull);
             }
         }

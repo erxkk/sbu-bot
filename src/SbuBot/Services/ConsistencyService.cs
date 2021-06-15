@@ -62,7 +62,7 @@ namespace SbuBot.Services
                 }
             }
 
-            Logger.LogDebug("Inserted: {@Guild}", new { Id = e.GuildId });
+            Logger.LogDebug("Guild inserted: {@Guild}", new { Id = e.GuildId });
             await base.OnJoinedGuild(e);
         }
 
@@ -80,10 +80,11 @@ namespace SbuBot.Services
                 }
 
                 if (await context.ColorRoles
-                    .FirstOrDefaultAsync(
-                        cr => cr.GuildId == guild.Id,
-                        Bot.StoppingToken
-                    ) is { } role)
+                        .FirstOrDefaultAsync(
+                            cr => cr.GuildId == guild.Id,
+                            Bot.StoppingToken
+                        ) is { } role
+                )
                 {
                     role.GuildId = null;
                     context.ColorRoles.Update(role);
@@ -104,7 +105,7 @@ namespace SbuBot.Services
                 await context.SaveChangesAsync(Bot.StoppingToken);
             }
 
-            Logger.LogDebug("Removed: {@Guild}", new { DiscordId = e.GuildId });
+            Logger.LogDebug("Guild removed: {@Guild}", new { Id = e.GuildId });
             await base.OnLeftGuild(e);
         }
 
@@ -130,7 +131,7 @@ namespace SbuBot.Services
                 }
             }
 
-            Logger.LogDebug("Inserted: {@Member}", new { e.Member.Id, Guild = e.GuildId });
+            Logger.LogDebug("Member inserted: {@Member}", new { e.Member.Id, Guild = e.GuildId });
 
             await base.OnMemberJoined(e);
         }
@@ -193,7 +194,7 @@ namespace SbuBot.Services
 
             Logger.LogDebug(
                 "Color role assigned, established owner ship: {@ColorRole}",
-                new { Id = addedRoleId, Owner = e.MemberId, Guild = e.NewMember.GuildId }
+                new { Id = addedRoleId, Guild = e.NewMember.GuildId, Owner = e.MemberId }
             );
 
             await base.OnMemberUpdated(e);
@@ -245,8 +246,7 @@ namespace SbuBot.Services
                 await context.SaveChangesAsync(Bot.StoppingToken);
             }
 
-            Logger.LogDebug("Removed: {@Member}", new { e.User.Id, Guild = e.GuildId });
-
+            Logger.LogDebug("Member removed: {@Member}", new { e.User.Id, Guild = e.GuildId });
             await base.OnMemberLeft(e);
         }
 
@@ -272,8 +272,7 @@ namespace SbuBot.Services
                 }
             }
 
-            Logger.LogDebug("Removed: {@ColorRole}", new { Id = e.RoleId, Guild = e.GuildId });
-
+            Logger.LogDebug("Role removed: {@ColorRole}", new { Id = e.RoleId, Guild = e.GuildId });
             await base.OnRoleDeleted(e);
         }
     }

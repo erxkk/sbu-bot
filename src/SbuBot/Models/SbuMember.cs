@@ -59,25 +59,25 @@ namespace SbuBot.Models
                 builder.HasOne(m => m.Guild)
                     .WithMany(g => g.Members)
                     .HasForeignKey(g => g.GuildId)
-                    .HasPrincipalKey(m => m.DiscordId)
+                    .HasPrincipalKey(m => m.Id)
                     .OnDelete(DeleteBehavior.SetNull);
 
                 builder.HasOne(m => m.ColorRole)
                     .WithOne(cr => cr.Owner)
                     .HasForeignKey<SbuColorRole>(cr => cr.OwnerId)
-                    .HasPrincipalKey<SbuMember>(m => m.DiscordId)
+                    .HasPrincipalKey<SbuMember>(m => m.Id)
                     .OnDelete(DeleteBehavior.SetNull);
 
                 builder.HasMany(m => m.Tags)
                     .WithOne(t => t.Owner)
                     .HasForeignKey(t => t.OwnerId)
-                    .HasPrincipalKey(m => m.DiscordId)
+                    .HasPrincipalKey(m => m.Id)
                     .OnDelete(DeleteBehavior.SetNull);
 
                 builder.HasMany(m => m.Reminders)
                     .WithOne(r => r.Owner)
                     .HasForeignKey(r => r.OwnerId)
-                    .HasPrincipalKey(m => m.DiscordId)
+                    .HasPrincipalKey(m => m.Id)
                     .OnDelete(DeleteBehavior.Cascade);
             }
         }

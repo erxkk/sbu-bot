@@ -71,8 +71,7 @@ namespace SbuBot.Services
         public async Task ScheduleAsync(
             SbuReminder reminder,
             bool isNewReminder = true,
-            CancellationToken cancellationToken = default,
-            CancellationToken stoppingToken = default
+            CancellationToken cancellationToken = default
         )
         {
             _linkIfNotStoppingToken(ref cancellationToken);
@@ -93,7 +92,7 @@ namespace SbuBot.Services
                     SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
 
                     context.Add(reminder);
-                    await context.SaveChangesAsync(cancellationToken);
+                    await context.SaveChangesAsync();
                 }
             }
 
@@ -107,7 +106,7 @@ namespace SbuBot.Services
                 reminderCallback,
                 reminder.DueAt - DateTimeOffset.Now,
                 0,
-                stoppingToken
+                cancellationToken
             );
 
             Logger.LogDebug("Scheduled {@Reminder}", reminder.Id);

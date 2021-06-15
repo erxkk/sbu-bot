@@ -36,7 +36,7 @@ namespace SbuBot.Commands.TypeParsers
                 }
             }
             else if (await roleParser.ParseAsync(parameter, value, context) is { IsSuccessful: true } roleParseResult
-                && SbuUtility.IsSbuColorRole(roleParseResult.Value)
+                && SbuUtility.IsSbuColorRole(roleParseResult.Value, context.Bot)
             )
             {
                 await using (context.BeginYield())

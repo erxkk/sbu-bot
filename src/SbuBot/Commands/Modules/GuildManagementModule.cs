@@ -20,6 +20,7 @@ using Qmmands;
 
 using SbuBot.Commands.Checks;
 using SbuBot.Commands.Information;
+using SbuBot.Models;
 
 namespace SbuBot.Commands.Modules
 {
@@ -123,6 +124,102 @@ namespace SbuBot.Commands.Modules
                 }
 
                 return Reply("Finished.");
+            }
+        }
+
+        // TODO: TEST
+        [Group("request")]
+        [Description("A group of commands for requesting access to restricted channels or permissions.")]
+        public sealed class RequestGroup : SbuModuleBase
+        {
+            [Command("vote"), Cooldown(1, 1, CooldownMeasure.Hours, CooldownBucketType.Member)]
+            [Description(
+                "Grants the senate submission role and waits to automatically add vote emotes to the next message."
+            )]
+            public async Task VoteAsync()
+            {
+                InteractivityExtension interactivity = Context.Bot.GetInteractivity();
+                MessageReceivedEventArgs waitMessageResult;
+
+                await Context.Author.GrantRoleAsync(SbuGlobals.Role.Perm.SENATE);
+                Context.AttachCleanUp(ctx => ctx.Author.RevokeRoleAsync(SbuGlobals.Role.Perm.SENATE));
+
+                await using (_ = Context.BeginYield())
+                {
+                    waitMessageResult = await interactivity.WaitForMessageAsync(
+                        SbuGlobals.Channel.SENATE,
+                        e => e.Member.Id == Context.Author.Id
+                    );
+                }
+
+                if (waitMessageResult is { })
+                {
+                    await waitMessageResult.Message.AddReactionAsync(new LocalCustomEmoji(SbuGlobals.Emote.Vote.UP));
+                    await waitMessageResult.Message.AddReactionAsync(new LocalCustomEmoji(SbuGlobals.Emote.Vote.DOWN));
+                    await waitMessageResult.Message.AddReactionAsync(new LocalCustomEmoji(SbuGlobals.Emote.Vote.NONE));
+                }
+
+                await Reply(
+                    $"You did not send a message in {Mention.TextChannel(SbuGlobals.Channel.SENATE)} in time."
+                );
+            }
+
+            [Command("quote"), Cooldown(1, 1, CooldownMeasure.Hours, CooldownBucketType.Member)]
+            [Description("Grants the shit-sbu-says submission role.")]
+            public async Task QuoteAsync()
+            {
+                InteractivityExtension interactivity = Context.Bot.GetInteractivity();
+                MessageReceivedEventArgs waitMessageResult;
+
+                await Context.Author.GrantRoleAsync(SbuGlobals.Role.Perm.SHIT_SBU_SAYS);
+                Context.AttachCleanUp(ctx => ctx.Author.RevokeRoleAsync(SbuGlobals.Role.Perm.SHIT_SBU_SAYS));
+
+                await using (_ = Context.BeginYield())
+                {
+                    waitMessageResult = await interactivity.WaitForMessageAsync(
+                        SbuGlobals.Channel.Based.SHIT_SBU_SAYS,
+                        e => e.Member.Id == Context.Author.Id
+                    );
+                }
+
+                if (waitMessageResult is null)
+                {
+                    await Reply(
+                        string.Format(
+                            "You did not send a message in {0} in time.",
+                            Mention.TextChannel(SbuGlobals.Channel.Based.SHIT_SBU_SAYS)
+                        )
+                    );
+                }
+            }
+
+            [Command("announce"), Cooldown(1, 1, CooldownMeasure.Hours, CooldownBucketType.Member)]
+            [Description("Grants the announcement submission role.")]
+            public async Task AnnounceAsync()
+            {
+                InteractivityExtension interactivity = Context.Bot.GetInteractivity();
+                MessageReceivedEventArgs waitMessageResult;
+
+                await Context.Author.GrantRoleAsync(SbuGlobals.Role.Perm.ANNOUNCEMENT);
+                Context.AttachCleanUp(ctx => ctx.Author.RevokeRoleAsync(SbuGlobals.Role.Perm.ANNOUNCEMENT));
+
+                await using (_ = Context.BeginYield())
+                {
+                    waitMessageResult = await interactivity.WaitForMessageAsync(
+                        SbuGlobals.Channel.ANNOUNCEMENTS,
+                        e => e.Member.Id == Context.Author.Id
+                    );
+                }
+
+                if (waitMessageResult is null)
+                {
+                    await Reply(
+                        string.Format(
+                            "You did not send a message in {0} in time.",
+                            Mention.TextChannel(SbuGlobals.Channel.ANNOUNCEMENTS)
+                        )
+                    );
+                }
             }
         }
 

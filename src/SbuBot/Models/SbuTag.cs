@@ -36,7 +36,7 @@ namespace SbuBot.Models
 
 #region EFCore
 
-        internal SbuTag(Guid id, Guid? ownerId, Guid guildId, string name, string content) : base(id)
+        internal SbuTag(Guid id, Guid? ownerId, Guid? guildId, string name, string content) : base(id)
         {
             OwnerId = ownerId;
             GuildId = guildId;
@@ -60,13 +60,13 @@ namespace SbuBot.Models
                 builder.HasOne(t => t.Owner)
                     .WithMany(m => m.Tags)
                     .HasForeignKey(t => t.OwnerId)
-                    .HasPrincipalKey(m => m.DiscordId)
+                    .HasPrincipalKey(m => m.Id)
                     .OnDelete(DeleteBehavior.SetNull);
 
                 builder.HasOne(t => t.Guild)
                     .WithMany(m => m.Tags)
                     .HasForeignKey(t => t.GuildId)
-                    .HasPrincipalKey(m => m.DiscordId)
+                    .HasPrincipalKey(m => m.Id)
                     .OnDelete(DeleteBehavior.SetNull);
             }
         }
