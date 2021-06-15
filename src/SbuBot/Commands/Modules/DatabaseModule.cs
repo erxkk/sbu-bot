@@ -29,10 +29,11 @@ namespace SbuBot.Commands.Modules
             IMember member
         )
         {
-            SbuMember newMember = new(member);
+            SbuGuild guild = await Context.GetOrCreateGuildAsync();
+            SbuMember newMember = new(member, guild.Id);
 
             if (SbuUtility.GetSbuColorRole(member) is { } colorRole)
-                Context.Db.ColorRoles.Add(new(colorRole, newMember.DiscordId));
+                Context.Db.ColorRoles.Add(new(colorRole, guild.Id, newMember.Id));
 
             Context.Db.Members.Add(newMember);
             await Context.Db.SaveChangesAsync();
@@ -50,15 +51,18 @@ namespace SbuBot.Commands.Modules
                 .Where(m => !m.IsBot)
                 .Select(m => (m, SbuUtility.GetSbuColorRole(m)));
 
+            SbuGuild guild = await Context.GetOrCreateGuildAsync();
+
             foreach ((IMember member, IRole? role) in userRolePairs)
             {
-                Context.Db.Members.Add(new(member));
+                SbuMember dbMember = new(member, guild.Id);
+                Context.Db.Members.Add(dbMember);
                 userCount++;
 
                 if (role is null)
                     continue;
 
-                Context.Db.ColorRoles.Add(new(role, member.Id));
+                Context.Db.ColorRoles.Add(new(role, guild.Id, dbMember.Id));
                 roleCount++;
             }
 
@@ -79,12 +83,12 @@ namespace SbuBot.Commands.Modules
                 return Reply("The given members cannot be the same");
 
             List<SbuTag> tags = await Context.Db.Tags
-                .Where(t => t.OwnerId == owner.DiscordId)
+                .Where(t => t.OwnerId == owner.Id)
                 .ToListAsync(Context.Bot.StoppingToken);
 
             foreach (SbuTag tag in tags)
             {
-                tag.OwnerId = receiver.DiscordId;
+                tag.OwnerId = receiver.Id;
             }
 
             bool hadRole = false;
@@ -92,7 +96,7 @@ namespace SbuBot.Commands.Modules
             if (owner.ColorRole is { })
             {
                 hadRole = true;
-                SbuColorRole role = Context.Invoker.ColorRole!;
+                SbuColorRole role = (await Context.GetOrCreateMemberAsync()).ColorRole!;
 
                 if (receiver.ColorRole is null)
                 {
@@ -101,7 +105,7 @@ namespace SbuBot.Commands.Modules
 
                     await Context.Guild.GrantRoleAsync(receiver.DiscordId, role.DiscordId);
 
-                    role.OwnerId = receiver.DiscordId;
+                    role.OwnerId = receiver.Id;
                 }
                 else
                 {
@@ -145,7 +149,7 @@ namespace SbuBot.Commands.Modules
                 new LocalEmbed()
                     .WithTitle($"Role : ({role.DiscordId}) {role.Id}")
                     .WithDescription(role.ToString())
-                    .AddField("Owner", role.OwnerId is { } ? Mention.User(role.OwnerId.Value) : "None")
+                    .AddField("Owner", role.OwnerId is { } ? Mention.User(role.Owner!.DiscordId) : "None")
             );
 
             [Command]
@@ -155,7 +159,7 @@ namespace SbuBot.Commands.Modules
                 new LocalEmbed()
                     .WithTitle($"Tag : {tag.Id}")
                     .WithDescription($"Name: {tag.Name}\n{Markdown.CodeBlock(tag.Content)}")
-                    .AddField("Owner", tag.OwnerId is { } ? Mention.User(tag.OwnerId.Value) : "None")
+                    .AddField("Owner", tag.OwnerId is { } ? Mention.User(tag.Owner!.DiscordId) : "None")
             );
 
             [Command]
@@ -166,7 +170,7 @@ namespace SbuBot.Commands.Modules
                 new LocalEmbed()
                     .WithTitle($"Reminder : {reminder.Id}")
                     .WithDescription("\nreminder.Message")
-                    .AddField("Owner", Mention.User(reminder.OwnerId.Value), true)
+                    .AddField("Owner", Mention.User(reminder.Owner!.DiscordId), true)
                     .AddField("CreatedAt", reminder.CreatedAt, true)
                     .AddField("DueAt", reminder.DueAt, true)
             );

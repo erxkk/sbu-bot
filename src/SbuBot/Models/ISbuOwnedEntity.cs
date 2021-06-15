@@ -1,9 +1,10 @@
-using Disqord;
+using System;
 
 namespace SbuBot.Models
 {
     public interface ISbuOwnedEntity : ISbuEntity
     {
-        public Snowflake? OwnerId { get; set; }
+        public Guid? OwnerId { get; set; }
+        public SbuMember? Owner { get; }
     }
 }

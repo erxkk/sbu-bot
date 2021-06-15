@@ -13,8 +13,8 @@ namespace SbuBot.Commands.Checks.Parameters
 
         public AuthorMustOwnAttribute(bool authorMustOwn = true) => AuthorMustOwn = authorMustOwn;
 
-        protected override ValueTask<CheckResult> CheckAsync(object argument, SbuCommandContext context)
-            => ((argument as ISbuOwnedEntity)!.OwnerId == context.Author.Id) == AuthorMustOwn
+        protected override async ValueTask<CheckResult> CheckAsync(object argument, SbuCommandContext context)
+            => ((argument as ISbuOwnedEntity)!.OwnerId == (await context.GetOrCreateMemberAsync()).Id) == AuthorMustOwn
                 ? ParameterCheckAttribute.Success()
                 : ParameterCheckAttribute.Failure(
                     string.Format(

@@ -13,7 +13,7 @@ namespace SbuBot.Commands.TypeParsers
 {
     public sealed class ReminderTypeParser : SbuTypeParserBase<SbuReminder>
     {
-        public static readonly string[] ACCEPTED_KEYWORDS = new[] { "last" };
+        public static readonly string[] ACCEPTED_KEYWORDS = { "last" };
 
         protected override async ValueTask<TypeParserResult<SbuReminder>> ParseAsync(
             Parameter parameter,
@@ -22,11 +22,14 @@ namespace SbuBot.Commands.TypeParsers
         )
         {
             ReminderService service = context.Services.GetRequiredService<ReminderService>();
+            SbuMember owner = await context.GetOrCreateMemberAsync();
+            SbuGuild guild = await context.GetOrCreateGuildAsync();
 
             if (value.Equals("last", StringComparison.OrdinalIgnoreCase))
             {
-                return service.CurrentReminders.Values.FirstOrDefault(r => r.OwnerId == context.Author.Id)
-                    is { } queriedReminder
+                return service.CurrentReminders.Values.FirstOrDefault(
+                    r => r.OwnerId == owner.Id && r.GuildId == guild.Id
+                ) is { } queriedReminder
                     ? TypeParser<SbuReminder>.Success(queriedReminder)
                     : TypeParser<SbuReminder>.Failure("Could not find reminder.");
             }

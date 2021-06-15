@@ -28,43 +28,115 @@ namespace SbuBot.Services
 
         protected override async ValueTask OnGuildAvailable(GuildAvailableEventArgs e)
         {
-            if (e.GuildId != SbuGlobals.Guild.SELF)
-                return;
-
-            await Bot.Chunker.ChunkAsync(e.Guild, Bot.StoppingToken);
-
-            await base.OnGuildAvailable(e);
-        }
-
-        protected override async ValueTask OnMemberJoined(MemberJoinedEventArgs e)
-        {
-            if (e.GuildId != SbuGlobals.Guild.SELF)
-                return;
-
             using (IServiceScope scope = Bot.Services.CreateScope())
             {
                 SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
 
-                if (await context.Members.FirstOrDefaultAsync(
-                    m => m.DiscordId == e.Member.Id,
+                if (await context.Guilds.FirstOrDefaultAsync(
+                    g => g.DiscordId == e.GuildId,
                     Bot.StoppingToken
                 ) is null)
                 {
-                    context.Members.Update(new(e.Member.Id));
+                    context.Guilds.Add(new(e.Guild));
                     await context.SaveChangesAsync(Bot.StoppingToken);
                 }
             }
 
-            Logger.LogDebug("Inserted: {@Member}", e.Member.Id);
+            await Bot.Chunker.ChunkAsync(e.Guild, Bot.StoppingToken);
+            await base.OnGuildAvailable(e);
+        }
+
+        protected override async ValueTask OnJoinedGuild(JoinedGuildEventArgs e)
+        {
+            using (IServiceScope scope = Bot.Services.CreateScope())
+            {
+                SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
+
+                if (await context.Guilds.FirstOrDefaultAsync(
+                    g => g.DiscordId == e.GuildId,
+                    Bot.StoppingToken
+                ) is null)
+                {
+                    context.Guilds.Add(new(e.Guild));
+                    await context.SaveChangesAsync(Bot.StoppingToken);
+                }
+            }
+
+            Logger.LogDebug("Inserted: {@Guild}", new { Id = e.GuildId });
+            await base.OnJoinedGuild(e);
+        }
+
+        protected override async ValueTask OnLeftGuild(LeftGuildEventArgs e)
+        {
+            using (IServiceScope scope = Bot.Services.CreateScope())
+            {
+                SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
+                ReminderService service = scope.ServiceProvider.GetRequiredService<ReminderService>();
+
+                if (await context.Guilds.FirstOrDefaultAsync(g => g.DiscordId == e.GuildId) is not { } guild)
+                {
+                    await base.OnLeftGuild(e);
+                    return;
+                }
+
+                if (await context.ColorRoles
+                    .FirstOrDefaultAsync(
+                        cr => cr.GuildId == guild.Id,
+                        Bot.StoppingToken
+                    ) is { } role)
+                {
+                    role.GuildId = null;
+                    context.ColorRoles.Update(role);
+                }
+
+                List<SbuTag> tags = await context.Tags
+                    .Where(t => t.GuildId == guild.Id)
+                    .ToListAsync(Bot.StoppingToken);
+
+                foreach (SbuTag tag in tags)
+                {
+                    tag.GuildId = null;
+                }
+
+                context.Tags.UpdateRange(tags);
+
+                await service.CancelAsync(q => q.Where(r => r.Value.GuildId == guild.Id));
+                await context.SaveChangesAsync(Bot.StoppingToken);
+            }
+
+            Logger.LogDebug("Removed: {@Guild}", new { DiscordId = e.GuildId });
+            await base.OnLeftGuild(e);
+        }
+
+        protected override async ValueTask OnMemberJoined(MemberJoinedEventArgs e)
+        {
+            using (IServiceScope scope = Bot.Services.CreateScope())
+            {
+                SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
+
+                if (await context.Guilds.FirstOrDefaultAsync(g => g.DiscordId == e.GuildId) is not { } guild)
+                {
+                    await base.OnMemberJoined(e);
+                    return;
+                }
+
+                if (await context.Members.FirstOrDefaultAsync(
+                    m => m.DiscordId == e.Member.Id && m.GuildId == guild.Id,
+                    Bot.StoppingToken
+                ) is null)
+                {
+                    context.Members.Update(new(e.Member, guild.Id));
+                    await context.SaveChangesAsync(Bot.StoppingToken);
+                }
+            }
+
+            Logger.LogDebug("Inserted: {@Member}", new { e.Member.Id, Guild = e.GuildId });
 
             await base.OnMemberJoined(e);
         }
 
         protected override async ValueTask OnMemberUpdated(MemberUpdatedEventArgs e)
         {
-            if (e.NewMember.GuildId != SbuGlobals.Guild.SELF)
-                return;
-
             if (e.OldMember is null)
                 return;
 
@@ -91,13 +163,28 @@ namespace SbuBot.Services
             {
                 SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
 
-                if (await context.ColorRoles.FirstOrDefaultAsync(r => r.DiscordId == addedRoleId) is { } role)
+                if (await context.Guilds.FirstOrDefaultAsync(g => g.DiscordId == e.NewMember.GuildId) is not { } guild)
                 {
-                    role.OwnerId = e.MemberId;
+                    await base.OnMemberUpdated(e);
+                    return;
+                }
+
+                if (await context.Members.FirstOrDefaultAsync(
+                    m => m.DiscordId == e.MemberId && m.GuildId == guild.Id,
+                    Bot.StoppingToken
+                ) is not { } member)
+                {
+                    member = new(e.NewMember, guild.Id);
+                    context.Members.Update(member);
+                }
+
+                if (await context.ColorRoles.FirstOrDefaultAsync(r => r.GuildId == guild.Id) is { } role)
+                {
+                    role.OwnerId = member.Id;
                 }
                 else
                 {
-                    role = new(addedRole, e.MemberId);
+                    role = new(addedRole, member.Id, guild.Id);
                     context.ColorRoles.Add(role);
                 }
 
@@ -106,7 +193,7 @@ namespace SbuBot.Services
 
             Logger.LogDebug(
                 "Color role assigned, established owner ship: {@ColorRole}",
-                new { Id = addedRoleId, Owner = e.MemberId }
+                new { Id = addedRoleId, Owner = e.MemberId, Guild = e.NewMember.GuildId }
             );
 
             await base.OnMemberUpdated(e);
@@ -114,16 +201,28 @@ namespace SbuBot.Services
 
         protected override async ValueTask OnMemberLeft(MemberLeftEventArgs e)
         {
-            if (e.GuildId != SbuGlobals.Guild.SELF)
-                return;
-
             using (IServiceScope scope = Bot.Services.CreateScope())
             {
                 SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
-                SchedulerService service = scope.ServiceProvider.GetRequiredService<SchedulerService>();
+                ReminderService service = scope.ServiceProvider.GetRequiredService<ReminderService>();
+
+                if (await context.Guilds.FirstOrDefaultAsync(g => g.DiscordId == e.GuildId) is not { } guild)
+                {
+                    await base.OnMemberLeft(e);
+                    return;
+                }
+
+                if (await context.Members.FirstOrDefaultAsync(
+                    m => m.DiscordId == e.User.Id && m.GuildId == guild.Id,
+                    Bot.StoppingToken
+                ) is not { } member)
+                {
+                    await base.OnMemberLeft(e);
+                    return;
+                }
 
                 if (await context.ColorRoles.FirstOrDefaultAsync(
-                    m => m.OwnerId == e.User.Id,
+                    m => m.OwnerId == member.Id && m.GuildId == guild.Id,
                     Bot.StoppingToken
                 ) is { } role)
                 {
@@ -132,12 +231,7 @@ namespace SbuBot.Services
                 }
 
                 List<SbuTag> tags = await context.Tags
-                    .Where(t => t.OwnerId == e.User.Id)
-                    .ToListAsync(Bot.StoppingToken);
-
-                List<SbuReminder> reminders = await context.Reminders
-                    .Where(t => t.OwnerId == e.User.Id)
-                    .Where(t => !t.IsDispatched)
+                    .Where(t => t.OwnerId == member.Id && t.GuildId == guild.Id)
                     .ToListAsync(Bot.StoppingToken);
 
                 foreach (SbuTag tag in tags)
@@ -145,28 +239,19 @@ namespace SbuBot.Services
                     tag.OwnerId = null;
                 }
 
-                foreach (SbuReminder reminder in reminders)
-                {
-                    service.Cancel(reminder.Id);
-                    reminder.IsDispatched = true;
-                }
-
-                context.Reminders.UpdateRange(reminders);
                 context.Tags.UpdateRange(tags);
 
+                await service.CancelAsync(q => q.Where(r => r.Value.OwnerId == member.Id));
                 await context.SaveChangesAsync(Bot.StoppingToken);
             }
 
-            Logger.LogDebug("Removed: {@Member}", e.User.Id);
+            Logger.LogDebug("Removed: {@Member}", new { e.User.Id, Guild = e.GuildId });
 
             await base.OnMemberLeft(e);
         }
 
         protected override async ValueTask OnRoleDeleted(RoleDeletedEventArgs e)
         {
-            if (e.GuildId != SbuGlobals.Guild.SELF)
-                return;
-
             if (e.Role.Position >= Bot.ColorRoleSeparator.Position)
                 return;
 
@@ -187,7 +272,7 @@ namespace SbuBot.Services
                 }
             }
 
-            Logger.LogDebug("Removed: {@ColorRole}", e.RoleId);
+            Logger.LogDebug("Removed: {@ColorRole}", new { Id = e.RoleId, Guild = e.GuildId });
 
             await base.OnRoleDeleted(e);
         }

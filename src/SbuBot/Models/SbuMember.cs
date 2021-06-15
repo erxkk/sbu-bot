@@ -10,11 +10,18 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace SbuBot.Models
 {
-    public sealed class SbuMember : SbuEntityBase, ISbuDiscordEntity
+    public sealed class SbuMember : SbuEntityBase, ISbuDiscordEntity, ISbuGuildEntity
     {
         public Snowflake DiscordId { get; set; }
+        public Guid? GuildId { get; set; }
 
         // nav properties
+        [HideOnSerialize, NotLogged]
+        public SbuGuild? OwnedGuild { get; }
+
+        [HideOnSerialize, NotLogged]
+        public SbuGuild Guild { get; }
+
         [HideOnSerialize, NotLogged]
         public SbuColorRole? ColorRole { get; }
 
@@ -24,13 +31,21 @@ namespace SbuBot.Models
         [HideOnSerialize, NotLogged]
         public List<SbuReminder> Reminders { get; } = new();
 
-        public SbuMember(Snowflake discordId) => DiscordId = discordId;
+        public SbuMember(Snowflake discordId, Guid guildId)
+        {
+            DiscordId = discordId;
+            GuildId = guildId;
+        }
 
-        public SbuMember(IMember member) => DiscordId = member.Id;
+        public SbuMember(IMember member, Guid guildId)
+        {
+            DiscordId = member.Id;
+            GuildId = guildId;
+        }
 
 #region EFCore
 
-        internal SbuMember(Guid id, Snowflake discordId) : base(id) => DiscordId = discordId;
+        internal SbuMember(Guid id, Snowflake discordId, Guid? guildId) : base(id) => DiscordId = discordId;
 
         internal sealed class EntityTypeConfiguration : IEntityTypeConfiguration<SbuMember>
         {
@@ -40,6 +55,12 @@ namespace SbuBot.Models
                 builder.HasIndex(m => m.DiscordId).IsUnique();
 
                 builder.Property(m => m.DiscordId);
+
+                builder.HasOne(m => m.Guild)
+                    .WithMany(g => g.Members)
+                    .HasForeignKey(g => g.GuildId)
+                    .HasPrincipalKey(m => m.DiscordId)
+                    .OnDelete(DeleteBehavior.SetNull);
 
                 builder.HasOne(m => m.ColorRole)
                     .WithOne(cr => cr.Owner)

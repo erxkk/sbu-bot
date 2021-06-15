@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -33,7 +32,7 @@ namespace SbuBot.Commands.Modules
         [Description("Claims the given tag if it has no owner.")]
         public async Task<DiscordCommandResult> ClaimTagAsync([MustBeOwned(false)] SbuTag tag)
         {
-            tag.OwnerId = Context.Author.Id;
+            tag.OwnerId = (await Context.GetOrCreateMemberAsync()).Id;
             Context.Db.Tags.Update(tag);
             await Context.Db.SaveChangesAsync();
 
@@ -55,7 +54,15 @@ namespace SbuBot.Commands.Modules
                     ) is { }
                 ) return Reply("A tag with same name already exists.");
 
-                Context.Db.Tags.Add(new(Context.Author.Id, tagDescriptor.Name, tagDescriptor.Content));
+                Context.Db.Tags.Add(
+                    new(
+                        (await Context.GetOrCreateMemberAsync()).Id,
+                        (await Context.GetOrCreateGuildAsync()).Id,
+                        tagDescriptor.Name,
+                        tagDescriptor.Content
+                    )
+                );
+
                 await Context.Db.SaveChangesAsync();
 
                 return Reply("Tag created.");
@@ -129,7 +136,12 @@ namespace SbuBot.Commands.Modules
                 }
 
                 Context.Db.Tags.Add(
-                    new(Context.Author.Id, waitNameResult.Message.Content, waitContentResult.Message.Content)
+                    new(
+                        (await Context.GetOrCreateMemberAsync()).Id,
+                        (await Context.GetOrCreateGuildAsync()).Id,
+                        waitNameResult.Message.Content,
+                        waitContentResult.Message.Content
+                    )
                 );
 
                 await Context.Db.SaveChangesAsync();
@@ -151,11 +163,11 @@ namespace SbuBot.Commands.Modules
                 SbuMember? owner = null
             )
             {
-                owner ??= Context.Invoker;
+                owner ??= await Context.GetOrCreateMemberAsync();
                 bool notAuthor = owner.DiscordId != Context.Author.Id;
 
                 List<SbuTag> tags = await Context.Db.Tags
-                    .Where(t => t.OwnerId == owner.DiscordId)
+                    .Where(t => t.OwnerId == owner.Id)
                     .ToListAsync(Context.Bot.StoppingToken);
 
                 if (tags.Count == 0)
@@ -175,7 +187,7 @@ namespace SbuBot.Commands.Modules
             [Description("Lists all tags.")]
             public async Task<DiscordCommandResult> ListAllAsync()
             {
-                List<SbuTag> tags = await Context.Db.Tags.ToListAsync(Context.Bot.StoppingToken);
+                List<SbuTag> tags = await Context.Db.Tags.Include(t => t.Owner).ToListAsync(Context.Bot.StoppingToken);
 
                 if (tags.Count == 0)
                     return Reply("No tags found.");
@@ -185,7 +197,7 @@ namespace SbuBot.Commands.Modules
                         t => string.Format(
                             "**Name:** {0}\n**Owner:** {1}\n**Content:** {2}",
                             t.Name,
-                            t.OwnerId is { } ? Mention.User(t.OwnerId.Value) : "None",
+                            t.OwnerId is { } ? Mention.User(t.Owner!.DiscordId) : "None",
                             t.Content
                         )
                     )
@@ -210,7 +222,7 @@ namespace SbuBot.Commands.Modules
                 if (tag is null)
                     return Reply("No tag found.");
 
-                if (tag.OwnerId != Context.Invoker.DiscordId)
+                if (tag.OwnerId != (await Context.GetOrCreateMemberAsync()).Id)
                     return Reply("You must be the owner of this tag.");
 
                 tag.Content = tagDescriptor.Content;
@@ -302,8 +314,10 @@ namespace SbuBot.Commands.Modules
                     || !waitConfirmResult.Message.Content.Equals("yes", StringComparison.OrdinalIgnoreCase))
                     return Reply("Aborted.");
 
+                SbuMember owner = await Context.GetOrCreateMemberAsync();
+
                 List<SbuTag> tags = await Context.Db.Tags
-                    .Where(t => t.OwnerId == Context.Author.Id)
+                    .Where(t => t.OwnerId == owner.Id)
                     .ToListAsync(Context.Bot.StoppingToken);
 
                 Context.Db.Tags.RemoveRange(tags);
@@ -326,7 +340,7 @@ namespace SbuBot.Commands.Modules
                 SbuTag tag
             )
             {
-                tag.OwnerId = receiver.DiscordId;
+                tag.OwnerId = receiver.Id;
                 Context.Db.Tags.Update(tag);
                 await Context.Db.SaveChangesAsync();
 
@@ -361,13 +375,15 @@ namespace SbuBot.Commands.Modules
                     || !waitConfirmResult.Message.Content.Equals("yes", StringComparison.OrdinalIgnoreCase))
                     return Reply("Aborted.");
 
+                SbuMember owner = await Context.GetOrCreateMemberAsync();
+
                 List<SbuTag> tags = await Context.Db.Tags
-                    .Where(t => t.OwnerId == Context.Author.Id)
+                    .Where(t => t.OwnerId == owner.Id)
                     .ToListAsync(Context.Bot.StoppingToken);
 
                 foreach (SbuTag dbTag in tags)
                 {
-                    dbTag.OwnerId = receiver.DiscordId;
+                    dbTag.OwnerId = receiver.Id;
                 }
 
                 Context.Db.Tags.UpdateRange(tags);

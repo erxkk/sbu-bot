@@ -1,5 +1,5 @@
 using System;
-using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Threading.Tasks;
 
 using Disqord.Bot;
@@ -15,12 +15,11 @@ namespace SbuBot.Commands
     public sealed class SbuCommandContext : DiscordGuildCommandContext
     {
         private SbuDbContext? _dbContext;
+        private SbuGuild? _sbuGuild;
+        private SbuMember? _sbuMember;
 
         public override SbuBot Bot => (base.Bot as SbuBot)!;
-
         public SbuDbContext Db => _dbContext ??= Services.GetRequiredService<SbuDbContext>();
-
-        public SbuMember Invoker { get; private set; }
 
         public SbuCommandContext(
             DiscordBotBase bot,
@@ -29,9 +28,9 @@ namespace SbuBot.Commands
             IGatewayUserMessage message,
             CachedTextChannel channel,
             IServiceProvider services,
-            SbuMember invoker = null!
+            SbuMember? sbuMember = null
         ) : base(bot, prefix, input, message, channel, services)
-            => Invoker = invoker;
+            => _sbuMember = sbuMember;
 
         public SbuCommandContext(
             DiscordBotBase bot,
@@ -40,29 +39,75 @@ namespace SbuBot.Commands
             IGatewayUserMessage message,
             CachedTextChannel channel,
             IServiceScope serviceScope,
-            SbuMember invoker = null!
+            SbuMember? sbuMember = null
         ) : base(bot, prefix, input, message, channel, serviceScope)
-            => Invoker = invoker;
+            => _sbuMember = sbuMember;
 
-        public SbuCommandContext(DiscordGuildCommandContext context, SbuMember invoker = null!) : base(
+        public SbuCommandContext(DiscordGuildCommandContext context, SbuMember? sbuMember = null) : base(
             context.Bot,
             context.Prefix,
             context.Input,
             context.Message,
             context.Channel,
             context.Services
-        ) => Invoker = invoker;
+        ) => _sbuMember = sbuMember;
 
-        public async Task InitializeAsync()
+        public async Task<SbuMember> GetOrCreateMemberAsync(
+            Func<IQueryable<SbuMember>, IQueryable<SbuMember>>? additionalConstraints = null
+        )
         {
-            Invoker ??= await Db.Members.Include(m => m.ColorRole).FirstOrDefaultAsync(m => m.DiscordId == Author.Id);
+            IQueryable<SbuMember> query = Db.Members;
 
-            if (Invoker is null)
+            if (additionalConstraints is { })
             {
-                Invoker = new(CurrentMember);
-                Db.Members.Add(Invoker);
+                query = additionalConstraints(query);
+            }
+
+            _sbuMember ??= await query.FirstOrDefaultAsync(m => m.DiscordId == Author.Id);
+
+            if (_sbuMember is null)
+            {
+                _sbuMember = new(Author, (await GetOrCreateGuildAsync()).Id);
+                Db.Members.Add(_sbuMember);
                 await Db.SaveChangesAsync();
             }
+
+            return _sbuMember;
         }
+
+        public async Task<SbuGuild> GetOrCreateGuildAsync(
+            Func<IQueryable<SbuGuild>, IQueryable<SbuGuild>>? additionalConstraints = null
+        )
+        {
+            IQueryable<SbuGuild> query = Db.Guilds;
+
+            if (additionalConstraints is { })
+            {
+                query = additionalConstraints(query);
+            }
+
+            _sbuGuild ??= await query.FirstOrDefaultAsync(m => m.DiscordId == Author.Id);
+
+            if (_sbuMember is null)
+            {
+                _sbuGuild = new(Guild);
+                Db.Guilds.Add(_sbuGuild);
+                await Db.SaveChangesAsync();
+            }
+
+            return _sbuGuild;
+        }
+
+        public void RepostAsAlias(string alias) => Bot.Queue.Post(
+            new SbuCommandContext(
+                Bot,
+                Prefix,
+                alias,
+                new ProxyMessage(Message, alias, Author, Channel.Id),
+                Channel,
+                Services
+            ),
+            context => context.Bot.ExecuteAsync(context)
+        );
     }
 }

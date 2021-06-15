@@ -1,9 +1,13 @@
+using System;
+
 namespace SbuBot
 {
     public static class SbuGlobals
     {
         public const char DESCRIPTOR_SEPARATOR = '|';
         public const string DEFAULT_PREFIX = "sbu";
+
+        public static readonly Version VERSION = new(0, 2, 0);
 
         public static readonly string[] RESERVED_KEYWORDS =
         {

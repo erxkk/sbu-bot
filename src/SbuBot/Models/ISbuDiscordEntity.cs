@@ -4,6 +4,6 @@ namespace SbuBot.Models
 {
     public interface ISbuDiscordEntity : ISbuEntity
     {
-        public Snowflake DiscordId { get; }
+        public Snowflake DiscordId { get; set; }
     }
 }

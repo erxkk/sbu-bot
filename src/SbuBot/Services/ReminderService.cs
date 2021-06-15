@@ -6,8 +6,6 @@ using System.Threading.Tasks;
 
 using Disqord;
 using Disqord.Bot;
-using Disqord.Bot.Hosting;
-using Disqord.Gateway;
 using Disqord.Rest;
 
 using Microsoft.EntityFrameworkCore;
@@ -54,10 +52,7 @@ namespace SbuBot.Services
             using (IServiceScope scope = Bot.Services.CreateScope())
             {
                 SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
-
-                notDispatchedReminders = await context.Reminders
-                    .Where(r => !r.IsDispatched)
-                    .ToListAsync(stoppingToken);
+                notDispatchedReminders = await context.Reminders.ToListAsync(stoppingToken);
             }
 
             await Client.WaitUntilReadyAsync(stoppingToken);
@@ -153,8 +148,7 @@ namespace SbuBot.Services
                     {
                         SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
 
-                        reminder.IsDispatched = true;
-                        context.Reminders.Update(reminder);
+                        context.Reminders.Remove(reminder);
                         await context.SaveChangesAsync(entry.CancellationToken);
                     }
 
@@ -213,8 +207,7 @@ namespace SbuBot.Services
             {
                 SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
 
-                reminder.IsDispatched = true;
-                context.Reminders.Update(reminder);
+                context.Reminders.Remove(reminder);
                 await context.SaveChangesAsync();
             }
 
@@ -223,19 +216,22 @@ namespace SbuBot.Services
             Logger.LogDebug("Unscheduled: {@Reminder}", reminder.Id);
         }
 
-        public async Task CancelForAsync(Snowflake ownerId)
+        public async Task CancelAsync(
+            Func<IEnumerable<KeyValuePair<Guid, SbuReminder>>, IEnumerable<KeyValuePair<Guid, SbuReminder>>> query
+        )
         {
+            if (query == null)
+                throw new ArgumentNullException(nameof(query));
+
             int count = 0;
 
-            IEnumerable<KeyValuePair<Guid, SbuReminder>> reminders = CurrentReminders
-                .Where(r => r.Value.OwnerId == ownerId);
+            IEnumerable<KeyValuePair<Guid, SbuReminder>> reminders = query(CurrentReminders);
 
             lock (_lock)
             {
-                foreach ((Guid id, SbuReminder reminder) in reminders)
+                foreach ((Guid id, SbuReminder _) in reminders)
                 {
                     count++;
-                    reminder.IsDispatched = true;
                     _currentReminders.Remove(id);
                     _schedulerService.Cancel(id);
                 }
@@ -245,11 +241,11 @@ namespace SbuBot.Services
             {
                 SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
 
-                context.Reminders.UpdateRange(reminders.Select(r => r.Value));
+                context.Reminders.RemoveRange(reminders.Select(r => r.Value));
                 await context.SaveChangesAsync();
             }
 
-            Logger.LogDebug("Unscheduled: {@Reminders}", new { Amount = count, Owner = ownerId });
+            Logger.LogDebug("Unscheduled: {@Reminders}", new { Amount = count });
         }
 
         private void _linkIfNotStoppingToken(ref CancellationToken cancellationToken)

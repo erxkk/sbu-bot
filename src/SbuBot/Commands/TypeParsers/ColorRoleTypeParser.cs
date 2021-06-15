@@ -20,6 +20,7 @@ namespace SbuBot.Commands.TypeParsers
         )
         {
             SbuColorRole? role = null;
+            SbuGuild guild = await context.GetOrCreateGuildAsync();
 
             TypeParser<Guid> guidParser = context.Bot.Commands.GetTypeParser<Guid>();
             TypeParser<IRole> roleParser = context.Bot.Commands.GetTypeParser<IRole>();
@@ -29,7 +30,7 @@ namespace SbuBot.Commands.TypeParsers
                 await using (context.BeginYield())
                 {
                     role = await context.Db.ColorRoles.FirstOrDefaultAsync(
-                        t => t.Id == guidParseResult.Value,
+                        r => r.Id == guidParseResult.Value && r.GuildId == guild.Id,
                         context.Bot.StoppingToken
                     );
                 }
@@ -41,7 +42,7 @@ namespace SbuBot.Commands.TypeParsers
                 await using (context.BeginYield())
                 {
                     role = await context.Db.ColorRoles.FirstOrDefaultAsync(
-                        t => t.DiscordId == roleParseResult.Value.Id,
+                        r => r.DiscordId == roleParseResult.Value.Id && r.GuildId == guild.Id,
                         context.Bot.StoppingToken
                     );
                 }

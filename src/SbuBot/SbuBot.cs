@@ -24,10 +24,8 @@ namespace SbuBot
         private readonly SbuBotConfiguration _config;
         public bool IsLocked { get; set; }
 
-        public CachedRole ColorRoleSeparator => this.GetRole(
-            SbuGlobals.Guild.SELF,
-            SbuGlobals.Role.Color.SELF
-        );
+        public CachedGuild Sbu => this.GetGuild(SbuGlobals.Guild.SELF);
+        public CachedRole ColorRoleSeparator => this.GetRole(SbuGlobals.Guild.SELF, SbuGlobals.Role.Color.SELF);
 
         public SbuBot(
             SbuBotConfiguration config,
@@ -68,7 +66,10 @@ namespace SbuBot
 
         protected override ValueTask<bool> CheckMessageAsync(IGatewayUserMessage message)
         {
-            if (message.Author.Id != SbuGlobals.Bot.OWNER && (!_config.IsProduction || IsLocked))
+            if (message.Author.Id == SbuGlobals.Bot.OWNER)
+                return ValueTask.FromResult(true);
+
+            if (!_config.IsProduction || IsLocked)
                 return ValueTask.FromResult(false);
 
             return base.CheckMessageAsync(message);
@@ -82,12 +83,6 @@ namespace SbuBot
         ) => new SbuCommandContext(
             (base.CreateCommandContext(prefix, input, message, channel) as DiscordGuildCommandContext)!
         );
-
-        protected override async ValueTask<bool> BeforeExecutedAsync(DiscordCommandContext context)
-        {
-            await (context as SbuCommandContext)!.InitializeAsync();
-            return await base.BeforeExecutedAsync(context);
-        }
 
         public override ValueTask<bool> IsOwnerAsync(Snowflake userId) => new(userId == SbuGlobals.Bot.OWNER);
 
@@ -104,8 +99,7 @@ namespace SbuBot
                     commandBuilder.Priority -= (commandBuilder.Parameters[0].Type == typeof(string) ? 2 : 1);
 
                 // assign remarks dynamically on descriptors to allow for constant integer stringification lmao
-                // [Remarks("literal" + constantNonString)] will not work unless the value is specified as string as
-                // well, although the string should be pasted upon compilation
+                // [Remarks("literal" + constantNonString)] will not work unless the value is a const string
                 foreach (ParameterBuilder parameterBuilder in commandBuilder.Parameters
                     .Where(p => p.Type.IsAssignableTo(typeof(IDescriptor)))
                 )

@@ -3,20 +3,19 @@ using System.Linq;
 
 using Destructurama.Attributed;
 
-using Disqord;
-
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace SbuBot.Models
 {
-    public sealed class SbuTag : SbuEntityBase, ISbuOwnedEntity
+    public sealed class SbuTag : SbuEntityBase, ISbuOwnedEntity, ISbuGuildEntity
     {
         public const int MIN_NAME_LENGTH = 3;
         public const int MAX_NAME_LENGTH = 128;
         public const int MAX_CONTENT_LENGTH = 2048;
 
-        public Snowflake? OwnerId { get; set; }
+        public Guid? OwnerId { get; set; }
+        public Guid? GuildId { get; set; }
         public string Name { get; }
         public string Content { get; set; }
 
@@ -24,18 +23,23 @@ namespace SbuBot.Models
         [HideOnSerialize, NotLogged]
         public SbuMember? Owner { get; }
 
-        public SbuTag(Snowflake ownerId, string name, string content)
+        [HideOnSerialize, NotLogged]
+        public SbuGuild? Guild { get; }
+
+        public SbuTag(Guid ownerId, Guid guildId, string name, string content)
         {
             OwnerId = ownerId;
+            GuildId = guildId;
             Name = name;
             Content = content;
         }
 
 #region EFCore
 
-        internal SbuTag(Guid id, Snowflake? ownerId, string name, string content) : base(id)
+        internal SbuTag(Guid id, Guid? ownerId, Guid guildId, string name, string content) : base(id)
         {
             OwnerId = ownerId;
+            GuildId = guildId;
             Name = name;
             Content = content;
         }
@@ -46,15 +50,22 @@ namespace SbuBot.Models
             {
                 builder.HasKey(t => t.Id);
                 builder.HasIndex(t => t.OwnerId);
-                builder.HasIndex(t => t.Name).IsUnique();
+                builder.HasIndex(t => new { t.Name, t.GuildId }).IsUnique();
 
                 builder.Property(t => t.OwnerId);
+                builder.Property(t => t.GuildId);
                 builder.Property(t => t.Name).HasMaxLength(SbuTag.MAX_NAME_LENGTH);
                 builder.Property(t => t.Content).HasMaxLength(SbuTag.MAX_CONTENT_LENGTH).IsRequired();
 
                 builder.HasOne(t => t.Owner)
                     .WithMany(m => m.Tags)
                     .HasForeignKey(t => t.OwnerId)
+                    .HasPrincipalKey(m => m.DiscordId)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                builder.HasOne(t => t.Guild)
+                    .WithMany(m => m.Tags)
+                    .HasForeignKey(t => t.GuildId)
                     .HasPrincipalKey(m => m.DiscordId)
                     .OnDelete(DeleteBehavior.SetNull);
             }
@@ -80,7 +91,7 @@ namespace SbuBot.Models
                 > SbuTag.MAX_NAME_LENGTH => ValidNameType.TooLong,
                 _ => SbuGlobals.RESERVED_KEYWORDS.Any(rn => rn.Equals(name, StringComparison.OrdinalIgnoreCase))
                     ? ValidNameType.Reserved
-                    : ValidNameType.Valid
+                    : ValidNameType.Valid,
             };
         }
 

@@ -10,5 +10,14 @@ namespace SbuBot.Extensions
     {
         public static LocalEmbed WithCurrentTimestamp(this LocalEmbed @this)
             => @this.WithTimestamp(DateTimeOffset.Now);
+
+        public static LocalEmbed AddInlineField(this LocalEmbed @this, string name, string content)
+            => @this.AddField(name, content, true);
+
+        public static LocalEmbed AddInlineField(this LocalEmbed @this, string name, object content)
+            => @this.AddField(name, content, true);
+
+        public static LocalEmbed AddBlankInlineField(this LocalEmbed @this)
+            => @this.AddBlankField(true);
     }
 }

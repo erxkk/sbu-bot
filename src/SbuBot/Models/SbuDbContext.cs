@@ -20,6 +20,7 @@ namespace SbuBot.Models
         private readonly SbuBotConfiguration _configuration;
 
 #nullable disable
+        public DbSet<SbuGuild> Guilds { get; set; }
         public DbSet<SbuMember> Members { get; set; }
         public DbSet<SbuColorRole> ColorRoles { get; set; }
         public DbSet<SbuTag> Tags { get; set; }

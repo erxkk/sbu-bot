@@ -24,7 +24,7 @@ namespace SbuBot.Commands.Modules
         {
             [Command]
             [Description("Replies with the given message.")]
-            public async Task<DiscordCommandResult> EchoAsync(
+            public DiscordCommandResult Echo(
                 [Description("The message to reply with.")]
                 string message
             ) => Reply(message);
@@ -122,67 +122,58 @@ namespace SbuBot.Commands.Modules
             [Description(
                 "Sends a given proxy command, or `ping` if not specified, as a given author in a given channel."
             )]
-            public async Task DoAsync(
+            public void Do(
                 [Description("The proxy author.")] IMember member,
                 [Description("The proxy channel.")] ITextChannel channel,
                 [Description("The proxy command.")] string command = "ping"
-            )
-            {
-                var ctx = new SbuCommandContext(
+            ) => Context.Bot.Queue.Post(
+                new SbuCommandContext(
                     Context.Bot,
                     Context.Prefix,
                     command,
                     new ProxyMessage(Context.Message, command, member, channel.Id),
                     Context.Channel,
                     Context.Services
-                );
-
-                await ctx.InitializeAsync();
-                Context.Bot.Queue.Post(ctx, context => context.Bot.ExecuteAsync(context));
-            }
+                ),
+                context => context.Bot.ExecuteAsync(context)
+            );
 
             [Command("as")]
             [Description("Sends a given proxy command, or `ping` if not specified, as a given author.")]
-            public async Task DoAsUserAsync(
+            public void DoAsUser(
                 [Description("The proxy author.")] IMember member,
                 [Description("The proxy command.")] string command = "ping"
-            )
-            {
-                var ctx = new SbuCommandContext(
+            ) => Context.Bot.Queue.Post(
+                new SbuCommandContext(
                     Context.Bot,
                     Context.Prefix,
                     command,
                     new ProxyMessage(Context.Message, command, member),
                     Context.Channel,
                     Context.Services
-                );
-
-                await ctx.InitializeAsync();
-                Context.Bot.Queue.Post(ctx, context => context.Bot.ExecuteAsync(context));
-            }
+                ),
+                context => context.Bot.ExecuteAsync(context)
+            );
 
             [Command("in")]
             [Description("Sends a given proxy command, or `ping` if not specified, in a given channel.")]
-            public async Task DoInChannelAsync(
+            public void DoInChannel(
                 [Description("The proxy channel.")] ITextChannel channel,
                 [Description("The proxy command.")] string command = "ping"
-            )
-            {
-                var ctx = new SbuCommandContext(
+            ) => Context.Bot.Queue.Post(
+                new SbuCommandContext(
                     Context.Bot,
                     Context.Prefix,
                     command,
                     new ProxyMessage(Context.Message, command, proxyChannelId: channel.Id),
                     Context.Channel,
                     Context.Services
-                );
-
-                await ctx.InitializeAsync();
-                Context.Bot.Queue.Post(ctx, context => context.Bot.ExecuteAsync(context));
-            }
+                ),
+                context => context.Bot.ExecuteAsync(context)
+            );
         }
 
-        [Command("lock")]
+        [Command("lock"), RequireBotOwner]
         [Description("Sets the bot lock state to the given state, or switches it if no state is specified.")]
         public DiscordCommandResult Lock(
             [OverrideDefault("!state")][Description("THe new lock state to set the bot to.")]

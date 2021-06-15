@@ -34,15 +34,14 @@ namespace SbuBot.Commands.Checks.Parameters
                             }
                         )
                         : string.Format(
-                            "The {0} must not be owned, but is currently owned by {1}.",
+                            "The {0} must not be owned, but is currently owned by somebody else.",
                             argument switch
                             {
                                 SbuColorRole => "role",
                                 SbuTag => "tag",
                                 SbuReminder => "reminder",
                                 _ => "entity",
-                            },
-                            Mention.User(ownedEntity.OwnerId!.Value)
+                            }
                         )
                 );
         }

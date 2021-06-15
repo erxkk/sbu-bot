@@ -13,12 +13,7 @@ namespace SbuBot
         public SbuBotConfiguration(IConfiguration configuration)
         {
             Environment = configuration["environment"];
-
-            IsProduction = string.Equals(
-                configuration["environment"],
-                "Production",
-                StringComparison.OrdinalIgnoreCase
-            );
+            IsProduction = string.Equals(Environment, "Production", StringComparison.OrdinalIgnoreCase);
 
             DbConnectionString = string.Format(
                 "Host={0};Database={1};Username={2};Password={3};Port={4};",

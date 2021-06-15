@@ -12,6 +12,7 @@ using Kkommon.Extensions.AsyncLinq;
 using Qmmands;
 
 using SbuBot.Commands.Information;
+using SbuBot.Extensions;
 
 namespace SbuBot.Commands.Modules
 {
@@ -22,6 +23,19 @@ namespace SbuBot.Commands.Modules
     [Description("A collection of commands for help and general server/member/bot information.")]
     public sealed class InfoModule : SbuModuleBase
     {
+        [Command("about")]
+        public DiscordCommandResult About() => Reply(
+            new LocalEmbed()
+                .WithTitle("Sbu-Bot")
+                .WithDescription("Bot for management for the sbu server.")
+                .AddInlineField("Default Prefix", SbuGlobals.DEFAULT_PREFIX)
+                .AddInlineField("Version", SbuGlobals.VERSION)
+                .AddInlineField(
+                    "Written in",
+                    $"{Markdown.Link("Disqord", "https://github.com/quahu/disqord")} (C#)"
+                )
+        );
+
         [Command("guide")]
         public DiscordCommandResult Guide() => Pages(
             new LocalEmbed()
@@ -129,8 +143,7 @@ namespace SbuBot.Commands.Modules
                             Context.Channel.Id
                         ),
                         Context.Channel,
-                        Context.Services,
-                        Context.Invoker
+                        Context.Services
                     ),
                     context => context.Bot.ExecuteAsync(context)
                 );

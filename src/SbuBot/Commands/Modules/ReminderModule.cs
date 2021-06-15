@@ -34,7 +34,16 @@ namespace SbuBot.Commands.Modules
                 ReminderDescriptor reminderDescriptor
             )
             {
-                var newReminder = new SbuReminder(Context, reminderDescriptor.Message, reminderDescriptor.Timestamp);
+                SbuMember owner = await Context.GetOrCreateMemberAsync();
+                SbuGuild guild = await Context.GetOrCreateGuildAsync();
+
+                SbuReminder newReminder = new(
+                    Context,
+                    owner.Id,
+                    guild.Id,
+                    reminderDescriptor.Message,
+                    reminderDescriptor.Timestamp
+                );
 
                 await Context.Services.GetRequiredService<ReminderService>()
                     .ScheduleAsync(newReminder, cancellationToken: Context.Bot.StoppingToken);
@@ -80,7 +89,9 @@ namespace SbuBot.Commands.Modules
                 if (!parseResult.IsSuccessful)
                     return Reply($"Aborted: {parseResult.FailureReason}.");
 
-                var newReminder = new SbuReminder(Context, message, parseResult.Value);
+                SbuMember owner = await Context.GetOrCreateMemberAsync();
+                SbuGuild guild = await Context.GetOrCreateGuildAsync();
+                SbuReminder newReminder = new(Context, owner.Id, guild.Id, message, parseResult.Value);
 
                 await using (Context.BeginYield())
                 {
@@ -163,7 +174,11 @@ namespace SbuBot.Commands.Modules
                 if (waitResult is null || !waitResult.Message.Content.Equals("yes", StringComparison.OrdinalIgnoreCase))
                     return Reply("Aborted.");
 
-                await Context.Services.GetRequiredService<ReminderService>().CancelForAsync(Context.Author.Id);
+                SbuMember owner = await Context.GetOrCreateMemberAsync();
+
+                await Context.Services.GetRequiredService<ReminderService>()
+                    .CancelAsync(q => q.Where(r => r.Value.OwnerId == owner.Id));
+
                 return Reply("Cancelled all reminders.");
             }
         }
@@ -187,15 +202,17 @@ namespace SbuBot.Commands.Modules
 
             [Command("all")]
             [Description("Lists all of the command author's reminders.")]
-            public DiscordCommandResult ListAll()
+            public async Task<DiscordCommandResult> ListAllAsync()
             {
                 if (Context.Services.GetRequiredService<ReminderService>().CurrentReminders
                     is not { Count: > 0 } reminders)
                     return Reply("You have no reminders.");
 
+                SbuMember owner = await Context.GetOrCreateMemberAsync();
+
                 return MaybePages(
                     reminders.Values
-                        .Where(r => r.OwnerId == Context.Author.Id)
+                        .Where(r => r.OwnerId == owner.Id)
                         .Select(
                             r => $"[`{r.Id}`]({r.JumpUrl})\n{r.DueAt}\n"
                                 + $"{(r.Message is { } ? $"\"{r.Message}\"" : "No Message")}\n"

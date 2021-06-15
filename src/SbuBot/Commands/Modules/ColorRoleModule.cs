@@ -17,7 +17,7 @@ using SbuBot.Services;
 
 namespace SbuBot.Commands.Modules
 {
-    [Group("role", "r")]
+    [Group("role", "r"), RequireBotGuildPermissions(Permission.ManageRoles)]
     [Description("A collection of commands for creation, modification, removal and usage of color roles.")]
     [Remarks(
         "A user may only have one color role at a time, role colors can be given as hex codes starting with `#` or as "
@@ -37,7 +37,7 @@ namespace SbuBot.Commands.Modules
             {
                 await Context.Author.GrantRoleAsync(role.DiscordId);
 
-                role.OwnerId = Context.Author.Id;
+                role.OwnerId = (await Context.GetOrCreateMemberAsync()).Id;
                 Context.Db.ColorRoles.Update(role);
                 await Context.Db.SaveChangesAsync();
 
@@ -54,7 +54,14 @@ namespace SbuBot.Commands.Modules
             {
                 await Context.Author.GrantRoleAsync(role.Id);
 
-                Context.Db.ColorRoles.Add(new(role, Context.Author.Id));
+                Context.Db.ColorRoles.Add(
+                    new(
+                        role,
+                        (await Context.GetOrCreateMemberAsync()).Id,
+                        (await Context.GetOrCreateGuildAsync()).Id
+                    )
+                );
+
                 await Context.Db.SaveChangesAsync();
 
                 return Reply("Color role claimed.");
@@ -106,7 +113,14 @@ namespace SbuBot.Commands.Modules
 
             await Context.Author.GrantRoleAsync(role.Id);
 
-            Context.Db.ColorRoles.Add(new(role, Context.Author.Id));
+            Context.Db.ColorRoles.Add(
+                new(
+                    role,
+                    (await Context.GetOrCreateMemberAsync()).Id,
+                    (await Context.GetOrCreateGuildAsync()).Id
+                )
+            );
+
             await Context.Db.SaveChangesAsync();
 
             return Reply($"{role.Mention} is your new color role.");
@@ -126,7 +140,7 @@ namespace SbuBot.Commands.Modules
                 string name
             )
             {
-                await Context.Guild.Roles[Context.Invoker.ColorRole!.DiscordId]
+                await Context.Guild.Roles[(await Context.GetOrCreateMemberAsync()).ColorRole!.DiscordId]
                     .ModifyAsync(
                         r =>
                         {
@@ -147,7 +161,9 @@ namespace SbuBot.Commands.Modules
                 string name
             )
             {
-                await Context.Guild.Roles[Context.Invoker.ColorRole!.DiscordId].ModifyAsync(r => r.Name = name);
+                await Context.Guild.Roles[(await Context.GetOrCreateMemberAsync()).ColorRole!.DiscordId]
+                    .ModifyAsync(r => r.Name = name);
+
                 return Reply("Your role has been modified.");
             }
 
@@ -155,7 +171,9 @@ namespace SbuBot.Commands.Modules
             [Description("Modifies the authors color role's color.")]
             public async Task<DiscordCommandResult> SetColorAsync([Description("The new color.")] Color color)
             {
-                await Context.Guild.Roles[Context.Invoker.ColorRole!.DiscordId].ModifyAsync(r => r.Color = color);
+                await Context.Guild.Roles[(await Context.GetOrCreateMemberAsync()).ColorRole!.DiscordId]
+                    .ModifyAsync(r => r.Color = color);
+
                 return Reply("Your role has been modified.");
             }
         }
@@ -165,11 +183,11 @@ namespace SbuBot.Commands.Modules
         public async Task<DiscordCommandResult> RemoveAsync()
         {
             ConsistencyService service = Context.Services.GetRequiredService<ConsistencyService>();
-            service.IgnoreRemovedRole(Context.Invoker.ColorRole!.DiscordId);
+            service.IgnoreRemovedRole((await Context.GetOrCreateMemberAsync()).ColorRole!.DiscordId);
 
-            await Context.Guild.Roles[Context.Invoker.ColorRole.DiscordId].DeleteAsync();
+            await Context.Guild.Roles[(await Context.GetOrCreateMemberAsync()).ColorRole.DiscordId].DeleteAsync();
 
-            Context.Db.ColorRoles.Remove(Context.Invoker.ColorRole);
+            Context.Db.ColorRoles.Remove((await Context.GetOrCreateMemberAsync()).ColorRole);
             await Context.Db.SaveChangesAsync();
 
             return Reply("Your color role has been removed.");
@@ -182,7 +200,7 @@ namespace SbuBot.Commands.Modules
             SbuMember receiver
         )
         {
-            SbuColorRole role = Context.Invoker.ColorRole!;
+            SbuColorRole role = (await Context.GetOrCreateMemberAsync()).ColorRole!;
 
             ConsistencyService service = Context.Services.GetRequiredService<ConsistencyService>();
             service.IgnoreAddedRole(role.DiscordId);
@@ -190,7 +208,7 @@ namespace SbuBot.Commands.Modules
             await Context.Guild.GrantRoleAsync(receiver.DiscordId, role.DiscordId);
             await Context.Author.RevokeRoleAsync(role.DiscordId);
 
-            role.OwnerId = receiver.DiscordId;
+            role.OwnerId = receiver.Id;
             Context.Db.ColorRoles.Update(role);
             await Context.Db.SaveChangesAsync();
 
