@@ -4,7 +4,6 @@ using System.IO;
 using Disqord;
 using Disqord.Bot.Hosting;
 using Disqord.Gateway;
-using Disqord.Http;
 
 using EFCoreSecondLevelCacheInterceptor;
 
