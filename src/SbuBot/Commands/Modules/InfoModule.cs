@@ -9,7 +9,7 @@ using Disqord.Bot;
 using Disqord.Gateway;
 using Disqord.Rest;
 
-using Kkommon.Extensions.AsyncLinq;
+using Kkommon.Extensions.AsyncEnumerable;
 
 using Qmmands;
 
@@ -132,19 +132,27 @@ namespace SbuBot.Commands.Modules
             [Command("list")]
             public async ValueTask<DiscordCommandResult> ListAsync()
             {
-                IEnumerable<Command> enumerable = Context.Bot.Commands.GetAllCommands();
+                IEnumerable<Command> commands = Context.Bot.Commands.GetAllCommands();
 
                 if (!Context.Author.GetGuildPermissions().Administrator)
-                {
-                    enumerable = await enumerable
-                        .AsyncWhere(async cmd => await cmd.RunChecksAsync(Context) is { IsSuccessful: true })
-                        .CollectAsync();
-                }
+                    commands = await filterOutFailedChecks(commands, Context).CollectAsync();
 
                 return MaybePages(
-                    enumerable.Select(cmd => cmd.IsEnabled ? $"`{cmd.GetSignature()}`" : $"~~`{cmd.GetSignature()}`~~"),
+                    commands.Select(cmd => cmd.IsEnabled ? $"`{cmd.GetSignature()}`" : $"~~`{cmd.GetSignature()}`~~"),
                     "Command List"
                 );
+
+                static async IAsyncEnumerable<Command> filterOutFailedChecks(
+                    IEnumerable<Command> source,
+                    DiscordGuildCommandContext context
+                )
+                {
+                    foreach (var cmd in source)
+                    {
+                        if (await cmd.RunChecksAsync(context) is { IsSuccessful: true })
+                            yield return cmd;
+                    }
+                }
             }
         }
 

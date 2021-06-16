@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Disqord;
 using Disqord.Extensions.Interactivity.Menus.Paged;
 
-using Kkommon.Extensions.Linq;
+using Kkommon.Extensions.Enumerable;
 
 namespace SbuBot.Commands
 {
@@ -19,7 +19,7 @@ namespace SbuBot.Commands
             string? title = null,
             string? footer = null,
             DateTimeOffset? timestamp = null
-        ) : base(userId, new MaybePageEmbedProvider(pages, title, footer, timestamp), pages.Minimum(2)) { }
+        ) : base(userId, new MaybePageEmbedProvider(pages, title, footer, timestamp), pages.CountAtLeast(2)) { }
     }
 
     public class MaybePageEmbedProvider : IPageProvider, IEnumerable<LocalEmbed>
