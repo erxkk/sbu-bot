@@ -12,6 +12,7 @@ using Qmmands;
 
 using SbuBot.Commands.Checks;
 using SbuBot.Commands.Checks.Parameters;
+using SbuBot.Extensions;
 using SbuBot.Models;
 using SbuBot.Services;
 
@@ -54,13 +55,14 @@ namespace SbuBot.Commands.Modules
             {
                 await Context.Author.GrantRoleAsync(role.Id);
 
-                Context.GetSbuDbContext().ColorRoles.Add(
-                    new(
-                        role,
-                        (await Context.GetOrCreateMemberAsync()).Id,
-                        (await Context.GetOrCreateGuildAsync()).Id
-                    )
-                );
+                Context.GetSbuDbContext()
+                    .ColorRoles.Add(
+                        new(
+                            role,
+                            (await Context.GetOrCreateMemberAsync()).Id,
+                            (await Context.GetOrCreateGuildAsync()).Id
+                        )
+                    );
 
                 await Context.GetSbuDbContext().SaveChangesAsync();
 
@@ -113,13 +115,14 @@ namespace SbuBot.Commands.Modules
 
             await Context.Author.GrantRoleAsync(role.Id);
 
-            Context.GetSbuDbContext().ColorRoles.Add(
-                new(
-                    role,
-                    (await Context.GetOrCreateMemberAsync()).Id,
-                    (await Context.GetOrCreateGuildAsync()).Id
-                )
-            );
+            Context.GetSbuDbContext()
+                .ColorRoles.Add(
+                    new(
+                        role,
+                        (await Context.GetOrCreateMemberAsync()).Id,
+                        (await Context.GetOrCreateGuildAsync()).Id
+                    )
+                );
 
             await Context.GetSbuDbContext().SaveChangesAsync();
 

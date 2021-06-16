@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
+using SbuBot.Extensions;
 using SbuBot.Models;
 
 namespace SbuBot.Services
@@ -154,7 +155,7 @@ namespace SbuBot.Services
             if (Bot.GetRole(e.NewMember.GuildId, addedRoleId) is not { } addedRole)
                 throw new RequiredCacheException("Could not find required role in cache.");
 
-            if (addedRole.Position >= Bot.ColorRoleSeparator.Position)
+            if (addedRole.Position >= Bot.GetColorRoleSeparator().Position)
                 return;
 
             if (_handledAddedRoles.Remove(addedRoleId))
@@ -252,7 +253,7 @@ namespace SbuBot.Services
 
         protected override async ValueTask OnRoleDeleted(RoleDeletedEventArgs e)
         {
-            if (e.Role.Position >= Bot.ColorRoleSeparator.Position)
+            if (e.Role.Position >= Bot.GetColorRoleSeparator().Position)
                 return;
 
             if (_handledRemovedRoles.Remove(e.RoleId))

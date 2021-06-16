@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 using Qmmands;
 
+using SbuBot.Extensions;
 using SbuBot.Models;
 using SbuBot.Services;
 

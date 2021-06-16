@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 using Qmmands;
 
+using SbuBot.Extensions;
 using SbuBot.Models;
 
 namespace SbuBot.Commands.TypeParsers

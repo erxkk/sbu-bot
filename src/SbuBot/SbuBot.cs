@@ -21,11 +21,7 @@ namespace SbuBot
 {
     public sealed class SbuBot : DiscordBot
     {
-        public SbuBotConfiguration Config { get; }
         public bool IsLocked { get; set; }
-
-        public CachedGuild Sbu => this.GetGuild(SbuGlobals.Guild.SELF);
-        public CachedRole ColorRoleSeparator => this.GetRole(SbuGlobals.Guild.SELF, SbuGlobals.Role.Color.SELF);
 
         public SbuBot(
             SbuBotConfiguration config,
@@ -34,10 +30,7 @@ namespace SbuBot
             IServiceProvider services,
             DiscordClient client
         ) : base(options, logger, services, client)
-        {
-            Config = config;
-            IsLocked = !Config.IsProduction;
-        }
+            => IsLocked = !config.IsProduction;
 
         protected override ValueTask AddTypeParsersAsync(CancellationToken cancellationToken = new())
         {

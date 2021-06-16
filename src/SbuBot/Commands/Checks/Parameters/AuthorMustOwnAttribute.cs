@@ -5,6 +5,7 @@ using Disqord.Bot;
 
 using Qmmands;
 
+using SbuBot.Extensions;
 using SbuBot.Models;
 
 namespace SbuBot.Commands.Checks.Parameters

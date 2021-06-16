@@ -9,6 +9,8 @@ using Disqord.Gateway;
 
 using Kkommon;
 
+using SbuBot.Extensions;
+
 namespace SbuBot
 {
     public static class SbuUtility
@@ -149,7 +151,7 @@ namespace SbuBot
             if (sbuColorRole.GuildId != SbuGlobals.Guild.SELF)
                 throw new ArgumentException("SbuColorRole must be from SBU.", nameof(sbuColorRole));
 
-            return sbuColorRole.Position < bot.ColorRoleSeparator.Position && sbuColorRole.Color is { };
+            return sbuColorRole.Position < bot.GetColorRoleSeparator().Position && sbuColorRole.Color is { };
         }
     }
 }

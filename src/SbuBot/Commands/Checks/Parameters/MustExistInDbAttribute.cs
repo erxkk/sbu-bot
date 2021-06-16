@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 
 using Qmmands;
 
+using SbuBot.Extensions;
+
 namespace SbuBot.Commands.Checks.Parameters
 {
     public sealed class MustExistInDbAttribute : DiscordGuildParameterCheckAttribute

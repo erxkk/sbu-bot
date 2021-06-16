@@ -13,6 +13,7 @@ using Qmmands;
 
 using SbuBot.Commands.Checks;
 using SbuBot.Commands.Checks.Parameters;
+using SbuBot.Extensions;
 using SbuBot.Models;
 using SbuBot.Services;
 

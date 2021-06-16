@@ -4,6 +4,8 @@ using Disqord.Bot;
 
 using Qmmands;
 
+using SbuBot.Extensions;
+
 namespace SbuBot.Commands.Checks
 {
     public sealed class RequireColorRoleAttribute : DiscordGuildCheckAttribute

@@ -15,6 +15,7 @@ using Qmmands;
 using SbuBot.Commands.Checks.Parameters;
 using SbuBot.Commands.Descriptors;
 using SbuBot.Commands.Information;
+using SbuBot.Extensions;
 using SbuBot.Models;
 
 namespace SbuBot.Commands.Modules
