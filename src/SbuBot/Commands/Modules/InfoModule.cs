@@ -32,6 +32,7 @@ namespace SbuBot.Commands.Modules
 
             return Reply(
                 new LocalEmbed()
+                    .WithAuthor(application.Owner)
                     .WithTitle("Sbu-Bot")
                     .WithDescription("Bot for management of the sbu server.")
                     .AddInlineField("Prefix", Markdown.Code(SbuGlobals.DEFAULT_PREFIX))
