@@ -17,6 +17,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 using SbuBot;
+using SbuBot.Logging;
 using SbuBot.Models;
 
 using Serilog;

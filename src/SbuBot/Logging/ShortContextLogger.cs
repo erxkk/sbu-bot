@@ -2,7 +2,7 @@ using System;
 
 using Microsoft.Extensions.Logging;
 
-namespace SbuBot
+namespace SbuBot.Logging
 {
     public class ShortContextLogger<T> : ILogger<T>
     {

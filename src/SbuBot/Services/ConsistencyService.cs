@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
+using SbuBot.Exceptions;
 using SbuBot.Extensions;
 using SbuBot.Models;
 
@@ -154,7 +155,7 @@ namespace SbuBot.Services
             Snowflake addedRoleId = except.First();
 
             if (Bot.GetRole(e.NewMember.GuildId, addedRoleId) is not { } addedRole)
-                throw new RequiredCacheException("Could not find required role in cache.");
+                throw new NotCachedException("Could not find required role in cache.");
 
             if (addedRole.Position >= Bot.GetColorRoleSeparator().Position)
                 return;

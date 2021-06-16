@@ -20,6 +20,7 @@ using Qmmands;
 
 using SbuBot.Commands.Checks;
 using SbuBot.Commands.Information;
+using SbuBot.Exceptions;
 using SbuBot.Extensions;
 
 namespace SbuBot.Commands.Modules
@@ -55,7 +56,7 @@ namespace SbuBot.Commands.Modules
 
                 if (Context.Bot.GetChannel(SbuGlobals.Guild.SELF, SbuGlobals.Channel.Based.PIN_ARCHIVE)
                     is not ITextChannel pinArchive)
-                    throw new RequiredCacheException("Could not find required pin archive channel.");
+                    throw new NotCachedException("Could not find required pin archive channel.");
 
                 switch (SbuUtility.TryCreatePinMessage(message))
                 {
@@ -95,7 +96,7 @@ namespace SbuBot.Commands.Modules
 
                 if (Context.Bot.GetChannel(SbuGlobals.Guild.SELF, SbuGlobals.Channel.Based.PIN_ARCHIVE)
                     is not ITextChannel pinArchive)
-                    throw new RequiredCacheException("Could not find required pin archive channel.");
+                    throw new NotCachedException("Could not find required pin archive channel.");
 
                 IReadOnlyList<IUserMessage> pins = await channel.FetchPinnedMessagesAsync();
 

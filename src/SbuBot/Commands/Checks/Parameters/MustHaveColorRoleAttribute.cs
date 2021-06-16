@@ -7,6 +7,7 @@ using Disqord.Gateway;
 
 using Qmmands;
 
+using SbuBot.Exceptions;
 using SbuBot.Extensions;
 using SbuBot.Models;
 
@@ -30,7 +31,7 @@ namespace SbuBot.Commands.Checks.Parameters
 
                 case SbuMember sbuMember:
                     if (context.Guild.GetMember(sbuMember.DiscordId) is not { } cachedMember)
-                        throw new RequiredCacheException("Could not get required cached required.");
+                        throw new NotCachedException("Could not get required cached required.");
 
                     member = cachedMember;
                     break;
