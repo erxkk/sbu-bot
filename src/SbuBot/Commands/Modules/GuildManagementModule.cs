@@ -20,6 +20,7 @@ using Qmmands;
 
 using SbuBot.Commands.Checks;
 using SbuBot.Commands.Information;
+using SbuBot.Extensions;
 
 namespace SbuBot.Commands.Modules
 {
@@ -260,7 +261,7 @@ namespace SbuBot.Commands.Modules
                 HashSet<ICustomEmoji> emoteSet = additionalEmotes.ToHashSet();
                 emoteSet.Add(emote);
 
-                int slots = SbuUtility.CustomEmojiSlots(Context.Guild);
+                int slots = Context.Guild.CustomEmojiSlots();
 
                 if (Context.Guild.Emojis.Count(e => !e.Value.IsAnimated) + emoteSet.Count(e => !e.IsAnimated) > slots)
                     return Reply("This would exceed the maximum amount of emotes.");

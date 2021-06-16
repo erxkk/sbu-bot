@@ -25,8 +25,8 @@ namespace SbuBot.Commands.TypeParsers
         )
         {
             ReminderService service = context.Services.GetRequiredService<ReminderService>();
-            SbuMember owner = await context.GetOrCreateMemberAsync();
-            SbuGuild guild = await context.GetOrCreateGuildAsync();
+            SbuMember owner = await context.GetSbuDbContext().GetSbuMemberAsync(context.Author);
+            SbuGuild guild = await context.GetSbuDbContext().GetSbuGuildAsync(context.Guild);
 
             if (value.Equals("last", StringComparison.OrdinalIgnoreCase))
             {

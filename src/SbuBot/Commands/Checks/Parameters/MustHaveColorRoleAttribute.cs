@@ -7,6 +7,7 @@ using Disqord.Gateway;
 
 using Qmmands;
 
+using SbuBot.Extensions;
 using SbuBot.Models;
 
 namespace SbuBot.Commands.Checks.Parameters
@@ -23,8 +24,8 @@ namespace SbuBot.Commands.Checks.Parameters
 
             switch (argument)
             {
-                case IMember imember:
-                    member = imember;
+                case IMember iMember:
+                    member = iMember;
                     break;
 
                 case SbuMember sbuMember:
@@ -38,10 +39,10 @@ namespace SbuBot.Commands.Checks.Parameters
                     throw new ArgumentNullException(nameof(argument));
             }
 
-            return SbuUtility.GetSbuColorRole(member) is { } == MustHaveColorRole
+            return member.GetColorRole() is { } == MustHaveColorRole
                 ? ParameterCheckAttribute.Success()
                 : ParameterCheckAttribute.Failure(
-                    string.Format("The given member must {0}have a color role.", MustHaveColorRole ? "" : "no ")
+                    string.Format("The given member must {0}have a color role.", MustHaveColorRole ? "" : "not ")
                 );
         }
 

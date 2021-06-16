@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -32,6 +33,31 @@ namespace SbuBot.Models
             _sbuBot = sbuBot;
             _configuration = configuration;
         }
+
+        public Task<SbuMember> GetSbuMemberAsync(
+            IMember member,
+            Func<IQueryable<SbuMember>, IQueryable<SbuMember>>? additionalConstraints = null
+        ) => GetSbuMemberAsync(member.Id, member.GuildId, additionalConstraints);
+
+        public async Task<SbuMember> GetSbuMemberAsync(
+            Snowflake memberId,
+            Snowflake guildId,
+            Func<IQueryable<SbuMember>, IQueryable<SbuMember>>? query = null
+        ) => await (query is { } ? query(Members) : Members)
+            .Include(m => m.Guild)
+            .FirstAsync(m => m.DiscordId == memberId && m.Guild.DiscordId == guildId);
+
+        public Task<SbuGuild> GetSbuGuildAsync(
+            IGuild guild,
+            Func<IQueryable<SbuGuild>, IQueryable<SbuGuild>>? query = null
+        ) => GetSbuGuildAsync(guild.Id, query);
+
+        public async Task<SbuGuild> GetSbuGuildAsync(
+            Snowflake guildId,
+            Func<IQueryable<SbuGuild>, IQueryable<SbuGuild>>? query = null
+        ) => await (query is { } ? query(Guilds) : Guilds).FirstAsync(m => m.DiscordId == guildId);
+
+#region Configuration
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
             => optionsBuilder.UseNpgsql(_configuration.DbConnectionString);
@@ -76,5 +102,7 @@ namespace SbuBot.Models
                 return new(null, new(configuration));
             }
         }
+
+#endregion
     }
 }

@@ -8,7 +8,7 @@ namespace SbuBot.Extensions
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class DiscordBotExtensions
     {
-        public static CachedRole GetColorRoleSeparator(this DiscordBot @this) => @this.GetRole(
+        public static CachedRole GetColorRoleSeparator(this DiscordBotBase @this) => @this.GetRole(
             SbuGlobals.Guild.SELF,
             SbuGlobals.Role.Color.SELF
         );

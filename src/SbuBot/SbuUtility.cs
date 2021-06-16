@@ -17,15 +17,6 @@ namespace SbuBot
     {
         public static readonly Regex IMAGE_FILE_REGEX = new(@"\.(gif|jpeg|jpg|png)$", RegexOptions.Compiled);
 
-        public static int CustomEmojiSlots(IGuild guild) => guild.BoostTier switch
-        {
-            BoostTier.None => 50,
-            BoostTier.First => 100,
-            BoostTier.Second => 150,
-            BoostTier.Third => 250,
-            _ => throw new ArgumentOutOfRangeException(nameof(guild), guild.BoostTier, null),
-        };
-
         public static Result<LocalMessage, string> TryCreatePinMessage(IUserMessage message)
         {
             LocalEmbed embed = new LocalEmbed()
@@ -68,7 +59,11 @@ namespace SbuBot
         {
             if (value.Length >= 76 && Discord.MessageJumpLinkRegex.Match(value) is { Success: true } matches)
             {
-                idPair = (ulong.Parse(matches.Groups[1].Value), ulong.Parse(matches.Groups[2].Value));
+                idPair = (
+                    ulong.Parse(matches.Groups["channel_id"].Value),
+                    ulong.Parse(matches.Groups["message_id"].Value)
+                );
+
                 return true;
             }
 
@@ -115,43 +110,6 @@ namespace SbuBot
                 throw new ArgumentException("Source cannot be empty", nameof(source));
 
             yield return builder.ToString();
-        }
-
-        public static IRole? GetSbuColorRole(IMember sbuMember)
-        {
-            if (sbuMember is null)
-                throw new ArgumentNullException(nameof(sbuMember));
-
-            if (sbuMember.GuildId != SbuGlobals.Guild.SELF)
-                throw new ArgumentException("SbuMember must be from SBU.", nameof(sbuMember));
-
-            return sbuMember.GetRoles()
-                .Values.OrderByDescending(role => role.Position)
-                .FirstOrDefault(role => role.Color is { });
-        }
-
-        public static IMember? GetSbuColorRoleOwner(IRole sbuColorRole)
-        {
-            if (sbuColorRole is null)
-                throw new ArgumentNullException(nameof(sbuColorRole));
-
-            if (sbuColorRole.GuildId != SbuGlobals.Guild.SELF)
-                throw new ArgumentException("SbuColorRole must be from SBU.", nameof(sbuColorRole));
-
-            return sbuColorRole.GetGatewayClient()
-                .GetGuild(sbuColorRole.GuildId)
-                .Members.Values.FirstOrDefault(m => m.RoleIds.Contains(sbuColorRole.Id));
-        }
-
-        public static bool IsSbuColorRole(IRole sbuColorRole, SbuBot bot)
-        {
-            if (sbuColorRole is null)
-                throw new ArgumentNullException(nameof(sbuColorRole));
-
-            if (sbuColorRole.GuildId != SbuGlobals.Guild.SELF)
-                throw new ArgumentException("SbuColorRole must be from SBU.", nameof(sbuColorRole));
-
-            return sbuColorRole.Position < bot.GetColorRoleSeparator().Position && sbuColorRole.Color is { };
         }
     }
 }

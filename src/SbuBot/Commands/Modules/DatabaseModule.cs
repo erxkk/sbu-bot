@@ -30,10 +30,10 @@ namespace SbuBot.Commands.Modules
             IMember member
         )
         {
-            SbuGuild guild = await Context.GetOrCreateGuildAsync();
+            SbuGuild guild = await Context.GetSbuDbContext().GetSbuGuildAsync(Context.Guild);
             SbuMember newMember = new(member, guild.Id);
 
-            if (SbuUtility.GetSbuColorRole(member) is { } colorRole)
+            if (member.GetColorRole() is { } colorRole)
                 Context.GetSbuDbContext().ColorRoles.Add(new(colorRole, guild.Id, newMember.Id));
 
             Context.GetSbuDbContext().Members.Add(newMember);
@@ -50,9 +50,9 @@ namespace SbuBot.Commands.Modules
 
             IEnumerable<(IMember m, IRole?)> userRolePairs = Context.Guild.Members.Values
                 .Where(m => !m.IsBot)
-                .Select(m => (m, SbuUtility.GetSbuColorRole(m)));
+                .Select(m => (m, m.GetColorRole()));
 
-            SbuGuild guild = await Context.GetOrCreateGuildAsync();
+            SbuGuild guild = await Context.GetSbuDbContext().GetSbuGuildAsync(Context.Guild);
 
             foreach ((IMember member, IRole? role) in userRolePairs)
             {
@@ -83,21 +83,20 @@ namespace SbuBot.Commands.Modules
             if (owner.DiscordId == receiver.DiscordId)
                 return Reply("The given members cannot be the same");
 
-            List<SbuTag> tags = await Context.GetSbuDbContext().Tags
+            List<SbuTag> tags = await Context.GetSbuDbContext()
+                .Tags
                 .Where(t => t.OwnerId == owner.Id)
                 .ToListAsync(Context.Bot.StoppingToken);
 
             foreach (SbuTag tag in tags)
-            {
                 tag.OwnerId = receiver.Id;
-            }
 
             bool hadRole = false;
 
             if (owner.ColorRole is { })
             {
                 hadRole = true;
-                SbuColorRole role = (await Context.GetOrCreateMemberAsync()).ColorRole!;
+                SbuColorRole role = (await Context.GetSbuDbContext().GetSbuMemberAsync(Context.Author)).ColorRole!;
 
                 if (receiver.ColorRole is null)
                 {

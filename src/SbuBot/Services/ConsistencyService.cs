@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 
 using Disqord;
 using Disqord.Bot;
+using Disqord.Bot.Hosting;
 using Disqord.Gateway;
 
 using Microsoft.EntityFrameworkCore;
@@ -249,6 +250,32 @@ namespace SbuBot.Services
 
             Logger.LogDebug("Member removed: {@Member}", new { e.User.Id, Guild = e.GuildId });
             await base.OnMemberLeft(e);
+        }
+
+        protected override async ValueTask OnMessageReceived(BotMessageReceivedEventArgs e)
+        {
+            using (IServiceScope scope = Bot.Services.CreateScope())
+            {
+                SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
+
+                if (await context.Guilds.FirstOrDefaultAsync(g => g.DiscordId == e.GuildId) is not { } guild)
+                {
+                    await base.OnMessageReceived(e);
+                    return;
+                }
+
+                if (await context.Members.FirstOrDefaultAsync(
+                    m => m.DiscordId == e.Member.Id && m.GuildId == guild.Id,
+                    Bot.StoppingToken
+                ) is null)
+                {
+                    context.Members.Update(new(e.Member, guild.Id));
+                    await context.SaveChangesAsync(Bot.StoppingToken);
+                }
+            }
+
+            Logger.LogDebug("Member inserted: {@Member}", new { e.Member.Id, Guild = e.GuildId });
+            await base.OnMessageReceived(e);
         }
 
         protected override async ValueTask OnRoleDeleted(RoleDeletedEventArgs e)

@@ -15,7 +15,6 @@ using Qmmands;
 
 using SbuBot.Commands.Information;
 using SbuBot.Extensions;
-using SbuBot.Models;
 
 namespace SbuBot.Commands.Modules
 {
@@ -131,7 +130,7 @@ namespace SbuBot.Commands.Modules
             }
 
             [Command("list")]
-            public async Task<DiscordCommandResult> ListAsync()
+            public async ValueTask<DiscordCommandResult> ListAsync()
             {
                 IEnumerable<Command> enumerable = Context.Bot.Commands.GetAllCommands();
 

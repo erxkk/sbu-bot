@@ -17,21 +17,23 @@ namespace SbuBot.Commands.Checks.Parameters
         public AuthorMustOwnAttribute(bool authorMustOwn = true) => AuthorMustOwn = authorMustOwn;
 
         public override async ValueTask<CheckResult> CheckAsync(object argument, DiscordGuildCommandContext context)
-            => ((argument as ISbuOwnedEntity)!.OwnerId == (await context.GetOrCreateMemberAsync()).Id) == AuthorMustOwn
-                ? ParameterCheckAttribute.Success()
-                : ParameterCheckAttribute.Failure(
-                    string.Format(
-                        "You must {0}to be the owner of the given {1}.",
-                        AuthorMustOwn ? "" : "not ",
-                        argument switch
-                        {
-                            SbuColorRole => "role",
-                            SbuTag => "tag",
-                            SbuReminder => "reminder",
-                            _ => "entity",
-                        }
-                    )
-                );
+            => ((argument as ISbuOwnedEntity)!.OwnerId
+                    == (await context.GetSbuDbContext().GetSbuMemberAsync(context.Author)).Id)
+                == AuthorMustOwn
+                    ? ParameterCheckAttribute.Success()
+                    : ParameterCheckAttribute.Failure(
+                        string.Format(
+                            "You must {0}to be the owner of the given {1}.",
+                            AuthorMustOwn ? "" : "not ",
+                            argument switch
+                            {
+                                SbuColorRole => "role",
+                                SbuTag => "tag",
+                                SbuReminder => "reminder",
+                                _ => "entity",
+                            }
+                        )
+                    );
 
         public override bool CheckType(Type type) => type.IsAssignableTo(typeof(ISbuOwnedEntity));
     }
