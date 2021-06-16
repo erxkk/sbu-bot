@@ -2,15 +2,16 @@ using System;
 using System.Threading.Tasks;
 
 using Disqord;
+using Disqord.Bot;
 
 using Qmmands;
 
 namespace SbuBot.Commands.Checks.Parameters
 {
-    public sealed class MustBeColorRoleAttribute : SbuParameterCheckAttribute
+    public sealed class MustBeColorRoleAttribute : DiscordGuildParameterCheckAttribute
     {
-        protected override ValueTask<CheckResult> CheckAsync(object argument, SbuCommandContext context)
-            => SbuUtility.IsSbuColorRole((argument as IRole)!, context.Bot)
+        public override ValueTask<CheckResult> CheckAsync(object argument, DiscordGuildCommandContext context)
+            => SbuUtility.IsSbuColorRole((argument as IRole)!, (context.Bot as SbuBot)!)
                 ? ParameterCheckAttribute.Success()
                 : ParameterCheckAttribute.Failure("The given role must be a color role.");
 

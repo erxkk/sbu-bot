@@ -12,7 +12,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Disqord.Bot" Version="1.0.0-06012021-32" />
+      <PackageReference Include="Disqord.Bot" Version="1.0.0-06082021-36" />
       <PackageReference Include="EFCoreSecondLevelCacheInterceptor" Version="3.1.0" />
       <PackageReference Include="HumanTimeParser.English" Version="2.0.1-dev-835860444" />
       <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="3.10.0-3.final" />
@@ -21,6 +21,7 @@
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
       <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Http" Version="5.0.0" />
       <PackageReference Include="NetEscapades.Configuration.Yaml" Version="2.1.0" />
       <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="5.0.6" />
       <PackageReference Include="Serilog.Extensions.Hosting" Version="4.1.2" />

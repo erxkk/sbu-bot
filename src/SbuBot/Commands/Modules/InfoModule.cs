@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,6 +7,7 @@ using System.Threading.Tasks;
 using Disqord;
 using Disqord.Bot;
 using Disqord.Gateway;
+using Disqord.Rest;
 
 using Kkommon.Extensions.AsyncLinq;
 
@@ -13,6 +15,7 @@ using Qmmands;
 
 using SbuBot.Commands.Information;
 using SbuBot.Extensions;
+using SbuBot.Models;
 
 namespace SbuBot.Commands.Modules
 {
@@ -24,17 +27,36 @@ namespace SbuBot.Commands.Modules
     public sealed class InfoModule : SbuModuleBase
     {
         [Command("about")]
-        public DiscordCommandResult About() => Reply(
-            new LocalEmbed()
-                .WithTitle("Sbu-Bot")
-                .WithDescription("Bot for management for the sbu server.")
-                .AddInlineField("Default Prefix", SbuGlobals.DEFAULT_PREFIX)
-                .AddInlineField("Version", SbuGlobals.VERSION)
-                .AddInlineField(
-                    "Written in",
-                    $"{Markdown.Link("Disqord", "https://github.com/quahu/disqord")} (C#)"
-                )
-        );
+        public async Task<DiscordCommandResult> AboutAsync()
+        {
+            IApplication application = await Context.Bot.FetchCurrentApplicationAsync();
+
+            return Reply(
+                new LocalEmbed()
+                    .WithTitle("Sbu-Bot")
+                    .WithDescription("Bot for management of the sbu server.")
+                    .AddInlineField("Prefix", Markdown.Code(SbuGlobals.DEFAULT_PREFIX))
+                    .AddBlankInlineField()
+                    .AddBlankInlineField()
+                    .AddInlineField("Version", SbuGlobals.VERSION)
+                    .AddInlineField(
+                        "Source",
+                        Markdown.Link("Github:erxkk/sbu-bot", SbuGlobals.Github.SELF)
+                    )
+                    .AddInlineField(
+                        "Library",
+                        Markdown.Link("Github:Quahu/Disqord", SbuGlobals.Github.DISQORD)
+                    )
+                    .AddInlineField(
+                        "CLR",
+                        $".NET {Environment.Version}"
+                    )
+                    .AddInlineField(
+                        "Host-OS",
+                        Environment.OSVersion
+                    )
+            );
+        }
 
         [Command("guide")]
         public DiscordCommandResult Guide() => Pages(
@@ -92,6 +114,7 @@ namespace SbuBot.Commands.Modules
 
         [Group("command", "commands")]
         public sealed class CommandGroup : SbuModuleBase
+
         {
             [Command("find")]
             public DiscordCommandResult Find(string command)
@@ -131,23 +154,7 @@ namespace SbuBot.Commands.Modules
         {
             if (command is null)
             {
-                Context.Bot.Queue.Post(
-                    new SbuCommandContext(
-                        Context.Bot,
-                        Context.Prefix,
-                        "command list",
-                        new ProxyMessage(
-                            Context.Message,
-                            $"{Context.Prefix} command list",
-                            Context.Author,
-                            Context.Channel.Id
-                        ),
-                        Context.Channel,
-                        Context.Services
-                    ),
-                    context => context.Bot.ExecuteAsync(context)
-                );
-
+                Context.RepostAsAlias("command list");
                 return null!;
             }
 

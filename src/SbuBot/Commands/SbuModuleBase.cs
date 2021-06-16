@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
 
-using Disqord;
 using Disqord.Bot;
 
 namespace SbuBot.Commands
 {
-    public abstract class SbuModuleBase : DiscordGuildModuleBase<SbuCommandContext>
+    public abstract class SbuModuleBase : DiscordGuildModuleBase
     {
+        // TODO: rework with new Menus
         protected DiscordMenuCommandResult MaybePages(
             IEnumerable<string> contents,
             string? title = null,
@@ -24,7 +24,5 @@ namespace SbuBot.Commands
                 timestamp
             )
         );
-
-        protected DiscordPrivateResponseCommandResult PrivateResponse(LocalMessage message) => new(Context, message);
     }
 }

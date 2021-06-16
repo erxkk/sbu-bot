@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using Destructurama.Attributed;
 
 using Disqord;
+using Disqord.Bot;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -18,6 +19,7 @@ namespace SbuBot.Models
 
         [NotNull]
         public Guid? OwnerId { get; set; }
+
         public Guid? GuildId { get; set; }
         public Snowflake ChannelId { get; }
         public Snowflake MessageId { get; }
@@ -60,7 +62,7 @@ namespace SbuBot.Models
         }
 
         public SbuReminder(
-            SbuCommandContext context,
+            DiscordGuildCommandContext context,
             Guid ownerId,
             Guid guildId,
             string? message,

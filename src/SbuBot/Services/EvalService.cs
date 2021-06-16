@@ -22,7 +22,7 @@ namespace SbuBot.Services
     {
         public EvalService(ILogger<EvalService> logger, DiscordBotBase bot) : base(logger, bot) { }
 
-        public CompilationResult CreateAndCompile(string code, SbuCommandContext context)
+        public CompilationResult CreateAndCompile(string code, DiscordGuildCommandContext context)
         {
             Script<object> script = CSharpScript.Create(code, ScriptOptions.Default, typeof(ScriptGlobals));
 
@@ -39,8 +39,8 @@ namespace SbuBot.Services
 
     public sealed class ScriptGlobals
     {
-        public SbuCommandContext Context { get; }
-        public ScriptGlobals(SbuCommandContext context) => Context = context;
+        public DiscordGuildCommandContext Context { get; }
+        public ScriptGlobals(DiscordGuildCommandContext context) => Context = context;
     }
 
     public abstract class CompilationResult

@@ -1,15 +1,17 @@
 using System;
 using System.Threading.Tasks;
 
+using Disqord.Bot;
+
 using Qmmands;
 
 namespace SbuBot.Commands.Checks.Parameters
 {
-    public class MustBeFutureAttribute : SbuParameterCheckAttribute
+    public class MustBeFutureAttribute : DiscordGuildParameterCheckAttribute
     {
         private const string FAILURE_REASON = "The given timestamp must be in the future.";
 
-        protected override ValueTask<CheckResult> CheckAsync(object argument, SbuCommandContext context)
+        public override ValueTask<CheckResult> CheckAsync(object argument, DiscordGuildCommandContext context)
         {
             DateTimeOffset now = DateTimeOffset.Now;
 

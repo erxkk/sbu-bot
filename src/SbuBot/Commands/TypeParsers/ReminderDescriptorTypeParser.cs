@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
+using Disqord.Bot;
+
 using HumanTimeParser.Core.Parsing;
 using HumanTimeParser.English;
 
@@ -19,7 +21,7 @@ namespace SbuBot.Commands.TypeParsers
         protected override ValueTask<TypeParserResult<ReminderDescriptor>> ParseAsync(
             Parameter parameter,
             string[] values,
-            SbuCommandContext context
+            DiscordGuildCommandContext context
         )
         {
             if (values.Length != 2)

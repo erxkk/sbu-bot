@@ -33,10 +33,10 @@ namespace SbuBot.Commands.Modules
             SbuMember newMember = new(member, guild.Id);
 
             if (SbuUtility.GetSbuColorRole(member) is { } colorRole)
-                Context.Db.ColorRoles.Add(new(colorRole, guild.Id, newMember.Id));
+                Context.GetSbuDbContext().ColorRoles.Add(new(colorRole, guild.Id, newMember.Id));
 
-            Context.Db.Members.Add(newMember);
-            await Context.Db.SaveChangesAsync();
+            Context.GetSbuDbContext().Members.Add(newMember);
+            await Context.GetSbuDbContext().SaveChangesAsync();
 
             return Reply($"{member.Mention} is now registered in the database.");
         }
@@ -56,17 +56,17 @@ namespace SbuBot.Commands.Modules
             foreach ((IMember member, IRole? role) in userRolePairs)
             {
                 SbuMember dbMember = new(member, guild.Id);
-                Context.Db.Members.Add(dbMember);
+                Context.GetSbuDbContext().Members.Add(dbMember);
                 userCount++;
 
                 if (role is null)
                     continue;
 
-                Context.Db.ColorRoles.Add(new(role, guild.Id, dbMember.Id));
+                Context.GetSbuDbContext().ColorRoles.Add(new(role, guild.Id, dbMember.Id));
                 roleCount++;
             }
 
-            await Context.Db.SaveChangesAsync();
+            await Context.GetSbuDbContext().SaveChangesAsync();
             return Reply($"Found {userCount} users, {roleCount} of which have a suitable color role.");
         }
 
@@ -82,7 +82,7 @@ namespace SbuBot.Commands.Modules
             if (owner.DiscordId == receiver.DiscordId)
                 return Reply("The given members cannot be the same");
 
-            List<SbuTag> tags = await Context.Db.Tags
+            List<SbuTag> tags = await Context.GetSbuDbContext().Tags
                 .Where(t => t.OwnerId == owner.Id)
                 .ToListAsync(Context.Bot.StoppingToken);
 
@@ -112,12 +112,12 @@ namespace SbuBot.Commands.Modules
                     role.OwnerId = null;
                 }
 
-                Context.Db.ColorRoles.Update(role);
+                Context.GetSbuDbContext().ColorRoles.Update(role);
                 await Context.Author.RevokeRoleAsync(role.DiscordId);
             }
 
             if (tags.Count != 0 || hadRole)
-                await Context.Db.SaveChangesAsync();
+                await Context.GetSbuDbContext().SaveChangesAsync();
 
             return Reply(
                 string.Format(

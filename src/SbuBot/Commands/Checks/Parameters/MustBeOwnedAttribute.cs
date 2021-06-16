@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 
 using Disqord;
+using Disqord.Bot;
 
 using Qmmands;
 
@@ -9,13 +10,13 @@ using SbuBot.Models;
 
 namespace SbuBot.Commands.Checks.Parameters
 {
-    public sealed class MustBeOwnedAttribute : SbuParameterCheckAttribute
+    public sealed class MustBeOwnedAttribute : DiscordGuildParameterCheckAttribute
     {
         public bool MustBeOwned { get; }
 
         public MustBeOwnedAttribute(bool mustBeOwned = true) => MustBeOwned = mustBeOwned;
 
-        protected override ValueTask<CheckResult> CheckAsync(object argument, SbuCommandContext context)
+        public override ValueTask<CheckResult> CheckAsync(object argument, DiscordGuildCommandContext context)
         {
             var ownedEntity = (argument as ISbuOwnedEntity)!;
 

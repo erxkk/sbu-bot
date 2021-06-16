@@ -127,7 +127,7 @@ namespace SbuBot.Commands.Modules
                 [Description("The proxy channel.")] ITextChannel channel,
                 [Description("The proxy command.")] string command = "ping"
             ) => Context.Bot.Queue.Post(
-                new SbuCommandContext(
+                new DiscordGuildCommandContext(
                     Context.Bot,
                     Context.Prefix,
                     command,
@@ -144,7 +144,7 @@ namespace SbuBot.Commands.Modules
                 [Description("The proxy author.")] IMember member,
                 [Description("The proxy command.")] string command = "ping"
             ) => Context.Bot.Queue.Post(
-                new SbuCommandContext(
+                new DiscordGuildCommandContext(
                     Context.Bot,
                     Context.Prefix,
                     command,
@@ -161,7 +161,7 @@ namespace SbuBot.Commands.Modules
                 [Description("The proxy channel.")] ITextChannel channel,
                 [Description("The proxy command.")] string command = "ping"
             ) => Context.Bot.Queue.Post(
-                new SbuCommandContext(
+                new DiscordGuildCommandContext(
                     Context.Bot,
                     Context.Prefix,
                     command,
@@ -180,8 +180,9 @@ namespace SbuBot.Commands.Modules
             bool? set = null
         )
         {
-            Context.Bot.IsLocked = set ?? !Context.Bot.IsLocked;
-            return Reply($"{(Context.Bot.IsLocked ? "Locked" : "Unlocked")} the bot.");
+            SbuBot bot = (Context.Bot as SbuBot)!;
+            bot.IsLocked = set ?? !bot.IsLocked;
+            return Reply($"{(bot.IsLocked ? "Locked" : "Unlocked")} the bot.");
         }
     }
 }

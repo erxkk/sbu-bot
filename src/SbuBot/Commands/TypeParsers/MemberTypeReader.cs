@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 
 using Disqord;
+using Disqord.Bot;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -11,12 +12,12 @@ using SbuBot.Models;
 
 namespace SbuBot.Commands.TypeParsers
 {
-    public sealed class MemberTypeReader : SbuTypeParserBase<SbuMember>
+    public sealed class MemberTypeReader : DiscordGuildTypeParser<SbuMember>
     {
-        protected override async ValueTask<TypeParserResult<SbuMember>> ParseAsync(
+        public override async ValueTask<TypeParserResult<SbuMember>> ParseAsync(
             Parameter parameter,
             string value,
-            SbuCommandContext context
+            DiscordGuildCommandContext context
         )
         {
             SbuMember? member = null;
@@ -28,7 +29,7 @@ namespace SbuBot.Commands.TypeParsers
             {
                 await using (context.BeginYield())
                 {
-                    member = await context.Db.Members.FirstOrDefaultAsync(
+                    member = await context.GetSbuDbContext().Members.FirstOrDefaultAsync(
                         t => t.Id == guidParseResult.Value,
                         context.Bot.StoppingToken
                     );
@@ -38,7 +39,7 @@ namespace SbuBot.Commands.TypeParsers
             {
                 await using (context.BeginYield())
                 {
-                    member = await context.Db.Members.FirstOrDefaultAsync(
+                    member = await context.GetSbuDbContext().Members.FirstOrDefaultAsync(
                         t => t.DiscordId == roleParseResult.Value.Id,
                         context.Bot.StoppingToken
                     );

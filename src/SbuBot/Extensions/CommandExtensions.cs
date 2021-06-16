@@ -1,60 +1,89 @@
+using System;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 using Disqord.Bot;
 
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+
 using Qmmands;
 
+using SbuBot.Commands;
 using SbuBot.Commands.Information;
+using SbuBot.Models;
 
 namespace SbuBot
 {
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class CommandExtensions
     {
-        // overloads of a command grouped together
-        public static bool IsOverloadGroup(this Module @this)
-            => @this.Submodules.Count == 0 && @this.Commands.All(c => c.Aliases.Count == 0);
-
-        // will also apply for command overload groups
-        public static bool IsGroupDefault(this Command @this) => @this.Aliases.Count == 0;
-
-        public static string GetSignature(this Parameter @this)
+        public static async ValueTask<SbuMember> GetOrCreateMemberAsync(
+            this DiscordGuildCommandContext @this,
+            Func<IQueryable<SbuMember>, IQueryable<SbuMember>>? additionalConstraints = null
+        )
         {
-            StringBuilder builder = new(16);
+            IQueryable<SbuMember> query = @this.GetSbuDbContext().Members;
 
-            builder.Append(@this.IsOptional ? '[' : '<').Append(@this.Name);
-
-            if (@this.IsMultiple)
-                builder.Append('…');
-
-            if (@this.IsOptional)
+            if (additionalConstraints is { })
             {
-                builder.Append(" = ");
-
-                object val = @this.Attributes
-                    .OfType<OverrideDefaultAttribute>()
-                    .FirstOrDefault() is { } overrideDefault
-                    ? overrideDefault.Value
-                    : @this.DefaultValue;
-
-                builder.Append(
-                    val switch
-                    {
-                        "you" => "you",
-                        string str => $"\"{str}\"",
-                        null => "none",
-                        _ => @this.DefaultValue,
-                    }
-                );
-
-                builder.Append(@this.IsOptional ? ']' : '>');
+                query = additionalConstraints(query);
             }
 
-            return builder.ToString();
+            var sbuMember = await query.FirstOrDefaultAsync(m => m.DiscordId == @this.Author.Id);
+
+            if (sbuMember is null)
+            {
+                sbuMember = new(@this.Author, (await @this.GetOrCreateGuildAsync()).Id);
+                @this.GetSbuDbContext().Members.Add(sbuMember);
+                await @this.GetSbuDbContext().SaveChangesAsync();
+            }
+
+            return sbuMember;
         }
 
+        public static async ValueTask<SbuGuild> GetOrCreateGuildAsync(
+            this DiscordGuildCommandContext @this,
+            Func<IQueryable<SbuGuild>, IQueryable<SbuGuild>>? additionalConstraints = null
+        )
+        {
+            IQueryable<SbuGuild> query = @this.GetSbuDbContext().Guilds;
+
+            if (additionalConstraints is { })
+            {
+                query = additionalConstraints(query);
+            }
+
+            var sbuGuild = await query.FirstOrDefaultAsync(m => m.DiscordId == @this.GuildId);
+
+            if (sbuGuild is null)
+            {
+                sbuGuild = new(@this.Guild);
+                @this.GetSbuDbContext().Guilds.Add(sbuGuild);
+                await @this.GetSbuDbContext().SaveChangesAsync();
+            }
+
+            return sbuGuild;
+        }
+
+        public static void RepostAsAlias(this DiscordGuildCommandContext @this, string alias) => @this.Bot.Queue.Post(
+            new DiscordGuildCommandContext(
+                @this.Bot,
+                @this.Prefix,
+                alias,
+                new ProxyMessage(@this.Message, $"{@this.Prefix} {alias}", @this.Author, @this.ChannelId),
+                @this.Channel,
+                @this.Services
+            ),
+            context => context.Bot.ExecuteAsync(context)
+        );
+
+        public static SbuDbContext GetSbuDbContext(this DiscordCommandContext @this)
+            => @this.Services.GetRequiredService<SbuDbContext>();
+
+        // TODO: make more generic for error handling
         public static string GetSignature(this Command @this, IPrefix? prefix = null)
         {
             StringBuilder builder = new(@this.FullAliases[0].Length + 16 * @this.Parameters.Count);

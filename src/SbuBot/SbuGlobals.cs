@@ -7,7 +7,7 @@ namespace SbuBot
         public const char DESCRIPTOR_SEPARATOR = '|';
         public const string DEFAULT_PREFIX = "sbu";
 
-        public static readonly Version VERSION = new(0, 2, 1);
+        public static readonly Version VERSION = new(0, 2, 2);
 
         public static readonly string[] RESERVED_KEYWORDS =
         {
@@ -20,6 +20,12 @@ namespace SbuBot
             // control flow
             "abort", "yes", "no",
         };
+
+        public static class Github
+        {
+            public const string SELF = "https://github.com/erxkk/sbu-bot";
+            public const string DISQORD = "https://github.com/quahu/disqord";
+        }
 
         public static class Bot
         {
@@ -49,7 +55,7 @@ namespace SbuBot
                 public const ulong NO_SERIOUS = 776789839793618984UL;
                 public const ulong SENATE = 775428028771598346UL;
                 public const ulong SHIT_SBU_SAYS = 759189942730883083UL;
-                public const ulong ANNOUNCEMENT = 773225941551153182UL;
+                public const ulong ANNOUNCEMENTS = 773225941551153182UL;
                 public const ulong BOOSTER = 732232124714713229UL;
                 public const ulong PIN = 817448908095488000UL;
             }

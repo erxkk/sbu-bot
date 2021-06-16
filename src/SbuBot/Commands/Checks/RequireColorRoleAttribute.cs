@@ -1,16 +1,18 @@
 using System.Threading.Tasks;
 
+using Disqord.Bot;
+
 using Qmmands;
 
 namespace SbuBot.Commands.Checks
 {
-    public sealed class RequireColorRoleAttribute : SbuCheckAttribute
+    public sealed class RequireColorRoleAttribute : DiscordGuildCheckAttribute
     {
         public bool RequireColorRole { get; }
 
         public RequireColorRoleAttribute(bool requireColorRole = true) => RequireColorRole = requireColorRole;
 
-        protected override async ValueTask<CheckResult> CheckAsync(SbuCommandContext context)
+        public override async ValueTask<CheckResult> CheckAsync(DiscordGuildCommandContext context)
             => (await context.GetOrCreateMemberAsync())!.ColorRole is { } == RequireColorRole
                 ? CheckAttribute.Success()
                 : CheckAttribute.Failure(

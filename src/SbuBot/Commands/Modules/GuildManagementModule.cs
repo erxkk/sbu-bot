@@ -20,7 +20,6 @@ using Qmmands;
 
 using SbuBot.Commands.Checks;
 using SbuBot.Commands.Information;
-using SbuBot.Models;
 
 namespace SbuBot.Commands.Modules
 {
@@ -127,7 +126,6 @@ namespace SbuBot.Commands.Modules
             }
         }
 
-        // TODO: TEST
         [Group("request")]
         [Description("A group of commands for requesting access to restricted channels or permissions.")]
         public sealed class RequestGroup : SbuModuleBase
@@ -139,29 +137,38 @@ namespace SbuBot.Commands.Modules
             public async Task VoteAsync()
             {
                 InteractivityExtension interactivity = Context.Bot.GetInteractivity();
-                MessageReceivedEventArgs waitMessageResult;
-
                 await Context.Author.GrantRoleAsync(SbuGlobals.Role.Perm.SENATE);
-                Context.AttachCleanUp(ctx => ctx.Author.RevokeRoleAsync(SbuGlobals.Role.Perm.SENATE));
 
-                await using (_ = Context.BeginYield())
+                try
                 {
-                    waitMessageResult = await interactivity.WaitForMessageAsync(
-                        SbuGlobals.Channel.SENATE,
-                        e => e.Member.Id == Context.Author.Id
-                    );
-                }
+                    MessageReceivedEventArgs waitMessageResult;
+                    await Reply($"Send your message in {Mention.TextChannel(SbuGlobals.Channel.SENATE)}.");
 
-                if (waitMessageResult is { })
-                {
+                    await using (_ = Context.BeginYield())
+                    {
+                        waitMessageResult = await interactivity.WaitForMessageAsync(
+                            SbuGlobals.Channel.SENATE,
+                            e => e.Member.Id == Context.Author.Id
+                        );
+                    }
+
+                    if (waitMessageResult is null)
+                    {
+                        await Reply(
+                            $"You did not send a message in {Mention.TextChannel(SbuGlobals.Channel.SENATE)} in time."
+                        );
+
+                        return;
+                    }
+
                     await waitMessageResult.Message.AddReactionAsync(new LocalCustomEmoji(SbuGlobals.Emote.Vote.UP));
                     await waitMessageResult.Message.AddReactionAsync(new LocalCustomEmoji(SbuGlobals.Emote.Vote.DOWN));
                     await waitMessageResult.Message.AddReactionAsync(new LocalCustomEmoji(SbuGlobals.Emote.Vote.NONE));
                 }
-
-                await Reply(
-                    $"You did not send a message in {Mention.TextChannel(SbuGlobals.Channel.SENATE)} in time."
-                );
+                finally
+                {
+                    await Context.Author.RevokeRoleAsync(SbuGlobals.Role.Perm.SENATE);
+                }
             }
 
             [Command("quote"), Cooldown(1, 1, CooldownMeasure.Hours, CooldownBucketType.Member)]
@@ -169,27 +176,34 @@ namespace SbuBot.Commands.Modules
             public async Task QuoteAsync()
             {
                 InteractivityExtension interactivity = Context.Bot.GetInteractivity();
-                MessageReceivedEventArgs waitMessageResult;
-
                 await Context.Author.GrantRoleAsync(SbuGlobals.Role.Perm.SHIT_SBU_SAYS);
-                Context.AttachCleanUp(ctx => ctx.Author.RevokeRoleAsync(SbuGlobals.Role.Perm.SHIT_SBU_SAYS));
 
-                await using (_ = Context.BeginYield())
+                try
                 {
-                    waitMessageResult = await interactivity.WaitForMessageAsync(
-                        SbuGlobals.Channel.Based.SHIT_SBU_SAYS,
-                        e => e.Member.Id == Context.Author.Id
-                    );
+                    await Reply($"Send your message in {Mention.TextChannel(SbuGlobals.Channel.Based.SHIT_SBU_SAYS)}.");
+                    MessageReceivedEventArgs waitMessageResult;
+
+                    await using (_ = Context.BeginYield())
+                    {
+                        waitMessageResult = await interactivity.WaitForMessageAsync(
+                            SbuGlobals.Channel.Based.SHIT_SBU_SAYS,
+                            e => e.Member.Id == Context.Author.Id
+                        );
+                    }
+
+                    if (waitMessageResult is null)
+                    {
+                        await Reply(
+                            string.Format(
+                                "You did not send a message in {0} in time.",
+                                Mention.TextChannel(SbuGlobals.Channel.Based.SHIT_SBU_SAYS)
+                            )
+                        );
+                    }
                 }
-
-                if (waitMessageResult is null)
+                finally
                 {
-                    await Reply(
-                        string.Format(
-                            "You did not send a message in {0} in time.",
-                            Mention.TextChannel(SbuGlobals.Channel.Based.SHIT_SBU_SAYS)
-                        )
-                    );
+                    await Context.Author.RevokeRoleAsync(SbuGlobals.Role.Perm.SHIT_SBU_SAYS);
                 }
             }
 
@@ -198,32 +212,38 @@ namespace SbuBot.Commands.Modules
             public async Task AnnounceAsync()
             {
                 InteractivityExtension interactivity = Context.Bot.GetInteractivity();
-                MessageReceivedEventArgs waitMessageResult;
+                await Context.Author.GrantRoleAsync(SbuGlobals.Role.Perm.ANNOUNCEMENTS);
 
-                await Context.Author.GrantRoleAsync(SbuGlobals.Role.Perm.ANNOUNCEMENT);
-                Context.AttachCleanUp(ctx => ctx.Author.RevokeRoleAsync(SbuGlobals.Role.Perm.ANNOUNCEMENT));
-
-                await using (_ = Context.BeginYield())
+                try
                 {
-                    waitMessageResult = await interactivity.WaitForMessageAsync(
-                        SbuGlobals.Channel.ANNOUNCEMENTS,
-                        e => e.Member.Id == Context.Author.Id
-                    );
+                    MessageReceivedEventArgs waitMessageResult;
+                    await Reply($"Send your message in {Mention.TextChannel(SbuGlobals.Channel.ANNOUNCEMENTS)}.");
+
+                    await using (_ = Context.BeginYield())
+                    {
+                        waitMessageResult = await interactivity.WaitForMessageAsync(
+                            SbuGlobals.Channel.ANNOUNCEMENTS,
+                            e => e.Member.Id == Context.Author.Id
+                        );
+                    }
+
+                    if (waitMessageResult is null)
+                    {
+                        await Reply(
+                            string.Format(
+                                "You did not send a message in {0} in time.",
+                                Mention.TextChannel(SbuGlobals.Channel.ANNOUNCEMENTS)
+                            )
+                        );
+                    }
                 }
-
-                if (waitMessageResult is null)
+                finally
                 {
-                    await Reply(
-                        string.Format(
-                            "You did not send a message in {0} in time.",
-                            Mention.TextChannel(SbuGlobals.Channel.ANNOUNCEMENTS)
-                        )
-                    );
+                    await Context.Author.RevokeRoleAsync(SbuGlobals.Role.Perm.ANNOUNCEMENTS);
                 }
             }
         }
 
-        // TODO: TEST
         [Group("emote"), RequireBotGuildPermissions(Permission.ManageEmojis),
          RequireAuthorGuildPermissions(Permission.ManageEmojis)]
         [Description("A group of commands for creating and removing emotes.")]
@@ -270,6 +290,7 @@ namespace SbuBot.Commands.Modules
                         downloaded++;
 
                         await currentStream.CopyToAsync(uploadBuffer, cts.Token);
+                        uploadBuffer.Position = 0;
                         await Context.Guild.CreateEmojiAsync(customEmoji.Name, uploadBuffer);
                     }
                     catch (OperationCanceledException)

@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 
 using Disqord;
+using Disqord.Bot;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -9,23 +10,25 @@ using Qmmands;
 
 namespace SbuBot.Commands.Checks.Parameters
 {
-    public sealed class MustExistInDbAttribute : SbuParameterCheckAttribute
+    public sealed class MustExistInDbAttribute : DiscordGuildParameterCheckAttribute
     {
         public bool MustExistInDb { get; }
 
         public MustExistInDbAttribute(bool mustExistInDb = true) => MustExistInDb = mustExistInDb;
 
-        protected override async ValueTask<CheckResult> CheckAsync(object argument, SbuCommandContext context)
+        public override async ValueTask<CheckResult> CheckAsync(object argument, DiscordGuildCommandContext context)
             => argument switch
             {
-                IMember member => (await context.Db.Members.FirstOrDefaultAsync(m => m.DiscordId == member.Id) is { })
+                IMember member => (await context.GetSbuDbContext()
+                        .Members.FirstOrDefaultAsync(m => m.DiscordId == member.Id) is { })
                     == MustExistInDb
                         ? ParameterCheckAttribute.Success()
                         : ParameterCheckAttribute.Failure(
                             $"The given member must {(MustExistInDb ? "" : "not ")}be in the database for "
                             + "this command."
                         ),
-                IRole role => (await context.Db.ColorRoles.FirstOrDefaultAsync(m => m.DiscordId == role.Id) is { })
+                IRole role => (await context.GetSbuDbContext()
+                        .ColorRoles.FirstOrDefaultAsync(m => m.DiscordId == role.Id) is { })
                     == MustExistInDb
                         ? ParameterCheckAttribute.Success()
                         : ParameterCheckAttribute.Failure(

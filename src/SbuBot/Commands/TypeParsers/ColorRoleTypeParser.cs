@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 
 using Disqord;
+using Disqord.Bot;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -11,12 +12,12 @@ using SbuBot.Models;
 
 namespace SbuBot.Commands.TypeParsers
 {
-    public sealed class ColorRoleTypeParser : SbuTypeParserBase<SbuColorRole>
+    public sealed class ColorRoleTypeParser : DiscordGuildTypeParser<SbuColorRole>
     {
-        protected override async ValueTask<TypeParserResult<SbuColorRole>> ParseAsync(
+        public override async ValueTask<TypeParserResult<SbuColorRole>> ParseAsync(
             Parameter parameter,
             string value,
-            SbuCommandContext context
+            DiscordGuildCommandContext context
         )
         {
             SbuColorRole? role = null;
@@ -29,22 +30,24 @@ namespace SbuBot.Commands.TypeParsers
             {
                 await using (context.BeginYield())
                 {
-                    role = await context.Db.ColorRoles.FirstOrDefaultAsync(
-                        r => r.Id == guidParseResult.Value && r.GuildId == guild.Id,
-                        context.Bot.StoppingToken
-                    );
+                    role = await context.GetSbuDbContext()
+                        .ColorRoles.FirstOrDefaultAsync(
+                            r => r.Id == guidParseResult.Value && r.GuildId == guild.Id,
+                            context.Bot.StoppingToken
+                        );
                 }
             }
             else if (await roleParser.ParseAsync(parameter, value, context) is { IsSuccessful: true } roleParseResult
-                && SbuUtility.IsSbuColorRole(roleParseResult.Value, context.Bot)
+                && SbuUtility.IsSbuColorRole(roleParseResult.Value, (context.Bot as SbuBot)!)
             )
             {
                 await using (context.BeginYield())
                 {
-                    role = await context.Db.ColorRoles.FirstOrDefaultAsync(
-                        r => r.DiscordId == roleParseResult.Value.Id && r.GuildId == guild.Id,
-                        context.Bot.StoppingToken
-                    );
+                    role = await context.GetSbuDbContext()
+                        .ColorRoles.FirstOrDefaultAsync(
+                            r => r.DiscordId == roleParseResult.Value.Id && r.GuildId == guild.Id,
+                            context.Bot.StoppingToken
+                        );
                 }
             }
 

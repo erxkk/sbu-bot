@@ -2,6 +2,8 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 
+using Disqord.Bot;
+
 using Microsoft.Extensions.DependencyInjection;
 
 using Qmmands;
@@ -11,14 +13,14 @@ using SbuBot.Services;
 
 namespace SbuBot.Commands.TypeParsers
 {
-    public sealed class ReminderTypeParser : SbuTypeParserBase<SbuReminder>
+    public sealed class ReminderTypeParser : DiscordGuildTypeParser<SbuReminder>
     {
         public static readonly string[] ACCEPTED_KEYWORDS = { "last" };
 
-        protected override async ValueTask<TypeParserResult<SbuReminder>> ParseAsync(
+        public override async ValueTask<TypeParserResult<SbuReminder>> ParseAsync(
             Parameter parameter,
             string value,
-            SbuCommandContext context
+            DiscordGuildCommandContext context
         )
         {
             ReminderService service = context.Services.GetRequiredService<ReminderService>();

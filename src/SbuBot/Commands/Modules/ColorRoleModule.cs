@@ -38,8 +38,8 @@ namespace SbuBot.Commands.Modules
                 await Context.Author.GrantRoleAsync(role.DiscordId);
 
                 role.OwnerId = (await Context.GetOrCreateMemberAsync()).Id;
-                Context.Db.ColorRoles.Update(role);
-                await Context.Db.SaveChangesAsync();
+                Context.GetSbuDbContext().ColorRoles.Update(role);
+                await Context.GetSbuDbContext().SaveChangesAsync();
 
                 return Reply("Color role claimed.");
             }
@@ -54,7 +54,7 @@ namespace SbuBot.Commands.Modules
             {
                 await Context.Author.GrantRoleAsync(role.Id);
 
-                Context.Db.ColorRoles.Add(
+                Context.GetSbuDbContext().ColorRoles.Add(
                     new(
                         role,
                         (await Context.GetOrCreateMemberAsync()).Id,
@@ -62,7 +62,7 @@ namespace SbuBot.Commands.Modules
                     )
                 );
 
-                await Context.Db.SaveChangesAsync();
+                await Context.GetSbuDbContext().SaveChangesAsync();
 
                 return Reply("Color role claimed.");
             }
@@ -113,7 +113,7 @@ namespace SbuBot.Commands.Modules
 
             await Context.Author.GrantRoleAsync(role.Id);
 
-            Context.Db.ColorRoles.Add(
+            Context.GetSbuDbContext().ColorRoles.Add(
                 new(
                     role,
                     (await Context.GetOrCreateMemberAsync()).Id,
@@ -121,7 +121,7 @@ namespace SbuBot.Commands.Modules
                 )
             );
 
-            await Context.Db.SaveChangesAsync();
+            await Context.GetSbuDbContext().SaveChangesAsync();
 
             return Reply($"{role.Mention} is your new color role.");
         }
@@ -187,8 +187,8 @@ namespace SbuBot.Commands.Modules
 
             await Context.Guild.Roles[(await Context.GetOrCreateMemberAsync()).ColorRole.DiscordId].DeleteAsync();
 
-            Context.Db.ColorRoles.Remove((await Context.GetOrCreateMemberAsync()).ColorRole);
-            await Context.Db.SaveChangesAsync();
+            Context.GetSbuDbContext().ColorRoles.Remove((await Context.GetOrCreateMemberAsync()).ColorRole);
+            await Context.GetSbuDbContext().SaveChangesAsync();
 
             return Reply("Your color role has been removed.");
         }
@@ -209,8 +209,8 @@ namespace SbuBot.Commands.Modules
             await Context.Author.RevokeRoleAsync(role.DiscordId);
 
             role.OwnerId = receiver.Id;
-            Context.Db.ColorRoles.Update(role);
-            await Context.Db.SaveChangesAsync();
+            Context.GetSbuDbContext().ColorRoles.Update(role);
+            await Context.GetSbuDbContext().SaveChangesAsync();
 
             return Reply($"You transferred your color role to {Mention.User(receiver.DiscordId)}.");
         }

@@ -1,19 +1,21 @@
 using System;
 using System.Threading.Tasks;
 
+using Disqord.Bot;
+
 using Qmmands;
 
 using SbuBot.Models;
 
 namespace SbuBot.Commands.Checks.Parameters
 {
-    public sealed class AuthorMustOwnAttribute : SbuParameterCheckAttribute
+    public sealed class AuthorMustOwnAttribute : DiscordGuildParameterCheckAttribute
     {
         public bool AuthorMustOwn { get; }
 
         public AuthorMustOwnAttribute(bool authorMustOwn = true) => AuthorMustOwn = authorMustOwn;
 
-        protected override async ValueTask<CheckResult> CheckAsync(object argument, SbuCommandContext context)
+        public override async ValueTask<CheckResult> CheckAsync(object argument, DiscordGuildCommandContext context)
             => ((argument as ISbuOwnedEntity)!.OwnerId == (await context.GetOrCreateMemberAsync()).Id) == AuthorMustOwn
                 ? ParameterCheckAttribute.Success()
                 : ParameterCheckAttribute.Failure(

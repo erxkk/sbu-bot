@@ -21,7 +21,7 @@ namespace SbuBot
 {
     public sealed class SbuBot : DiscordBot
     {
-        private readonly SbuBotConfiguration _config;
+        public SbuBotConfiguration Config { get; }
         public bool IsLocked { get; set; }
 
         public CachedGuild Sbu => this.GetGuild(SbuGlobals.Guild.SELF);
@@ -34,7 +34,10 @@ namespace SbuBot
             IServiceProvider services,
             DiscordClient client
         ) : base(options, logger, services, client)
-            => _config = config;
+        {
+            Config = config;
+            IsLocked = !Config.IsProduction;
+        }
 
         protected override ValueTask AddTypeParsersAsync(CancellationToken cancellationToken = new())
         {
@@ -69,20 +72,11 @@ namespace SbuBot
             if (message.Author.Id == SbuGlobals.Bot.OWNER)
                 return ValueTask.FromResult(true);
 
-            if (!_config.IsProduction || IsLocked)
+            if (IsLocked)
                 return ValueTask.FromResult(false);
 
             return base.CheckMessageAsync(message);
         }
-
-        public override DiscordCommandContext CreateCommandContext(
-            IPrefix prefix,
-            string input,
-            IGatewayUserMessage message,
-            CachedTextChannel channel
-        ) => new SbuCommandContext(
-            (base.CreateCommandContext(prefix, input, message, channel) as DiscordGuildCommandContext)!
-        );
 
         public override ValueTask<bool> IsOwnerAsync(Snowflake userId) => new(userId == SbuGlobals.Bot.OWNER);
 

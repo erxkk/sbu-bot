@@ -1,6 +1,8 @@
 using System;
 using System.Threading.Tasks;
 
+using Disqord.Bot;
+
 using Microsoft.EntityFrameworkCore;
 
 using Qmmands;
@@ -9,12 +11,12 @@ using SbuBot.Models;
 
 namespace SbuBot.Commands.TypeParsers
 {
-    public sealed class TagTypeParser : SbuTypeParserBase<SbuTag>
+    public sealed class TagTypeParser : DiscordGuildTypeParser<SbuTag>
     {
-        protected override async ValueTask<TypeParserResult<SbuTag>> ParseAsync(
+        public override async ValueTask<TypeParserResult<SbuTag>> ParseAsync(
             Parameter parameter,
             string value,
-            SbuCommandContext context
+            DiscordGuildCommandContext context
         )
         {
             SbuTag? tag;
@@ -26,7 +28,7 @@ namespace SbuBot.Commands.TypeParsers
             {
                 await using (context.BeginYield())
                 {
-                    tag = await context.Db.Tags.FirstOrDefaultAsync(
+                    tag = await context.GetSbuDbContext().Tags.FirstOrDefaultAsync(
                         t => t.Id == guidParseResult.Value && t.GuildId == guild.Id,
                         context.Bot.StoppingToken
                     );
@@ -36,7 +38,7 @@ namespace SbuBot.Commands.TypeParsers
             {
                 await using (context.BeginYield())
                 {
-                    tag = await context.Db.Tags.FirstOrDefaultAsync(
+                    tag = await context.GetSbuDbContext().Tags.FirstOrDefaultAsync(
                         t => t.Name == value && t.GuildId == guild.Id,
                         context.Bot.StoppingToken
                     );
