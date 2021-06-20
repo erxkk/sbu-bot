@@ -17,7 +17,7 @@ using SbuBot.Models;
 
 namespace SbuBot.Services
 {
-    public sealed class ConsistencyService : SbuBotServiceBase
+    public sealed class ConsistencyService : DiscordBotService
     {
         private readonly HashSet<Snowflake> _handledAddedRoles = new();
         private readonly HashSet<Snowflake> _handledRemovedRoles = new();
@@ -129,7 +129,7 @@ namespace SbuBot.Services
                     Bot.StoppingToken
                 ) is null)
                 {
-                    context.Members.Update(new(e.Member, guild.Id));
+                    context.Members.Add(new(e.Member, guild.Id));
                     await context.SaveChangesAsync(Bot.StoppingToken);
                 }
             }
@@ -179,7 +179,7 @@ namespace SbuBot.Services
                 ) is not { } member)
                 {
                     member = new(e.NewMember, guild.Id);
-                    context.Members.Update(member);
+                    context.Members.Add(member);
                 }
 
                 if (await context.ColorRoles.FirstOrDefaultAsync(r => r.GuildId == guild.Id) is { } role)
@@ -270,7 +270,7 @@ namespace SbuBot.Services
                     Bot.StoppingToken
                 ) is null)
                 {
-                    context.Members.Update(new(e.Member, guild.Id));
+                    context.Members.Add(new(e.Member, guild.Id));
                     await context.SaveChangesAsync(Bot.StoppingToken);
                 }
             }

@@ -18,7 +18,7 @@ using SbuBot.Models;
 
 namespace SbuBot.Services
 {
-    public sealed class EvalService : SbuBotServiceBase
+    public sealed class EvalService : DiscordBotService
     {
         public EvalService(ILogger<EvalService> logger, DiscordBotBase bot) : base(logger, bot) { }
 

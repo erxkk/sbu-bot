@@ -1,9 +1,11 @@
 using System;
+using System.Collections;
 using System.Linq;
 using System.Threading.Tasks;
 
 using Disqord;
 using Disqord.Bot;
+using Disqord.Extensions.Interactivity.Menus.Paged;
 using Disqord.Rest;
 
 using Microsoft.Extensions.DependencyInjection;
@@ -100,11 +102,20 @@ namespace SbuBot.Commands.Modules
 
                 case CompilationResult.Failed compilationFailed:
                 {
-                    return MaybePages(
-                        compilationFailed.Diagnostics.Select(d => d.Id),
-                        "Compilation failed",
-                        "Failed at",
-                        startTime + compilationFailed.CompilationTime
+                    // TODO: fill out pages
+                    return Pages(
+                        new Page().WithEmbeds(
+                            new LocalEmbed()
+                                .WithTitle("Compilation failed")
+                                .WithDescription(
+                                    string.Join(
+                                        ", ",
+                                        compilationFailed.Diagnostics
+                                    )
+                                )
+                                .WithFooter("Failed")
+                                .WithTimestamp(startTime + compilationFailed.CompilationTime)
+                        )
                     );
                 }
 
@@ -183,6 +194,13 @@ namespace SbuBot.Commands.Modules
             SbuBot bot = (Context.Bot as SbuBot)!;
             bot.IsLocked = set ?? !bot.IsLocked;
             return Reply($"{(bot.IsLocked ? "Locked" : "Unlocked")} the bot.");
+        }
+
+        [Command("test"), RequireBotOwner]
+        [Description("Sets the bot lock state to the given state, or switches it if no state is specified.")]
+        public DiscordCommandResult Test()
+        {
+            return FilledPages(Enumerable.Range(1, 9).Select(i => i.ToString()), 3);
         }
     }
 }

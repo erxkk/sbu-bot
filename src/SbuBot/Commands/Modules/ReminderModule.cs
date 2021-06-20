@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Disqord;
 using Disqord.Bot;
 using Disqord.Extensions.Interactivity;
+using Disqord.Extensions.Interactivity.Menus.Paged;
 using Disqord.Gateway;
 
 using Microsoft.Extensions.DependencyInjection;
@@ -210,14 +211,23 @@ namespace SbuBot.Commands.Modules
 
                 SbuMember owner = await Context.GetSbuDbContext().GetSbuMemberAsync(Context.Author);
 
-                return MaybePages(
-                    reminders.Values
-                        .Where(r => r.OwnerId == owner.Id)
-                        .Select(
-                            r => $"[`{r.Id}`]({r.JumpUrl})\n{r.DueAt}\n"
-                                + $"{(r.Message is { } ? $"\"{r.Message}\"" : "No Message")}\n"
-                        ),
-                    "Your Reminders"
+                // TODO: fill out pages
+                return Pages(
+                    new Page().WithEmbeds(
+                        new LocalEmbed()
+                            .WithTitle("Your Reminders")
+                            .WithDescription(
+                                string.Join(
+                                    "\n",
+                                    reminders.Values
+                                        .Where(r => r.OwnerId == owner.Id)
+                                        .Select(
+                                            r => $"[`{r.Id}`]({r.JumpUrl})\n{r.DueAt}\n"
+                                                + $"{(r.Message is { } ? $"\"{r.Message}\"" : "No Message")}\n"
+                                        )
+                                )
+                            )
+                    )
                 );
             }
         }

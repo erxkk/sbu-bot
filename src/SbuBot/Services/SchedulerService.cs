@@ -1,16 +1,16 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 
 using Disqord.Bot;
-
-using Kkommon;
+using Disqord.Bot.Hosting;
 
 using Microsoft.Extensions.Logging;
 
 namespace SbuBot.Services
 {
-    public sealed class SchedulerService : SbuBotServiceBase
+    public sealed class SchedulerService : DiscordBotService
     {
         private readonly Dictionary<Guid, Entry> _scheduleEntries = new();
         private readonly object _lock = new();
@@ -33,7 +33,7 @@ namespace SbuBot.Services
         public SchedulerService(ILogger<SchedulerService> logger, DiscordBotBase bot) : base(logger, bot) { }
 
         public Guid Schedule(
-            AsyncAction<Entry> callback,
+            Func<Entry, Task> callback,
             TimeSpan timeSpan,
             int recurringCount = 0,
             CancellationToken cancellationToken = default
@@ -46,7 +46,7 @@ namespace SbuBot.Services
 
         public void Schedule(
             Guid id,
-            AsyncAction<Entry> callback,
+            Func<Entry, Task> callback,
             TimeSpan timeSpan,
             int recurringCount = 0,
             CancellationToken cancellationToken = default
@@ -156,7 +156,7 @@ namespace SbuBot.Services
 
         public sealed record Entry(
             Guid Id,
-            AsyncAction<Entry> Callback,
+            Func<Entry, Task> Callback,
             Timer Timer,
             int RecurringCount,
             CancellationToken CancellationToken = default

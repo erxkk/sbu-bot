@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 using Disqord;
 using Disqord.Bot;
+using Disqord.Bot.Hosting;
 using Disqord.Rest;
 
 using Microsoft.EntityFrameworkCore;
@@ -16,7 +17,7 @@ using SbuBot.Models;
 
 namespace SbuBot.Services
 {
-    public sealed class ReminderService : SbuBotServiceBase
+    public sealed class ReminderService : DiscordBotService
     {
         private readonly SchedulerService _schedulerService;
 
@@ -119,7 +120,7 @@ namespace SbuBot.Services
                         reminder.ChannelId,
                         new LocalMessage()
                             .WithReply(reminder.MessageId, reminder.ChannelId, SbuGlobals.Guild.SELF, false)
-                            .WithEmbed(
+                            .WithEmbeds(
                                 new LocalEmbed()
                                     .WithTitle("Reminder")
                                     .WithDescription(

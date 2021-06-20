@@ -4,10 +4,12 @@ namespace SbuBot
 {
     public static class SbuGlobals
     {
+        public const char BULLET = '•';
+        public const char ELLIPSES = '…';
         public const char DESCRIPTOR_SEPARATOR = '|';
         public const string DEFAULT_PREFIX = "sbu";
 
-        public static readonly Version VERSION = new(0, 2, 6);
+        public static readonly Version VERSION = new(0, 2, 7);
 
         public static readonly string[] RESERVED_KEYWORDS =
         {

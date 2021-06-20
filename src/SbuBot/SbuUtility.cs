@@ -29,7 +29,7 @@ namespace SbuBot
                     true
                 );
 
-            LocalMessage pinMessage = new LocalMessage().WithEmbed(embed);
+            LocalMessage pinMessage = new LocalMessage().WithEmbeds(embed);
 
             if (message.Embeds.Count != 0)
             {

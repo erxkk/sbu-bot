@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Disqord;
 using Disqord.Bot;
 using Disqord.Extensions.Interactivity;
+using Disqord.Extensions.Interactivity.Menus.Paged;
 using Disqord.Gateway;
 
 using Microsoft.EntityFrameworkCore;
@@ -183,9 +184,19 @@ namespace SbuBot.Commands.Modules
                     );
                 }
 
-                return MaybePages(
-                    tags.Select(t => $"**Name:** {t.Name}\n**Content:** {t.Content}"),
-                    $"{(notAuthor ? $"{Mention.User(owner.DiscordId)}'s" : "Your")} Tags"
+                // TODO: fill out pages
+                return Pages(
+                    new Page().WithEmbeds(
+                        new LocalEmbed().WithTitle(
+                                $"{(notAuthor ? $"{Mention.User(owner.DiscordId)}'s" : "Your")} Tags"
+                            )
+                            .WithDescription(
+                                string.Join(
+                                    "\n",
+                                    tags.Select(t => $"**Name:** {t.Name}\n**Content:** {t.Content}")
+                                )
+                            )
+                    )
                 );
             }
 
@@ -200,13 +211,21 @@ namespace SbuBot.Commands.Modules
                 if (tags.Count == 0)
                     return Reply("No tags found.");
 
-                return MaybePages(
-                    tags.Select(
-                        t => string.Format(
-                            "**Name:** {0}\n**Owner:** {1}\n**Content:** {2}",
-                            t.Name,
-                            t.OwnerId is { } ? Mention.User(t.Owner!.DiscordId) : "None",
-                            t.Content
+                // TODO: fill out pages
+                return Pages(
+                    new Page().WithEmbeds(
+                        new LocalEmbed().WithDescription(
+                            string.Join(
+                                "\n",
+                                tags.Select(
+                                    t => string.Format(
+                                        "**Name:** {0}\n**Owner:** {1}\n**Content:** {2}",
+                                        t.Name,
+                                        t.OwnerId is { } ? Mention.User(t.Owner!.DiscordId) : "None",
+                                        t.Content
+                                    )
+                                )
+                            )
                         )
                     )
                 );

@@ -1,28 +1,21 @@
-using System;
 using System.Collections.Generic;
+using System.Linq;
 
+using Disqord;
 using Disqord.Bot;
+using Disqord.Extensions.Interactivity.Menus.Paged;
 
 namespace SbuBot.Commands
 {
     public abstract class SbuModuleBase : DiscordGuildModuleBase
     {
         // TODO: rework with new Menus
-        protected DiscordMenuCommandResult MaybePages(
+        protected DiscordMenuCommandResult FilledPages(
             IEnumerable<string> contents,
-            string? title = null,
-            string? footer = null,
-            DateTimeOffset? timestamp = null,
-            int itemsPerPage = -1,
-            bool filled = true
-        ) => Menu(
-            new MaybePagedEmbed(
-                Context.Author.Id,
-                filled ? SbuUtility.FillPages(contents, itemsPerPage) : contents,
-                title,
-                footer,
-                timestamp
-            )
+            int itemsPerPage = -1
+        ) => Pages(
+            SbuUtility.FillPages(contents, itemsPerPage)
+                .Select(p => new Page().WithEmbeds(new LocalEmbed().WithDescription(p)))
         );
     }
 }
