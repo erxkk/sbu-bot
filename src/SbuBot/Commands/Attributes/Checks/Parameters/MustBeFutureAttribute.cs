@@ -5,7 +5,7 @@ using Disqord.Bot;
 
 using Qmmands;
 
-namespace SbuBot.Commands.Checks.Parameters
+namespace SbuBot.Commands.Attributes.Checks.Parameters
 {
     public class MustBeFutureAttribute : DiscordGuildParameterCheckAttribute
     {

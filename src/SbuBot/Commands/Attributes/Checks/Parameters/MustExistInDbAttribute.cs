@@ -10,7 +10,7 @@ using Qmmands;
 
 using SbuBot.Extensions;
 
-namespace SbuBot.Commands.Checks.Parameters
+namespace SbuBot.Commands.Attributes.Checks.Parameters
 {
     public sealed class MustExistInDbAttribute : DiscordGuildParameterCheckAttribute
     {

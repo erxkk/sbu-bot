@@ -12,7 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 using Qmmands;
 
-using SbuBot.Commands.Information;
+using SbuBot.Commands.Attributes;
 using SbuBot.Services;
 
 namespace SbuBot.Commands.Modules
@@ -102,20 +102,12 @@ namespace SbuBot.Commands.Modules
 
                 case CompilationResult.Failed compilationFailed:
                 {
-                    // TODO: fill out pages
-                    return Pages(
-                        new Page().WithEmbeds(
-                            new LocalEmbed()
-                                .WithTitle("Compilation failed")
-                                .WithDescription(
-                                    string.Join(
-                                        ", ",
-                                        compilationFailed.Diagnostics
-                                    )
-                                )
-                                .WithFooter("Failed")
-                                .WithTimestamp(startTime + compilationFailed.CompilationTime)
-                        )
+                    return FilledPages(
+                        compilationFailed.Diagnostics.Select(d => d.ToString()),
+                        embedModifier: embed => embed
+                            .WithTitle("Compilation failed")
+                            .WithFooter("Failed")
+                            .WithTimestamp(startTime + compilationFailed.CompilationTime)
                     );
                 }
 
@@ -200,7 +192,8 @@ namespace SbuBot.Commands.Modules
         [Description("Sets the bot lock state to the given state, or switches it if no state is specified.")]
         public DiscordCommandResult Test()
         {
-            return FilledPages(Enumerable.Range(1, 9).Select(i => i.ToString()), 3);
+            //return FilledPages(Enumerable.Range(1, 9).Select(i => i.ToString()), 3);
+            return Help(Context.Bot.Commands.GetAllCommands().First(c => c.Aliases.Contains("as")));
         }
     }
 }

@@ -10,11 +10,9 @@ using Disqord.Extensions.Interactivity.Menus.Paged;
 using Disqord.Gateway;
 using Disqord.Rest;
 
-using Kkommon.Extensions.AsyncEnumerable;
-
 using Qmmands;
 
-using SbuBot.Commands.Information;
+using SbuBot.Commands.Attributes;
 using SbuBot.Extensions;
 
 namespace SbuBot.Commands.Modules
@@ -135,19 +133,9 @@ namespace SbuBot.Commands.Modules
                 if (!matches.Any())
                     return Reply("Couldn't find any commands for that input");
 
-                // TODO: fill out pages
-                return Pages(
-                    new Page().WithEmbeds(
-                        new LocalEmbed().WithTitle("Command List")
-                            .WithDescription(
-                                string.Join(
-                                    "\n",
-                                    matches.Select(
-                                        cmd => cmd.IsEnabled ? $"`{cmd.GetSignature()}`" : $"~~`{cmd.GetSignature()}`~~"
-                                    )
-                                )
-                            )
-                    )
+                return FilledPages(
+                    matches.Select(cmd => cmd.IsEnabled ? $"`{cmd.GetSignature()}`" : $"~~`{cmd.GetSignature()}`~~"),
+                    embedModifier: embed => embed.WithTitle("Command List")
                 );
             }
 
@@ -155,41 +143,26 @@ namespace SbuBot.Commands.Modules
             public async ValueTask<DiscordCommandResult> ListAsync()
             {
                 IEnumerable<Command> commands = Context.Bot.Commands.GetAllCommands();
+                List<Command> filteredCommands = new();
 
                 if (!Context.Author.GetGuildPermissions().Administrator)
-                    commands = await filterOutFailedChecks(commands, Context).CollectAsync();
-
-                // TODO: fill out pages
-                return Pages(
-                    new Page().WithEmbeds(
-                        new LocalEmbed().WithTitle("Command List")
-                            .WithDescription(
-                                string.Join(
-                                    "\n",
-                                    commands.Select(
-                                        cmd => cmd.IsEnabled ? $"`{cmd.GetSignature()}`" : $"~~`{cmd.GetSignature()}`~~"
-                                    )
-                                )
-                            )
-                    )
-                );
-
-                static async IAsyncEnumerable<Command> filterOutFailedChecks(
-                    IEnumerable<Command> source,
-                    DiscordGuildCommandContext context
-                )
                 {
-                    foreach (var cmd in source)
+                    foreach (var cmd in commands)
                     {
-                        if (await cmd.RunChecksAsync(context) is { IsSuccessful: true })
-                            yield return cmd;
+                        if (await cmd.RunChecksAsync(Context) is { IsSuccessful: true })
+                            filteredCommands.Add(cmd);
                     }
                 }
+
+                return FilledPages(
+                    commands.Select(cmd => cmd.IsEnabled ? $"`{cmd.GetSignature()}`" : $"~~`{cmd.GetSignature()}`~~"),
+                    embedModifier: embed => embed.WithTitle("Command List")
+                );
             }
         }
 
         [Command("help", "h", "how")]
-        public DiscordCommandResult Help([OverrideDefault("show all commands")] string? command = null)
+        public DiscordCommandResult Help([OverrideDefault("list all commands")] string? command = null)
         {
             if (command is null)
             {
@@ -203,37 +176,30 @@ namespace SbuBot.Commands.Modules
             if (matches.Count == 0)
                 return Reply("No commands found.");
 
-            // TODO: fill out pages
-            return Pages(
-                new Page().WithEmbeds(
-                    new LocalEmbed().WithDescription(
-                        string.Join(
-                            "\n",
-                            matches.Select(c => c.Command)
-                                .Select(
-                                    cmd =>
-                                    {
-                                        StringBuilder builder = new();
+            return FilledPages(
+                matches.Select(c => c.Command)
+                    .Select(
+                        cmd =>
+                        {
+                            StringBuilder builder = new();
 
-                                        builder.Append(cmd.IsEnabled ? "`" : "~~`")
-                                            .Append(cmd.GetSignature())
-                                            .AppendLine(cmd.IsEnabled ? "`" : "`~~");
+                            builder.Append(cmd.IsEnabled ? "`" : "~~`")
+                                .Append(cmd.GetSignature())
+                                .AppendLine(cmd.IsEnabled ? "`" : "`~~");
 
-                                        if (!cmd.IsEnabled)
-                                            return builder.ToString();
+                            if (!cmd.IsEnabled)
+                                return builder.ToString();
 
-                                        if (cmd.Description is { })
-                                            builder.AppendLine("Description:").AppendLine(cmd.Description);
+                            if (cmd.Description is { })
+                                builder.AppendLine("Description:").AppendLine(cmd.Description);
 
-                                        if (cmd.Remarks is { })
-                                            builder.AppendLine("Remarks:").AppendLine(cmd.Remarks);
+                            if (cmd.Remarks is { })
+                                builder.AppendLine("Remarks:").AppendLine(cmd.Remarks);
 
-                                        return builder.ToString();
-                                    }
-                                )
-                        )
-                    )
-                )
+                            return builder.ToString();
+                        }
+                    ),
+                embedModifier: embed => embed.WithTitle("Commands")
             );
         }
     }

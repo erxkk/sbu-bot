@@ -6,7 +6,7 @@ using Qmmands;
 
 using SbuBot.Extensions;
 
-namespace SbuBot.Commands.Checks
+namespace SbuBot.Commands.Attributes.Checks
 {
     public sealed class RequireColorRoleAttribute : DiscordGuildCheckAttribute
     {

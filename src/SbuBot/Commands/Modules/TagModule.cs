@@ -13,9 +13,9 @@ using Microsoft.EntityFrameworkCore;
 
 using Qmmands;
 
-using SbuBot.Commands.Checks.Parameters;
-using SbuBot.Commands.Descriptors;
-using SbuBot.Commands.Information;
+using SbuBot.Commands.Attributes;
+using SbuBot.Commands.Attributes.Checks.Parameters;
+using SbuBot.Commands.TypeParsers.Descriptors;
 using SbuBot.Extensions;
 using SbuBot.Models;
 
@@ -184,18 +184,10 @@ namespace SbuBot.Commands.Modules
                     );
                 }
 
-                // TODO: fill out pages
-                return Pages(
-                    new Page().WithEmbeds(
-                        new LocalEmbed().WithTitle(
-                                $"{(notAuthor ? $"{Mention.User(owner.DiscordId)}'s" : "Your")} Tags"
-                            )
-                            .WithDescription(
-                                string.Join(
-                                    "\n",
-                                    tags.Select(t => $"**Name:** {t.Name}\n**Content:** {t.Content}")
-                                )
-                            )
+                return FilledPages(
+                    tags.Select(t => $"**Name:** {t.Name}\n**Content:** {t.Content}"),
+                    embedModifier: embed => embed.WithTitle(
+                        $"{(notAuthor ? $"{Mention.User(owner.DiscordId)}'s" : "Your")} Tags"
                     )
                 );
             }
@@ -211,23 +203,16 @@ namespace SbuBot.Commands.Modules
                 if (tags.Count == 0)
                     return Reply("No tags found.");
 
-                // TODO: fill out pages
-                return Pages(
-                    new Page().WithEmbeds(
-                        new LocalEmbed().WithDescription(
-                            string.Join(
-                                "\n",
-                                tags.Select(
-                                    t => string.Format(
-                                        "**Name:** {0}\n**Owner:** {1}\n**Content:** {2}",
-                                        t.Name,
-                                        t.OwnerId is { } ? Mention.User(t.Owner!.DiscordId) : "None",
-                                        t.Content
-                                    )
-                                )
-                            )
+                return FilledPages(
+                    tags.Select(
+                        t => string.Format(
+                            "**Name:** {0}\n**Owner:** {1}\n**Content:** {2}",
+                            t.Name,
+                            t.OwnerId is { } ? Mention.User(t.Owner!.DiscordId) : "None",
+                            t.Content
                         )
-                    )
+                    ),
+                    embedModifier: embed => embed.WithTitle("Tags")
                 );
             }
         }

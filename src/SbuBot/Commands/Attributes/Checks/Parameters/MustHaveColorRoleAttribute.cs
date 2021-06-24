@@ -11,7 +11,7 @@ using SbuBot.Exceptions;
 using SbuBot.Extensions;
 using SbuBot.Models;
 
-namespace SbuBot.Commands.Checks.Parameters
+namespace SbuBot.Commands.Attributes.Checks.Parameters
 {
     public sealed class MustHaveColorRoleAttribute : DiscordGuildParameterCheckAttribute
     {

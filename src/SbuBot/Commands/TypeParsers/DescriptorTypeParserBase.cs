@@ -6,7 +6,7 @@ using Disqord.Bot;
 
 using Qmmands;
 
-using SbuBot.Commands.Descriptors;
+using SbuBot.Commands.TypeParsers.Descriptors;
 
 namespace SbuBot.Commands.TypeParsers
 {

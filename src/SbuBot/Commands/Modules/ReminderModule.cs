@@ -12,8 +12,8 @@ using Microsoft.Extensions.DependencyInjection;
 
 using Qmmands;
 
-using SbuBot.Commands.Checks.Parameters;
-using SbuBot.Commands.Descriptors;
+using SbuBot.Commands.Attributes.Checks.Parameters;
+using SbuBot.Commands.TypeParsers.Descriptors;
 using SbuBot.Extensions;
 using SbuBot.Models;
 using SbuBot.Services;
@@ -211,23 +211,14 @@ namespace SbuBot.Commands.Modules
 
                 SbuMember owner = await Context.GetSbuDbContext().GetSbuMemberAsync(Context.Author);
 
-                // TODO: fill out pages
-                return Pages(
-                    new Page().WithEmbeds(
-                        new LocalEmbed()
-                            .WithTitle("Your Reminders")
-                            .WithDescription(
-                                string.Join(
-                                    "\n",
-                                    reminders.Values
-                                        .Where(r => r.OwnerId == owner.Id)
-                                        .Select(
-                                            r => $"[`{r.Id}`]({r.JumpUrl})\n{r.DueAt}\n"
-                                                + $"{(r.Message is { } ? $"\"{r.Message}\"" : "No Message")}\n"
-                                        )
-                                )
-                            )
-                    )
+                return FilledPages(
+                    reminders.Values
+                        .Where(r => r.OwnerId == owner.Id)
+                        .Select(
+                            r => $"[`{r.Id}`]({r.JumpUrl})\n{r.DueAt}\n"
+                                + $"{(r.Message is { } ? $"\"{r.Message}\"" : "No Message")}\n"
+                        ),
+                    embedModifier: embed => embed.WithTitle("Your Reminders")
                 );
             }
         }

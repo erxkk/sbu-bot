@@ -11,8 +11,8 @@ using Microsoft.Extensions.DependencyInjection;
 
 using Qmmands;
 
-using SbuBot.Commands.Checks;
-using SbuBot.Commands.Checks.Parameters;
+using SbuBot.Commands.Attributes.Checks;
+using SbuBot.Commands.Attributes.Checks.Parameters;
 using SbuBot.Extensions;
 using SbuBot.Models;
 using SbuBot.Services;

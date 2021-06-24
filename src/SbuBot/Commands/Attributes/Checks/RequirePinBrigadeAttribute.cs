@@ -7,7 +7,7 @@ using Qmmands;
 
 using SbuBot.Exceptions;
 
-namespace SbuBot.Commands.Checks
+namespace SbuBot.Commands.Attributes.Checks
 {
     public sealed class RequirePinBrigadeAttribute : DiscordGuildCheckAttribute
     {

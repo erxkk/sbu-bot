@@ -8,7 +8,7 @@ using Qmmands;
 
 using SbuBot.Models;
 
-namespace SbuBot.Commands.Checks.Parameters
+namespace SbuBot.Commands.Attributes.Checks.Parameters
 {
     public sealed class MustBeOwnedAttribute : DiscordGuildParameterCheckAttribute
     {

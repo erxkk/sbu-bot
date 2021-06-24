@@ -1,6 +1,6 @@
 using SbuBot.Models;
 
-namespace SbuBot.Commands.Descriptors
+namespace SbuBot.Commands.TypeParsers.Descriptors
 {
     public readonly struct TagDescriptor : IDescriptor
     {

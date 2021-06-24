@@ -6,7 +6,7 @@ using Disqord.Bot;
 
 using Qmmands;
 
-using SbuBot.Commands.Information;
+using SbuBot.Commands.Attributes;
 
 namespace SbuBot
 {

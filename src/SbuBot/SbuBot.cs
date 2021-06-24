@@ -14,7 +14,7 @@ using Microsoft.Extensions.Options;
 using Qmmands;
 
 using SbuBot.Commands;
-using SbuBot.Commands.Descriptors;
+using SbuBot.Commands.TypeParsers.Descriptors;
 using SbuBot.Commands.TypeParsers;
 
 namespace SbuBot

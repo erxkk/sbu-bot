@@ -1,6 +1,6 @@
 using System;
 
-namespace SbuBot.Commands.Information
+namespace SbuBot.Commands.Attributes
 {
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class)]
     public sealed class UsageAttribute : Attribute

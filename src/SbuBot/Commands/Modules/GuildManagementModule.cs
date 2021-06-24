@@ -18,8 +18,8 @@ using Microsoft.Extensions.DependencyInjection;
 
 using Qmmands;
 
-using SbuBot.Commands.Checks;
-using SbuBot.Commands.Information;
+using SbuBot.Commands.Attributes;
+using SbuBot.Commands.Attributes.Checks;
 using SbuBot.Exceptions;
 using SbuBot.Extensions;
 
