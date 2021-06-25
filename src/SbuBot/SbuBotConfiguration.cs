@@ -17,11 +17,11 @@ namespace SbuBot
 
             DbConnectionString = string.Format(
                 "Host={0};Database={1};Username={2};Password={3};Port={4};Include Error Detail={5};",
-                configuration["Postgres:Host"],
-                configuration["Postgres:Database"],
-                configuration["Postgres:Username"],
-                configuration["Postgres:Password"],
-                configuration["Postgres:Port"],
+                configuration["Psql_Host"],
+                configuration["Psql_Database"],
+                configuration["Psql_Username"],
+                configuration["Psql_Password"],
+                configuration["Psql_Port"],
                 !IsProduction
             );
         }
