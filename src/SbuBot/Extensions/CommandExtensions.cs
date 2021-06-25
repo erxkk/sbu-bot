@@ -34,9 +34,9 @@ namespace SbuBot
                 builder.Append(parameter.IsOptional ? '[' : '<').Append(parameter.Name);
 
                 if (parameter.IsMultiple)
-                    builder.Append(',').Append(SbuGlobals.ELLIPSES);
+                    builder.Append(SbuGlobals.ELLIPSES);
 
-                if (parameter.IsOptional)
+                if (parameter.IsOptional && !parameter.IsMultiple)
                 {
                     builder.Append(" = ");
 

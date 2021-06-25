@@ -23,10 +23,10 @@ namespace SbuBot.Models
         public string Content { get; set; }
 
         // nav properties
-        [HideOnSerialize, NotLogged]
+        [NotLogged]
         public SbuMember? Owner { get; }
 
-        [HideOnSerialize, NotLogged]
+        [NotLogged]
         public SbuGuild? Guild { get; }
 
         public SbuTag(Snowflake ownerId, Snowflake guildId, string name, string content)
@@ -40,6 +40,7 @@ namespace SbuBot.Models
 
 #region EFCore
 
+#nullable disable
         internal SbuTag(Guid id, Snowflake? ownerId, Snowflake guildId, string name, string content)
         {
             Id = id;

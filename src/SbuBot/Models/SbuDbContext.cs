@@ -36,37 +36,55 @@ namespace SbuBot.Models
 
         public Task<SbuColorRole?> GetColorRoleAsync(
             IRole member,
-            Func<IQueryable<SbuColorRole>, IQueryable<SbuColorRole>>? query = null
-        ) => GetColorRoleAsync(member.Id, member.GuildId, query);
+            Func<IQueryable<SbuColorRole>, IQueryable<SbuColorRole>>? query = null,
+            CancellationToken cancellationToken = default
+        ) => GetColorRoleAsync(member.Id, member.GuildId, query, cancellationToken);
 
-        public async Task<SbuColorRole?> GetColorRoleAsync(
+        public Task<SbuColorRole?> GetColorRoleAsync(
             Snowflake roleId,
             Snowflake guildId,
-            Func<IQueryable<SbuColorRole>, IQueryable<SbuColorRole>>? query = null
-        ) => await (query is { } ? query(ColorRoles) : ColorRoles)
-            .FirstOrDefaultAsync(m => m.Id == roleId && m.GuildId == guildId);
+            Func<IQueryable<SbuColorRole>, IQueryable<SbuColorRole>>? query = null,
+            CancellationToken cancellationToken = default
+        ) => (query is { } ? query(ColorRoles) : ColorRoles)
+            .FirstOrDefaultAsync(
+                m => m.Id == roleId && m.GuildId == guildId,
+                _sbuBot?.StoppingToken ?? cancellationToken
+            )!;
 
         public Task<SbuMember?> GetMemberAsync(
             IMember member,
-            Func<IQueryable<SbuMember>, IQueryable<SbuMember>>? query = null
-        ) => GetMemberAsync(member.Id, member.GuildId, query);
+            Func<IQueryable<SbuMember>, IQueryable<SbuMember>>? query = null,
+            CancellationToken cancellationToken = default
+        ) => GetMemberAsync(member.Id, member.GuildId, query, cancellationToken);
 
-        public async Task<SbuMember?> GetMemberAsync(
+        public Task<SbuMember?> GetMemberAsync(
             Snowflake memberId,
             Snowflake guildId,
-            Func<IQueryable<SbuMember>, IQueryable<SbuMember>>? query = null
-        ) => await (query is { } ? query(Members) : Members)
-            .FirstOrDefaultAsync(m => m.Id == memberId && m.GuildId == guildId);
+            Func<IQueryable<SbuMember>, IQueryable<SbuMember>>? query = null,
+            CancellationToken cancellationToken = default
+        ) => (query is { } ? query(Members) : Members)
+            .FirstOrDefaultAsync(
+                m => m.Id == memberId && m.GuildId == guildId,
+                _sbuBot?.StoppingToken ?? cancellationToken
+            )!;
 
         public Task<SbuGuild> GetGuildAsync(
             IGuild guild,
-            Func<IQueryable<SbuGuild>, IQueryable<SbuGuild>>? query = null
-        ) => GetGuildAsync(guild.Id, query);
+            Func<IQueryable<SbuGuild>, IQueryable<SbuGuild>>? query = null,
+            CancellationToken cancellationToken = default
+        ) => GetGuildAsync(guild.Id, query, cancellationToken);
 
-        public async Task<SbuGuild> GetGuildAsync(
+        public Task<SbuGuild> GetGuildAsync(
             Snowflake guildId,
-            Func<IQueryable<SbuGuild>, IQueryable<SbuGuild>>? query = null
-        ) => await (query is { } ? query(Guilds) : Guilds).FirstAsync(m => m.Id == guildId);
+            Func<IQueryable<SbuGuild>, IQueryable<SbuGuild>>? query = null,
+            CancellationToken cancellationToken = default
+        ) => (query is { } ? query(Guilds) : Guilds).FirstAsync(
+            m => m.Id == guildId,
+            _sbuBot?.StoppingToken ?? cancellationToken
+        );
+
+        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+            => base.SaveChangesAsync(_sbuBot?.StoppingToken ?? cancellationToken);
 
 #region Configuration
 
@@ -95,9 +113,6 @@ namespace SbuBot.Models
             modelBuilder.UseValueConverterForType(datetimeConverter);
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(SbuDbContext).Assembly);
         }
-
-        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
-            => base.SaveChangesAsync(_sbuBot?.StoppingToken ?? cancellationToken);
 
         internal sealed class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<SbuDbContext>
         {

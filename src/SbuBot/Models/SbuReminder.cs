@@ -11,13 +11,14 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace SbuBot.Models
 {
-    public sealed class SbuReminder : SbuEntityBase, ISbuEntity, ISbuOwnedEntity, ISbuGuildEntity
+    public sealed class SbuReminder : SbuEntityBase, ISbuOwnedEntity, ISbuGuildEntity
     {
         public const int MAX_MESSAGE_LENGTH = 1024;
         public Guid Id { get; }
 
         [NotNull]
         public Snowflake? OwnerId { get; set; }
+
         public Snowflake GuildId { get; }
         public Snowflake ChannelId { get; }
         public Snowflake MessageId { get; }
@@ -25,7 +26,7 @@ namespace SbuBot.Models
         public DateTimeOffset CreatedAt { get; }
         public DateTimeOffset DueAt { get; set; }
 
-        [HideOnSerialize, NotLogged]
+        [NotLogged]
         public string JumpUrl => string.Format(
             "https://discord.com/channels/{0}/{1}/{2}",
             GuildId,
@@ -34,10 +35,10 @@ namespace SbuBot.Models
         );
 
         // nav properties
-        [HideOnSerialize, NotLogged]
+        [NotLogged]
         public SbuMember? Owner { get; }
 
-        [HideOnSerialize, NotLogged]
+        [NotLogged]
         public SbuGuild? Guild { get; }
 
         public SbuReminder(
@@ -79,6 +80,8 @@ namespace SbuBot.Models
         }
 
 #region EFCore
+
+#nullable disable
 
         internal SbuReminder(
             Guid id,

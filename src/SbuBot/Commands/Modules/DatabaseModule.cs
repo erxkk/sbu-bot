@@ -57,11 +57,21 @@ namespace SbuBot.Commands.Modules
 
             SbuGuild guild = await dbContext.GetGuildAsync(Context.Guild);
 
-            // BUG: does not insert anything
-            // TODO: prefetch by guildId
+            Dictionary<Snowflake, SbuMember> members = await dbContext.Members
+                .Where(m => m.GuildId == Context.Guild.Id)
+                .ToDictionaryAsync(k => k.Id, v => v, Context.Bot.StoppingToken);
+
+            Dictionary<Snowflake, SbuColorRole> colorRoles = await dbContext.ColorRoles
+                .Where(cr => cr.GuildId == Context.Guild.Id)
+                .ToDictionaryAsync(k => k.Id, v => v, Context.Bot.StoppingToken);
+
             foreach ((IMember member, IRole? role) in userRolePairs)
             {
-                if (await dbContext.GetMemberAsync(Context.Author) is not { } dbMember)
+                if (members.TryGetValue(member.Id, out var dbMember))
+                {
+                    dbContext.Members.Update(dbMember);
+                }
+                else
                 {
                     dbMember = new(member, guild.Id);
                     dbContext.Members.Add(dbMember);
@@ -72,7 +82,7 @@ namespace SbuBot.Commands.Modules
                 if (role is null)
                     continue;
 
-                if (await dbContext.GetColorRoleAsync(role) is { } dbRole)
+                if (colorRoles.TryGetValue(role.Id, out var dbRole))
                 {
                     dbRole.OwnerId = dbMember.Id;
                     dbContext.ColorRoles.Update(dbRole);
@@ -103,8 +113,7 @@ namespace SbuBot.Commands.Modules
             if (owner.Id == receiver.Id)
                 return Reply("The given members cannot be the same.");
 
-            List<SbuTag> tags = await dbContext
-                .Tags
+            List<SbuTag> tags = await dbContext.Tags
                 .Where(t => t.OwnerId == owner.Id)
                 .ToListAsync(Context.Bot.StoppingToken);
 

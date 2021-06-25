@@ -10,7 +10,7 @@ using SbuBot.Models;
 namespace SbuBot.Migrations
 {
     [DbContext(typeof(SbuDbContext))]
-    [Migration("20210625140413_FixedRelations")]
+    [Migration("20210625152700_FixedRelations")]
     partial class FixedRelations
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -32,12 +32,9 @@ namespace SbuBot.Migrations
                     b.Property<ulong?>("OwnerId")
                         .HasColumnType("numeric(20,0)");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id", "GuildId");
 
                     b.HasIndex("GuildId");
-
-                    b.HasIndex("OwnerId")
-                        .IsUnique();
 
                     b.HasIndex("OwnerId", "GuildId")
                         .IsUnique();
@@ -63,7 +60,7 @@ namespace SbuBot.Migrations
                     b.Property<ulong>("GuildId")
                         .HasColumnType("numeric(20,0)");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id", "GuildId");
 
                     b.HasIndex("GuildId");
 
@@ -151,7 +148,7 @@ namespace SbuBot.Migrations
 
                     b.HasOne("SbuBot.Models.SbuMember", "Owner")
                         .WithOne("ColorRole")
-                        .HasForeignKey("SbuBot.Models.SbuColorRole", "OwnerId")
+                        .HasForeignKey("SbuBot.Models.SbuColorRole", "OwnerId", "GuildId")
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Guild");
@@ -181,6 +178,7 @@ namespace SbuBot.Migrations
                     b.HasOne("SbuBot.Models.SbuMember", "Owner")
                         .WithMany("Reminders")
                         .HasForeignKey("OwnerId")
+                        .HasPrincipalKey("Id")
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Guild");
@@ -199,6 +197,7 @@ namespace SbuBot.Migrations
                     b.HasOne("SbuBot.Models.SbuMember", "Owner")
                         .WithMany("Tags")
                         .HasForeignKey("OwnerId")
+                        .HasPrincipalKey("Id")
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Guild");

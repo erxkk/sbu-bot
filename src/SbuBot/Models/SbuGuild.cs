@@ -14,22 +14,24 @@ namespace SbuBot.Models
         public Snowflake Id { get; }
 
         // nav properties
-        [HideOnSerialize, NotLogged]
+        [NotLogged]
         public List<SbuMember> Members { get; } = new();
 
-        [HideOnSerialize, NotLogged]
+        [NotLogged]
         public List<SbuColorRole> ColorRoles { get; } = new();
 
-        [HideOnSerialize, NotLogged]
+        [NotLogged]
         public List<SbuReminder> Reminders { get; } = new();
 
-        [HideOnSerialize, NotLogged]
+        [NotLogged]
         public List<SbuTag> Tags { get; } = new();
 
         public SbuGuild(Snowflake id) => Id = id;
         public SbuGuild(IGuild guild) => Id = guild.Id;
 
 #region EFCore
+
+#nullable disable
 
         internal sealed class EntityTypeConfiguration : IEntityTypeConfiguration<SbuGuild>
         {

@@ -27,7 +27,8 @@ namespace SbuBot.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Members", x => x.Id);
+                    table.PrimaryKey("PK_Members", x => new { x.Id, x.GuildId });
+                    table.UniqueConstraint("AK_Members_Id", x => x.Id);
                     table.ForeignKey(
                         name: "FK_Members_Guilds_GuildId",
                         column: x => x.GuildId,
@@ -41,12 +42,12 @@ namespace SbuBot.Migrations
                 columns: table => new
                 {
                     Id = table.Column<ulong>(type: "numeric(20,0)", nullable: false),
-                    OwnerId = table.Column<ulong>(type: "numeric(20,0)", nullable: true),
-                    GuildId = table.Column<ulong>(type: "numeric(20,0)", nullable: false)
+                    GuildId = table.Column<ulong>(type: "numeric(20,0)", nullable: false),
+                    OwnerId = table.Column<ulong>(type: "numeric(20,0)", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ColorRoles", x => x.Id);
+                    table.PrimaryKey("PK_ColorRoles", x => new { x.Id, x.GuildId });
                     table.ForeignKey(
                         name: "FK_ColorRoles_Guilds_GuildId",
                         column: x => x.GuildId,
@@ -54,10 +55,10 @@ namespace SbuBot.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.SetNull);
                     table.ForeignKey(
-                        name: "FK_ColorRoles_Members_OwnerId",
-                        column: x => x.OwnerId,
+                        name: "FK_ColorRoles_Members_OwnerId_GuildId",
+                        columns: x => new { x.OwnerId, x.GuildId },
                         principalTable: "Members",
-                        principalColumn: "Id",
+                        principalColumns: new[] { "Id", "GuildId" },
                         onDelete: ReferentialAction.SetNull);
                 });
 
@@ -122,12 +123,6 @@ namespace SbuBot.Migrations
                 name: "IX_ColorRoles_GuildId",
                 table: "ColorRoles",
                 column: "GuildId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ColorRoles_OwnerId",
-                table: "ColorRoles",
-                column: "OwnerId",
-                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_ColorRoles_OwnerId_GuildId",

@@ -5,6 +5,8 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 
+using Destructurama.Attributed;
+
 using SbuBot.Extensions;
 
 namespace SbuBot.Models
@@ -33,11 +35,7 @@ namespace SbuBot.Models
                         _ => throw new ArgumentOutOfRangeException(nameof(members), memberInfo, null),
                     };
 
-                    value = memberInfo.GetCustomAttribute<HideOnSerializeAttribute>() is { }
-                        ? HiddenValue.INSTANCE
-                        : value;
-
-                    if (value is HiddenValue)
+                    if (memberInfo.GetCustomAttribute<NotLoggedAttribute>() is { })
                         continue;
 
                     stringBuilder!.AppendLine(
@@ -50,7 +48,8 @@ namespace SbuBot.Models
                                 string @string => $"\"{@string}\"",
                                 IEnumerable enumerable =>
                                     "Enumerable<{"
-                                    + (enumerable.GetType().GenericTypeArguments.FirstOrDefault()?.Name ?? "Unknown")
+                                    + (enumerable.GetType().GenericTypeArguments.FirstOrDefault()?.Name
+                                        ?? "Unknown")
                                     + ">",
                                 { } => value.ToString(),
                                 null => "<null>",

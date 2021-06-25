@@ -12,13 +12,13 @@ namespace SbuBot.Models
         public const int MAX_NAME_LENGTH = 100;
         public Snowflake Id { get; }
         public Snowflake? OwnerId { get; set; }
-        public Snowflake GuildId { get; set; }
+        public Snowflake GuildId { get; }
 
         // nav properties
-        [HideOnSerialize, NotLogged]
-        public SbuMember? Owner { get; set; }
+        [NotLogged]
+        public SbuMember? Owner { get; }
 
-        [HideOnSerialize, NotLogged]
+        [NotLogged]
         public SbuGuild? Guild { get; }
 
         public SbuColorRole(Snowflake id, Snowflake? ownerId, Snowflake guildId)
@@ -37,20 +37,21 @@ namespace SbuBot.Models
 
 #region EFCore
 
+#nullable disable
+
         internal sealed class EntityTypeConfiguration : IEntityTypeConfiguration<SbuColorRole>
         {
             public void Configure(EntityTypeBuilder<SbuColorRole> builder)
             {
-                builder.HasKey(cr => cr.Id);
-                builder.HasIndex(cr => new { cr.OwnerId, cr.GuildId }).IsUnique();
+                builder.HasKey(cr => new { cr.Id, cr.GuildId });
 
                 builder.Property(cr => cr.OwnerId);
                 builder.Property(cr => cr.GuildId);
 
                 builder.HasOne(cr => cr.Owner)
                     .WithOne(m => m.ColorRole)
-                    .HasForeignKey<SbuColorRole>(cr => cr.OwnerId)
-                    .HasPrincipalKey<SbuMember>(m => m.Id)
+                    .HasForeignKey<SbuColorRole>(cr => new { cr.OwnerId, cr.GuildId })
+                    .HasPrincipalKey<SbuMember>(m => new { m.Id, m.GuildId })
                     .OnDelete(DeleteBehavior.SetNull);
 
                 builder.HasOne(cr => cr.Guild)
