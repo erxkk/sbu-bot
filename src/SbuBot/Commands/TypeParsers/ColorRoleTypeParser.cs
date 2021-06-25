@@ -1,4 +1,3 @@
-using System;
 using System.Threading.Tasks;
 
 using Disqord;
@@ -22,23 +21,11 @@ namespace SbuBot.Commands.TypeParsers
         )
         {
             SbuColorRole? role = null;
-            SbuGuild guild = await context.GetSbuDbContext().GetSbuGuildAsync(context.Guild);
+            SbuGuild guild = await context.GetSbuDbContext().GetGuildAsync(context.Guild);
 
-            TypeParser<Guid> guidParser = context.Bot.Commands.GetTypeParser<Guid>();
             TypeParser<IRole> roleParser = context.Bot.Commands.GetTypeParser<IRole>();
 
-            if (await guidParser.ParseAsync(parameter, value, context) is { IsSuccessful: true } guidParseResult)
-            {
-                await using (context.BeginYield())
-                {
-                    role = await context.GetSbuDbContext()
-                        .ColorRoles.FirstOrDefaultAsync(
-                            r => r.Id == guidParseResult.Value && r.GuildId == guild.Id,
-                            context.Bot.StoppingToken
-                        );
-                }
-            }
-            else if (await roleParser.ParseAsync(parameter, value, context) is { IsSuccessful: true } roleParseResult
+            if (await roleParser.ParseAsync(parameter, value, context) is { IsSuccessful: true } roleParseResult
                 && roleParseResult.Value.Position < context.Bot.GetColorRoleSeparator().Position
                 && roleParseResult.Value.Color is { }
             )
@@ -47,7 +34,7 @@ namespace SbuBot.Commands.TypeParsers
                 {
                     role = await context.GetSbuDbContext()
                         .ColorRoles.FirstOrDefaultAsync(
-                            r => r.DiscordId == roleParseResult.Value.Id && r.GuildId == guild.Id,
+                            r => r.Id == roleParseResult.Value.Id && r.GuildId == guild.Id,
                             context.Bot.StoppingToken
                         );
                 }

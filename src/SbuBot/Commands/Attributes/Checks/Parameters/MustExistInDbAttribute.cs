@@ -22,7 +22,7 @@ namespace SbuBot.Commands.Attributes.Checks.Parameters
             => argument switch
             {
                 IMember member => (await context.GetSbuDbContext()
-                        .Members.FirstOrDefaultAsync(m => m.DiscordId == member.Id) is { })
+                        .Members.FirstOrDefaultAsync(m => m.Id == member.Id) is { })
                     == MustExistInDb
                         ? ParameterCheckAttribute.Success()
                         : ParameterCheckAttribute.Failure(
@@ -30,7 +30,7 @@ namespace SbuBot.Commands.Attributes.Checks.Parameters
                             + "this command."
                         ),
                 IRole role => (await context.GetSbuDbContext()
-                        .ColorRoles.FirstOrDefaultAsync(m => m.DiscordId == role.Id) is { })
+                        .ColorRoles.FirstOrDefaultAsync(m => m.Id == role.Id) is { })
                     == MustExistInDb
                         ? ParameterCheckAttribute.Success()
                         : ParameterCheckAttribute.Failure(

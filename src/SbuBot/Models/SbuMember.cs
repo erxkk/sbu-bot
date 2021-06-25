@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 
 using Destructurama.Attributed;
@@ -12,18 +11,15 @@ namespace SbuBot.Models
 {
     public sealed class SbuMember : SbuEntityBase, ISbuDiscordEntity, ISbuGuildEntity
     {
-        public Snowflake DiscordId { get; set; }
-        public Guid? GuildId { get; set; }
+        public Snowflake Id { get; }
+        public Snowflake GuildId { get; }
 
         // nav properties
-        [HideOnSerialize, NotLogged]
-        public SbuGuild? OwnedGuild { get; }
-
         [HideOnSerialize, NotLogged]
         public SbuGuild Guild { get; }
 
         [HideOnSerialize, NotLogged]
-        public SbuColorRole? ColorRole { get; }
+        public SbuColorRole? ColorRole { get; set; }
 
         [HideOnSerialize, NotLogged]
         public List<SbuTag> Tags { get; } = new();
@@ -31,30 +27,27 @@ namespace SbuBot.Models
         [HideOnSerialize, NotLogged]
         public List<SbuReminder> Reminders { get; } = new();
 
-        public SbuMember(Snowflake discordId, Guid guildId)
+        public SbuMember(Snowflake id, Snowflake guildId)
         {
-            DiscordId = discordId;
+            Id = id;
             GuildId = guildId;
         }
 
-        public SbuMember(IMember member, Guid guildId)
+        public SbuMember(IMember member, Snowflake guildId)
         {
-            DiscordId = member.Id;
+            Id = member.Id;
             GuildId = guildId;
         }
 
 #region EFCore
-
-        internal SbuMember(Guid id, Snowflake discordId, Guid? guildId) : base(id) => DiscordId = discordId;
 
         internal sealed class EntityTypeConfiguration : IEntityTypeConfiguration<SbuMember>
         {
             public void Configure(EntityTypeBuilder<SbuMember> builder)
             {
                 builder.HasKey(m => m.Id);
-                builder.HasIndex(m => m.DiscordId).IsUnique();
 
-                builder.Property(m => m.DiscordId);
+                builder.Property(m => m.GuildId);
 
                 builder.HasOne(m => m.Guild)
                     .WithMany(g => g.Members)

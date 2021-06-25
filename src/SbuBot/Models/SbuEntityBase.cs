@@ -9,16 +9,8 @@ using SbuBot.Extensions;
 
 namespace SbuBot.Models
 {
-    public abstract class SbuEntityBase : ISbuEntity
+    public abstract class SbuEntityBase
     {
-        public Guid Id { get; }
-
-        // new
-        protected SbuEntityBase() => Id = Guid.NewGuid();
-
-        // ef core
-        internal SbuEntityBase(Guid id) => Id = id;
-
         // generates yaml like representation
         public override string ToString()
         {
@@ -38,7 +30,7 @@ namespace SbuBot.Models
                     {
                         PropertyInfo { CanRead: true } propertyInfo => propertyInfo.GetValue(this),
                         FieldInfo fieldInfo => fieldInfo.GetValue(this),
-                        _ => throw new ArgumentOutOfRangeException(nameof(members), memberInfo, null)
+                        _ => throw new ArgumentOutOfRangeException(nameof(members), memberInfo, null),
                     };
 
                     value = memberInfo.GetCustomAttribute<HideOnSerializeAttribute>() is { }

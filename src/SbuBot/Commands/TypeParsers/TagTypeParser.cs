@@ -21,7 +21,7 @@ namespace SbuBot.Commands.TypeParsers
         )
         {
             SbuTag? tag;
-            SbuGuild guild = await context.GetSbuDbContext().GetSbuGuildAsync(context.Guild);
+            SbuGuild guild = await context.GetSbuDbContext().GetGuildAsync(context.Guild);
 
             TypeParser<Guid> guidParser = context.Bot.Commands.GetTypeParser<Guid>();
 

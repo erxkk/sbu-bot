@@ -35,8 +35,8 @@ namespace SbuBot.Commands.Modules
                 ReminderDescriptor reminderDescriptor
             )
             {
-                SbuMember owner = await Context.GetSbuDbContext().GetSbuMemberAsync(Context.Author);
-                SbuGuild guild = await Context.GetSbuDbContext().GetSbuGuildAsync(Context.Guild);
+                SbuMember owner = await Context.GetSbuDbContext().GetMemberAsync(Context.Author);
+                SbuGuild guild = await Context.GetSbuDbContext().GetGuildAsync(Context.Guild);
 
                 SbuReminder newReminder = new(
                     Context,
@@ -90,8 +90,8 @@ namespace SbuBot.Commands.Modules
                 if (!parseResult.IsSuccessful)
                     return Reply($"Aborted: {parseResult.FailureReason}.");
 
-                SbuMember owner = await Context.GetSbuDbContext().GetSbuMemberAsync(Context.Author);
-                SbuGuild guild = await Context.GetSbuDbContext().GetSbuGuildAsync(Context.Guild);
+                SbuMember owner = await Context.GetSbuDbContext().GetMemberAsync(Context.Author);
+                SbuGuild guild = await Context.GetSbuDbContext().GetGuildAsync(Context.Guild);
                 SbuReminder newReminder = new(Context, owner.Id, guild.Id, message, parseResult.Value);
 
                 await using (Context.BeginYield())
@@ -175,7 +175,7 @@ namespace SbuBot.Commands.Modules
                 if (waitResult is null || !waitResult.Message.Content.Equals("yes", StringComparison.OrdinalIgnoreCase))
                     return Reply("Aborted.");
 
-                SbuMember owner = await Context.GetSbuDbContext().GetSbuMemberAsync(Context.Author);
+                SbuMember owner = await Context.GetSbuDbContext().GetMemberAsync(Context.Author);
 
                 await Context.Services.GetRequiredService<ReminderService>()
                     .CancelAsync(q => q.Where(r => r.Value.OwnerId == owner.Id));
@@ -209,7 +209,7 @@ namespace SbuBot.Commands.Modules
                     is not { Count: > 0 } reminders)
                     return Reply("You have no reminders.");
 
-                SbuMember owner = await Context.GetSbuDbContext().GetSbuMemberAsync(Context.Author);
+                SbuMember owner = await Context.GetSbuDbContext().GetMemberAsync(Context.Author);
 
                 return FilledPages(
                     reminders.Values

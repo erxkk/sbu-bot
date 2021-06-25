@@ -2,8 +2,8 @@ using Disqord;
 
 namespace SbuBot.Models
 {
-    public interface ISbuDiscordEntity : ISbuEntity
+    public interface ISbuDiscordEntity
     {
-        public Snowflake DiscordId { get; set; }
+        public Snowflake Id { get; }
     }
 }

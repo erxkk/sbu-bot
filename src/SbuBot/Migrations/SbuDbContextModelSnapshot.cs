@@ -21,33 +21,23 @@ namespace SbuBot.Migrations
 
             modelBuilder.Entity("SbuBot.Models.SbuColorRole", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<int?>("Color")
-                        .HasColumnType("integer");
-
-                    b.Property<ulong>("DiscordId")
+                    b.Property<ulong>("Id")
                         .HasColumnType("numeric(20,0)");
 
-                    b.Property<Guid?>("GuildId")
-                        .HasColumnType("uuid");
+                    b.Property<ulong>("GuildId")
+                        .HasColumnType("numeric(20,0)");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<Guid?>("OwnerId")
-                        .HasColumnType("uuid");
+                    b.Property<ulong?>("OwnerId")
+                        .HasColumnType("numeric(20,0)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DiscordId")
-                        .IsUnique();
+                    b.HasIndex("GuildId");
 
                     b.HasIndex("OwnerId")
+                        .IsUnique();
+
+                    b.HasIndex("OwnerId", "GuildId")
                         .IsUnique();
 
                     b.ToTable("ColorRoles");
@@ -55,38 +45,23 @@ namespace SbuBot.Migrations
 
             modelBuilder.Entity("SbuBot.Models.SbuGuild", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<ulong>("DiscordId")
+                    b.Property<ulong>("Id")
                         .HasColumnType("numeric(20,0)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("DiscordId")
-                        .IsUnique();
 
                     b.ToTable("Guilds");
                 });
 
             modelBuilder.Entity("SbuBot.Models.SbuMember", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<ulong>("DiscordId")
+                    b.Property<ulong>("Id")
                         .HasColumnType("numeric(20,0)");
 
-                    b.Property<Guid?>("GuildId")
-                        .IsRequired()
-                        .HasColumnType("uuid");
+                    b.Property<ulong>("GuildId")
+                        .HasColumnType("numeric(20,0)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("DiscordId")
-                        .IsUnique();
 
                     b.HasIndex("GuildId");
 
@@ -108,8 +83,8 @@ namespace SbuBot.Migrations
                     b.Property<long>("DueAt")
                         .HasColumnType("bigint");
 
-                    b.Property<Guid?>("GuildId")
-                        .HasColumnType("uuid");
+                    b.Property<ulong>("GuildId")
+                        .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("Message")
                         .HasMaxLength(1024)
@@ -118,8 +93,8 @@ namespace SbuBot.Migrations
                     b.Property<ulong>("MessageId")
                         .HasColumnType("numeric(20,0)");
 
-                    b.Property<Guid?>("OwnerId")
-                        .HasColumnType("uuid");
+                    b.Property<ulong?>("OwnerId")
+                        .HasColumnType("numeric(20,0)");
 
                     b.HasKey("Id");
 
@@ -141,16 +116,16 @@ namespace SbuBot.Migrations
                         .HasMaxLength(2048)
                         .HasColumnType("character varying(2048)");
 
-                    b.Property<Guid?>("GuildId")
-                        .HasColumnType("uuid");
+                    b.Property<ulong>("GuildId")
+                        .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(128)
                         .HasColumnType("character varying(128)");
 
-                    b.Property<Guid?>("OwnerId")
-                        .HasColumnType("uuid");
+                    b.Property<ulong?>("OwnerId")
+                        .HasColumnType("numeric(20,0)");
 
                     b.HasKey("Id");
 
@@ -168,8 +143,9 @@ namespace SbuBot.Migrations
                 {
                     b.HasOne("SbuBot.Models.SbuGuild", "Guild")
                         .WithMany("ColorRoles")
-                        .HasForeignKey("OwnerId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .HasForeignKey("GuildId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .IsRequired();
 
                     b.HasOne("SbuBot.Models.SbuMember", "Owner")
                         .WithOne("ColorRole")
@@ -197,7 +173,8 @@ namespace SbuBot.Migrations
                     b.HasOne("SbuBot.Models.SbuGuild", "Guild")
                         .WithMany("Reminders")
                         .HasForeignKey("GuildId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("SbuBot.Models.SbuMember", "Owner")
                         .WithMany("Reminders")
@@ -214,7 +191,8 @@ namespace SbuBot.Migrations
                     b.HasOne("SbuBot.Models.SbuGuild", "Guild")
                         .WithMany("Tags")
                         .HasForeignKey("GuildId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .IsRequired();
 
                     b.HasOne("SbuBot.Models.SbuMember", "Owner")
                         .WithMany("Tags")

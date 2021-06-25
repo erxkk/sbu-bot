@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace SbuBot.Migrations
 {
-    public partial class RevampedRelations : Migration
+    public partial class FixedRelations : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -11,8 +11,7 @@ namespace SbuBot.Migrations
                 name: "Guilds",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    DiscordId = table.Column<ulong>(type: "numeric(20,0)", nullable: false)
+                    Id = table.Column<ulong>(type: "numeric(20,0)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -23,9 +22,8 @@ namespace SbuBot.Migrations
                 name: "Members",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    DiscordId = table.Column<ulong>(type: "numeric(20,0)", nullable: false),
-                    GuildId = table.Column<Guid>(type: "uuid", nullable: false)
+                    Id = table.Column<ulong>(type: "numeric(20,0)", nullable: false),
+                    GuildId = table.Column<ulong>(type: "numeric(20,0)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -42,19 +40,16 @@ namespace SbuBot.Migrations
                 name: "ColorRoles",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    DiscordId = table.Column<ulong>(type: "numeric(20,0)", nullable: false),
-                    OwnerId = table.Column<Guid>(type: "uuid", nullable: true),
-                    GuildId = table.Column<Guid>(type: "uuid", nullable: true),
-                    Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    Color = table.Column<int>(type: "integer", nullable: true)
+                    Id = table.Column<ulong>(type: "numeric(20,0)", nullable: false),
+                    OwnerId = table.Column<ulong>(type: "numeric(20,0)", nullable: true),
+                    GuildId = table.Column<ulong>(type: "numeric(20,0)", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ColorRoles", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ColorRoles_Guilds_OwnerId",
-                        column: x => x.OwnerId,
+                        name: "FK_ColorRoles_Guilds_GuildId",
+                        column: x => x.GuildId,
                         principalTable: "Guilds",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.SetNull);
@@ -71,8 +66,8 @@ namespace SbuBot.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    OwnerId = table.Column<Guid>(type: "uuid", nullable: true),
-                    GuildId = table.Column<Guid>(type: "uuid", nullable: true),
+                    OwnerId = table.Column<ulong>(type: "numeric(20,0)", nullable: true),
+                    GuildId = table.Column<ulong>(type: "numeric(20,0)", nullable: false),
                     ChannelId = table.Column<ulong>(type: "numeric(20,0)", nullable: false),
                     MessageId = table.Column<ulong>(type: "numeric(20,0)", nullable: false),
                     Message = table.Column<string>(type: "character varying(1024)", maxLength: 1024, nullable: true),
@@ -101,8 +96,8 @@ namespace SbuBot.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    OwnerId = table.Column<Guid>(type: "uuid", nullable: true),
-                    GuildId = table.Column<Guid>(type: "uuid", nullable: true),
+                    OwnerId = table.Column<ulong>(type: "numeric(20,0)", nullable: true),
+                    GuildId = table.Column<ulong>(type: "numeric(20,0)", nullable: false),
                     Name = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
                     Content = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: false)
                 },
@@ -124,10 +119,9 @@ namespace SbuBot.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_ColorRoles_DiscordId",
+                name: "IX_ColorRoles_GuildId",
                 table: "ColorRoles",
-                column: "DiscordId",
-                unique: true);
+                column: "GuildId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ColorRoles_OwnerId",
@@ -136,15 +130,9 @@ namespace SbuBot.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Guilds_DiscordId",
-                table: "Guilds",
-                column: "DiscordId",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Members_DiscordId",
-                table: "Members",
-                column: "DiscordId",
+                name: "IX_ColorRoles_OwnerId_GuildId",
+                table: "ColorRoles",
+                columns: new[] { "OwnerId", "GuildId" },
                 unique: true);
 
             migrationBuilder.CreateIndex(

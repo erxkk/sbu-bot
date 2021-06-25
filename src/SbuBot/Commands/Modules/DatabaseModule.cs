@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 
 using Disqord;
 using Disqord.Bot;
+using Disqord.Gateway;
 using Disqord.Rest;
 
 using Microsoft.EntityFrameworkCore;
@@ -30,44 +31,61 @@ namespace SbuBot.Commands.Modules
             IMember member
         )
         {
-            SbuGuild guild = await Context.GetSbuDbContext().GetSbuGuildAsync(Context.Guild);
+            SbuDbContext dbContext = Context.GetSbuDbContext();
+            SbuGuild guild = await dbContext.GetGuildAsync(Context.Guild);
             SbuMember newMember = new(member, guild.Id);
 
             if (member.GetColorRole() is { } colorRole)
-                Context.GetSbuDbContext().ColorRoles.Add(new(colorRole, guild.Id, newMember.Id));
+                dbContext.ColorRoles.Add(new(colorRole, guild.Id, newMember.Id));
 
-            Context.GetSbuDbContext().Members.Add(newMember);
-            await Context.GetSbuDbContext().SaveChangesAsync();
+            dbContext.Members.Add(newMember);
+            await dbContext.SaveChangesAsync();
 
             return Reply($"{member.Mention} is now registered in the database.");
         }
 
         [Command("init"), RequireBotOwner]
-        [Description("Initializes the database, loading members and color roles into it.")]
+        [Description("Initializes the database for this guild, loading members and color roles into it.")]
         public async Task<DiscordCommandResult> InitAsync()
         {
+            SbuDbContext dbContext = Context.GetSbuDbContext();
             int userCount = 0, roleCount = 0;
 
             IEnumerable<(IMember m, IRole?)> userRolePairs = Context.Guild.Members.Values
                 .Where(m => !m.IsBot)
                 .Select(m => (m, m.GetColorRole()));
 
-            SbuGuild guild = await Context.GetSbuDbContext().GetSbuGuildAsync(Context.Guild);
+            SbuGuild guild = await dbContext.GetGuildAsync(Context.Guild);
 
+            // BUG: does not insert anything
+            // TODO: prefetch by guildId
             foreach ((IMember member, IRole? role) in userRolePairs)
             {
-                SbuMember dbMember = new(member, guild.Id);
-                Context.GetSbuDbContext().Members.Add(dbMember);
+                if (await dbContext.GetMemberAsync(Context.Author) is not { } dbMember)
+                {
+                    dbMember = new(member, guild.Id);
+                    dbContext.Members.Add(dbMember);
+                }
+
                 userCount++;
 
                 if (role is null)
                     continue;
 
-                Context.GetSbuDbContext().ColorRoles.Add(new(role, guild.Id, dbMember.Id));
+                if (await dbContext.GetColorRoleAsync(role) is { } dbRole)
+                {
+                    dbRole.OwnerId = dbMember.Id;
+                    dbContext.ColorRoles.Update(dbRole);
+                }
+                else
+                {
+                    dbContext.ColorRoles.Add(new(role, dbMember.Id, guild.Id));
+                }
+
                 roleCount++;
             }
 
-            await Context.GetSbuDbContext().SaveChangesAsync();
+            await dbContext.SaveChangesAsync();
             return Reply($"Found {userCount} users, {roleCount} of which have a suitable color role.");
         }
 
@@ -80,10 +98,12 @@ namespace SbuBot.Commands.Modules
             SbuMember receiver
         )
         {
-            if (owner.DiscordId == receiver.DiscordId)
-                return Reply("The given members cannot be the same");
+            SbuDbContext dbContext = Context.GetSbuDbContext();
 
-            List<SbuTag> tags = await Context.GetSbuDbContext()
+            if (owner.Id == receiver.Id)
+                return Reply("The given members cannot be the same.");
+
+            List<SbuTag> tags = await dbContext
                 .Tags
                 .Where(t => t.OwnerId == owner.Id)
                 .ToListAsync(Context.Bot.StoppingToken);
@@ -96,14 +116,14 @@ namespace SbuBot.Commands.Modules
             if (owner.ColorRole is { })
             {
                 hadRole = true;
-                SbuColorRole role = (await Context.GetSbuDbContext().GetSbuMemberAsync(Context.Author)).ColorRole!;
+                SbuColorRole role = owner.ColorRole;
 
                 if (receiver.ColorRole is null)
                 {
                     ConsistencyService service = Context.Services.GetRequiredService<ConsistencyService>();
-                    service.IgnoreAddedRole(role.DiscordId);
+                    service.IgnoreAddedRole(role.Id);
 
-                    await Context.Guild.GrantRoleAsync(receiver.DiscordId, role.DiscordId);
+                    await Context.Guild.GrantRoleAsync(receiver.Id, role.Id);
 
                     role.OwnerId = receiver.Id;
                 }
@@ -112,18 +132,18 @@ namespace SbuBot.Commands.Modules
                     role.OwnerId = null;
                 }
 
-                Context.GetSbuDbContext().ColorRoles.Update(role);
-                await Context.Author.RevokeRoleAsync(role.DiscordId);
+                dbContext.ColorRoles.Update(role);
+                await Context.Author.RevokeRoleAsync(role.Id);
             }
 
             if (tags.Count != 0 || hadRole)
-                await Context.GetSbuDbContext().SaveChangesAsync();
+                await dbContext.SaveChangesAsync();
 
             return Reply(
                 string.Format(
                     "{0} now owns all of {1}'s db entries.",
-                    Mention.User(receiver.DiscordId),
-                    Mention.User(owner.DiscordId)
+                    Mention.User(receiver.Id),
+                    Mention.User(owner.Id)
                 )
             );
         }
@@ -135,44 +155,94 @@ namespace SbuBot.Commands.Modules
             [Command]
             public DiscordCommandResult InspectMember(
                 [Description("The member to inspect.")]
-                SbuMember member
+                SbuMember member,
+                [Description("Additional members to inspect.")]
+                params SbuMember[] additionalMembers
             ) => Reply(
-                new LocalEmbed()
-                    .WithTitle($"Member : ({member.DiscordId}) {member.Id}")
-                    .WithDescription(member.ToString())
+                additionalMembers.Prepend(member)
+                    .Select(
+                        m => new LocalEmbed()
+                            .WithAuthor(Context.Guild.GetMember(m.Id))
+                            .WithDescription(Markdown.CodeBlock("yml", m))
+                            .AddInlineField("Self", Mention.User(m.Id))
+                            .AddInlineField(
+                                "ColorRole",
+                                m.ColorRole is { } ? Mention.Role(m.ColorRole.Id) : "None"
+                            )
+                    )
+                    .ToArray()
             );
 
             [Command]
             public DiscordCommandResult InspectRole(
-                [Description("The role to inspect.")] SbuColorRole role
+                [Description("The role to inspect.")] SbuColorRole role,
+                [Description("Additional roles to inspect.")]
+                params SbuColorRole[] additionalRoles
             ) => Reply(
-                new LocalEmbed()
-                    .WithTitle($"Role : ({role.DiscordId}) {role.Id}")
-                    .WithDescription(role.ToString())
-                    .AddField("Owner", role.OwnerId is { } ? Mention.User(role.Owner!.DiscordId) : "None")
+                additionalRoles.Prepend(role)
+                    .Select(
+                        r =>
+                        {
+                            LocalEmbed embed = new LocalEmbed()
+                                .WithTitle("Role")
+                                .WithDescription(Markdown.CodeBlock("yml", r))
+                                .AddInlineField("Self", Mention.Role(r.Id))
+                                .AddInlineField(
+                                    "Owner",
+                                    r.OwnerId is { } ? Mention.User(r.OwnerId.Value) : "None"
+                                );
+
+                            if (r.OwnerId is { })
+                                embed.WithAuthor(Context.Guild.GetMember(r.OwnerId.Value));
+
+                            return embed;
+                        }
+                    )
+                    .ToArray()
             );
 
             [Command]
             public DiscordCommandResult InspectTag(
-                [Description("The tag to inspect.")] SbuTag tag
+                [Description("The tag to inspect.")] SbuTag tag,
+                [Description("Additional tags to inspect.")]
+                params SbuTag[] additionalTags
             ) => Reply(
-                new LocalEmbed()
-                    .WithTitle($"Tag : {tag.Id}")
-                    .WithDescription($"Name: {tag.Name}\n{Markdown.CodeBlock(tag.Content)}")
-                    .AddField("Owner", tag.OwnerId is { } ? Mention.User(tag.Owner!.DiscordId) : "None")
+                additionalTags.Prepend(tag)
+                    .Select(
+                        t =>
+                        {
+                            LocalEmbed embed = new LocalEmbed()
+                                .WithTitle("Tag")
+                                .WithDescription(Markdown.CodeBlock("yml", t))
+                                .AddInlineField("Owner", t.OwnerId is { } ? Mention.User(t.OwnerId.Value) : "None");
+
+                            if (t.OwnerId is { })
+                                embed.WithAuthor(Context.Guild.GetMember(t.OwnerId.Value));
+
+                            return embed;
+                        }
+                    )
+                    .ToArray()
             );
 
             [Command]
             public DiscordCommandResult InspectTag(
                 [Description("The reminder to inspect.")]
-                SbuReminder reminder
+                SbuReminder reminder,
+                [Description("Additional reminders to inspect.")]
+                params SbuReminder[] additionalReminders
             ) => Reply(
-                new LocalEmbed()
-                    .WithTitle($"Reminder : {reminder.Id}")
-                    .WithDescription("\nreminder.Message")
-                    .AddField("Owner", Mention.User(reminder.Owner!.DiscordId), true)
-                    .AddField("CreatedAt", reminder.CreatedAt, true)
-                    .AddField("DueAt", reminder.DueAt, true)
+                additionalReminders.Prepend(reminder)
+                    .Select(
+                        r => new LocalEmbed()
+                            .WithAuthor(Context.Guild.GetMember(r.OwnerId.Value))
+                            .WithTitle("Reminder")
+                            .WithDescription(Markdown.CodeBlock("yml", r))
+                            .AddInlineField("Owner", Mention.User(r.OwnerId.Value))
+                            .AddInlineField("CreatedAt", r.CreatedAt)
+                            .AddInlineField("DueAt", r.DueAt)
+                    )
+                    .ToArray()
             );
         }
     }

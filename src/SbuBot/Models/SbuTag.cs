@@ -3,19 +3,22 @@ using System.Linq;
 
 using Destructurama.Attributed;
 
+using Disqord;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace SbuBot.Models
 {
-    public sealed class SbuTag : SbuEntityBase, ISbuOwnedEntity, ISbuGuildEntity
+    public sealed class SbuTag : SbuEntityBase, ISbuEntity, ISbuOwnedEntity, ISbuGuildEntity
     {
         public const int MIN_NAME_LENGTH = 3;
         public const int MAX_NAME_LENGTH = 128;
         public const int MAX_CONTENT_LENGTH = 2048;
 
-        public Guid? OwnerId { get; set; }
-        public Guid? GuildId { get; set; }
+        public Guid Id { get; }
+        public Snowflake? OwnerId { get; set; }
+        public Snowflake GuildId { get; }
         public string Name { get; }
         public string Content { get; set; }
 
@@ -26,8 +29,9 @@ namespace SbuBot.Models
         [HideOnSerialize, NotLogged]
         public SbuGuild? Guild { get; }
 
-        public SbuTag(Guid ownerId, Guid guildId, string name, string content)
+        public SbuTag(Snowflake ownerId, Snowflake guildId, string name, string content)
         {
+            Id = Guid.NewGuid();
             OwnerId = ownerId;
             GuildId = guildId;
             Name = name;
@@ -36,8 +40,9 @@ namespace SbuBot.Models
 
 #region EFCore
 
-        internal SbuTag(Guid id, Guid? ownerId, Guid? guildId, string name, string content) : base(id)
+        internal SbuTag(Guid id, Snowflake? ownerId, Snowflake guildId, string name, string content)
         {
+            Id = id;
             OwnerId = ownerId;
             GuildId = guildId;
             Name = name;

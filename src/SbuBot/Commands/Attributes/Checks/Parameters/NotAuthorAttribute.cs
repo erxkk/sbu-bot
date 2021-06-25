@@ -17,7 +17,7 @@ namespace SbuBot.Commands.Attributes.Checks.Parameters
                 {
                     IMember member => member.Id,
                     Snowflake snowflake => snowflake,
-                    SbuMember sbuMember => sbuMember.DiscordId,
+                    SbuMember sbuMember => sbuMember.Id,
                     _ => throw new ArgumentOutOfRangeException(nameof(argument), argument, null),
                 }
                 != context.Author.Id

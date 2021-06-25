@@ -30,7 +30,7 @@ namespace SbuBot.Commands.Attributes.Checks.Parameters
                     break;
 
                 case SbuMember sbuMember:
-                    if (context.Guild.GetMember(sbuMember.DiscordId) is not { } cachedMember)
+                    if (context.Guild.GetMember(sbuMember.Id) is not { } cachedMember)
                         throw new NotCachedException("Could not get required cached required.");
 
                     member = cachedMember;

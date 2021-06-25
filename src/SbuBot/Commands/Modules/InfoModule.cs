@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 using Disqord;
@@ -17,14 +16,12 @@ using SbuBot.Extensions;
 
 namespace SbuBot.Commands.Modules
 {
-    // TODO: annotate when finished
     // TODO: improve syntax explanation, add descriptor explanation
-    // TODO: add dynamic menu with navigation when buttons are finished
-    // TODO: add informational commands
-    [Description("A collection of commands for help and general server/member/bot information."), Disabled]
+    [Description("A collection of commands for help and general server/member/bot information.")]
     public sealed class InfoModule : SbuModuleBase
     {
         [Command("about")]
+        [Description("Displays information about the bot.")]
         public async Task<DiscordCommandResult> AboutAsync()
         {
             IApplication application = await Context.Bot.FetchCurrentApplicationAsync();
@@ -58,6 +55,7 @@ namespace SbuBot.Commands.Modules
         }
 
         [Command("guide")]
+        [Description("Displays an interactive guide that explains bot usage.")]
         public DiscordCommandResult Guide() => Pages(
             new Page().WithEmbeds(
                 new LocalEmbed()
@@ -122,27 +120,31 @@ namespace SbuBot.Commands.Modules
         );
 
         [Group("command", "commands")]
+        [Description("A group of commands for displaying command information.")]
         public sealed class CommandGroup : SbuModuleBase
 
         {
             [Command("find")]
+            [Description("Finds all commands that would match the given input.")]
             public DiscordCommandResult Find(string command)
             {
-                IEnumerable<Command> matches = Context.Bot.Commands.FindCommands(command).Select(m => m.Command);
+                IReadOnlyList<CommandMatch> matches = Context.Bot.Commands.FindCommands(command);
 
-                if (!matches.Any())
-                    return Reply("Couldn't find any commands for that input");
+                if (matches.Count == 0)
+                    return Reply("Couldn't find any commands for the given input.");
 
                 return FilledPages(
-                    matches.Select(cmd => cmd.IsEnabled ? $"`{cmd.GetSignature()}`" : $"~~`{cmd.GetSignature()}`~~"),
-                    embedModifier: embed => embed.WithTitle("Command List")
+                    matches.Select(m => m.Command)
+                        .Select(cmd => cmd.IsEnabled ? $"`{cmd.GetSignature()}`" : $"~~`{cmd.GetSignature()}`~~"),
+                    embedModifier: embed => embed.WithTitle("Matched commands")
                 );
             }
 
             [Command("list")]
+            [Description("Lists all commands.")]
             public async ValueTask<DiscordCommandResult> ListAsync()
             {
-                IEnumerable<Command> commands = Context.Bot.Commands.GetAllCommands();
+                IReadOnlyList<Command> commands = Context.Bot.Commands.GetAllCommands();
                 List<Command> filteredCommands = new();
 
                 if (!Context.Author.GetGuildPermissions().Administrator)
@@ -156,12 +158,15 @@ namespace SbuBot.Commands.Modules
 
                 return FilledPages(
                     commands.Select(cmd => cmd.IsEnabled ? $"`{cmd.GetSignature()}`" : $"~~`{cmd.GetSignature()}`~~"),
-                    embedModifier: embed => embed.WithTitle("Command List")
+                    embedModifier: embed => embed.WithTitle("Commands")
                 );
             }
         }
 
         [Command("help", "h", "how")]
+        [Description(
+            "Interactively displays information about for a given command, or displays all commands if non is given."
+        )]
         public DiscordCommandResult Help([OverrideDefault("list all commands")] string? command = null)
         {
             if (command is null)
@@ -172,35 +177,12 @@ namespace SbuBot.Commands.Modules
 
             IReadOnlyList<CommandMatch> matches = Context.Bot.Commands.FindCommands(command);
 
-            // TODO: create proper handling for commands
-            if (matches.Count == 0)
-                return Reply("No commands found.");
-
-            return FilledPages(
-                matches.Select(c => c.Command)
-                    .Select(
-                        cmd =>
-                        {
-                            StringBuilder builder = new();
-
-                            builder.Append(cmd.IsEnabled ? "`" : "~~`")
-                                .Append(cmd.GetSignature())
-                                .AppendLine(cmd.IsEnabled ? "`" : "`~~");
-
-                            if (!cmd.IsEnabled)
-                                return builder.ToString();
-
-                            if (cmd.Description is { })
-                                builder.AppendLine("Description:").AppendLine(cmd.Description);
-
-                            if (cmd.Remarks is { })
-                                builder.AppendLine("Remarks:").AppendLine(cmd.Remarks);
-
-                            return builder.ToString();
-                        }
-                    ),
-                embedModifier: embed => embed.WithTitle("Commands")
-            );
+            return matches.Count switch
+            {
+                0 => Reply("Couldn't find any commands for the given input."),
+                1 => Help(matches[0].Command),
+                _ => Help(matches.Select(c => c.Command)),
+            };
         }
     }
 }

@@ -9,18 +9,16 @@ using Disqord.Bot;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-using SbuBot.Commands;
-
 namespace SbuBot.Models
 {
-    public sealed class SbuReminder : SbuEntityBase, ISbuOwnedEntity, ISbuGuildEntity
+    public sealed class SbuReminder : SbuEntityBase, ISbuEntity, ISbuOwnedEntity, ISbuGuildEntity
     {
         public const int MAX_MESSAGE_LENGTH = 1024;
+        public Guid Id { get; }
 
         [NotNull]
-        public Guid? OwnerId { get; set; }
-
-        public Guid? GuildId { get; set; }
+        public Snowflake? OwnerId { get; set; }
+        public Snowflake GuildId { get; }
         public Snowflake ChannelId { get; }
         public Snowflake MessageId { get; }
         public string? Message { get; }
@@ -43,8 +41,8 @@ namespace SbuBot.Models
         public SbuGuild? Guild { get; }
 
         public SbuReminder(
-            Guid ownerId,
-            Guid? guildId,
+            Snowflake ownerId,
+            Snowflake guildId,
             Snowflake channelId,
             Snowflake messageId,
             string? message,
@@ -52,6 +50,7 @@ namespace SbuBot.Models
             DateTimeOffset dueAt
         )
         {
+            Id = Guid.NewGuid();
             OwnerId = ownerId;
             GuildId = guildId;
             ChannelId = channelId;
@@ -63,12 +62,13 @@ namespace SbuBot.Models
 
         public SbuReminder(
             DiscordGuildCommandContext context,
-            Guid ownerId,
-            Guid guildId,
+            Snowflake ownerId,
+            Snowflake guildId,
             string? message,
             DateTimeOffset dueAt
         )
         {
+            Id = Guid.NewGuid();
             OwnerId = ownerId;
             GuildId = guildId;
             ChannelId = context.ChannelId;
@@ -82,15 +82,16 @@ namespace SbuBot.Models
 
         internal SbuReminder(
             Guid id,
-            Guid? ownerId,
-            Guid? guildId,
+            Snowflake? ownerId,
+            Snowflake guildId,
             Snowflake channelId,
             Snowflake messageId,
             string? message,
             DateTimeOffset createdAt,
             DateTimeOffset dueAt
-        ) : base(id)
+        )
         {
+            Id = id;
             OwnerId = ownerId;
             GuildId = guildId;
             ChannelId = channelId;
@@ -108,6 +109,7 @@ namespace SbuBot.Models
                 builder.HasIndex(t => t.OwnerId);
                 builder.HasIndex(t => t.GuildId);
 
+                builder.Property(t => t.OwnerId);
                 builder.Property(t => t.GuildId);
                 builder.Property(t => t.ChannelId);
                 builder.Property(t => t.MessageId);

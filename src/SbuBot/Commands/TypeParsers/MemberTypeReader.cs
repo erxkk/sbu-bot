@@ -1,4 +1,3 @@
-using System;
 using System.Threading.Tasks;
 
 using Disqord;
@@ -23,25 +22,14 @@ namespace SbuBot.Commands.TypeParsers
         {
             SbuMember? member = null;
 
-            TypeParser<Guid> guidParser = context.Bot.Commands.GetTypeParser<Guid>();
             TypeParser<IMember> roleParser = context.Bot.Commands.GetTypeParser<IMember>();
 
-            if (await guidParser.ParseAsync(parameter, value, context) is { IsSuccessful: true } guidParseResult)
+            if (await roleParser.ParseAsync(parameter, value, context) is { IsSuccessful: true } roleParseResult)
             {
                 await using (context.BeginYield())
                 {
                     member = await context.GetSbuDbContext().Members.FirstOrDefaultAsync(
-                        t => t.Id == guidParseResult.Value,
-                        context.Bot.StoppingToken
-                    );
-                }
-            }
-            else if (await roleParser.ParseAsync(parameter, value, context) is { IsSuccessful: true } roleParseResult)
-            {
-                await using (context.BeginYield())
-                {
-                    member = await context.GetSbuDbContext().Members.FirstOrDefaultAsync(
-                        t => t.DiscordId == roleParseResult.Value.Id,
+                        t => t.Id == roleParseResult.Value.Id,
                         context.Bot.StoppingToken
                     );
                 }

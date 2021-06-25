@@ -8,7 +8,7 @@ using Disqord.Extensions.Interactivity.Menus.Paged;
 
 using Qmmands;
 
-using SbuBot.Commands.Views;
+using SbuBot.Commands.Views.Help;
 
 namespace SbuBot.Commands
 {
@@ -23,7 +23,19 @@ namespace SbuBot.Commands
                 .Select(p => new Page().WithEmbeds((embedModifier?.Invoke(new()) ?? new()).WithDescription(p)))
         );
 
-        protected DiscordMenuCommandResult Help(Command command) => View(HelpView.Command(command));
-        protected DiscordMenuCommandResult Help(Module module) => View(HelpView.Module(module));
+        protected DiscordMenuCommandResult Help(Command command) => View(
+            command.Description is { } ? new CommandView(command) : new GroupView(command.Module)
+        );
+
+        protected DiscordMenuCommandResult Help(IEnumerable<Command> commands)
+        {
+            return View(
+                !commands.GroupBy(o => o.Name).Any()
+                    ? new SearchMatchView(commands)
+                    : new GroupView(commands.First().Module)
+            );
+        }
+
+        protected DiscordMenuCommandResult Help(Module module) => View(new ModuleView(module));
     }
 }

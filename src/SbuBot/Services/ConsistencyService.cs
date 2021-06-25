@@ -36,7 +36,7 @@ namespace SbuBot.Services
                 SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
 
                 if (await context.Guilds.FirstOrDefaultAsync(
-                    g => g.DiscordId == e.GuildId,
+                    g => g.Id == e.GuildId,
                     Bot.StoppingToken
                 ) is null)
                 {
@@ -56,7 +56,7 @@ namespace SbuBot.Services
                 SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
 
                 if (await context.Guilds.FirstOrDefaultAsync(
-                    g => g.DiscordId == e.GuildId,
+                    g => g.Id == e.GuildId,
                     Bot.StoppingToken
                 ) is null)
                 {
@@ -76,33 +76,20 @@ namespace SbuBot.Services
                 SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
                 ReminderService service = scope.ServiceProvider.GetRequiredService<ReminderService>();
 
-                if (await context.Guilds.FirstOrDefaultAsync(g => g.DiscordId == e.GuildId) is not { } guild)
-                {
-                    await base.OnLeftGuild(e);
+                if (await context.Guilds.FirstOrDefaultAsync(g => g.Id == e.GuildId) is not { } guild)
                     return;
-                }
 
-                if (await context.ColorRoles
-                        .FirstOrDefaultAsync(
-                            cr => cr.GuildId == guild.Id,
-                            Bot.StoppingToken
-                        ) is { } role
-                )
-                {
-                    role.GuildId = null;
-                    context.ColorRoles.Update(role);
-                }
+                context.ColorRoles.RemoveRange(
+                    await context.ColorRoles
+                        .Where(t => t.GuildId == guild.Id)
+                        .ToListAsync(Bot.StoppingToken)
+                );
 
-                List<SbuTag> tags = await context.Tags
-                    .Where(t => t.GuildId == guild.Id)
-                    .ToListAsync(Bot.StoppingToken);
-
-                foreach (SbuTag tag in tags)
-                {
-                    tag.GuildId = null;
-                }
-
-                context.Tags.UpdateRange(tags);
+                context.Tags.RemoveRange(
+                    await context.Tags
+                        .Where(t => t.GuildId == guild.Id)
+                        .ToListAsync(Bot.StoppingToken)
+                );
 
                 await service.CancelAsync(q => q.Where(r => r.Value.GuildId == guild.Id));
                 await context.SaveChangesAsync(Bot.StoppingToken);
@@ -113,18 +100,18 @@ namespace SbuBot.Services
 
         protected override async ValueTask OnMemberJoined(MemberJoinedEventArgs e)
         {
+            if (e.Member.IsBot)
+                return;
+
             using (IServiceScope scope = Bot.Services.CreateScope())
             {
                 SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
 
-                if (await context.Guilds.FirstOrDefaultAsync(g => g.DiscordId == e.GuildId) is not { } guild)
-                {
-                    await base.OnMemberJoined(e);
+                if (await context.Guilds.FirstOrDefaultAsync(g => g.Id == e.GuildId) is not { } guild)
                     return;
-                }
 
                 if (await context.Members.FirstOrDefaultAsync(
-                    m => m.DiscordId == e.Member.Id && m.GuildId == guild.Id,
+                    m => m.Id == e.Member.Id && m.GuildId == guild.Id,
                     Bot.StoppingToken
                 ) is { }) return;
 
@@ -137,6 +124,9 @@ namespace SbuBot.Services
 
         protected override async ValueTask OnMemberUpdated(MemberUpdatedEventArgs e)
         {
+            if (e.NewMember.IsBot)
+                return;
+
             if (e.OldMember is null)
                 return;
 
@@ -163,14 +153,14 @@ namespace SbuBot.Services
             {
                 SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
 
-                if (await context.Guilds.FirstOrDefaultAsync(g => g.DiscordId == e.NewMember.GuildId) is not { } guild)
+                if (await context.Guilds.FirstOrDefaultAsync(g => g.Id == e.NewMember.GuildId) is not { } guild)
                 {
                     await base.OnMemberUpdated(e);
                     return;
                 }
 
                 if (await context.Members.FirstOrDefaultAsync(
-                    m => m.DiscordId == e.MemberId && m.GuildId == guild.Id,
+                    m => m.Id == e.MemberId && m.GuildId == guild.Id,
                     Bot.StoppingToken
                 ) is not { } member)
                 {
@@ -199,25 +189,21 @@ namespace SbuBot.Services
 
         protected override async ValueTask OnMemberLeft(MemberLeftEventArgs e)
         {
+            if (e.User.IsBot)
+                return;
+
             using (IServiceScope scope = Bot.Services.CreateScope())
             {
                 SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
                 ReminderService service = scope.ServiceProvider.GetRequiredService<ReminderService>();
 
-                if (await context.Guilds.FirstOrDefaultAsync(g => g.DiscordId == e.GuildId) is not { } guild)
-                {
-                    await base.OnMemberLeft(e);
+                if (await context.Guilds.FirstOrDefaultAsync(g => g.Id == e.GuildId) is not { } guild)
                     return;
-                }
 
                 if (await context.Members.FirstOrDefaultAsync(
-                    m => m.DiscordId == e.User.Id && m.GuildId == guild.Id,
+                    m => m.Id == e.User.Id && m.GuildId == guild.Id,
                     Bot.StoppingToken
-                ) is not { } member)
-                {
-                    await base.OnMemberLeft(e);
-                    return;
-                }
+                ) is not { } member) return;
 
                 if (await context.ColorRoles.FirstOrDefaultAsync(
                     m => m.OwnerId == member.Id && m.GuildId == guild.Id,
@@ -233,9 +219,7 @@ namespace SbuBot.Services
                     .ToListAsync(Bot.StoppingToken);
 
                 foreach (SbuTag tag in tags)
-                {
                     tag.OwnerId = null;
-                }
 
                 context.Tags.UpdateRange(tags);
 
@@ -247,18 +231,18 @@ namespace SbuBot.Services
 
         protected override async ValueTask OnMessageReceived(BotMessageReceivedEventArgs e)
         {
+            if (e.Member.IsBot)
+                return;
+
             using (IServiceScope scope = Bot.Services.CreateScope())
             {
                 SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
 
-                if (await context.Guilds.FirstOrDefaultAsync(g => g.DiscordId == e.GuildId) is not { } guild)
-                {
-                    await base.OnMessageReceived(e);
+                if (await context.Guilds.FirstOrDefaultAsync(g => g.Id == e.GuildId) is not { } guild)
                     return;
-                }
 
                 if (await context.Members.FirstOrDefaultAsync(
-                    m => m.DiscordId == e.Member.Id && m.GuildId == guild.Id,
+                    m => m.Id == e.Member.Id && m.GuildId == guild.Id,
                     Bot.StoppingToken
                 ) is { }) return;
 
@@ -282,7 +266,7 @@ namespace SbuBot.Services
                 SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
 
                 if (await context.ColorRoles.FirstOrDefaultAsync(
-                    r => r.DiscordId == e.RoleId,
+                    r => r.Id == e.RoleId,
                     Bot.StoppingToken
                 ) is { } role)
                 {

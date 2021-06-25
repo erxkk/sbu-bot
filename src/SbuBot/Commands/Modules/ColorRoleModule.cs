@@ -37,9 +37,9 @@ namespace SbuBot.Commands.Modules
                 SbuColorRole role
             )
             {
-                await Context.Author.GrantRoleAsync(role.DiscordId);
+                await Context.Author.GrantRoleAsync(role.Id);
 
-                role.OwnerId = (await Context.GetSbuDbContext().GetSbuMemberAsync(Context.Author)).Id;
+                role.OwnerId = (await Context.GetSbuDbContext().GetMemberAsync(Context.Author)).Id;
                 Context.GetSbuDbContext().ColorRoles.Update(role);
                 await Context.GetSbuDbContext().SaveChangesAsync();
 
@@ -60,8 +60,8 @@ namespace SbuBot.Commands.Modules
                     .ColorRoles.Add(
                         new(
                             role,
-                            (await Context.GetSbuDbContext().GetSbuMemberAsync(Context.Author)).Id,
-                            (await Context.GetSbuDbContext().GetSbuGuildAsync(Context.Guild)).Id
+                            (await Context.GetSbuDbContext().GetMemberAsync(Context.Author)).Id,
+                            (await Context.GetSbuDbContext().GetGuildAsync(Context.Guild)).Id
                         )
                     );
 
@@ -120,8 +120,8 @@ namespace SbuBot.Commands.Modules
                 .ColorRoles.Add(
                     new(
                         role,
-                        (await Context.GetSbuDbContext().GetSbuMemberAsync(Context.Author)).Id,
-                        (await Context.GetSbuDbContext().GetSbuGuildAsync(Context.Guild)).Id
+                        (await Context.GetSbuDbContext().GetMemberAsync(Context.Author)).Id,
+                        (await Context.GetSbuDbContext().GetGuildAsync(Context.Guild)).Id
                     )
                 );
 
@@ -144,9 +144,9 @@ namespace SbuBot.Commands.Modules
                 string name
             )
             {
-                SbuMember member = await Context.GetSbuDbContext().GetSbuMemberAsync(Context.Author);
+                SbuMember member = await Context.GetSbuDbContext().GetMemberAsync(Context.Author);
 
-                await Context.Guild.Roles[member.ColorRole!.DiscordId]
+                await Context.Guild.Roles[member.ColorRole!.Id]
                     .ModifyAsync(
                         r =>
                         {
@@ -167,8 +167,8 @@ namespace SbuBot.Commands.Modules
                 string name
             )
             {
-                SbuMember member = await Context.GetSbuDbContext().GetSbuMemberAsync(Context.Author);
-                await Context.Guild.Roles[member.ColorRole!.DiscordId].ModifyAsync(r => r.Name = name);
+                SbuMember member = await Context.GetSbuDbContext().GetMemberAsync(Context.Author);
+                await Context.Guild.Roles[member.ColorRole!.Id].ModifyAsync(r => r.Name = name);
                 return Reply("Your role has been modified.");
             }
 
@@ -176,8 +176,8 @@ namespace SbuBot.Commands.Modules
             [Description("Modifies the authors color role's color.")]
             public async Task<DiscordCommandResult> SetColorAsync([Description("The new color.")] Color color)
             {
-                SbuMember member = await Context.GetSbuDbContext().GetSbuMemberAsync(Context.Author);
-                await Context.Guild.Roles[member.ColorRole!.DiscordId].ModifyAsync(r => r.Color = color);
+                SbuMember member = await Context.GetSbuDbContext().GetMemberAsync(Context.Author);
+                await Context.Guild.Roles[member.ColorRole!.Id].ModifyAsync(r => r.Color = color);
                 return Reply("Your role has been modified.");
             }
         }
@@ -187,10 +187,10 @@ namespace SbuBot.Commands.Modules
         public async Task<DiscordCommandResult> RemoveAsync()
         {
             ConsistencyService service = Context.Services.GetRequiredService<ConsistencyService>();
-            SbuMember member = await Context.GetSbuDbContext().GetSbuMemberAsync(Context.Author);
-            service.IgnoreRemovedRole(member.ColorRole!.DiscordId);
+            SbuMember member = await Context.GetSbuDbContext().GetMemberAsync(Context.Author);
+            service.IgnoreRemovedRole(member.ColorRole!.Id);
 
-            await Context.Guild.Roles[member.ColorRole.DiscordId].DeleteAsync();
+            await Context.Guild.Roles[member.ColorRole.Id].DeleteAsync();
 
             Context.GetSbuDbContext().ColorRoles.Remove(member.ColorRole);
             await Context.GetSbuDbContext().SaveChangesAsync();
@@ -205,19 +205,19 @@ namespace SbuBot.Commands.Modules
             SbuMember receiver
         )
         {
-            SbuColorRole role = (await Context.GetSbuDbContext().GetSbuMemberAsync(Context.Author)).ColorRole!;
+            SbuColorRole role = (await Context.GetSbuDbContext().GetMemberAsync(Context.Author)).ColorRole!;
 
             ConsistencyService service = Context.Services.GetRequiredService<ConsistencyService>();
-            service.IgnoreAddedRole(role.DiscordId);
+            service.IgnoreAddedRole(role.Id);
 
-            await Context.Guild.GrantRoleAsync(receiver.DiscordId, role.DiscordId);
-            await Context.Author.RevokeRoleAsync(role.DiscordId);
+            await Context.Guild.GrantRoleAsync(receiver.Id, role.Id);
+            await Context.Author.RevokeRoleAsync(role.Id);
 
             role.OwnerId = receiver.Id;
             Context.GetSbuDbContext().ColorRoles.Update(role);
             await Context.GetSbuDbContext().SaveChangesAsync();
 
-            return Reply($"You transferred your color role to {Mention.User(receiver.DiscordId)}.");
+            return Reply($"You transferred your color role to {Mention.User(receiver.Id)}.");
         }
     }
 }

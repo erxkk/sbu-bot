@@ -34,28 +34,39 @@ namespace SbuBot.Models
             _configuration = configuration;
         }
 
-        public Task<SbuMember> GetSbuMemberAsync(
-            IMember member,
-            Func<IQueryable<SbuMember>, IQueryable<SbuMember>>? additionalConstraints = null
-        ) => GetSbuMemberAsync(member.Id, member.GuildId, additionalConstraints);
+        public Task<SbuColorRole?> GetColorRoleAsync(
+            IRole member,
+            Func<IQueryable<SbuColorRole>, IQueryable<SbuColorRole>>? query = null
+        ) => GetColorRoleAsync(member.Id, member.GuildId, query);
 
-        public async Task<SbuMember> GetSbuMemberAsync(
+        public async Task<SbuColorRole?> GetColorRoleAsync(
+            Snowflake roleId,
+            Snowflake guildId,
+            Func<IQueryable<SbuColorRole>, IQueryable<SbuColorRole>>? query = null
+        ) => await (query is { } ? query(ColorRoles) : ColorRoles)
+            .FirstOrDefaultAsync(m => m.Id == roleId && m.GuildId == guildId);
+
+        public Task<SbuMember?> GetMemberAsync(
+            IMember member,
+            Func<IQueryable<SbuMember>, IQueryable<SbuMember>>? query = null
+        ) => GetMemberAsync(member.Id, member.GuildId, query);
+
+        public async Task<SbuMember?> GetMemberAsync(
             Snowflake memberId,
             Snowflake guildId,
             Func<IQueryable<SbuMember>, IQueryable<SbuMember>>? query = null
         ) => await (query is { } ? query(Members) : Members)
-            .Include(m => m.Guild)
-            .FirstAsync(m => m.DiscordId == memberId && m.Guild.DiscordId == guildId);
+            .FirstOrDefaultAsync(m => m.Id == memberId && m.GuildId == guildId);
 
-        public Task<SbuGuild> GetSbuGuildAsync(
+        public Task<SbuGuild> GetGuildAsync(
             IGuild guild,
             Func<IQueryable<SbuGuild>, IQueryable<SbuGuild>>? query = null
-        ) => GetSbuGuildAsync(guild.Id, query);
+        ) => GetGuildAsync(guild.Id, query);
 
-        public async Task<SbuGuild> GetSbuGuildAsync(
+        public async Task<SbuGuild> GetGuildAsync(
             Snowflake guildId,
             Func<IQueryable<SbuGuild>, IQueryable<SbuGuild>>? query = null
-        ) => await (query is { } ? query(Guilds) : Guilds).FirstAsync(m => m.DiscordId == guildId);
+        ) => await (query is { } ? query(Guilds) : Guilds).FirstAsync(m => m.Id == guildId);
 
 #region Configuration
 

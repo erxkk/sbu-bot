@@ -1,10 +1,10 @@
-using System;
+using Disqord;
 
 namespace SbuBot.Models
 {
     public interface ISbuGuildEntity
     {
-        public Guid? GuildId { get; set; }
+        public Snowflake GuildId { get; }
         public SbuGuild? Guild { get; }
     }
 }

@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Disqord;
 using Disqord.Bot;
 using Disqord.Extensions.Interactivity;
-using Disqord.Extensions.Interactivity.Menus.Paged;
 using Disqord.Gateway;
 
 using Microsoft.EntityFrameworkCore;
@@ -28,13 +27,16 @@ namespace SbuBot.Commands.Modules
     {
         [Command]
         [Description("Responds with the given tag's content.")]
-        public DiscordCommandResult Get(SbuTag tag) => Response(tag.Content);
+        public DiscordCommandResult Get([Description("The tag to invoke.")] SbuTag tag) => Response(tag.Content);
 
         [Command("claim", "take")]
         [Description("Claims the given tag if it has no owner.")]
-        public async Task<DiscordCommandResult> ClaimTagAsync([MustBeOwned(false)] SbuTag tag)
+        public async Task<DiscordCommandResult> ClaimTagAsync(
+            [MustBeOwned(false)][Description("The tag to claim.")]
+            SbuTag tag
+        )
         {
-            tag.OwnerId = (await Context.GetSbuDbContext().GetSbuMemberAsync(Context.Author)).Id;
+            tag.OwnerId = (await Context.GetSbuDbContext().GetMemberAsync(Context.Author)).Id;
             Context.GetSbuDbContext().Tags.Update(tag);
             await Context.GetSbuDbContext().SaveChangesAsync();
 
@@ -60,8 +62,8 @@ namespace SbuBot.Commands.Modules
                 Context.GetSbuDbContext()
                     .Tags.Add(
                         new(
-                            (await Context.GetSbuDbContext().GetSbuMemberAsync(Context.Author)).Id,
-                            (await Context.GetSbuDbContext().GetSbuGuildAsync(Context.Guild)).Id,
+                            (await Context.GetSbuDbContext().GetMemberAsync(Context.Author)).Id,
+                            (await Context.GetSbuDbContext().GetGuildAsync(Context.Guild)).Id,
                             tagDescriptor.Name,
                             tagDescriptor.Content
                         )
@@ -143,8 +145,8 @@ namespace SbuBot.Commands.Modules
                 Context.GetSbuDbContext()
                     .Tags.Add(
                         new(
-                            (await Context.GetSbuDbContext().GetSbuMemberAsync(Context.Author)).Id,
-                            (await Context.GetSbuDbContext().GetSbuGuildAsync(Context.Guild)).Id,
+                            (await Context.GetSbuDbContext().GetMemberAsync(Context.Author)).Id,
+                            (await Context.GetSbuDbContext().GetGuildAsync(Context.Guild)).Id,
                             waitNameResult.Message.Content,
                             waitContentResult.Message.Content
                         )
@@ -169,8 +171,8 @@ namespace SbuBot.Commands.Modules
                 SbuMember? owner = null
             )
             {
-                owner ??= await Context.GetSbuDbContext().GetSbuMemberAsync(Context.Author);
-                bool notAuthor = owner.DiscordId != Context.Author.Id;
+                owner ??= await Context.GetSbuDbContext().GetMemberAsync(Context.Author);
+                bool notAuthor = owner.Id != Context.Author.Id;
 
                 List<SbuTag> tags = await Context.GetSbuDbContext()
                     .Tags
@@ -180,14 +182,14 @@ namespace SbuBot.Commands.Modules
                 if (tags.Count == 0)
                 {
                     return Reply(
-                        $"{(notAuthor ? Mention.User(owner.DiscordId) + "doesn't" : "you don't")} own and tags."
+                        $"{(notAuthor ? Mention.User(owner.Id) + "doesn't" : "you don't")} own and tags."
                     );
                 }
 
                 return FilledPages(
                     tags.Select(t => $"**Name:** {t.Name}\n**Content:** {t.Content}"),
                     embedModifier: embed => embed.WithTitle(
-                        $"{(notAuthor ? $"{Mention.User(owner.DiscordId)}'s" : "Your")} Tags"
+                        $"{(notAuthor ? $"{Mention.User(owner.Id)}'s" : "Your")} Tags"
                     )
                 );
             }
@@ -208,7 +210,7 @@ namespace SbuBot.Commands.Modules
                         t => string.Format(
                             "**Name:** {0}\n**Owner:** {1}\n**Content:** {2}",
                             t.Name,
-                            t.OwnerId is { } ? Mention.User(t.Owner!.DiscordId) : "None",
+                            t.OwnerId is { } ? Mention.User(t.Owner!.Id) : "None",
                             t.Content
                         )
                     ),
@@ -235,7 +237,7 @@ namespace SbuBot.Commands.Modules
                 if (tag is null)
                     return Reply("No tag found.");
 
-                if (tag.OwnerId != (await Context.GetSbuDbContext().GetSbuMemberAsync(Context.Author)).Id)
+                if (tag.OwnerId != (await Context.GetSbuDbContext().GetMemberAsync(Context.Author)).Id)
                     return Reply("You must be the owner of this tag.");
 
                 tag.Content = tagDescriptor.Content;
@@ -327,7 +329,7 @@ namespace SbuBot.Commands.Modules
                     || !waitConfirmResult.Message.Content.Equals("yes", StringComparison.OrdinalIgnoreCase))
                     return Reply("Aborted.");
 
-                SbuMember owner = await Context.GetSbuDbContext().GetSbuMemberAsync(Context.Author);
+                SbuMember owner = await Context.GetSbuDbContext().GetMemberAsync(Context.Author);
 
                 List<SbuTag> tags = await Context.GetSbuDbContext()
                     .Tags
@@ -358,7 +360,7 @@ namespace SbuBot.Commands.Modules
                 Context.GetSbuDbContext().Tags.Update(tag);
                 await Context.GetSbuDbContext().SaveChangesAsync();
 
-                return Reply($"{Mention.User(receiver.DiscordId)} now owns `{tag.Name}`.");
+                return Reply($"{Mention.User(receiver.Id)} now owns `{tag.Name}`.");
             }
 
             [Command("all")]
@@ -371,7 +373,7 @@ namespace SbuBot.Commands.Modules
                 await Reply(
                     string.Format(
                         "Are you sure you want to transfer all your tags to {0}? Respond `yes` to confirm.",
-                        Mention.User(receiver.DiscordId)
+                        Mention.User(receiver.Id)
                     )
                 );
 
@@ -389,7 +391,7 @@ namespace SbuBot.Commands.Modules
                     || !waitConfirmResult.Message.Content.Equals("yes", StringComparison.OrdinalIgnoreCase))
                     return Reply("Aborted.");
 
-                SbuMember owner = await Context.GetSbuDbContext().GetSbuMemberAsync(Context.Author);
+                SbuMember owner = await Context.GetSbuDbContext().GetMemberAsync(Context.Author);
 
                 List<SbuTag> tags = await Context.GetSbuDbContext()
                     .Tags
@@ -404,7 +406,7 @@ namespace SbuBot.Commands.Modules
                 Context.GetSbuDbContext().Tags.UpdateRange(tags);
                 await Context.GetSbuDbContext().SaveChangesAsync();
 
-                return Reply($"{Mention.User(receiver.DiscordId)} now owns all of your tags.");
+                return Reply($"{Mention.User(receiver.Id)} now owns all of your tags.");
             }
         }
 
