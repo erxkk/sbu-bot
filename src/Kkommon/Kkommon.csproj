@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net5.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <RootNamespace>Kkommon.Core</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="JetBrains.Annotations" Version="2021.1.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Update="Math\Ratio.Operators.cs">
+        <DependentUpon>Ratio.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Extensions\ArithmeticExtensions.Primitives.cs">
+        <DependentUpon>ArithmeticExtensions.cs</DependentUpon>
+      </Compile>
+    </ItemGroup>
+
+</Project>
