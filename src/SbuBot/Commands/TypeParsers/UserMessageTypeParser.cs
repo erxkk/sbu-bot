@@ -20,7 +20,7 @@ namespace SbuBot.Commands.TypeParsers
             {
                 IUserMessage? message;
 
-                if (value.Length < 21 && ulong.TryParse(value, out var id))
+                if (value.Length < 21 && ulong.TryParse(value, out ulong id))
                 {
                     await using (_ = context.BeginYield())
                     {
@@ -32,7 +32,7 @@ namespace SbuBot.Commands.TypeParsers
                         : TypeParser<IUserMessage>.Failure("Could not find message.");
                 }
 
-                if (SbuUtility.TryParseMessageLink(value, out var idPair))
+                if (SbuUtility.TryParseMessageLink(value, out (Snowflake ChannelId, Snowflake MessageId) idPair))
                 {
                     await using (_ = context.BeginYield())
                     {

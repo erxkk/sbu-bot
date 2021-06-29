@@ -21,7 +21,6 @@ namespace SbuBot.Commands.TypeParsers
         )
         {
             SbuTag? tag;
-            SbuGuild guild = await context.GetSbuDbContext().GetGuildAsync(context.Guild);
 
             TypeParser<Guid> guidParser = context.Bot.Commands.GetTypeParser<Guid>();
 
@@ -32,7 +31,7 @@ namespace SbuBot.Commands.TypeParsers
                     tag = await context.GetSbuDbContext()
                         .Tags
                         .FirstOrDefaultAsync(
-                            t => t.Id == guidParseResult.Value && t.GuildId == guild.Id,
+                            t => t.Id == guidParseResult.Value && t.GuildId == context.GuildId,
                             context.Bot.StoppingToken
                         );
                 }
@@ -44,7 +43,7 @@ namespace SbuBot.Commands.TypeParsers
                     tag = await context.GetSbuDbContext()
                         .Tags
                         .FirstOrDefaultAsync(
-                            t => t.Name == value && t.GuildId == guild.Id,
+                            t => t.Name == value && t.GuildId == context.GuildId,
                             context.Bot.StoppingToken
                         );
                 }

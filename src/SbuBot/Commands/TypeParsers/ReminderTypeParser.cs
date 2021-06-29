@@ -25,13 +25,11 @@ namespace SbuBot.Commands.TypeParsers
         )
         {
             ReminderService service = context.Services.GetRequiredService<ReminderService>();
-            SbuMember owner = (await context.GetSbuDbContext().GetMemberAsync(context.Author))!;
-            SbuGuild guild = await context.GetSbuDbContext().GetGuildAsync(context.Guild);
 
             if (value.Equals("last", StringComparison.OrdinalIgnoreCase))
             {
                 return service.CurrentReminders.Values.FirstOrDefault(
-                    r => r.OwnerId == owner.Id && r.GuildId == guild.Id
+                    r => r.OwnerId == context.Author.Id && r.GuildId == context.GuildId
                 ) is { } queriedReminder
                     ? TypeParser<SbuReminder>.Success(queriedReminder)
                     : TypeParser<SbuReminder>.Failure("Could not find reminder.");

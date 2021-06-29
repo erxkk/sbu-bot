@@ -21,17 +21,19 @@ namespace SbuBot.Commands.TypeParsers
         )
         {
             SbuMember? member = null;
+            TypeParser<IMember> memberParser = context.Bot.Commands.GetTypeParser<IMember>();
 
-            TypeParser<IMember> roleParser = context.Bot.Commands.GetTypeParser<IMember>();
-
-            if (await roleParser.ParseAsync(parameter, value, context) is { IsSuccessful: true } roleParseResult)
+            if (await memberParser.ParseAsync(parameter, value, context) is { IsSuccessful: true } memberParseResult)
             {
                 await using (context.BeginYield())
                 {
-                    member = await context.GetSbuDbContext().Members.FirstOrDefaultAsync(
-                        t => t.Id == roleParseResult.Value.Id,
-                        context.Bot.StoppingToken
-                    );
+                    member = await context.GetSbuDbContext()
+                        .GetMemberAsync(
+                            memberParseResult.Value.Id,
+                            context.GuildId,
+                            members => members.Include(m => m.ColorRole),
+                            context.Bot.StoppingToken
+                        );
                 }
             }
 
