@@ -4,8 +4,6 @@ using System.Threading.Tasks;
 using Disqord;
 using Disqord.Bot;
 
-using Microsoft.EntityFrameworkCore;
-
 using Qmmands;
 
 using SbuBot.Extensions;
@@ -21,16 +19,14 @@ namespace SbuBot.Commands.Attributes.Checks.Parameters
         public override async ValueTask<CheckResult> CheckAsync(object argument, DiscordGuildCommandContext context)
             => argument switch
             {
-                IMember member => (await context.GetSbuDbContext()
-                        .Members.FirstOrDefaultAsync(m => m.Id == member.Id) is { })
+                IMember member => (await context.GetSbuDbContext().GetMemberAsync(member) is { })
                     == MustExistInDb
                         ? ParameterCheckAttribute.Success()
                         : ParameterCheckAttribute.Failure(
                             $"The given member must {(MustExistInDb ? "" : "not ")}be in the database for "
                             + "this command."
                         ),
-                IRole role => (await context.GetSbuDbContext()
-                        .ColorRoles.FirstOrDefaultAsync(m => m.Id == role.Id) is { })
+                IRole role => (await context.GetSbuDbContext().GetColorRoleAsync(role) is { })
                     == MustExistInDb
                         ? ParameterCheckAttribute.Success()
                         : ParameterCheckAttribute.Failure(

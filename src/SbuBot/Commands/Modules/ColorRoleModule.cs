@@ -144,7 +144,7 @@ namespace SbuBot.Commands.Modules
                 string name
             )
             {
-                SbuMember member = await Context.GetSbuDbContext().GetMemberAsync(Context.Author);
+                SbuMember member = (await Context.GetSbuDbContext().GetMemberAsync(Context.Author))!;
 
                 await Context.Guild.Roles[member.ColorRole!.Id]
                     .ModifyAsync(

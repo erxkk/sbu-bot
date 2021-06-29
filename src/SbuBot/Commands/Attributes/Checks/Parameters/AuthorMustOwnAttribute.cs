@@ -18,7 +18,7 @@ namespace SbuBot.Commands.Attributes.Checks.Parameters
 
         public override async ValueTask<CheckResult> CheckAsync(object argument, DiscordGuildCommandContext context)
             => ((argument as ISbuOwnedEntity)!.OwnerId
-                    == (await context.GetSbuDbContext().GetMemberAsync(context.Author)).Id)
+                    == (await context.GetSbuDbContext().GetMemberAsync(context.Author))!.Id)
                 == AuthorMustOwn
                     ? ParameterCheckAttribute.Success()
                     : ParameterCheckAttribute.Failure(

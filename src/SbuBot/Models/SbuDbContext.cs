@@ -34,11 +34,11 @@ namespace SbuBot.Models
             _configuration = configuration;
         }
 
-        public Task<SbuColorRole?> GetColorRoleAsync(
+        public Task<SbuColorRole> GetColorRoleAsync(
             IRole member,
             Func<IQueryable<SbuColorRole>, IQueryable<SbuColorRole>>? query = null,
             CancellationToken cancellationToken = default
-        ) => GetColorRoleAsync(member.Id, member.GuildId, query, cancellationToken);
+        ) => GetColorRoleAsync(member.Id, member.GuildId, query, cancellationToken)!;
 
         public Task<SbuColorRole?> GetColorRoleAsync(
             Snowflake roleId,
@@ -51,11 +51,11 @@ namespace SbuBot.Models
                 _sbuBot?.StoppingToken ?? cancellationToken
             )!;
 
-        public Task<SbuMember?> GetMemberAsync(
+        public Task<SbuMember> GetMemberAsync(
             IMember member,
             Func<IQueryable<SbuMember>, IQueryable<SbuMember>>? query = null,
             CancellationToken cancellationToken = default
-        ) => GetMemberAsync(member.Id, member.GuildId, query, cancellationToken);
+        ) => GetMemberAsync(member.Id, member.GuildId, query, cancellationToken)!;
 
         public Task<SbuMember?> GetMemberAsync(
             Snowflake memberId,
