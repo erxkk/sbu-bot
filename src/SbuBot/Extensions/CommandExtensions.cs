@@ -14,7 +14,7 @@ namespace SbuBot
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class CommandExtensions
     {
-        public static bool IsGroup(this Module @this) => @this.Commands.GroupBy(c => c.Name).Count() == 1;
+        public static bool IsGroup(this Module @this) => @this.Commands.All(c => c.Description is null);
 
         public static IEnumerable<Command> Defaults(this Module @this)
             => @this.Commands.Where(c => c.Aliases.Count == 0);

@@ -6,6 +6,8 @@ using Disqord;
 using Disqord.Bot;
 using Disqord.Extensions.Interactivity.Menus.Paged;
 
+using Kkommon.Extensions.Enumerable;
+
 using Qmmands;
 
 using SbuBot.Commands.Views.Help;
@@ -23,19 +25,20 @@ namespace SbuBot.Commands
                 .Select(p => new Page().WithEmbeds((embedModifier?.Invoke(new()) ?? new()).WithDescription(p)))
         );
 
-        protected DiscordMenuCommandResult Help(Command command) => View(
-            command.Description is { } ? new CommandView(command) : new GroupView(command.Module)
+        protected DiscordMenuCommandResult HelpView(Command command) => View(
+            command.Module.IsGroup() ? new CommandView(command) : new GroupView(command.Module)
         );
 
-        protected DiscordMenuCommandResult Help(IEnumerable<Command> commands)
+        protected DiscordMenuCommandResult HelpView(IEnumerable<Command> commands)
         {
             return View(
-                !commands.GroupBy(o => o.Name).Any()
+                !commands.GroupBy(o => o.Name).HasAtLeast(2)
                     ? new SearchMatchView(commands)
                     : new GroupView(commands.First().Module)
             );
         }
 
-        protected DiscordMenuCommandResult Help(Module module) => View(new ModuleView(module));
+        protected DiscordMenuCommandResult HelpView(Module module)
+            => View(module.IsGroup() ? new GroupView(module) : new ModuleView(module));
     }
 }

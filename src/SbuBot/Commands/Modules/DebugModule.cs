@@ -1,11 +1,9 @@
 using System;
-using System.Collections;
 using System.Linq;
 using System.Threading.Tasks;
 
 using Disqord;
 using Disqord.Bot;
-using Disqord.Extensions.Interactivity.Menus.Paged;
 using Disqord.Rest;
 
 using Microsoft.Extensions.DependencyInjection;
@@ -193,7 +191,7 @@ namespace SbuBot.Commands.Modules
         public DiscordCommandResult Test()
         {
             //return FilledPages(Enumerable.Range(1, 9).Select(i => i.ToString()), 3);
-            return Help(Context.Bot.Commands.GetAllCommands().First(c => c.Aliases.Contains("as")));
+            return HelpView(Context.Bot.Commands.GetAllCommands().First(c => c.Aliases.Contains("as")));
         }
     }
 }
