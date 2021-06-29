@@ -2,8 +2,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SbuBot", "src\SbuBot\SbuBot.csproj", "{E7B77B1F-C044-42FC-9825-DA40CBA6FB88}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kkommon", "src\Kkommon\Kkommon.csproj", "{D58F8A5D-056A-4784-868B-4F842386F18D}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

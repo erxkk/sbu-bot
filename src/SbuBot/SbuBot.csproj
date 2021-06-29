@@ -8,7 +8,7 @@
     </PropertyGroup>
     
     <ItemGroup>
-      <ProjectReference Include="..\Kkommon\Kkommon.csproj" />
+      <ProjectReference Include="..\..\kkommon\src\Kkommon\Kkommon.csproj" />
     </ItemGroup>
 
     <ItemGroup>
