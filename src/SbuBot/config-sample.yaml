@@ -1,9 +1,0 @@
-Discord:
-  Token: dev-token
-
-Postgres:
-  Host: 127.0.0.1
-  Port: 5432
-  Database: sbu-bot-db
-  Username: postgres
-  Password: postgres

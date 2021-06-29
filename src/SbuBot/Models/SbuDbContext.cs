@@ -121,8 +121,7 @@ namespace SbuBot.Models
                 IConfigurationRoot configuration = new ConfigurationBuilder()
                     .SetBasePath(Directory.GetCurrentDirectory())
                     .AddEnvironmentVariables("DOTNET_")
-                    .AddYamlFile("config.yaml")
-                    .AddCommandLine(args)
+                    .AddEnvironmentVariables("BOT_")
                     .Build();
 
                 return new(null, new(configuration));

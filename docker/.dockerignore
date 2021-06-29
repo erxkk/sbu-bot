@@ -11,6 +11,7 @@
 **/*.*proj.user
 **/*.dbmdl
 **/*.jfm
+**/config.yaml
 **/azds.yaml
 **/bin
 **/charts

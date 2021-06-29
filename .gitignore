@@ -1,5 +1,6 @@
 # configuration
 config.yaml
+.env
 
 # dotnet output
 bin/
