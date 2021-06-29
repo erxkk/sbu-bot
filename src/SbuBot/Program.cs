@@ -23,11 +23,11 @@ using Serilog;
 
 try
 {
-    IHostBuilder hostBuilder = new HostBuilder()
+    IHostBuilder hostBuilder = Host.CreateDefaultBuilder()
         .ConfigureAppConfiguration(
             (ctx, config) => config.SetBasePath(Directory.GetCurrentDirectory())
                 .AddEnvironmentVariables("DOTNET_")
-                .AddEnvironmentVariables()
+                .AddEnvironmentVariables("BOT_")
                 .Build()
         )
         .UseSerilog(
@@ -64,7 +64,7 @@ try
         .ConfigureDiscordBot<SbuBot.SbuBot>(
             (ctx, bot) =>
             {
-                bot.Token = ctx.Configuration["Discord_Token"];
+                bot.Token = ctx.Configuration["Discord:Token"];
                 bot.Prefixes = new[] { SbuGlobals.DEFAULT_PREFIX };
                 bot.Intents = GatewayIntents.Recommended;
             }
