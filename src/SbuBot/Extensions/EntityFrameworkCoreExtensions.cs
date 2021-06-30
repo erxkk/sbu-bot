@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace SbuBot.Extensions
 {
     // stolen from Zackattack01 :^)
-    // improved to include nullable for value types and use generics for compile time safety
+    // expanded to include nullable for value types and use generics for compile time safety
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class EntityFrameworkCoreExtensions
     {

@@ -6,14 +6,16 @@ namespace SbuBot
 {
     public sealed class SbuBotConfiguration
     {
-        public string Environment { get; }
         public bool IsProduction { get; }
         public string DbConnectionString { get; }
 
         public SbuBotConfiguration(IConfiguration configuration)
         {
-            Environment = configuration["environment"];
-            IsProduction = string.Equals(Environment, "Production", StringComparison.OrdinalIgnoreCase);
+            IsProduction = string.Equals(
+                configuration["environment"],
+                "production",
+                StringComparison.OrdinalIgnoreCase
+            );
 
             DbConnectionString = string.Format(
                 "Host={0};Database={1};Username={2};Password={3};Port={4};Include Error Detail={5};",
@@ -22,7 +24,7 @@ namespace SbuBot
                 configuration["Postgres:Username"],
                 configuration["Postgres:Password"],
                 configuration["Postgres:Port"],
-                !IsProduction
+                configuration["Postgres:DetailedErrors"] ?? "false"
             );
         }
     }

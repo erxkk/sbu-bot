@@ -25,11 +25,11 @@ using SbuBot.Extensions;
 
 namespace SbuBot.Commands.Modules
 {
-    // TODO: Usage View
     [Description("A collection of commands for server management like pin-archival or emote creation.")]
     public sealed class GuildManagementModule : SbuModuleBase
     {
-        [Group("archive"), RequirePinBrigade(Group = "AdminOrPinBrigade"), RequireAdmin(Group = "AdminOrPinBrigade"),
+        [Group("archive")]
+        [RequirePinBrigade(Group = "AdminOrPinBrigade"), RequireAdmin(Group = "AdminOrPinBrigade"),
          RequireGuild(SbuGlobals.Guild.SELF)]
         [Description("A group of commands for archiving messages.")]
         public sealed class ArchiveGroup : SbuModuleBase
@@ -139,7 +139,8 @@ namespace SbuBot.Commands.Modules
         [Description("A group of commands for requesting access to restricted channels or permissions.")]
         public sealed class RequestGroup : SbuModuleBase
         {
-            [Command("vote"), Cooldown(1, 1, CooldownMeasure.Hours, CooldownBucketType.Member)]
+            [Command("vote")]
+            [Cooldown(1, 1, CooldownMeasure.Hours, CooldownBucketType.Member)]
             [Description(
                 "Grants the senate submission role and waits to automatically add vote emotes to the next message."
             )]
@@ -180,7 +181,8 @@ namespace SbuBot.Commands.Modules
                 }
             }
 
-            [Command("quote"), Cooldown(1, 1, CooldownMeasure.Hours, CooldownBucketType.Member)]
+            [Command("quote")]
+            [Cooldown(1, 1, CooldownMeasure.Hours, CooldownBucketType.Member)]
             [Description("Grants the shit-sbu-says submission role.")]
             public async Task QuoteAsync()
             {
@@ -216,7 +218,8 @@ namespace SbuBot.Commands.Modules
                 }
             }
 
-            [Command("announce"), Cooldown(1, 1, CooldownMeasure.Hours, CooldownBucketType.Member)]
+            [Command("announce")]
+            [Cooldown(1, 1, CooldownMeasure.Hours, CooldownBucketType.Member)]
             [Description("Grants the announcement submission role.")]
             public async Task AnnounceAsync()
             {
@@ -253,8 +256,8 @@ namespace SbuBot.Commands.Modules
             }
         }
 
-        [Group("emote"), RequireBotGuildPermissions(Permission.ManageEmojis),
-         RequireAuthorGuildPermissions(Permission.ManageEmojis)]
+        [Group("emote")]
+        [RequireBotGuildPermissions(Permission.ManageEmojis), RequireAuthorGuildPermissions(Permission.ManageEmojis)]
         [Description("A group of commands for creating and removing emotes.")]
         public sealed class EmoteGroup : SbuModuleBase
         {

@@ -30,7 +30,8 @@ namespace SbuBot.Commands.Modules
                 string message
             ) => Reply(message);
 
-            [Command, RequireBotOwner]
+            [Command]
+            [RequireBotOwner]
             [Description(
                 "Removes the original message and replies with the given message in the given target channel."
             )]
@@ -70,7 +71,8 @@ namespace SbuBot.Commands.Modules
             return Reply($"Scheduled pong to be sent in `{timespan}`.");
         }
 
-        [Command("eval"), RequireBotOwner]
+        [Command("eval")]
+        [RequireBotOwner]
         [Description("Compiles and runs a C#-Script and returns the script result.")]
         public async Task<DiscordCommandResult> EvalAsync(
             [Description("The expression to evaluate.")]
@@ -115,7 +117,8 @@ namespace SbuBot.Commands.Modules
         }
 
         // currently not before/after execute is done etc
-        [Group("do"), RequireBotOwner]
+        [Group("do")]
+        [RequireBotOwner]
         [Description("A group of commands that invoke other commands with a proxy context.")]
         public sealed class ProxyGroup : SbuModuleBase
         {
@@ -174,7 +177,8 @@ namespace SbuBot.Commands.Modules
             );
         }
 
-        [Command("lock"), RequireBotOwner]
+        [Command("lock")]
+        [RequireBotOwner]
         [Description("Sets the bot lock state to the given state, or switches it if no state is specified.")]
         public DiscordCommandResult Lock(
             [OverrideDefault("!state")][Description("THe new lock state to set the bot to.")]
@@ -186,7 +190,8 @@ namespace SbuBot.Commands.Modules
             return Reply($"{(bot.IsLocked ? "Locked" : "Unlocked")} the bot.");
         }
 
-        [Command("test"), RequireBotOwner]
+        [Command("test")]
+        [RequireBotOwner]
         [Description("Sets the bot lock state to the given state, or switches it if no state is specified.")]
         public DiscordCommandResult Test()
         {

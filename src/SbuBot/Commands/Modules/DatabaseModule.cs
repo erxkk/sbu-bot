@@ -24,7 +24,8 @@ namespace SbuBot.Commands.Modules
     [Description("A collection of commands for managing the database.")]
     public sealed class DatabaseModule : SbuModuleBase
     {
-        [Command("register"), RequireBotOwner]
+        [Command("register")]
+        [RequireBotOwner]
         [Description("Registers a member and their color role in the database.")]
         public async Task<DiscordCommandResult> RegisterAsync(
             [NotAuthor, MustExistInDb(false)][Description("The member to register in the database.")]
@@ -42,7 +43,8 @@ namespace SbuBot.Commands.Modules
             return Reply($"{member.Mention} is now registered in the database.");
         }
 
-        [Command("init"), RequireBotOwner]
+        [Command("init")]
+        [RequireBotOwner]
         [Description("Initializes the database for this guild, loading members and color roles into it.")]
         public async Task<DiscordCommandResult> InitAsync()
         {
@@ -88,7 +90,8 @@ namespace SbuBot.Commands.Modules
             return Reply($"Found {userCount} users, {roleCount} of which have a suitable color role.");
         }
 
-        [Command("transfer"), RequireAdmin]
+        [Command("transfer")]
+        [RequireAdmin]
         [Description("Transfers a members database entries to another member.")]
         public async Task<DiscordCommandResult> TransferAllAsync(
             [Description("The member that owns the database entries.")]
@@ -146,7 +149,8 @@ namespace SbuBot.Commands.Modules
             );
         }
 
-        [Group("inspect"), RequireBotOwner]
+        [Group("inspect")]
+        [RequireBotOwner]
         [Description("Inspects a given entity's database entry.")]
         public sealed class InspectGroup : SbuModuleBase
         {

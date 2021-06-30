@@ -14,7 +14,7 @@ namespace SbuBot.Extensions
                 throw new ArgumentNullException(nameof(@this));
 
             if (count <= 0)
-                throw new ArgumentOutOfRangeException(nameof(count), count, null);
+                throw new ArgumentOutOfRangeException(nameof(count), count, "Count must not be less than 1.");
 
             StringBuilder sb = new StringBuilder(@this.Length + count * (@this.Count(c => c == '\n') + 1)).Append("  ");
             ReadOnlySpan<char> span = @this.AsSpan();

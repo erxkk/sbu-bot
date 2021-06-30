@@ -19,7 +19,8 @@ using SbuBot.Services;
 
 namespace SbuBot.Commands.Modules
 {
-    [Group("role", "r"), RequireBotGuildPermissions(Permission.ManageRoles)]
+    [Group("role", "r")]
+    [RequireBotGuildPermissions(Permission.ManageRoles)]
     [Description("A collection of commands for creation, modification, removal and usage of color roles.")]
     [Remarks(
         "A user may only have one color role at a time, role colors can be given as hex codes starting with `#` or as "
@@ -38,7 +39,8 @@ namespace SbuBot.Commands.Modules
             )
             : Reply("You have no color role.");
 
-        [Group("claim", "take"), RequireColorRole(false)]
+        [Group("claim", "take")]
+        [RequireColorRole(false)]
         [Description("Claims the given color role if it has no owner.")]
         public sealed class ClaimGroup : SbuModuleBase
         {
@@ -85,7 +87,8 @@ namespace SbuBot.Commands.Modules
             }
         }
 
-        [Command("create", "make", "new"), RequireColorRole(false)]
+        [Command("create", "make", "new")]
+        [RequireColorRole(false)]
         [Description("Creates a new color role.")]
         [Usage("role create #afafaf my gray role", "r make green dream role dream role")]
         public async Task<DiscordCommandResult> CreateAsync(
@@ -144,7 +147,8 @@ namespace SbuBot.Commands.Modules
             return Reply($"{role.Mention} is your new color role.");
         }
 
-        [Group("edit", "change"), RequireColorRole]
+        [Group("edit", "change")]
+        [RequireColorRole]
         [Description("A group of commands for editing color roles.")]
         public sealed class EditGroup : SbuModuleBase
         {
@@ -199,7 +203,8 @@ namespace SbuBot.Commands.Modules
             }
         }
 
-        [Command("remove", "delete"), RequireColorRole]
+        [Command("remove", "delete")]
+        [RequireColorRole]
         [Description("Removes the authors color role.")]
         public async Task<DiscordCommandResult> RemoveAsync()
         {
@@ -215,7 +220,8 @@ namespace SbuBot.Commands.Modules
             return Reply("Your color role has been removed.");
         }
 
-        [Command("transfer"), RequireColorRole]
+        [Command("transfer")]
+        [RequireColorRole]
         [Description("Transfers the authors color role to the given member.")]
         [Usage("role transfer @user", "r transfer 352815253828141056", "r transfer Allah")]
         public async Task<DiscordCommandResult> TransferColorRoleAsync(

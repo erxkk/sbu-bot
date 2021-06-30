@@ -31,6 +31,7 @@ namespace SbuBot
 
             LocalMessage pinMessage = new LocalMessage().WithEmbeds(embed);
 
+            // TODO: try parsing link if nothing is found
             if (message.Embeds.Count != 0)
             {
                 if (message.Embeds[0].Image is { } image)
@@ -99,7 +100,7 @@ namespace SbuBot
                 yield return builder.ToString();
 
                 elements = 0;
-                builder = new StringBuilder().AppendLine(item);
+                builder.Clear().AppendLine(item);
             }
 
             if (builder.Length == 0)
