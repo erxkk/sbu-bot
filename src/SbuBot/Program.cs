@@ -25,13 +25,13 @@ try
 {
     IHostBuilder hostBuilder = Host.CreateDefaultBuilder()
         .ConfigureAppConfiguration(
-            (ctx, config) => config.SetBasePath(Directory.GetCurrentDirectory())
+            (_, config) => config.SetBasePath(Directory.GetCurrentDirectory())
                 .AddEnvironmentVariables("DOTNET_")
                 .AddEnvironmentVariables("BOT_")
                 .Build()
         )
         .UseSerilog(
-            (ctx, services, logging) => logging
+            (_, _, logging) => logging
                 .MinimumLevel.Verbose()
                 .Destructure.ToMaximumDepth(3)
                 .Destructure.ToMaximumCollectionCount(5)
@@ -54,7 +54,7 @@ try
                 .AddDbContext<SbuDbContext>()
                 .AddEFSecondLevelCache(
                     cache => cache
-                        .CacheAllQueries(CacheExpirationMode.Sliding, TimeSpan.FromMinutes(15))
+                        .CacheAllQueries(CacheExpirationMode.Sliding, TimeSpan.FromMinutes(5))
                         .DisableLogging()
                 )
                 .AddSingleton(new SbuBotConfiguration(ctx.Configuration))

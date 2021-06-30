@@ -75,8 +75,7 @@ namespace SbuBot.Commands.Modules
                     .ColorRoles.Add(
                         new(
                             role,
-                            (await Context.GetSbuDbContext().GetMemberAsync(Context.Author)).Id,
-                            (await Context.GetSbuDbContext().GetGuildAsync(Context.Guild)).Id
+                            (await Context.GetSbuDbContext().GetMemberAsync(Context.Author)).Id
                         )
                     );
 
@@ -136,8 +135,7 @@ namespace SbuBot.Commands.Modules
                 .ColorRoles.Add(
                     new(
                         role,
-                        (await Context.GetSbuDbContext().GetMemberAsync(Context.Author)).Id,
-                        (await Context.GetSbuDbContext().GetGuildAsync(Context.Guild)).Id
+                        (await Context.GetSbuDbContext().GetMemberAsync(Context.Author)).Id
                     )
                 );
 

@@ -28,11 +28,11 @@ namespace SbuBot.Models
             GuildId = guildId;
         }
 
-        public SbuColorRole(IRole role, Snowflake ownerId, Snowflake guildId)
+        public SbuColorRole(IRole role, Snowflake ownerId)
         {
             Id = role.Id;
             OwnerId = ownerId;
-            GuildId = guildId;
+            GuildId = role.GuildId;
         }
 
 #region EFCore
@@ -58,7 +58,7 @@ namespace SbuBot.Models
                     .WithMany(m => m.ColorRoles)
                     .HasForeignKey(cr => cr.GuildId)
                     .HasPrincipalKey(m => m.Id)
-                    .OnDelete(DeleteBehavior.SetNull);
+                    .OnDelete(DeleteBehavior.Cascade);
             }
         }
 

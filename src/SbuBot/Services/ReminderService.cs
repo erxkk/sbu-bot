@@ -5,7 +5,6 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Disqord;
-using Disqord.Bot;
 using Disqord.Bot.Hosting;
 using Disqord.Rest;
 
@@ -22,29 +21,20 @@ namespace SbuBot.Services
         private readonly SchedulerService _schedulerService;
 
         private readonly Dictionary<Guid, SbuReminder> _currentReminders = new();
-        private readonly object _lock = new();
 
-        public IReadOnlyDictionary<Guid, SbuReminder> CurrentReminders
+        public ReminderService(SchedulerService schedulerService) => _schedulerService = schedulerService;
+
+        public IReadOnlyDictionary<Guid, SbuReminder> GetCurrentReminders()
         {
-            get
+            Dictionary<Guid, SbuReminder> copy;
+
+            lock (this)
             {
-                Dictionary<Guid, SbuReminder> copy;
-
-                lock (_lock)
-                {
-                    copy = new(_currentReminders);
-                }
-
-                return copy;
+                copy = new(_currentReminders);
             }
-        }
 
-        public ReminderService(
-            SchedulerService schedulerService,
-            ILogger<ReminderService> logger,
-            DiscordBotBase bot
-        ) : base(logger, bot)
-            => _schedulerService = schedulerService;
+            return copy;
+        }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
@@ -63,7 +53,7 @@ namespace SbuBot.Services
                 if (notDispatchedReminder.DueAt + TimeSpan.FromMilliseconds(500) <= DateTimeOffset.Now)
                     notDispatchedReminder.DueAt = DateTimeOffset.Now + TimeSpan.FromSeconds(5);
 
-                await ScheduleAsync(notDispatchedReminder, false, stoppingToken);
+                await ScheduleAsync(notDispatchedReminder, false);
             }
 
             await base.ExecuteAsync(stoppingToken);
@@ -71,12 +61,9 @@ namespace SbuBot.Services
 
         public async Task ScheduleAsync(
             SbuReminder reminder,
-            bool isNewReminder = true,
-            CancellationToken cancellationToken = default
+            bool isNewReminder = true
         )
         {
-            _linkIfNotStoppingToken(ref cancellationToken);
-
             if (reminder.DueAt + TimeSpan.FromMilliseconds(500) <= DateTimeOffset.Now)
             {
                 throw new ArgumentOutOfRangeException(
@@ -97,7 +84,7 @@ namespace SbuBot.Services
                 }
             }
 
-            lock (_lock)
+            lock (this)
             {
                 _currentReminders[reminder.Id] = reminder;
             }
@@ -106,8 +93,7 @@ namespace SbuBot.Services
                 reminder.Id,
                 reminderCallback,
                 reminder.DueAt - DateTimeOffset.Now,
-                0,
-                cancellationToken
+                0
             );
 
             Logger.LogDebug("Scheduled {@Reminder}", reminder.Id);
@@ -139,7 +125,7 @@ namespace SbuBot.Services
                 }
                 finally
                 {
-                    lock (_lock)
+                    lock (this)
                     {
                         _currentReminders.Remove(reminder.Id);
                     }
@@ -157,16 +143,11 @@ namespace SbuBot.Services
             }
         }
 
-        public async Task RescheduleAsync(
-            Guid id,
-            DateTimeOffset newTimestamp,
-            CancellationToken cancellationToken = default
-        )
+        public async Task RescheduleAsync(Guid id, DateTimeOffset newTimestamp)
         {
-            _linkIfNotStoppingToken(ref cancellationToken);
             SbuReminder reminder;
 
-            lock (_lock)
+            lock (this)
             {
                 if (!_currentReminders.TryGetValue(id, out reminder!))
                     return;
@@ -178,12 +159,12 @@ namespace SbuBot.Services
 
                 reminder.DueAt = newTimestamp;
                 context.Reminders.Update(reminder);
-                await context.SaveChangesAsync(cancellationToken);
+                await context.SaveChangesAsync();
             }
 
             DateTimeOffset previousDueAt = reminder.DueAt;
             reminder.DueAt = newTimestamp;
-            _schedulerService.Reschedule(id, reminder.DueAt - DateTimeOffset.Now, cancellationToken);
+            _schedulerService.Reschedule(id, reminder.DueAt - DateTimeOffset.Now);
 
             Logger.LogDebug(
                 "Rescheduled: {@PreviousTimespan} -> {@NewTimespan} : {@Reminder}",
@@ -197,7 +178,7 @@ namespace SbuBot.Services
         {
             SbuReminder reminder;
 
-            lock (_lock)
+            lock (this)
             {
                 if (!_currentReminders.Remove(id, out reminder!))
                     return;
@@ -216,18 +197,16 @@ namespace SbuBot.Services
             Logger.LogDebug("Unscheduled: {@Reminder}", reminder.Id);
         }
 
-        public async Task CancelAsync(
-            Func<IEnumerable<KeyValuePair<Guid, SbuReminder>>, IEnumerable<KeyValuePair<Guid, SbuReminder>>> query
-        )
+        public async Task CancelAsync(Func<KeyValuePair<Guid, SbuReminder>, bool> query)
         {
             if (query == null)
                 throw new ArgumentNullException(nameof(query));
 
             int count = 0;
 
-            IEnumerable<KeyValuePair<Guid, SbuReminder>> reminders = query(CurrentReminders);
+            IEnumerable<KeyValuePair<Guid, SbuReminder>> reminders = GetCurrentReminders().Where(query);
 
-            lock (_lock)
+            lock (this)
             {
                 foreach ((Guid id, SbuReminder _) in reminders)
                 {
@@ -246,16 +225,6 @@ namespace SbuBot.Services
             }
 
             Logger.LogDebug("Unscheduled: {@Reminders}", new { Amount = count });
-        }
-
-        private void _linkIfNotStoppingToken(ref CancellationToken cancellationToken)
-        {
-            if (cancellationToken != Bot.StoppingToken)
-            {
-                cancellationToken = CancellationTokenSource
-                    .CreateLinkedTokenSource(Bot.StoppingToken, cancellationToken)
-                    .Token;
-            }
         }
     }
 }

@@ -33,10 +33,10 @@ namespace SbuBot.Models
             GuildId = guildId;
         }
 
-        public SbuMember(IMember member, Snowflake guildId)
+        public SbuMember(IMember member)
         {
             Id = member.Id;
-            GuildId = guildId;
+            GuildId = member.GuildId;
         }
 
 #region EFCore
@@ -54,7 +54,7 @@ namespace SbuBot.Models
                     .WithMany(g => g.Members)
                     .HasForeignKey(g => g.GuildId)
                     .HasPrincipalKey(m => m.Id)
-                    .OnDelete(DeleteBehavior.SetNull);
+                    .OnDelete(DeleteBehavior.Cascade);
 
                 builder.HasOne(m => m.ColorRole)
                     .WithOne(cr => cr.Owner)

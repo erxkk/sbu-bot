@@ -73,7 +73,7 @@ namespace SbuBot.Models
                     .WithMany(m => m.Tags)
                     .HasForeignKey(t => t.GuildId)
                     .HasPrincipalKey(m => m.Id)
-                    .OnDelete(DeleteBehavior.SetNull);
+                    .OnDelete(DeleteBehavior.Cascade);
             }
         }
 

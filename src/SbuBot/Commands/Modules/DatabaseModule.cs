@@ -32,13 +32,11 @@ namespace SbuBot.Commands.Modules
         )
         {
             SbuDbContext dbContext = Context.GetSbuDbContext();
-            SbuGuild guild = await dbContext.GetGuildAsync(Context.Guild);
-            SbuMember newMember = new(member, guild.Id);
+            SbuMember newMember = dbContext.AddMember(member);
 
             if (member.GetColorRole() is { } colorRole)
-                dbContext.ColorRoles.Add(new(colorRole, guild.Id, newMember.Id));
+                dbContext.AddColorRole(colorRole, newMember.Id);
 
-            dbContext.Members.Add(newMember);
             await dbContext.SaveChangesAsync();
 
             return Reply($"{member.Mention} is now registered in the database.");
@@ -55,8 +53,6 @@ namespace SbuBot.Commands.Modules
                 .Where(m => !m.IsBot)
                 .Select(m => (m, m.GetColorRole()));
 
-            SbuGuild guild = await dbContext.GetGuildAsync(Context.Guild);
-
             Dictionary<Snowflake, SbuMember> members = await dbContext.Members
                 .Where(m => m.GuildId == Context.Guild.Id)
                 .ToDictionaryAsync(k => k.Id, v => v, Context.Bot.StoppingToken);
@@ -67,15 +63,8 @@ namespace SbuBot.Commands.Modules
 
             foreach ((IMember member, IRole? role) in userRolePairs)
             {
-                if (members.TryGetValue(member.Id, out var dbMember))
-                {
-                    dbContext.Members.Update(dbMember);
-                }
-                else
-                {
-                    dbMember = new(member, guild.Id);
-                    dbContext.Members.Add(dbMember);
-                }
+                if (!members.TryGetValue(member.Id, out var dbMember))
+                    dbMember = dbContext.AddMember(member);
 
                 userCount++;
 
@@ -89,7 +78,7 @@ namespace SbuBot.Commands.Modules
                 }
                 else
                 {
-                    dbContext.ColorRoles.Add(new(role, dbMember.Id, guild.Id));
+                    dbContext.AddColorRole(role, dbMember.Id);
                 }
 
                 roleCount++;

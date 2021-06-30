@@ -34,6 +34,13 @@ namespace SbuBot.Models
             _configuration = configuration;
         }
 
+        public SbuColorRole AddColorRole(IRole role, Snowflake ownerId)
+        {
+            SbuColorRole sbuColorRole = new(role, ownerId);
+            ColorRoles.Add(sbuColorRole);
+            return sbuColorRole;
+        }
+
         public Task<SbuColorRole> GetColorRoleAsync(
             IRole member,
             Func<IQueryable<SbuColorRole>, IQueryable<SbuColorRole>>? query = null,
@@ -50,6 +57,13 @@ namespace SbuBot.Models
                 m => m.Id == roleId && m.GuildId == guildId,
                 _sbuBot?.StoppingToken ?? cancellationToken
             )!;
+
+        public SbuMember AddMember(IMember member)
+        {
+            SbuMember sbuMember = new(member);
+            Members.Add(sbuMember);
+            return sbuMember;
+        }
 
         public Task<SbuMember> GetMemberAsync(
             IMember member,
@@ -68,20 +82,27 @@ namespace SbuBot.Models
                 _sbuBot?.StoppingToken ?? cancellationToken
             )!;
 
+        public SbuGuild AddGuild(IGuild guild)
+        {
+            SbuGuild sbuGuild = new(guild);
+            Guilds.Add(sbuGuild);
+            return sbuGuild;
+        }
+
         public Task<SbuGuild> GetGuildAsync(
             IGuild guild,
             Func<IQueryable<SbuGuild>, IQueryable<SbuGuild>>? query = null,
             CancellationToken cancellationToken = default
-        ) => GetGuildAsync(guild.Id, query, cancellationToken);
+        ) => GetGuildAsync(guild.Id, query, cancellationToken)!;
 
-        public Task<SbuGuild> GetGuildAsync(
+        public Task<SbuGuild?> GetGuildAsync(
             Snowflake guildId,
             Func<IQueryable<SbuGuild>, IQueryable<SbuGuild>>? query = null,
             CancellationToken cancellationToken = default
-        ) => (query is { } ? query(Guilds) : Guilds).FirstAsync(
+        ) => (query is { } ? query(Guilds) : Guilds).FirstOrDefaultAsync(
             m => m.Id == guildId,
             _sbuBot?.StoppingToken ?? cancellationToken
-        );
+        )!;
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
             => base.SaveChangesAsync(_sbuBot?.StoppingToken ?? cancellationToken);

@@ -3,7 +3,6 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using Disqord;
-using Disqord.Bot;
 using Disqord.Bot.Hosting;
 using Disqord.Gateway;
 
@@ -24,29 +23,24 @@ namespace SbuBot.Services
 
         public override int Priority => int.MaxValue;
 
-        public ConsistencyService(ILogger<ConsistencyService> logger, DiscordBotBase bot) : base(logger, bot) { }
-
         public void IgnoreAddedRole(Snowflake roleId) => _handledAddedRoles.Add(roleId);
         public void IgnoreRemovedRole(Snowflake roleId) => _handledRemovedRoles.Add(roleId);
 
+        // TODO: fix discrepancies, don't await chunking + only use one event to handle guild inserts
         protected override async ValueTask OnGuildAvailable(GuildAvailableEventArgs e)
         {
             using (IServiceScope scope = Bot.Services.CreateScope())
             {
                 SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
 
-                if (await context.Guilds.FirstOrDefaultAsync(
-                    g => g.Id == e.GuildId,
-                    Bot.StoppingToken
-                ) is null)
+                if (await context.GetGuildAsync(e.GuildId) is null)
                 {
-                    context.Guilds.Add(new(e.Guild));
+                    context.AddGuild(e.Guild);
                     await context.SaveChangesAsync(Bot.StoppingToken);
                 }
             }
 
-            await Bot.Chunker.ChunkAsync(e.Guild, Bot.StoppingToken);
-            await base.OnGuildAvailable(e);
+            await Bot.Chunker.ChunkAsync(e.Guild);
         }
 
         protected override async ValueTask OnJoinedGuild(JoinedGuildEventArgs e)
@@ -55,18 +49,14 @@ namespace SbuBot.Services
             {
                 SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
 
-                if (await context.Guilds.FirstOrDefaultAsync(
-                    g => g.Id == e.GuildId,
-                    Bot.StoppingToken
-                ) is null)
+                if (await context.GetGuildAsync(e.GuildId) is null)
                 {
-                    context.Guilds.Add(new(e.Guild));
-                    await context.SaveChangesAsync(Bot.StoppingToken);
+                    context.AddGuild(e.Guild);
+                    await context.SaveChangesAsync();
                 }
             }
 
             Logger.LogDebug("Guild inserted: {@Guild}", new { Id = e.GuildId });
-            await base.OnJoinedGuild(e);
         }
 
         protected override async ValueTask OnLeftGuild(LeftGuildEventArgs e)
@@ -76,23 +66,12 @@ namespace SbuBot.Services
                 SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
                 ReminderService service = scope.ServiceProvider.GetRequiredService<ReminderService>();
 
-                if (await context.Guilds.FirstOrDefaultAsync(g => g.Id == e.GuildId) is not { } guild)
+                if (await context.GetGuildAsync(e.GuildId) is not { } guild)
                     return;
 
-                context.ColorRoles.RemoveRange(
-                    await context.ColorRoles
-                        .Where(t => t.GuildId == guild.Id)
-                        .ToListAsync(Bot.StoppingToken)
-                );
-
-                context.Tags.RemoveRange(
-                    await context.Tags
-                        .Where(t => t.GuildId == guild.Id)
-                        .ToListAsync(Bot.StoppingToken)
-                );
-
-                await service.CancelAsync(q => q.Where(r => r.Value.GuildId == guild.Id));
-                await context.SaveChangesAsync(Bot.StoppingToken);
+                context.Guilds.Remove(guild);
+                await service.CancelAsync(r => r.Value.GuildId == guild.Id);
+                await context.SaveChangesAsync();
             }
 
             Logger.LogDebug("Guild removed: {@Guild}", new { Id = e.GuildId });
@@ -107,16 +86,11 @@ namespace SbuBot.Services
             {
                 SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
 
-                if (await context.Guilds.FirstOrDefaultAsync(g => g.Id == e.GuildId) is not { } guild)
+                if (await context.GetMemberAsync(e.Member.Id, e.GuildId) is { })
                     return;
 
-                if (await context.Members.FirstOrDefaultAsync(
-                    m => m.Id == e.Member.Id && m.GuildId == guild.Id,
-                    Bot.StoppingToken
-                ) is { }) return;
-
-                context.Members.Add(new(e.Member, guild.Id));
-                await context.SaveChangesAsync(Bot.StoppingToken);
+                context.AddMember(e.Member);
+                await context.SaveChangesAsync();
             }
 
             Logger.LogDebug("Member inserted: {@Member}", new { e.Member.Id, Guild = e.GuildId });
@@ -128,7 +102,7 @@ namespace SbuBot.Services
                 return;
 
             if (e.OldMember is null)
-                return;
+                throw new NotCachedException("Could not find required member in cache.");
 
             if (e.OldMember.RoleIds.Count == e.NewMember.RoleIds.Count)
                 return;
@@ -159,26 +133,23 @@ namespace SbuBot.Services
                     return;
                 }
 
-                if (await context.Members.FirstOrDefaultAsync(
-                    m => m.Id == e.MemberId && m.GuildId == guild.Id,
-                    Bot.StoppingToken
-                ) is not { } member)
+                if (await context.GetMemberAsync(e.NewMember) is not { } member)
                 {
-                    member = new(e.NewMember, guild.Id);
+                    member = new(e.NewMember);
                     context.Members.Add(member);
                 }
 
-                if (await context.ColorRoles.FirstOrDefaultAsync(r => r.GuildId == guild.Id) is { } role)
+                if (await context.GetColorRoleAsync(addedRole) is not { } role)
                 {
-                    role.OwnerId = member.Id;
+                    role = new(addedRole, member.Id);
+                    context.ColorRoles.Add(role);
                 }
                 else
                 {
-                    role = new(addedRole, member.Id, guild.Id);
-                    context.ColorRoles.Add(role);
+                    role.OwnerId = member.Id;
                 }
 
-                await context.SaveChangesAsync(Bot.StoppingToken);
+                await context.SaveChangesAsync();
 
                 Logger.LogDebug(
                     "Color role assigned, established owner ship: {@ColorRole}",
@@ -197,34 +168,11 @@ namespace SbuBot.Services
                 SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
                 ReminderService service = scope.ServiceProvider.GetRequiredService<ReminderService>();
 
-                if (await context.Guilds.FirstOrDefaultAsync(g => g.Id == e.GuildId) is not { } guild)
+                if (await context.GetMemberAsync(e.User.Id, e.GuildId) is not { } member)
                     return;
 
-                if (await context.Members.FirstOrDefaultAsync(
-                    m => m.Id == e.User.Id && m.GuildId == guild.Id,
-                    Bot.StoppingToken
-                ) is not { } member) return;
-
-                if (await context.ColorRoles.FirstOrDefaultAsync(
-                    m => m.OwnerId == member.Id && m.GuildId == guild.Id,
-                    Bot.StoppingToken
-                ) is { } role)
-                {
-                    role.OwnerId = null;
-                    context.ColorRoles.Update(role);
-                }
-
-                List<SbuTag> tags = await context.Tags
-                    .Where(t => t.OwnerId == member.Id && t.GuildId == guild.Id)
-                    .ToListAsync(Bot.StoppingToken);
-
-                foreach (SbuTag tag in tags)
-                    tag.OwnerId = null;
-
-                context.Tags.UpdateRange(tags);
-
-                await service.CancelAsync(q => q.Where(r => r.Value.OwnerId == member.Id));
-                await context.SaveChangesAsync(Bot.StoppingToken);
+                await service.CancelAsync(r => r.Value.OwnerId == member.Id);
+                await context.SaveChangesAsync();
                 Logger.LogDebug("Member removed: {@Member}", new { e.User.Id, Guild = e.GuildId });
             }
         }
@@ -234,20 +182,18 @@ namespace SbuBot.Services
             if (e.Member.IsBot)
                 return;
 
+            if (e.GuildId is null)
+                return;
+
             using (IServiceScope scope = Bot.Services.CreateScope())
             {
                 SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
 
-                if (await context.Guilds.FirstOrDefaultAsync(g => g.Id == e.GuildId) is not { } guild)
+                if (await context.GetMemberAsync(e.Member.Id, e.GuildId.Value) is { })
                     return;
 
-                if (await context.Members.FirstOrDefaultAsync(
-                    m => m.Id == e.Member.Id && m.GuildId == guild.Id,
-                    Bot.StoppingToken
-                ) is { }) return;
-
-                context.Members.Add(new(e.Member, guild.Id));
-                await context.SaveChangesAsync(Bot.StoppingToken);
+                context.Members.Add(new(e.Member));
+                await context.SaveChangesAsync();
             }
 
             Logger.LogDebug("Member inserted: {@Member}", new { e.Member.Id, Guild = e.GuildId });
@@ -265,13 +211,10 @@ namespace SbuBot.Services
             {
                 SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
 
-                if (await context.ColorRoles.FirstOrDefaultAsync(
-                    r => r.Id == e.RoleId,
-                    Bot.StoppingToken
-                ) is { } role)
+                if (await context.GetColorRoleAsync(e.RoleId, e.GuildId) is { } role)
                 {
                     context.ColorRoles.Remove(role);
-                    await context.SaveChangesAsync(Bot.StoppingToken);
+                    await context.SaveChangesAsync();
                 }
             }
 

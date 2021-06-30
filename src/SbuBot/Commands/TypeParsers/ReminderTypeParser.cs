@@ -28,7 +28,7 @@ namespace SbuBot.Commands.TypeParsers
 
             if (value.Equals("last", StringComparison.OrdinalIgnoreCase))
             {
-                return service.CurrentReminders.Values.FirstOrDefault(
+                return service.GetCurrentReminders().Values.FirstOrDefault(
                     r => r.OwnerId == context.Author.Id && r.GuildId == context.GuildId
                 ) is { } queriedReminder
                     ? TypeParser<SbuReminder>.Success(queriedReminder)
@@ -40,7 +40,7 @@ namespace SbuBot.Commands.TypeParsers
             if (await guidParser.ParseAsync(parameter, value, context) is not { IsSuccessful: true } guidParseResult)
                 return TypeParser<SbuReminder>.Failure("Could not parse reminder.");
 
-            return service.CurrentReminders.TryGetValue(guidParseResult.Value, out var indexedReminder)
+            return service.GetCurrentReminders().TryGetValue(guidParseResult.Value, out var indexedReminder)
                 ? TypeParser<SbuReminder>.Success(indexedReminder)
                 : TypeParser<SbuReminder>.Failure("Could not find reminder.");
         }

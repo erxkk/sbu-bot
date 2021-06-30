@@ -52,8 +52,7 @@ namespace SbuBot.Commands.Modules
                     reminderDescriptor.Timestamp
                 );
 
-                await Context.Services.GetRequiredService<ReminderService>()
-                    .ScheduleAsync(newReminder, cancellationToken: Context.Bot.StoppingToken);
+                await Context.Services.GetRequiredService<ReminderService>().ScheduleAsync(newReminder);
 
                 return Reply(
                     new LocalEmbed()
@@ -101,11 +100,7 @@ namespace SbuBot.Commands.Modules
                 SbuGuild guild = await Context.GetSbuDbContext().GetGuildAsync(Context.Guild);
                 SbuReminder newReminder = new(Context, owner.Id, guild.Id, message, parseResult.Value);
 
-                await using (Context.BeginYield())
-                {
-                    await Context.Services.GetRequiredService<ReminderService>()
-                        .ScheduleAsync(newReminder, cancellationToken: Context.Bot.StoppingToken);
-                }
+                await Context.Services.GetRequiredService<ReminderService>().ScheduleAsync(newReminder);
 
                 return Reply(
                     new LocalEmbed()
@@ -129,8 +124,7 @@ namespace SbuBot.Commands.Modules
         {
             if (newTimestamp + TimeSpan.FromMilliseconds(500) >= DateTimeOffset.Now)
             {
-                await Context.Services.GetRequiredService<ReminderService>()
-                    .RescheduleAsync(reminder.Id, newTimestamp, Context.Bot.StoppingToken);
+                await Context.Services.GetRequiredService<ReminderService>().RescheduleAsync(reminder.Id, newTimestamp);
             }
 
             return Reply(
@@ -190,7 +184,7 @@ namespace SbuBot.Commands.Modules
                 SbuMember owner = await Context.GetSbuDbContext().GetMemberAsync(Context.Author);
 
                 await Context.Services.GetRequiredService<ReminderService>()
-                    .CancelAsync(q => q.Where(r => r.Value.OwnerId == owner.Id));
+                    .CancelAsync(r => r.Value.OwnerId == owner.Id);
 
                 return Reply("Cancelled all reminders.");
             }
@@ -218,7 +212,7 @@ namespace SbuBot.Commands.Modules
             [Description("Lists all of the command author's reminders.")]
             public async Task<DiscordCommandResult> ListAllAsync()
             {
-                if (Context.Services.GetRequiredService<ReminderService>().CurrentReminders
+                if (Context.Services.GetRequiredService<ReminderService>().GetCurrentReminders()
                     is not { Count: > 0 } reminders)
                     return Reply("You have no reminders.");
 

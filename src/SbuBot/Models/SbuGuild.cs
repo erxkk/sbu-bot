@@ -43,25 +43,25 @@ namespace SbuBot.Models
                     .WithOne(m => m.Guild)
                     .HasForeignKey(m => m.GuildId)
                     .HasPrincipalKey(g => g.Id)
-                    .OnDelete(DeleteBehavior.SetNull);
+                    .OnDelete(DeleteBehavior.Cascade);
 
                 builder.HasMany(g => g.ColorRoles)
                     .WithOne(cr => cr.Guild)
                     .HasForeignKey(cr => cr.GuildId)
                     .HasPrincipalKey(g => g.Id)
-                    .OnDelete(DeleteBehavior.SetNull);
+                    .OnDelete(DeleteBehavior.Cascade);
 
                 builder.HasMany(g => g.Tags)
                     .WithOne(t => t.Guild)
                     .HasForeignKey(t => t.GuildId)
                     .HasPrincipalKey(g => g.Id)
-                    .OnDelete(DeleteBehavior.SetNull);
+                    .OnDelete(DeleteBehavior.Cascade);
 
                 builder.HasMany(g => g.Reminders)
                     .WithOne(r => r.Guild)
                     .HasForeignKey(r => r.GuildId)
                     .HasPrincipalKey(g => g.Id)
-                    .OnDelete(DeleteBehavior.SetNull);
+                    .OnDelete(DeleteBehavior.Cascade);
             }
         }
 

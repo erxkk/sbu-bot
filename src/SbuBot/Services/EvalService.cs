@@ -13,11 +13,9 @@ using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.Extensions.Logging;
 
-using SbuBot.Commands;
-using SbuBot.Models;
-
 namespace SbuBot.Services
 {
+    // TODO: overhaul to either be extension methods or find a reason for this to be a service
     public sealed class EvalService : DiscordBotService
     {
         public EvalService(ILogger<EvalService> logger, DiscordBotBase bot) : base(logger, bot) { }
