@@ -9,7 +9,7 @@ namespace SbuBot
         public const char DESCRIPTOR_SEPARATOR = '|';
         public const string DEFAULT_PREFIX = "sbu";
 
-        public static readonly Version VERSION = new(0, 4, 4);
+        public static readonly Version VERSION = new(0, 4, 5);
 
         public static readonly string[] RESERVED_KEYWORDS =
         {
@@ -97,8 +97,6 @@ namespace SbuBot
                 public const ulong SELF = 760469720741969950UL;
                 public const ulong PIN_ARCHIVE = 775826206410407937UL;
                 public const ulong SHIT_SBU_SAYS = 759153822806310912UL;
-                public const ulong CUM_ROOM = 760468335439380521UL;
-                public const ulong INVERSE_CUM_ROOM = 760468275750240266UL;
                 public const ulong CRUMPET_SERVER = 790542075346944020UL;
                 public const ulong DUDE_ZONE = 808295761841225739UL;
                 public const ulong SOCIETY = 732212629476737095UL;
@@ -127,6 +125,13 @@ namespace SbuBot
             public static class Deleted
             {
                 public const ulong SELF = 784093487150399508UL;
+                public const ulong CHESS = 818919984470294578UL;
+                public const ulong GAMING_SALES = 758612906778165288UL;
+                public const ulong INVERSE_CUM_ROOM = 760468275750240266UL;
+                public const ulong CUM_ROOM = 760468335439380521UL;
+                public const ulong CYBERPUNK = 786519547225833482UL;
+                public const ulong DEGENERATE = 732211770613170246UL;
+                public const ulong WHEN_THE = 843720840139112449UL;
             }
         }
 
