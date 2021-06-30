@@ -6,7 +6,9 @@ using Disqord.Bot;
 
 using Qmmands;
 
+using SbuBot.Exceptions;
 using SbuBot.Extensions;
+using SbuBot.Models;
 
 namespace SbuBot.Commands.Attributes.Checks.Parameters
 {
@@ -19,6 +21,10 @@ namespace SbuBot.Commands.Attributes.Checks.Parameters
             {
                 IMember member => (member.GetHierarchy(), "member"),
                 IRole role => (role.Position, "role"),
+                SbuColorRole sbuRole => (
+                    context.Guild.Roles.TryGetValue(sbuRole.Id, out var discordRole)
+                        ? discordRole.Position
+                        : throw new NotCachedException("Could not find role in cache for hierarchy check."), "role"),
                 _ => throw new ArgumentOutOfRangeException(nameof(argument), argument, null),
             };
 
@@ -30,6 +36,7 @@ namespace SbuBot.Commands.Attributes.Checks.Parameters
         }
 
         public override bool CheckType(Type type) => type.IsAssignableTo(typeof(IMember))
-            || type.IsAssignableTo(typeof(IRole));
+            || type.IsAssignableTo(typeof(IRole))
+            || type == typeof(SbuColorRole);
     }
 }
