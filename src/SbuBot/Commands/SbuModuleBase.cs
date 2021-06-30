@@ -25,6 +25,8 @@ namespace SbuBot.Commands
                 .Select(p => new Page().WithEmbeds((embedModifier?.Invoke(new()) ?? new()).WithDescription(p)))
         );
 
+        protected DiscordMenuCommandResult HelpView() => View(new RootView(Context.Bot.Commands));
+
         protected DiscordMenuCommandResult HelpView(Command command) => View(
             command.Module.IsGroup() ? new CommandView(command) : new GroupView(command.Module)
         );

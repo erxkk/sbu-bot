@@ -1,4 +1,4 @@
-using System.Linq;
+using System.Text;
 
 using Disqord;
 using Disqord.Extensions.Interactivity.Menus;
@@ -11,14 +11,12 @@ namespace SbuBot.Commands.Views.Help
     {
         public RootView(CommandService service) : base(true)
         {
-            TemplateMessage.Embeds[0]
-                .WithTitle("Modules")
-                .WithDescription(
-                    string.Join("\n", service.TopLevelModules.Select(m => $"{SbuGlobals.BULLET} {m.Name}"))
-                );
+            StringBuilder description = new(512);
 
             foreach (Module submodule in service.TopLevelModules)
             {
+                description.Append(SbuGlobals.BULLET).Append(' ').AppendLine(submodule.Name);
+
                 AddComponent(
                     new ButtonViewComponent(
                         _ =>
@@ -33,6 +31,10 @@ namespace SbuBot.Commands.Views.Help
                     }
                 );
             }
+
+            TemplateMessage.Embeds[0]
+                .WithTitle("Modules")
+                .WithDescription(description.ToString());
         }
     }
 }

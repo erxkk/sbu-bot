@@ -27,10 +27,12 @@ namespace SbuBot.Commands.Modules
     {
         [Command]
         [Description("Responds with the given tag's content.")]
+        [Usage("tag tagggg", "t whomstve")]
         public DiscordCommandResult Get([Description("The tag to invoke.")] SbuTag tag) => Response(tag.Content);
 
         [Command("claim", "take")]
         [Description("Claims the given tag if it has no owner.")]
+        [Usage("tag claim tagggg", "t take whomstve")]
         public async Task<DiscordCommandResult> ClaimTagAsync(
             [MustBeOwned(false)][Description("The tag to claim.")]
             SbuTag tag
@@ -48,6 +50,7 @@ namespace SbuBot.Commands.Modules
         public sealed class CreateGroup : SbuModuleBase
         {
             [Command]
+            [Usage("tag create tagggg | new tag who dis", "t make da dog | what da dog doin", "tag new h | h")]
             public async Task<DiscordCommandResult> CreateAsync(
                 [Description("The tag descriptor.")] TagDescriptor tagDescriptor
             )
@@ -164,6 +167,7 @@ namespace SbuBot.Commands.Modules
         {
             [Command]
             [Description("Lists the tags of a given member, or of the command author if no member is specified.")]
+            [Usage("tag list", "t list @user", "tag list 352815253828141056", "tag list Allah")]
             public async Task<DiscordCommandResult> ListFromOwnerAsync(
                 [OverrideDefault("@author")]
                 [Description("The member who's tags should be listed.")]
@@ -224,6 +228,7 @@ namespace SbuBot.Commands.Modules
         public sealed class EditGroup : SbuModuleBase
         {
             [Command]
+            [Usage("tag edit da dog | what da dog doin now", "t change h | h!!!")]
             public async Task<DiscordCommandResult> EditAsync(
                 [Description("The tag descriptor.")] TagDescriptor tagDescriptor
             )
@@ -248,6 +253,7 @@ namespace SbuBot.Commands.Modules
             }
 
             [Command]
+            [Usage("tag edit da dog", "t change h")]
             public async Task<DiscordCommandResult> EditInteractiveAsync(
                 [AuthorMustOwn][Description("The tag that should be modified.")]
                 SbuTag tag
@@ -282,6 +288,7 @@ namespace SbuBot.Commands.Modules
         {
             [Command]
             [Description("Removes a given tag.")]
+            [Usage("tag remove da dog", "t delete h")]
             public async Task<DiscordCommandResult> RemoveAsync(
                 [AuthorMustOwn][Description("The tag that should be removed.")]
                 SbuTag tag
@@ -349,6 +356,7 @@ namespace SbuBot.Commands.Modules
         {
             [Command]
             [Description("Transfers ownership of a given tag to the given member.")]
+            [Usage("tag transfer @user da dog", "t transfer 352815253828141056 h")]
             public async Task<DiscordCommandResult> TransferAsync(
                 [NotAuthor][Description("The member that should receive the given tag.")]
                 SbuMember receiver,
@@ -365,6 +373,7 @@ namespace SbuBot.Commands.Modules
 
             [Command("all")]
             [Description("Transfers ownership of all of the command author's tags to the given member.")]
+            [Usage("tag transfer all @user", "t transfer all 352815253828141056")]
             public async Task<DiscordCommandResult> TransferAllAsync(
                 [NotAuthor][Description("The member that should receive the given tags.")]
                 SbuMember receiver

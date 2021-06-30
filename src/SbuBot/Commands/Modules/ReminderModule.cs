@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 using Qmmands;
 
+using SbuBot.Commands.Attributes;
 using SbuBot.Commands.Attributes.Checks.Parameters;
 using SbuBot.Commands.TypeParsers.Descriptors;
 using SbuBot.Extensions;
@@ -30,6 +31,11 @@ namespace SbuBot.Commands.Modules
         public sealed class CreateGroup : SbuModuleBase
         {
             [Command]
+            [Usage(
+                "reminder create in 3 days | do the thing",
+                "reminder make in 3 days | do the thing",
+                "remindeme new in 3 days | do the thing"
+            )]
             public async Task<DiscordCommandResult> CreateAsync(
                 [Description("The reminder descriptor.")]
                 ReminderDescriptor reminderDescriptor
@@ -59,6 +65,7 @@ namespace SbuBot.Commands.Modules
             }
 
             [Command]
+            [Usage("reminder create do the thing", "reminder make do the thing", "remindeme new do the thing")]
             public async Task<DiscordCommandResult> CreateInteractiveAsync(
                 [Maximum(SbuReminder.MAX_MESSAGE_LENGTH)][Description("The optional message of the reminder.")]
                 string? message = null
@@ -112,6 +119,7 @@ namespace SbuBot.Commands.Modules
 
         [Command("edit", "change")]
         [Description("Reschedules the given reminder.")]
+        [Usage("reminder edit in 2 days", "reminder change in 5 seconds")]
         public async Task<DiscordCommandResult> RescheduleAsync(
             [AuthorMustOwn][Description("The reminder to reschedule.")]
             SbuReminder reminder,
@@ -135,11 +143,15 @@ namespace SbuBot.Commands.Modules
         }
 
         [Group("remove", "delete", "cancel")]
-        [Description("A group of commands for cancelling reminders.")]
         public sealed class RemoveGroup : SbuModuleBase
         {
             [Command]
             [Description("Cancels the given reminder.")]
+            [Usage(
+                "reminder remove last",
+                "reminder delete 936DA01F-9ABD-4d9d-80C7-02AF85C822A8",
+                "remindme cancel last"
+            )]
             public async Task<DiscordCommandResult> CancelAsync(
                 [AuthorMustOwn][Description("The reminder that should be canceled.")]
                 SbuReminder reminder
@@ -190,6 +202,7 @@ namespace SbuBot.Commands.Modules
         {
             [Command]
             [Description("Lists the given reminder.")]
+            [Usage("reminder list last", "reminder list 936DA01F-9ABD-4d9d-80C7-02AF85C822A8")]
             public DiscordCommandResult List(
                 [AuthorMustOwn][Description("The reminder that should be listed.")]
                 SbuReminder reminder

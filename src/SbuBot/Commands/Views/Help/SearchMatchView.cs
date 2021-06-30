@@ -1,8 +1,10 @@
 using System.Collections.Generic;
-using System.Linq;
+using System.Text;
 
 using Disqord;
 using Disqord.Extensions.Interactivity.Menus;
+
+using Kkommon.Extensions.Enumerable;
 
 using Qmmands;
 
@@ -12,18 +14,17 @@ namespace SbuBot.Commands.Views.Help
     {
         public SearchMatchView(IEnumerable<Command> commands)
         {
-            int i = 0;
+            StringBuilder description = new(256);
 
-            TemplateMessage.Embeds[0]
-                .WithTitle("Multiple matches")
-                .WithDescription(
-                    string.Join("\n", commands.Select(c => $"`{++i}` {SbuGlobals.BULLET} {c.GetSignature()}"))
-                );
-
-            i = 0;
-
-            foreach (Command command in commands)
+            foreach ((int index, Command command) in commands.Enumerate())
             {
+                description.Append('`')
+                    .Append(index)
+                    .Append('`')
+                    .Append(SbuGlobals.BULLET)
+                    .Append(' ')
+                    .AppendLine(command.GetSignature());
+
                 AddComponent(
                     new ButtonViewComponent(
                         _ =>
@@ -33,11 +34,13 @@ namespace SbuBot.Commands.Views.Help
                         }
                     )
                     {
-                        Label = (++i).ToString(),
+                        Label = index.ToString(),
                         Style = ButtonComponentStyle.Secondary,
                     }
                 );
             }
+
+            TemplateMessage.Embeds[0].WithTitle("Multiple matches").WithDescription(description.ToString());
         }
     }
 }

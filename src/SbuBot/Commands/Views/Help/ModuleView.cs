@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 using Disqord;
@@ -18,42 +19,23 @@ namespace SbuBot.Commands.Views.Help
         {
             _module = module;
 
-            TemplateMessage.Embeds[0]
-                .WithTitle(module.Name)
-                .WithDescription(
-                    string.Format(
-                        "**Description:**\n{0}\n**Submodules:**\n{1}\n**Commands:**\n{2}",
-                        module.Description ?? "`--`",
-                        module.Submodules.Count > 0
-                            ? string.Join(
-                                "\n",
-                                module.Submodules.Select(
-                                    m => string.Format(
-                                        "{0} {1}",
-                                        SbuGlobals.BULLET,
-                                        m.Aliases.Count != 0 ? Markdown.Code(m.Aliases[0]) : m.Name
-                                    )
-                                )
-                            )
-                            : "`--`",
-                        module.Commands.Count > 0
-                            ? string.Join(
-                                "\n",
-                                module.Commands.Select(c => $"{SbuGlobals.BULLET} {Markdown.Code(c.GetSignature())}")
-                            )
-                            : "`--`"
-                    )
-                );
-
-            if (module.Aliases.Count != 0)
-                TemplateMessage.Embeds[0]
-                    .AddInlineField("Aliases", string.Join(", ", module.Aliases.Select(Markdown.Code)));
+            StringBuilder description = new StringBuilder("**Description:**\n", 512)
+                .AppendLine(module.Description);
 
             if (module.Remarks is { })
-                TemplateMessage.Embeds[0].AddInlineField("Remarks", module.Remarks);
+                description.AppendLine("**Remarks:**").AppendLine(module.Remarks);
+
+            if (module.Submodules.Count > 0)
+                description.AppendLine("**Submodules:**");
 
             foreach (Module submodule in module.Submodules)
             {
+                description.Append(SbuGlobals.BULLET)
+                    .Append(' ')
+                    .AppendLine(
+                        submodule.Aliases.Count != 0 ? Markdown.Code(submodule.Aliases[0]) : submodule.Name
+                    );
+
                 AddComponent(
                     new ButtonViewComponent(
                         _ =>
@@ -69,8 +51,15 @@ namespace SbuBot.Commands.Views.Help
                 );
             }
 
+            if (module.Commands.Count > 0)
+                description.AppendLine("**Commands:**");
+
             foreach (Command command in module.Commands)
             {
+                description.Append(SbuGlobals.BULLET)
+                    .Append(' ')
+                    .AppendLine(Markdown.Code(command.GetSignature()));
+
                 AddComponent(
                     new ButtonViewComponent(
                         _ =>
@@ -84,6 +73,16 @@ namespace SbuBot.Commands.Views.Help
                         Style = ButtonComponentStyle.Secondary,
                     }
                 );
+            }
+
+            TemplateMessage.Embeds[0]
+                .WithTitle(module.Name)
+                .WithDescription(description.ToString());
+
+            if (module.Aliases.Count != 0)
+            {
+                TemplateMessage.Embeds[0]
+                    .AddInlineField("Aliases", string.Join(", ", module.Aliases.Select(Markdown.Code)));
             }
         }
 

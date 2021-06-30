@@ -147,10 +147,14 @@ namespace SbuBot.Commands.Modules
         [Group("command", "commands")]
         [Description("A group of commands for displaying command information.")]
         public sealed class CommandGroup : SbuModuleBase
-
         {
+            [Command("modules")]
+            [Description("Finds all commands that would match the given input.")]
+            public DiscordCommandResult Modules() => HelpView();
+
             [Command("find")]
             [Description("Finds all commands that would match the given input.")]
+            [Usage("command find role edit name", "command find help")]
             public DiscordCommandResult Find(string command)
             {
                 IReadOnlyList<CommandMatch> matches = Context.Bot.Commands.FindCommands(command);
@@ -192,15 +196,14 @@ namespace SbuBot.Commands.Modules
 
         [Command("help", "h", "how")]
         [Description(
-            "Interactively displays information about for a given command, or displays all commands if non is given."
+            "Interactively displays information about for a given command/module, or displays all modules if non is "
+            + "given."
         )]
-        public DiscordCommandResult Help([OverrideDefault("list all commands")] string? command = null)
+        [Usage("help role edit name", "how role edit", "h role")]
+        public DiscordCommandResult Help(string? command = null)
         {
             if (command is null)
-            {
-                Context.RepostAsAlias("command list");
-                return null!;
-            }
+                return HelpView();
 
             IReadOnlyList<CommandMatch> matches = Context.Bot.Commands.FindCommands(command);
 
@@ -209,7 +212,7 @@ namespace SbuBot.Commands.Modules
                 0 => Context.Bot.Commands.GetAllModules().FirstOrDefault(m => m.FullAliases.Contains(command))
                     is { } module
                     ? HelpView(module)
-                    : Reply("Couldn't find any commands for the given input."),
+                    : HelpView(),
                 1 => HelpView(matches[0].Command),
                 _ => HelpView(matches.Select(c => c.Command)),
             };

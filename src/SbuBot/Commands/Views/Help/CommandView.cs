@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 using Disqord;
@@ -6,6 +7,7 @@ using Disqord.Extensions.Interactivity.Menus;
 
 using Qmmands;
 
+using SbuBot.Commands.Attributes;
 using SbuBot.Extensions;
 
 namespace SbuBot.Commands.Views.Help
@@ -18,23 +20,40 @@ namespace SbuBot.Commands.Views.Help
         {
             _command = command;
 
-            TemplateMessage.Embeds[0]
-                .WithTitle(command.Name)
-                .WithDescription(
-                    string.Format(
-                        "`{0}`\n**Description:**\n{1}",
-                        command.GetSignature(),
-                        command.Description ?? command.Module.Description ?? "`--`"
-                    )
-                );
-
-            if (command.Aliases.Count != 0)
-                TemplateMessage.Embeds[0]
-                    .AddInlineField("Aliases", string.Join(", ", command.Aliases.Select(Markdown.Code)));
+            StringBuilder description = new StringBuilder("`", 512)
+                .Append(command.GetSignature())
+                .AppendLine("`\n**Description:**")
+                .Append(command.Description ?? command.Module.Description);
 
             if ((command.Remarks ?? command.Module.Remarks) is { } remarks)
-                TemplateMessage.Embeds[0].AddInlineField("Remarks", remarks);
+                description.AppendLine("**Remarks:**").AppendLine(remarks);
 
+            if (command.Attributes.OfType<UsageAttribute>().FirstOrDefault() is { } usage)
+            {
+                description.AppendLine("**Examples:**");
+
+                foreach (string example in usage.Values)
+                {
+                    description.Append('`')
+                        .Append(example)
+                        .Append('`')
+                        .Append('\n');
+                }
+            }
+
+            TemplateMessage.Embeds[0]
+                .WithTitle(command.Name)
+                .WithDescription(description.ToString());
+
+            if (command.Aliases.Count != 0)
+            {
+                TemplateMessage.Embeds[0]
+                    .AddInlineField("Aliases", string.Join(", ", command.Aliases.Select(Markdown.Code)))
+                    .AddBlankInlineField()
+                    .AddBlankInlineField();
+            }
+
+            // TODO: include remarks for parameters?
             foreach (Parameter parameter in command.Parameters)
                 TemplateMessage.Embeds[0].AddInlineField(parameter.Name, parameter.Description);
         }

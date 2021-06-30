@@ -10,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 using Qmmands;
 
+using SbuBot.Commands.Attributes;
 using SbuBot.Commands.Attributes.Checks;
 using SbuBot.Commands.Attributes.Checks.Parameters;
 using SbuBot.Extensions;
@@ -18,7 +19,6 @@ using SbuBot.Services;
 
 namespace SbuBot.Commands.Modules
 {
-    // TODO: check for role hierarchy
     [Group("role", "r"), RequireBotGuildPermissions(Permission.ManageRoles)]
     [Description("A collection of commands for creation, modification, removal and usage of color roles.")]
     [Remarks(
@@ -32,8 +32,11 @@ namespace SbuBot.Commands.Modules
         public sealed class ClaimGroup : SbuModuleBase
         {
             [Command]
+            [Usage("role claim some role name", "r take 732234804384366602", "r claim @SBU-Bot")]
             public async Task<DiscordCommandResult> ClaimAsync(
-                [MustBeOwned(false)][Description("The role to claim")][Remarks("Must be a color role.")]
+                [RequireHigherHierarchy, MustBeOwned(false)]
+                [Description("The role to claim.")]
+                [Remarks("Must be a color role.")]
                 SbuColorRole role
             )
             {
@@ -47,8 +50,9 @@ namespace SbuBot.Commands.Modules
             }
 
             [Command]
+            [Usage("role claim some role name", "r take 732234804384366602", "r claim @SBU-Bot")]
             public async Task<DiscordCommandResult> ClaimNewAsync(
-                [MustBeColorRole, MustExistInDb(false)]
+                [MustBeColorRole, RequireHigherHierarchy, MustExistInDb(false)]
                 [Description("The role to claim")]
                 [Remarks("Must be a color role.")]
                 IRole role
@@ -73,6 +77,7 @@ namespace SbuBot.Commands.Modules
 
         [Command("create", "make", "new"), RequireColorRole(false)]
         [Description("Creates a new color role.")]
+        [Usage("role create #afafaf my gray role", "r make green dream role dream role")]
         public async Task<DiscordCommandResult> CreateAsync(
             [Description("The role color.")] Color color,
             [Maximum(SbuColorRole.MAX_NAME_LENGTH)]
@@ -136,6 +141,7 @@ namespace SbuBot.Commands.Modules
         {
             [Command]
             [Description("Modifies the authors color role's color and name.")]
+            [Usage("role edit blue my blue role", "r change #afafaf yooo it's now gray")]
             public async Task<DiscordCommandResult> EditAsync(
                 [Description("The new color.")] Color color,
                 [Maximum(SbuColorRole.MAX_NAME_LENGTH)]
@@ -160,6 +166,7 @@ namespace SbuBot.Commands.Modules
 
             [Command("name")]
             [Description("Modifies the authors color role's name.")]
+            [Usage("role edit name new name")]
             public async Task<DiscordCommandResult> SetNameAsync(
                 [Maximum(SbuColorRole.MAX_NAME_LENGTH)]
                 [Description("The new name.")]
@@ -174,6 +181,7 @@ namespace SbuBot.Commands.Modules
 
             [Command("color")]
             [Description("Modifies the authors color role's color.")]
+            [Usage("role edit color blue", "sbu r change color #afafaf")]
             public async Task<DiscordCommandResult> SetColorAsync([Description("The new color.")] Color color)
             {
                 SbuMember member = await Context.GetSbuDbContext().GetMemberAsync(Context.Author);
@@ -200,6 +208,7 @@ namespace SbuBot.Commands.Modules
 
         [Command("transfer"), RequireColorRole]
         [Description("Transfers the authors color role to the given member.")]
+        [Usage("role transfer @user", "r transfer 352815253828141056", "r transfer Allah")]
         public async Task<DiscordCommandResult> TransferColorRoleAsync(
             [NotAuthor, MustHaveColorRole(false)][Description("The member that should receive the color role.")]
             SbuMember receiver

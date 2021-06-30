@@ -24,6 +24,7 @@ namespace SbuBot.Commands.Modules
         {
             [Command]
             [Description("Replies with the given message.")]
+            [Usage("echo echo", "echo blah blah blah")]
             public DiscordCommandResult Echo(
                 [Description("The message to reply with.")]
                 string message
@@ -47,6 +48,7 @@ namespace SbuBot.Commands.Modules
 
         [Command("ping")]
         [Description("Replies with `Pong!` after the given timespan or instantly if no timespan is specified.")]
+        [Usage("ping", "ping in 3 seconds")]
         public DiscordCommandResult Send(
             [OverrideDefault("now")][Description("The timestamp at which to send the reply.")]
             DateTime? timespan = null

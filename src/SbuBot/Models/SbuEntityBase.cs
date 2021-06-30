@@ -19,8 +19,8 @@ namespace SbuBot.Models
             var builder = new StringBuilder(512);
             builder.AppendLine($"{GetType().Name}:");
 
-            appendMembers(ref builder, GetType().GetFields());
-            appendMembers(ref builder, GetType().GetProperties());
+            appendMembers(ref builder, GetType().GetFields(BindingFlags.Instance | BindingFlags.Public));
+            appendMembers(ref builder, GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public));
 
             return builder.ToString();
 

@@ -25,6 +25,7 @@ using SbuBot.Extensions;
 
 namespace SbuBot.Commands.Modules
 {
+    // TODO: Usage View
     [Description("A collection of commands for server management like pin-archival or emote creation.")]
     public sealed class GuildManagementModule : SbuModuleBase
     {
@@ -38,6 +39,11 @@ namespace SbuBot.Commands.Modules
             [Remarks(
                 "The Message are unpinned unless specified otherwise, specifying otherwise cannot be done when "
                 + "replying to the message. In this case the message id/link must be used as message argument."
+            )]
+            [Usage(
+                "archive (with reply)",
+                "archive 836993360274784297",
+                "archive https://discord.com/channels/732210852849123418/732231139233759324/836993360274784297"
             )]
             public async Task<DiscordCommandResult> ArchiveMessageAsync(
                 [OverrideDefault("@reply")][Description("The message that should be archived.")]
@@ -85,6 +91,7 @@ namespace SbuBot.Commands.Modules
                 "Messages are unpinned unless specified otherwise, specifying otherwise cannot be done without "
                 + "specifying the channel. In this case the channel id/mention/name must be used as message argument."
             )]
+            [Usage("archive all", "archive all #channel", "archive all 732211844315349005")]
             public async Task<DiscordCommandResult> ArchiveAllAsync(
                 [OverrideDefault("#here")][Description("The channel of which the pins should be archived.")]
                 ITextChannel? channel = null,
@@ -253,6 +260,7 @@ namespace SbuBot.Commands.Modules
         {
             [Command("add")]
             [Description("Adds the given emote(s) to the server.")]
+            [Usage("emote add emote", "emote add emote1 emote2 emote3")]
             public async Task<DiscordCommandResult> AddAsync(
                 [Description("The emote to add.")] ICustomEmoji emote,
                 [Description("Optional additional emotes to add.")]
@@ -315,6 +323,7 @@ namespace SbuBot.Commands.Modules
 
             [Command("remove", "delete")]
             [Description("Removes the given emote(s) from the server.")]
+            [Usage("emote remove emote", "emote remove emote1 emote2 emote3", "emote remove 855415802139901962")]
             public async Task<DiscordCommandResult> RemoveAsync(
                 [Description("The emote to remove.")] IGuildEmoji emote,
                 [Description("Optional additional emotes to remove.")]

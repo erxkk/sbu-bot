@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 using Disqord;
@@ -18,29 +19,12 @@ namespace SbuBot.Commands.Views.Help
         {
             _group = group;
 
-            TemplateMessage.Embeds[0]
-                .WithTitle(group.Aliases[0])
-                .WithDescription(
-                    string.Format(
-                        "**Signatures:**\n{0}\n**Description:**\n{1}\n**Remarks:**\n{2}",
-                        string.Join(
-                            "\n",
-                            group.Commands.Select(c => $"{SbuGlobals.BULLET} {Markdown.Code(c.GetSignature())}")
-                        ),
-                        group.Description ?? "`--`",
-                        group.Remarks ?? "`--`"
-                    )
-                );
-
-            if (group.Aliases.Count != 0)
-                TemplateMessage.Embeds[0]
-                    .AddInlineField("Aliases", string.Join(", ", group.Aliases.Select(Markdown.Code)));
-
-            if (group.Remarks is { })
-                TemplateMessage.Embeds[0].AddInlineField("Remarks", group.Remarks);
+            StringBuilder description = new("**Signatures:**\n", 512);
 
             foreach (Command command in group.Commands)
             {
+                description.Append(SbuGlobals.BULLET).Append(' ').AppendLine(Markdown.Code(command.GetSignature()));
+
                 AddComponent(
                     new ButtonViewComponent(
                         _ =>
@@ -55,6 +39,21 @@ namespace SbuBot.Commands.Views.Help
                         Style = ButtonComponentStyle.Secondary,
                     }
                 );
+            }
+
+            description.AppendLine("**Description:**").Append(group.Description);
+
+            if (group.Remarks is { })
+                description.AppendLine("**Remarks:**").Append(group.Remarks);
+
+            TemplateMessage.Embeds[0]
+                .WithTitle(group.Aliases[0])
+                .WithDescription(description.ToString());
+
+            if (group.Aliases.Count != 0)
+            {
+                TemplateMessage.Embeds[0]
+                    .AddInlineField("Aliases", string.Join(", ", group.Aliases.Select(Markdown.Code)));
             }
         }
 
