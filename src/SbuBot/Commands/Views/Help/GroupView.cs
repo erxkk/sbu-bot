@@ -25,6 +25,8 @@ namespace SbuBot.Commands.Views.Help
             {
                 description.Append(SbuGlobals.BULLET).Append(' ').AppendLine(Markdown.Code(command.GetSignature()));
 
+                string paramSig = command.GetParameterSignature();
+
                 AddComponent(
                     new ButtonViewComponent(
                         _ =>
@@ -34,7 +36,7 @@ namespace SbuBot.Commands.Views.Help
                         }
                     )
                     {
-                        Label = command.GetParameterSignature(),
+                        Label = string.IsNullOrWhiteSpace(paramSig) ? "--" : paramSig,
                         Row = 1,
                         Style = ButtonComponentStyle.Secondary,
                     }
