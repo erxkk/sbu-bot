@@ -27,6 +27,17 @@ namespace SbuBot.Commands.Modules
     )]
     public sealed class ColorRoleModule : SbuModuleBase
     {
+        [Command]
+        [Description("Displays information about your current color role.")]
+        public DiscordCommandResult Role() => Context.Author.GetColorRole() is { } role
+            ? Reply(
+                new LocalEmbed()
+                    .WithColor(role.Color)
+                    .AddField("Name", role.Name)
+                    .AddField("Color", role.Color)
+            )
+            : Reply("You have no color role.");
+
         [Group("claim", "take"), RequireColorRole(false)]
         [Description("Claims the given color role if it has no owner.")]
         public sealed class ClaimGroup : SbuModuleBase

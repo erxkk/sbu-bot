@@ -34,7 +34,9 @@ namespace SbuBot.Commands.Views.Help
 
                 foreach (string example in usage.Values)
                 {
-                    description.Append('`')
+                    description.Append(SbuGlobals.BULLET)
+                        .Append(' ')
+                        .Append('`')
                         .Append(SbuGlobals.DEFAULT_PREFIX)
                         .Append(example)
                         .Append('`')
