@@ -56,9 +56,8 @@ namespace SbuBot.Commands.Views.Help
 
             foreach (Command command in module.Commands)
             {
-                description.Append(SbuGlobals.BULLET)
-                    .Append(' ')
-                    .AppendLine(Markdown.Code(command.GetSignature()));
+                command.AppendTo(description.Append(SbuGlobals.BULLET).Append(' ').Append('`'));
+                description.Append('`').Append('\n');
 
                 AddComponent(
                     new ButtonViewComponent(

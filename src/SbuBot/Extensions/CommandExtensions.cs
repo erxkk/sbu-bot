@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -19,87 +20,114 @@ namespace SbuBot
         public static IEnumerable<Command> Defaults(this Module @this)
             => @this.Commands.Where(c => c.Aliases.Count == 0);
 
-        // TODO: make more generic for error handling
-        public static string GetSignature(this Command @this, IPrefix? prefix = null)
+        public static void AppendTo(
+            this Command @this,
+            StringBuilder builder,
+            IPrefix? prefix = null,
+            bool withDefaults = true
+        )
         {
-            StringBuilder builder = new(@this.FullAliases[0].Length + 16 * @this.Parameters.Count);
+            if (@this is null)
+                throw new ArgumentNullException(nameof(@this));
+
+            if (builder is null)
+                throw new ArgumentNullException(nameof(builder));
 
             if (prefix is { })
                 builder.Append(prefix).Append(' ');
 
-            builder.Append(@this.FullAliases[0]).Append(' ');
+            builder.Append(@this.FullAliases[0]);
 
-            foreach (Parameter parameter in @this.Parameters)
-            {
-                builder.Append(parameter.IsOptional ? '[' : '<').Append(parameter.Name);
+            if (@this.Parameters.Count == 0)
+                return;
 
-                if (parameter.IsMultiple)
-                    builder.Append(SbuGlobals.ELLIPSES);
+            builder.Append(' ');
+            @this.AppendParametersTo(builder, withDefaults);
+        }
 
-                if (parameter.IsOptional && !parameter.IsMultiple)
-                {
-                    builder.Append(" = ");
+        public static string Format(this Command @this, IPrefix? prefix = null, bool withDefaults = true)
+        {
+            if (@this is null)
+                throw new ArgumentNullException(nameof(@this));
 
-                    object val = parameter.Attributes
-                        .OfType<OverrideDefaultAttribute>()
-                        .FirstOrDefault() is { } overrideDefault
-                        ? overrideDefault.Value
-                        : parameter.DefaultValue;
-
-                    builder.Append(
-                        val switch
-                        {
-                            null => "none",
-                            { } value => value,
-                        }
-                    );
-                }
-
-                builder.Append(parameter.IsOptional ? ']' : '>').Append(' ');
-            }
-
-            if (builder.Length > 1)
-                builder.Remove(builder.Length - 1, 1);
-
+            StringBuilder builder = new(@this.FullAliases[0].Length + 16 * @this.Parameters.Count);
+            @this.AppendTo(builder, prefix, withDefaults);
             return builder.ToString();
         }
 
-        public static string GetParameterSignature(this Command @this)
+        public static void AppendParametersTo(this Command @this, StringBuilder builder, bool withDefaults = true)
         {
-            StringBuilder builder = new(@this.FullAliases[0].Length + 16 * @this.Parameters.Count);
+            if (@this is null)
+                throw new ArgumentNullException(nameof(@this));
+
+            if (builder is null)
+                throw new ArgumentNullException(nameof(builder));
 
             foreach (Parameter parameter in @this.Parameters)
             {
-                builder.Append(parameter.IsOptional ? '[' : '<').Append(parameter.Name);
-
-                if (parameter.IsMultiple)
-                    builder.Append(',').Append(SbuGlobals.ELLIPSES);
-
-                if (parameter.IsOptional)
-                {
-                    builder.Append(" = ");
-
-                    object val = parameter.Attributes
-                        .OfType<OverrideDefaultAttribute>()
-                        .FirstOrDefault() is { } overrideDefault
-                        ? overrideDefault.Value
-                        : parameter.DefaultValue;
-
-                    builder.Append(
-                        val switch
-                        {
-                            null => "none",
-                            { } value => value,
-                        }
-                    );
-                }
-
-                builder.Append(parameter.IsOptional ? ']' : '>').Append(' ');
+                parameter.AppendTo(builder, withDefaults);
+                builder.Append(' ');
             }
 
-            if (builder.Length > 1)
+            if (@this.Parameters.Count != 0)
                 builder.Remove(builder.Length - 1, 1);
+        }
 
+        public static string FormatParameters(this Command @this, bool withDefaults = true)
+        {
+            if (@this is null)
+                throw new ArgumentNullException(nameof(@this));
+
+            StringBuilder builder = new(16 * @this.Parameters.Count);
+            @this.AppendParametersTo(builder, withDefaults);
+            return builder.ToString();
+        }
+
+        public static void AppendTo(this Parameter @this, StringBuilder builder, bool withDefault = true)
+        {
+            if (@this is null)
+                throw new ArgumentNullException(nameof(@this));
+
+            if (builder is null)
+                throw new ArgumentNullException(nameof(builder));
+
+            builder.Append(@this.Name);
+
+            if (@this.IsMultiple)
+            {
+                builder.Append(SbuGlobals.ELLIPSES);
+            }
+            else if (withDefault && @this.IsOptional)
+            {
+                builder.Append(" = ");
+
+                object defaultValue = @this.Attributes
+                    .OfType<OverrideDefaultAttribute>()
+                    .FirstOrDefault() is { } overrideDefault
+                    ? overrideDefault.Value
+                    : @this.DefaultValue;
+
+                builder.Append(
+                    defaultValue switch
+                    {
+                        null => "none",
+                        true => "true",
+                        false => "false",
+                        { } value => value,
+                    }
+                );
+            }
+
+            builder.Append(@this.IsOptional ? ']' : '>');
+        }
+
+        public static string Format(this Parameter @this, bool withDefault = true)
+        {
+            if (@this is null)
+                throw new ArgumentNullException(nameof(@this));
+
+            StringBuilder builder = new(2 + @this.Name.Length + (withDefault && @this.IsOptional ? 8 : 0));
+            @this.AppendTo(builder);
             return builder.ToString();
         }
     }

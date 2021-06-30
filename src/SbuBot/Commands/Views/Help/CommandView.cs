@@ -20,10 +20,11 @@ namespace SbuBot.Commands.Views.Help
         {
             _command = command;
 
-            StringBuilder description = new StringBuilder("`", 512)
-                .Append(command.GetSignature())
-                .AppendLine("`\n**Description:**")
-                .AppendLine(command.Description ?? command.Module.Description);
+            StringBuilder description = new(512);
+            command.AppendTo(description.Append('`'));
+            description.Append('`');
+
+            description.AppendLine("`\n**Description:**").AppendLine(command.Description ?? command.Module.Description);
 
             if ((command.Remarks ?? command.Module.Remarks) is { } remarks)
                 description.AppendLine("**Remarks:**").AppendLine(remarks);
@@ -56,9 +57,18 @@ namespace SbuBot.Commands.Views.Help
                     .AddBlankInlineField();
             }
 
-            // TODO: include remarks for parameters?
             foreach (Parameter parameter in command.Parameters)
-                TemplateMessage.Embeds[0].AddInlineField(parameter.Name, parameter.Description);
+            {
+                TemplateMessage.Embeds[0]
+                    .AddInlineField(
+                        parameter.Name,
+                        string.Format(
+                            "**Description:**\n{0}{1}",
+                            parameter.Description,
+                            (parameter.Remarks is { } ? "\n**Remarks:**\n" + parameter.Remarks : "")
+                        )
+                    );
+            }
         }
 
         public override ValueTask GoToParent(ButtonEventArgs e)

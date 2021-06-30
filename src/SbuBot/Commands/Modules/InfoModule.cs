@@ -164,7 +164,7 @@ namespace SbuBot.Commands.Modules
 
                 return FilledPages(
                     matches.Select(m => m.Command)
-                        .Select(cmd => cmd.IsEnabled ? $"`{cmd.GetSignature()}`" : $"~~`{cmd.GetSignature()}`~~"),
+                        .Select(cmd => cmd.IsEnabled ? $"`{cmd.Format()}`" : $"~~`{cmd.Format()}`~~"),
                     embedModifier: embed => embed.WithTitle("Matched commands")
                 );
             }
@@ -187,7 +187,7 @@ namespace SbuBot.Commands.Modules
 
                 return FilledPages(
                     filteredCommands.Select(
-                        cmd => cmd.IsEnabled ? $"`{cmd.GetSignature()}`" : $"~~`{cmd.GetSignature()}`~~"
+                        cmd => cmd.IsEnabled ? $"`{cmd.Format()}`" : $"~~`{cmd.Format()}`~~"
                     ),
                     embedModifier: embed => embed.WithTitle("Commands")
                 );

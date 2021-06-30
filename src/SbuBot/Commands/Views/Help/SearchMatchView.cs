@@ -18,12 +18,11 @@ namespace SbuBot.Commands.Views.Help
 
             foreach ((int index, Command command) in commands.Enumerate())
             {
-                description.Append('`')
-                    .Append(index)
-                    .Append('`')
-                    .Append(SbuGlobals.BULLET)
-                    .Append(' ')
-                    .AppendLine(command.GetSignature());
+                command.AppendTo(
+                    description.Append('`').Append(index).Append('`').Append(SbuGlobals.BULLET).Append(' ')
+                );
+
+                description.Append('\n');
 
                 AddComponent(
                     new ButtonViewComponent(

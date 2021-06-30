@@ -23,9 +23,10 @@ namespace SbuBot.Commands.Views.Help
 
             foreach (Command command in group.Commands)
             {
-                description.Append(SbuGlobals.BULLET).Append(' ').AppendLine(Markdown.Code(command.GetSignature()));
+                command.AppendTo(description.Append(SbuGlobals.BULLET).Append(' ').Append('`'));
+                description.Append('`').Append('\n');
 
-                string paramSig = command.GetParameterSignature();
+                string paramSig = command.FormatParameters(false);
 
                 AddComponent(
                     new ButtonViewComponent(
