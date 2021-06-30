@@ -1,7 +1,6 @@
 using System;
 using System.Threading.Tasks;
 
-using Disqord;
 using Disqord.Bot;
 
 using HumanTimeParser.Core.Parsing;

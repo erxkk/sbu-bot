@@ -4,9 +4,8 @@ using System.Threading.Tasks;
 
 using Disqord;
 using Disqord.Bot;
-using Disqord.Extensions.Interactivity;
-using Disqord.Extensions.Interactivity.Menus.Paged;
-using Disqord.Gateway;
+
+using Kkommon;
 
 using Microsoft.Extensions.DependencyInjection;
 
@@ -41,13 +40,10 @@ namespace SbuBot.Commands.Modules
                 ReminderDescriptor reminderDescriptor
             )
             {
-                SbuMember owner = await Context.GetSbuDbContext().GetMemberAsync(Context.Author);
-                SbuGuild guild = await Context.GetSbuDbContext().GetGuildAsync(Context.Guild);
-
                 SbuReminder newReminder = new(
                     Context,
-                    owner.Id,
-                    guild.Id,
+                    Context.Author.Id,
+                    Context.Guild.Id,
                     reminderDescriptor.Message,
                     reminderDescriptor.Timestamp
                 );
@@ -72,33 +68,25 @@ namespace SbuBot.Commands.Modules
             {
                 TypeParser<DateTime> parser = Context.Bot.Commands.GetTypeParser<DateTime>();
 
+                string? timestamp = null;
                 await Reply("When do you want to be reminded?");
 
-                MessageReceivedEventArgs? waitResult;
+                if (await Context.WaitFollowUpForAsync() is Result<string?, Unit>.Success followUp)
+                    timestamp = followUp.Value;
 
-                await using (Context.BeginYield())
-                {
-                    waitResult = await Context.WaitForMessageAsync(
-                        e => e.Member.Id == Context.Author.Id,
-                        cancellationToken: Context.Bot.StoppingToken
-                    );
-                }
-
-                if (waitResult is null)
+                if (timestamp is null)
                     return Reply("Aborted: You did not provide a timestamp.");
 
                 TypeParserResult<DateTime>? parseResult = await parser.ParseAsync(
                     null,
-                    waitResult.Message.Content,
+                    timestamp,
                     Context
                 );
 
                 if (!parseResult.IsSuccessful)
                     return Reply($"Aborted: {parseResult.FailureReason}.");
 
-                SbuMember owner = await Context.GetSbuDbContext().GetMemberAsync(Context.Author);
-                SbuGuild guild = await Context.GetSbuDbContext().GetGuildAsync(Context.Guild);
-                SbuReminder newReminder = new(Context, owner.Id, guild.Id, message, parseResult.Value);
+                SbuReminder newReminder = new(Context, Context.Author.Id, Context.Guild.Id, message, parseResult.Value);
 
                 await Context.Services.GetRequiredService<ReminderService>().ScheduleAsync(newReminder);
 
@@ -166,25 +154,25 @@ namespace SbuBot.Commands.Modules
             [Description("Cancels all of the command author's reminders.")]
             public async Task<DiscordCommandResult> CancelAllAsync()
             {
-                await Reply("Are yous ure you want to cancel all your reminders? Respond `yes` to confirm.");
+                await Reply("Are you sure you want to cancel all your reminders? Respond `yes` to confirm.");
 
-                MessageReceivedEventArgs? waitResult;
+                ConfirmationResult result = await Context.WaitForConfirmationAsync();
 
-                await using (Context.BeginYield())
+                switch (result)
                 {
-                    waitResult = await Context.WaitForMessageAsync(
-                        e => e.Member.Id == Context.Author.Id,
-                        cancellationToken: Context.Bot.StoppingToken
-                    );
+                    case ConfirmationResult.Timeout:
+                    case ConfirmationResult.Aborted:
+                        return Reply("Aborted.");
+
+                    case ConfirmationResult.Confirmed:
+                        break;
+
+                    default:
+                        throw new ArgumentOutOfRangeException();
                 }
 
-                if (waitResult is null || !waitResult.Message.Content.Equals("yes", StringComparison.OrdinalIgnoreCase))
-                    return Reply("Aborted.");
-
-                SbuMember owner = await Context.GetSbuDbContext().GetMemberAsync(Context.Author);
-
                 await Context.Services.GetRequiredService<ReminderService>()
-                    .CancelAsync(r => r.Value.OwnerId == owner.Id);
+                    .CancelAsync(r => r.Value.OwnerId == Context.Author.Id);
 
                 return Reply("Cancelled all reminders.");
             }
@@ -216,11 +204,9 @@ namespace SbuBot.Commands.Modules
                     is not { Count: > 0 } reminders)
                     return Reply("You have no reminders.");
 
-                SbuMember owner = await Context.GetSbuDbContext().GetMemberAsync(Context.Author);
-
                 return FilledPages(
                     reminders.Values
-                        .Where(r => r.OwnerId == owner.Id)
+                        .Where(r => r.OwnerId == Context.Author.Id)
                         .Select(
                             r => $"[`{r.Id}`]({r.JumpUrl})\n{r.DueAt}\n"
                                 + $"{(r.Message is { } ? $"\"{r.Message}\"" : "No Message")}\n"

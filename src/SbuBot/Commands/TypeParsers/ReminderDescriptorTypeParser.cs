@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using Disqord.Bot;
@@ -27,7 +26,7 @@ namespace SbuBot.Commands.TypeParsers
             if (values.Length != 2)
                 return TypeParser<ReminderDescriptor>.Failure($"Two parts were expected, found {values.Length}.");
 
-            if (values[2].Length > SbuReminder.MAX_MESSAGE_LENGTH)
+            if (values[1].Length > SbuReminder.MAX_MESSAGE_LENGTH)
             {
                 return TypeParser<ReminderDescriptor>.Failure(
                     $"The given message must at most be {SbuReminder.MAX_MESSAGE_LENGTH} characters long."

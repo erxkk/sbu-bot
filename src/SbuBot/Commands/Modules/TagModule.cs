@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 
 using Disqord;
 using Disqord.Bot;
-using Disqord.Extensions.Interactivity;
-using Disqord.Gateway;
+
+using Kkommon;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -38,7 +38,7 @@ namespace SbuBot.Commands.Modules
             SbuTag tag
         )
         {
-            tag.OwnerId = (await Context.GetSbuDbContext().GetMemberAsync(Context.Author)).Id;
+            tag.OwnerId = Context.Author.Id;
             Context.GetSbuDbContext().Tags.Update(tag);
             await Context.GetSbuDbContext().SaveChangesAsync();
 
@@ -55,21 +55,15 @@ namespace SbuBot.Commands.Modules
                 [Description("The tag descriptor.")] TagDescriptor tagDescriptor
             )
             {
-                if (await Context.GetSbuDbContext()
-                        .Tags.FirstOrDefaultAsync(
-                            t => t.Name == tagDescriptor.Name,
-                            Context.Bot.StoppingToken
-                        ) is { }
-                ) return Reply("A tag with same name already exists.");
+                if (await Context.GetTagAsync(tagDescriptor.Name) is { })
+                    return Reply("A tag with same name already exists.");
 
                 Context.GetSbuDbContext()
-                    .Tags.Add(
-                        new(
-                            (await Context.GetSbuDbContext().GetMemberAsync(Context.Author)).Id,
-                            (await Context.GetSbuDbContext().GetGuildAsync(Context.Guild)).Id,
-                            tagDescriptor.Name,
-                            tagDescriptor.Content
-                        )
+                    .AddTag(
+                        Context.Author.Id,
+                        Context.Guild.Id,
+                        tagDescriptor.Name,
+                        tagDescriptor.Content
                     );
 
                 await Context.GetSbuDbContext().SaveChangesAsync();
@@ -80,22 +74,16 @@ namespace SbuBot.Commands.Modules
             [Command]
             public async Task<DiscordCommandResult> CreateInteractiveAsync()
             {
+                string? name = null;
                 await Reply("How should the tag be called? (spaces are allowed)");
 
-                MessageReceivedEventArgs? waitNameResult;
+                if (await Context.WaitFollowUpForAsync() is Result<string?, Unit>.Success nameFollowUp)
+                    name = nameFollowUp.Value;
 
-                await using (Context.BeginYield())
-                {
-                    waitNameResult = await Context.WaitForMessageAsync(
-                        e => e.Member.Id == Context.Author.Id,
-                        cancellationToken: Context.Bot.StoppingToken
-                    );
-                }
-
-                if (waitNameResult is null)
+                if (name is null)
                     return Reply("Aborted: You did not provide a tag name.");
 
-                string name = waitNameResult.Message.Content.Trim();
+                name = name.Trim();
 
                 switch (SbuTag.IsValidTagName(name))
                 {
@@ -119,26 +107,19 @@ namespace SbuBot.Commands.Modules
                         throw new ArgumentOutOfRangeException();
                 }
 
-                if (await Context.GetSbuDbContext()
-                    .Tags.FirstOrDefaultAsync(t => t.Name == name, Context.Bot.StoppingToken) is { })
+                if (await Context.GetTagAsync(name) is { })
                     return Reply("Tag with same name already exists.");
 
+                string? content = null;
                 await Reply("What do you want the tag content to be?");
 
-                MessageReceivedEventArgs? waitContentResult;
+                if (await Context.WaitFollowUpForAsync() is Result<string?, Unit>.Success contentFollowUp)
+                    content = contentFollowUp.Value;
 
-                await using (Context.BeginYield())
-                {
-                    waitContentResult = await Context.WaitForMessageAsync(
-                        e => e.Member.Id == Context.Author.Id,
-                        cancellationToken: Context.Bot.StoppingToken
-                    );
-                }
-
-                if (waitContentResult is null)
+                if (content is null)
                     return Reply("Aborted: You did not provide tag content.");
 
-                if (waitContentResult.Message.Content.Length > SbuTag.MAX_CONTENT_LENGTH)
+                if (content.Length > SbuTag.MAX_CONTENT_LENGTH)
                 {
                     return Reply(
                         $"Aborted: The tag content must be at most {SbuTag.MAX_CONTENT_LENGTH} characters long."
@@ -146,13 +127,11 @@ namespace SbuBot.Commands.Modules
                 }
 
                 Context.GetSbuDbContext()
-                    .Tags.Add(
-                        new(
-                            (await Context.GetSbuDbContext().GetMemberAsync(Context.Author)).Id,
-                            (await Context.GetSbuDbContext().GetGuildAsync(Context.Guild)).Id,
-                            waitNameResult.Message.Content,
-                            waitContentResult.Message.Content
-                        )
+                    .AddTag(
+                        Context.Author.Id,
+                        Context.Guild.Id,
+                        name,
+                        content
                     );
 
                 await Context.GetSbuDbContext().SaveChangesAsync();
@@ -175,7 +154,7 @@ namespace SbuBot.Commands.Modules
                 SbuMember? owner = null
             )
             {
-                owner ??= await Context.GetSbuDbContext().GetMemberAsync(Context.Author);
+                owner ??= await Context.GetAuthorAsync();
                 bool notAuthor = owner.Id != Context.Author.Id;
 
                 List<SbuTag> tags = await Context.GetSbuDbContext()
@@ -202,9 +181,7 @@ namespace SbuBot.Commands.Modules
             [Description("Lists all tags.")]
             public async Task<DiscordCommandResult> ListAllAsync()
             {
-                List<SbuTag> tags = await Context.GetSbuDbContext()
-                    .Tags.Include(t => t.Owner)
-                    .ToListAsync(Context.Bot.StoppingToken);
+                List<SbuTag> tags = await Context.GetTagsAsync();
 
                 if (tags.Count == 0)
                     return Reply("No tags found.");
@@ -233,16 +210,12 @@ namespace SbuBot.Commands.Modules
                 [Description("The tag descriptor.")] TagDescriptor tagDescriptor
             )
             {
-                SbuTag? tag = await Context.GetSbuDbContext()
-                    .Tags.FirstOrDefaultAsync(
-                        t => t.Name == tagDescriptor.Name,
-                        Context.Bot.StoppingToken
-                    );
+                SbuTag? tag = await Context.GetTagAsync(tagDescriptor.Name);
 
                 if (tag is null)
                     return Reply("No tag found.");
 
-                if (tag.OwnerId != (await Context.GetSbuDbContext().GetMemberAsync(Context.Author)).Id)
+                if (tag.OwnerId != Context.Author.Id)
                     return Reply("You must be the owner of this tag.");
 
                 tag.Content = tagDescriptor.Content;
@@ -259,22 +232,16 @@ namespace SbuBot.Commands.Modules
                 SbuTag tag
             )
             {
-                await Reply("What do you want the new tag content to be?");
+                string? content = null;
+                await Reply("What do you want the tag content to be?");
 
-                MessageReceivedEventArgs? waitContentResult;
+                if (await Context.WaitFollowUpForAsync() is Result<string?, Unit>.Success contentFollowUp)
+                    content = contentFollowUp.Value;
 
-                await using (Context.BeginYield())
-                {
-                    waitContentResult = await Context.WaitForMessageAsync(
-                        e => e.Member.Id == Context.Author.Id,
-                        cancellationToken: Context.Bot.StoppingToken
-                    );
-                }
-
-                if (waitContentResult is null)
+                if (content is null)
                     return Reply("Aborted: You did not provide tag content.");
 
-                tag.Content = waitContentResult.Message.Content;
+                tag.Content = content.Trim();
                 Context.GetSbuDbContext().Tags.Update(tag);
                 await Context.GetSbuDbContext().SaveChangesAsync();
 
@@ -295,20 +262,20 @@ namespace SbuBot.Commands.Modules
             )
             {
                 await Reply("Are you sure you want to remove this tag? Respond `yes` to confirm.");
+                ConfirmationResult result = await Context.WaitForConfirmationAsync();
 
-                MessageReceivedEventArgs? waitConfirmResult;
-
-                await using (Context.BeginYield())
+                switch (result)
                 {
-                    waitConfirmResult = await Context.WaitForMessageAsync(
-                        e => e.Member.Id == Context.Author.Id,
-                        cancellationToken: Context.Bot.StoppingToken
-                    );
-                }
+                    case ConfirmationResult.Timeout:
+                    case ConfirmationResult.Aborted:
+                        return Reply("Aborted.");
 
-                if (waitConfirmResult is null
-                    || !waitConfirmResult.Message.Content.Equals("yes", StringComparison.OrdinalIgnoreCase))
-                    return Reply("Aborted.");
+                    case ConfirmationResult.Confirmed:
+                        break;
+
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
 
                 Context.GetSbuDbContext().Tags.Remove(tag);
                 await Context.GetSbuDbContext().SaveChangesAsync();
@@ -321,20 +288,20 @@ namespace SbuBot.Commands.Modules
             public async Task<DiscordCommandResult> RemoveAllAsync()
             {
                 await Reply("Are you sure you want to remove all your tags? Respond `yes` to confirm.");
+                ConfirmationResult result = await Context.WaitForConfirmationAsync();
 
-                MessageReceivedEventArgs? waitConfirmResult;
-
-                await using (Context.BeginYield())
+                switch (result)
                 {
-                    waitConfirmResult = await Context.WaitForMessageAsync(
-                        e => e.Member.Id == Context.Author.Id,
-                        cancellationToken: Context.Bot.StoppingToken
-                    );
-                }
+                    case ConfirmationResult.Timeout:
+                    case ConfirmationResult.Aborted:
+                        return Reply("Aborted.");
 
-                if (waitConfirmResult is null
-                    || !waitConfirmResult.Message.Content.Equals("yes", StringComparison.OrdinalIgnoreCase))
-                    return Reply("Aborted.");
+                    case ConfirmationResult.Confirmed:
+                        break;
+
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
 
                 SbuMember owner = await Context.GetSbuDbContext().GetMemberAsync(Context.Author);
 
@@ -386,31 +353,28 @@ namespace SbuBot.Commands.Modules
                     )
                 );
 
-                MessageReceivedEventArgs? waitConfirmResult;
+                ConfirmationResult result = await Context.WaitForConfirmationAsync();
 
-                await using (Context.BeginYield())
+                switch (result)
                 {
-                    waitConfirmResult = await Context.WaitForMessageAsync(
-                        e => e.Member.Id == Context.Author.Id,
-                        cancellationToken: Context.Bot.StoppingToken
-                    );
+                    case ConfirmationResult.Timeout:
+                    case ConfirmationResult.Aborted:
+                        return Reply("Aborted.");
+
+                    case ConfirmationResult.Confirmed:
+                        break;
+
+                    default:
+                        throw new ArgumentOutOfRangeException();
                 }
-
-                if (waitConfirmResult is null
-                    || !waitConfirmResult.Message.Content.Equals("yes", StringComparison.OrdinalIgnoreCase))
-                    return Reply("Aborted.");
-
-                SbuMember owner = await Context.GetSbuDbContext().GetMemberAsync(Context.Author);
 
                 List<SbuTag> tags = await Context.GetSbuDbContext()
                     .Tags
-                    .Where(t => t.OwnerId == owner.Id)
+                    .Where(t => t.OwnerId == Context.Author.Id)
                     .ToListAsync(Context.Bot.StoppingToken);
 
                 foreach (SbuTag dbTag in tags)
-                {
                     dbTag.OwnerId = receiver.Id;
-                }
 
                 Context.GetSbuDbContext().Tags.UpdateRange(tags);
                 await Context.GetSbuDbContext().SaveChangesAsync();

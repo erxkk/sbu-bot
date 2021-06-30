@@ -5,8 +5,6 @@ using Disqord.Bot;
 
 using Qmmands;
 
-using SbuBot.Commands.TypeParsers;
-
 namespace SbuBot.Commands
 {
     public sealed class GuidTypeParser : DiscordTypeParser<Guid>

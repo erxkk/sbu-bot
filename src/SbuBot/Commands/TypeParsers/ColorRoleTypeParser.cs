@@ -3,8 +3,6 @@ using System.Threading.Tasks;
 using Disqord;
 using Disqord.Bot;
 
-using Microsoft.EntityFrameworkCore;
-
 using Qmmands;
 
 using SbuBot.Extensions;
@@ -30,13 +28,7 @@ namespace SbuBot.Commands.TypeParsers
             {
                 await using (context.BeginYield())
                 {
-                    role = await context.GetSbuDbContext()
-                        .GetColorRoleAsync(
-                            roleParseResult.Value.Id,
-                            context.GuildId,
-                            roles => roles.Include(r => r.Owner),
-                            context.Bot.StoppingToken
-                        );
+                    role = await context.GetColorRoleAsync(roleParseResult.Value);
                 }
             }
 

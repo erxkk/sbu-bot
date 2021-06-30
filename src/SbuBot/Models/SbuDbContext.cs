@@ -42,21 +42,18 @@ namespace SbuBot.Models
         }
 
         public Task<SbuColorRole> GetColorRoleAsync(
-            IRole member,
-            Func<IQueryable<SbuColorRole>, IQueryable<SbuColorRole>>? query = null,
-            CancellationToken cancellationToken = default
-        ) => GetColorRoleAsync(member.Id, member.GuildId, query, cancellationToken)!;
+            IRole role,
+            Func<IQueryable<SbuColorRole>, IQueryable<SbuColorRole>>? query = null
+        ) => GetColorRoleAsync(role.Id, role.GuildId, query)!;
 
         public Task<SbuColorRole?> GetColorRoleAsync(
             Snowflake roleId,
             Snowflake guildId,
-            Func<IQueryable<SbuColorRole>, IQueryable<SbuColorRole>>? query = null,
-            CancellationToken cancellationToken = default
-        ) => (query is { } ? query(ColorRoles) : ColorRoles)
-            .FirstOrDefaultAsync(
-                m => m.Id == roleId && m.GuildId == guildId,
-                _sbuBot?.StoppingToken ?? cancellationToken
-            )!;
+            Func<IQueryable<SbuColorRole>, IQueryable<SbuColorRole>>? query = null
+        ) => (query is { } ? query(ColorRoles) : ColorRoles).FirstOrDefaultAsync(
+            m => m.Id == roleId && m.GuildId == guildId,
+            _sbuBot?.StoppingToken ?? default
+        )!;
 
         public SbuMember AddMember(IMember member)
         {
@@ -67,20 +64,17 @@ namespace SbuBot.Models
 
         public Task<SbuMember> GetMemberAsync(
             IMember member,
-            Func<IQueryable<SbuMember>, IQueryable<SbuMember>>? query = null,
-            CancellationToken cancellationToken = default
-        ) => GetMemberAsync(member.Id, member.GuildId, query, cancellationToken)!;
+            Func<IQueryable<SbuMember>, IQueryable<SbuMember>>? query = null
+        ) => GetMemberAsync(member.Id, member.GuildId, query)!;
 
         public Task<SbuMember?> GetMemberAsync(
             Snowflake memberId,
             Snowflake guildId,
-            Func<IQueryable<SbuMember>, IQueryable<SbuMember>>? query = null,
-            CancellationToken cancellationToken = default
-        ) => (query is { } ? query(Members) : Members)
-            .FirstOrDefaultAsync(
-                m => m.Id == memberId && m.GuildId == guildId,
-                _sbuBot?.StoppingToken ?? cancellationToken
-            )!;
+            Func<IQueryable<SbuMember>, IQueryable<SbuMember>>? query = null
+        ) => (query is { } ? query(Members) : Members).FirstOrDefaultAsync(
+            m => m.Id == memberId && m.GuildId == guildId,
+            _sbuBot?.StoppingToken ?? default
+        )!;
 
         public SbuGuild AddGuild(IGuild guild)
         {
@@ -91,17 +85,39 @@ namespace SbuBot.Models
 
         public Task<SbuGuild> GetGuildAsync(
             IGuild guild,
-            Func<IQueryable<SbuGuild>, IQueryable<SbuGuild>>? query = null,
-            CancellationToken cancellationToken = default
-        ) => GetGuildAsync(guild.Id, query, cancellationToken)!;
+            Func<IQueryable<SbuGuild>, IQueryable<SbuGuild>>? query = null
+        ) => GetGuildAsync(guild.Id, query)!;
 
         public Task<SbuGuild?> GetGuildAsync(
             Snowflake guildId,
-            Func<IQueryable<SbuGuild>, IQueryable<SbuGuild>>? query = null,
-            CancellationToken cancellationToken = default
+            Func<IQueryable<SbuGuild>, IQueryable<SbuGuild>>? query = null
         ) => (query is { } ? query(Guilds) : Guilds).FirstOrDefaultAsync(
             m => m.Id == guildId,
-            _sbuBot?.StoppingToken ?? cancellationToken
+            _sbuBot?.StoppingToken ?? default
+        )!;
+
+        public SbuTag AddTag(Snowflake ownerId, Snowflake guildId, string name, string content)
+        {
+            SbuTag sbuTag = new(ownerId, guildId, name, content);
+            Tags.Add(sbuTag);
+            return sbuTag;
+        }
+
+        public Task<SbuTag?> GetTagAsync(
+            string name,
+            Snowflake guildId,
+            Func<IQueryable<SbuTag>, IQueryable<SbuTag>>? query = null
+        ) => (query is { } ? query(Tags) : Tags).FirstOrDefaultAsync(
+            t => t.Name == name && t.GuildId == guildId,
+            _sbuBot?.StoppingToken ?? default
+        )!;
+
+        public Task<SbuTag?> GetTagAsync(
+            Guid id,
+            Func<IQueryable<SbuTag>, IQueryable<SbuTag>>? query = null
+        ) => (query is { } ? query(Tags) : Tags).FirstOrDefaultAsync(
+            t => t.Id == id,
+            _sbuBot?.StoppingToken ?? default
         )!;
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

@@ -8,7 +8,6 @@ using Microsoft.Extensions.DependencyInjection;
 
 using Qmmands;
 
-using SbuBot.Extensions;
 using SbuBot.Models;
 using SbuBot.Services;
 
@@ -16,8 +15,6 @@ namespace SbuBot.Commands.TypeParsers
 {
     public sealed class ReminderTypeParser : DiscordGuildTypeParser<SbuReminder>
     {
-        public static readonly string[] ACCEPTED_KEYWORDS = { "last" };
-
         public override async ValueTask<TypeParserResult<SbuReminder>> ParseAsync(
             Parameter parameter,
             string value,
@@ -28,9 +25,10 @@ namespace SbuBot.Commands.TypeParsers
 
             if (value.Equals("last", StringComparison.OrdinalIgnoreCase))
             {
-                return service.GetCurrentReminders().Values.FirstOrDefault(
-                    r => r.OwnerId == context.Author.Id && r.GuildId == context.GuildId
-                ) is { } queriedReminder
+                return service.GetCurrentReminders()
+                    .Values.FirstOrDefault(
+                        r => r.OwnerId == context.Author.Id && r.GuildId == context.GuildId
+                    ) is { } queriedReminder
                     ? TypeParser<SbuReminder>.Success(queriedReminder)
                     : TypeParser<SbuReminder>.Failure("Could not find reminder.");
             }

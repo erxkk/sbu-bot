@@ -3,8 +3,6 @@ using System.Threading.Tasks;
 
 using Disqord.Bot;
 
-using Microsoft.EntityFrameworkCore;
-
 using Qmmands;
 
 using SbuBot.Extensions;
@@ -28,24 +26,14 @@ namespace SbuBot.Commands.TypeParsers
             {
                 await using (context.BeginYield())
                 {
-                    tag = await context.GetSbuDbContext()
-                        .Tags
-                        .FirstOrDefaultAsync(
-                            t => t.Id == guidParseResult.Value && t.GuildId == context.GuildId,
-                            context.Bot.StoppingToken
-                        );
+                    tag = await context.GetTagAsync(guidParseResult.Value);
                 }
             }
             else
             {
                 await using (context.BeginYield())
                 {
-                    tag = await context.GetSbuDbContext()
-                        .Tags
-                        .FirstOrDefaultAsync(
-                            t => t.Name == value && t.GuildId == context.GuildId,
-                            context.Bot.StoppingToken
-                        );
+                    tag = await context.GetTagAsync(value);
                 }
             }
 

@@ -12,5 +12,10 @@ namespace SbuBot.Extensions
             SbuGlobals.Guild.SELF,
             SbuGlobals.Role.Color.SELF
         );
+
+        public static CachedChannel GetPinArchive(this DiscordBotBase @this) => @this.GetChannel(
+            SbuGlobals.Guild.SELF,
+            SbuGlobals.Channel.Based.PIN_ARCHIVE
+        );
     }
 }

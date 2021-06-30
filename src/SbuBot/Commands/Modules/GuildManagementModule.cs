@@ -60,8 +60,7 @@ namespace SbuBot.Commands.Modules
                     message = Context.Message.ReferencedMessage.Value;
                 }
 
-                if (Context.Bot.GetChannel(SbuGlobals.Guild.SELF, SbuGlobals.Channel.Based.PIN_ARCHIVE)
-                    is not ITextChannel pinArchive)
+                if (Context.Bot.GetPinArchive() is not ITextChannel pinArchive)
                     throw new NotCachedException("Could not find required pin archive channel.");
 
                 switch (SbuUtility.TryCreatePinMessage(message))
@@ -101,8 +100,7 @@ namespace SbuBot.Commands.Modules
             {
                 channel ??= Context.Channel;
 
-                if (Context.Bot.GetChannel(SbuGlobals.Guild.SELF, SbuGlobals.Channel.Based.PIN_ARCHIVE)
-                    is not ITextChannel pinArchive)
+                if (Context.Bot.GetPinArchive() is not ITextChannel pinArchive)
                     throw new NotCachedException("Could not find required pin archive channel.");
 
                 IReadOnlyList<IUserMessage> pins = await channel.FetchPinnedMessagesAsync();
@@ -337,21 +335,24 @@ namespace SbuBot.Commands.Modules
                 emoteSet.Add(emote);
 
                 if (emoteSet.Count > 1)
+                {
                     await Reply("Are you sure you want to remove all those emotes? Respond `yes` to confirm.");
 
-                MessageReceivedEventArgs waitConfirmResult;
+                    ConfirmationResult result = await Context.WaitForConfirmationAsync();
 
-                await using (_ = Context.BeginYield())
-                {
-                    waitConfirmResult = await Context.WaitForMessageAsync(
-                        e => e.Member.Id == Context.Author.Id,
-                        cancellationToken: Context.Bot.StoppingToken
-                    );
+                    switch (result)
+                    {
+                        case ConfirmationResult.Timeout:
+                        case ConfirmationResult.Aborted:
+                            return Reply("Aborted.");
+
+                        case ConfirmationResult.Confirmed:
+                            break;
+
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
                 }
-
-                if (waitConfirmResult is null
-                    || !waitConfirmResult.Message.Content.Equals("yes", StringComparison.OrdinalIgnoreCase))
-                    return Reply("Aborted.");
 
                 foreach (IGuildEmoji customEmoji in emoteSet)
                     await customEmoji.DeleteAsync();
