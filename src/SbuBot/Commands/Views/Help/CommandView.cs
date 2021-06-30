@@ -23,7 +23,7 @@ namespace SbuBot.Commands.Views.Help
             StringBuilder description = new StringBuilder("`", 512)
                 .Append(command.GetSignature())
                 .AppendLine("`\n**Description:**")
-                .Append(command.Description ?? command.Module.Description);
+                .AppendLine(command.Description ?? command.Module.Description);
 
             if ((command.Remarks ?? command.Module.Remarks) is { } remarks)
                 description.AppendLine("**Remarks:**").AppendLine(remarks);

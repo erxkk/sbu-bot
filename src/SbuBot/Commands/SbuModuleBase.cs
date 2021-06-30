@@ -28,7 +28,7 @@ namespace SbuBot.Commands
         protected DiscordMenuCommandResult HelpView() => View(new RootView(Context.Bot.Commands));
 
         protected DiscordMenuCommandResult HelpView(Command command) => View(
-            command.Module.IsGroup() ? new CommandView(command) : new GroupView(command.Module)
+            command.Module.IsGroup() ? new GroupView(command.Module) : new CommandView(command)
         );
 
         protected DiscordMenuCommandResult HelpView(IEnumerable<Command> commands)

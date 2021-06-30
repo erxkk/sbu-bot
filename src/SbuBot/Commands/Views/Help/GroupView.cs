@@ -43,10 +43,10 @@ namespace SbuBot.Commands.Views.Help
                 );
             }
 
-            description.AppendLine("**Description:**").Append(group.Description);
+            description.AppendLine("**Description:**").AppendLine(group.Description);
 
             if (group.Remarks is { })
-                description.AppendLine("**Remarks:**").Append(group.Remarks);
+                description.AppendLine("**Remarks:**").AppendLine(group.Remarks);
 
             TemplateMessage.Embeds[0]
                 .WithTitle(group.Aliases[0])

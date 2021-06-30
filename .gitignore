@@ -1,5 +1,5 @@
 # configuration
-config.yaml
+migrations.yaml
 .env
 
 # dotnet output
