@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 
 using Disqord;
 using Disqord.Bot;
-using Disqord.Extensions.Interactivity.Menus.Paged;
 using Disqord.Gateway;
 using Disqord.Rest;
 
@@ -16,12 +15,9 @@ using SbuBot.Extensions;
 
 namespace SbuBot.Commands.Modules
 {
-    // TODO: improve syntax explanation
     [Description("A collection of commands for help and general server/member/bot information.")]
     public sealed class InfoModule : SbuModuleBase
     {
-        private readonly int _guidePageCount = 6;
-
         [Command("about")]
         [Description("Displays information about the bot.")]
         public async Task<DiscordCommandResult> AboutAsync()
@@ -43,7 +39,7 @@ namespace SbuBot.Commands.Modules
                     )
                     .AddInlineField(
                         "Library",
-                        Markdown.Link("Github:Quahu/Disqord", SbuGlobals.Github.DISQORD)
+                        Markdown.Link("Github:quahu/disqord", SbuGlobals.Github.DISQORD)
                     )
                     .AddInlineField(
                         "CLR",
@@ -56,91 +52,24 @@ namespace SbuBot.Commands.Modules
             );
         }
 
-        // TODO: make extension that auto adds paged footer
         [Command("guide")]
-        [Description("Displays an interactive guide that explains bot usage.")]
-        public DiscordCommandResult Guide() => Pages(
-            new Page().WithEmbeds(
-                new LocalEmbed()
-                    .WithTitle("Commands")
-                    .WithFooter($"1/{_guidePageCount}")
-                    .WithDescription(
-                        "To use Commands ping the bot or send a message that starts with "
-                        + $"'{SbuGlobals.DEFAULT_PREFIX}', the space between the prefix and the command is "
-                        + "optional and does not influence the command execution, both `sbu ping` and "
-                        + "`sbuping` will work just fine."
-                    )
-            ),
-            new Page().WithEmbeds(
-                new LocalEmbed()
-                    .WithTitle("Parameters")
-                    .WithFooter($"2/{_guidePageCount}")
-                    .WithDescription(
-                        "Brackets in help commands indicate parameter importance:"
-                        + "\n> - `<param>` indicates a required parameter, it cannot be left out."
-                        + "\n> - `[param = default]` indicates an optional parameter, if left out the default value "
-                        + "will be used."
-                        + "\n> - `[params…]` indicates a collection of values, if left out none will be passed."
-                        + "\n> - All parameters but the last of each command are separated by spaces by default."
-                    )
-            ),
-            new Page().WithEmbeds(
-                new LocalEmbed()
-                    .WithTitle("Parameters Examples")
-                    .WithFooter($"3/{_guidePageCount}")
-                    .WithDescription(
-                        "> `ban <user> [reason = \"beaned\"]` can be used like:\n"
-                        + Markdown.CodeBlock("sbu ban @joemama\nsbu ban @joemama you're a jew")
-                        + "\n> `gift <user> <tag> [additional tags…]` can be used like:\n"
-                        + Markdown.CodeBlock("sbu gift @joemama tag1\nsbu gift @joemama tag1 tag2 tag3")
-                    )
-            ),
-            new Page().WithEmbeds(
-                new LocalEmbed()
-                    .WithTitle("Parsing")
-                    .WithFooter($"4/{_guidePageCount}")
-                    .WithDescription(
-                        "Quotes and backslashes receive special handling when parsing:\n"
-                        + "> - Quotes `\"counts as one\"` indicate the start and end of an argument that contains "
-                        + "spaces and is not the last argument, they are ignored on the last argument.\n"
-                        + "> - Backslashes escape the following character to not receive any special handling.\n"
-                        + "> - To use quotes or slashes as literal values anywhere they have to be escaped `\\\"`, "
-                        + "will be parsed as `\"`."
-                    )
-            ),
-            new Page().WithEmbeds(
-                new LocalEmbed()
-                    .WithTitle("Parsing Examples")
-                    .WithFooter($"5/{_guidePageCount}")
-                    .WithDescription(
-                        "> `tag new <name> [content]` can be used to create a tag like this:\n"
-                        + "> `tag name with spaces` => `benor haha`.\n"
-                        + Markdown.CodeBlock("sbu tag new \"tag name with spaces\" benor haha")
-                        + "> To allow quotes in the value name itself, create the tag like this:\n"
-                        + Markdown.CodeBlock("sbu tag \\\"\\\"\\\"them\\\"\\\"\\\" ||da jews||\ntag \"\"\"them\"\"\"")
-                    )
-            ),
-            new Page().WithEmbeds(
-                new LocalEmbed()
-                    .WithTitle("Descriptors")
-                    .WithFooter($"6/{_guidePageCount}")
-                    .WithDescription(
-                        "> Descriptors are used to easily separate multiple arguments which contain spaces\n"
-                        + "> A descriptor uses `|` as a separator instead of spaces, but trims off trailing and "
-                        + "leading whitespace."
-                    )
-            ),
-            new Page().WithEmbeds(
-                new LocalEmbed()
-                    .WithTitle("Descriptor Examples")
-                    .WithFooter($"6/{_guidePageCount}")
-                    .WithDescription(
-                        "> `tag new <tagDescriptor>` can be used to create a tag like this:\n"
-                        + "> `tag name with spaces` => `tag content with spaces`.\n"
-                        + Markdown.CodeBlock("sbu tag new tag name with spaces | tag content with spaces")
-                        + "> Quotes and spaces are ignored"
-                    )
-            )
+        [Description("Displays an interactive guide that explains bot usage and help syntax.")]
+        public DiscordCommandResult Guide() => CountedPages(
+            new LocalEmbed()
+                .WithTitle("Commands")
+                .WithDescription(GuideStatic.COMMANDS),
+            new LocalEmbed()
+                .WithTitle("Syntax & Semantics")
+                .WithDescription(GuideStatic.SYNTAX_SEMANTICS),
+            new LocalEmbed()
+                .WithTitle("Parsing")
+                .WithDescription(GuideStatic.PARSING),
+            new LocalEmbed()
+                .WithTitle("Parsing Examples")
+                .WithDescription(GuideStatic.PARSING_EXAMPLES),
+            new LocalEmbed()
+                .WithTitle("Escaping Examples")
+                .WithDescription(GuideStatic.ESCAPING_EXAMPLES)
         );
 
         // TODO: add paginator that avoids buttons on 1 page
@@ -216,6 +145,73 @@ namespace SbuBot.Commands.Modules
                 1 => HelpView(matches[0].Command),
                 _ => HelpView(matches.Select(c => c.Command)),
             };
+        }
+
+        private static class GuideStatic
+        {
+            private const string INDENT = "\u200B \u200B \u200B \u200B ";
+
+            public const string COMMANDS
+                = "To use Commands ping the bot or send a message that starts with `sbu`, the space between the prefix "
+                + "and the command is optional and does not influence the command execution, both `sbu ping` and "
+                + "`sbuping` will work just fine.";
+
+            public static readonly string SYNTAX_SEMANTICS
+                = "**Brackets in help commands indicate parameter importance**\n"
+                + "• `<param>` a required parameter, it cannot be left out\n"
+                + "• `[param = default]` an optional parameter, if left out the default value will be used\n"
+                + "• `[params…]` a collection of values, if left out none will be passed\n"
+                + "• `{object}` non-string-literals\n"
+                + $"{GuideStatic.INDENT}- `{{-cmd}}` invokes `sbu cmd` instead\n"
+                + $"{GuideStatic.INDENT}- `{{!state}}` negation of state\n"
+                + $"{GuideStatic.INDENT}- `{{@user}}` user-mention\n"
+                + $"{GuideStatic.INDENT}- `{{@reply}}` inline-reply\n"
+                + $"{GuideStatic.INDENT}- `{{#channel}}` channel-mention\n"
+                + "\n"
+                + "Arguments are separated by spaces, wrap an argument in quotes `\"\"` if it contains spaces, this is "
+                + "not necessary for the last non-collection parameter.";
+
+            public const string PARSING
+                = "**Quotes and backslashes receive special handling when parsing**\n"
+                + "• Quotes `\"counts as one\"` indicate the start and end of an argument that contains spaces and is "
+                + "not the last argument, they are parsed normally on the last argument.\n"
+                + "• Backslashes escape the following character to not receive any special handling.\n"
+                + "• To use quotes or slashes as literal values anywhere they have to be escaped `\\\"` will be parsed "
+                + "as `\"`.\n"
+                + "• Descriptors are used to make parsing easier, a descriptor separates arguments by `::` and "
+                + "discards leading and trailing whitspace.";
+
+            public static readonly string PARSING_EXAMPLES
+                = "• **Optional argument**\n"
+                + $"{GuideStatic.INDENT}- command `ban <user> [reason = \"beaned\"]`\n"
+                + $"{GuideStatic.INDENT}- used like `sbu ban @joemama`\n"
+                + $"{GuideStatic.INDENT}- bans `@joemama` with `beaned` as the reason\n"
+                + "\n"
+                + "• **Optional argument not omitted**\n"
+                + $"{GuideStatic.INDENT}- command `ban <user> [reason = \"beaned\"]`\n"
+                + $"{GuideStatic.INDENT}- used like `sbu ban @joemama you're a retard`\n"
+                + $"{GuideStatic.INDENT}- bans `@joemama` with `you're a retard` as the reason\n"
+                + "\n"
+                + "• **Additional argument omitted**\n"
+                + $"{GuideStatic.INDENT}- command `gift <user> <tag> [additional tags…]`\n"
+                + $"{GuideStatic.INDENT}- used like `sbu gift @joemama tag1`\n"
+                + $"{GuideStatic.INDENT}- gifts `@joemama` `tag1`\n"
+                + "\n"
+                + "• **Additional argument not omitted**\n"
+                + $"{GuideStatic.INDENT}- command `gift <user> <tag> [additional tags…]`\n"
+                + $"{GuideStatic.INDENT}- used like `sbu gift @joemama tag1 \"tag2 with spaces\" tag3`\n"
+                + $"{GuideStatic.INDENT}- gifts `@joemama` `tag1`, `tag2 with spaces and tag3`";
+
+            public static readonly string ESCAPING_EXAMPLES
+                = "• **Escaping a quote to include it in the argument**\n"
+                + $"{GuideStatic.INDENT}- command `tag <name> <conent>`\n"
+                + $"{GuideStatic.INDENT}- used like `sbu tag \\\"\\\"\\\"them\\\"\\\"\\\" ||da juice||`\n"
+                + $"{GuideStatic.INDENT}- creates a tag with `\"\"\"them\"\"\"` as name and `||da juice||` as content\n"
+                + "\n"
+                + "• **Using a descriptor for the same tag**\n"
+                + $"{GuideStatic.INDENT}- command `tag <tagDescriptor>`\n"
+                + $"{GuideStatic.INDENT}- used like `sbu tag \"\"\"them\"\"\" :: ||da juice||`\n"
+                + $"{GuideStatic.INDENT}- creates a tag with `\"\"\"them\"\"\"` as name and `||da juice||` as content";
         }
     }
 }

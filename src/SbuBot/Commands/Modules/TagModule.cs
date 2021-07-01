@@ -148,7 +148,7 @@ namespace SbuBot.Commands.Modules
             [Description("Lists the tags of a given member, or of the command author if no member is specified.")]
             [Usage("tag list", "t list @user", "tag list 352815253828141056", "tag list Allah")]
             public async Task<DiscordCommandResult> ListFromOwnerAsync(
-                [OverrideDefault("@author")]
+                [OverrideDefault("{@author}")]
                 [Description("The member who's tags should be listed.")]
                 [Remarks("Defaults to the command author.")]
                 SbuMember? owner = null

@@ -4,8 +4,6 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 
-using Disqord.Bot;
-
 using Qmmands;
 
 using SbuBot.Commands.Attributes;
@@ -23,7 +21,6 @@ namespace SbuBot
         public static void AppendTo(
             this Command @this,
             StringBuilder builder,
-            IPrefix? prefix = null,
             bool withDefaults = true
         )
         {
@@ -32,9 +29,6 @@ namespace SbuBot
 
             if (builder is null)
                 throw new ArgumentNullException(nameof(builder));
-
-            if (prefix is { })
-                builder.Append(prefix).Append(' ');
 
             builder.Append(@this.FullAliases[0]);
 
@@ -45,13 +39,13 @@ namespace SbuBot
             @this.AppendParametersTo(builder, withDefaults);
         }
 
-        public static string Format(this Command @this, IPrefix? prefix = null, bool withDefaults = true)
+        public static string Format(this Command @this, bool withDefaults = true)
         {
             if (@this is null)
                 throw new ArgumentNullException(nameof(@this));
 
             StringBuilder builder = new(@this.FullAliases[0].Length + 16 * @this.Parameters.Count);
-            @this.AppendTo(builder, prefix, withDefaults);
+            @this.AppendTo(builder, withDefaults);
             return builder.ToString();
         }
 
@@ -110,9 +104,10 @@ namespace SbuBot
                 builder.Append(
                     defaultValue switch
                     {
-                        null => "none",
-                        true => "true",
-                        false => "false",
+                        null => "{none}",
+                        true => "{true}",
+                        false => "{false}",
+                        string str when !str.StartsWith('{') => $"\"{str}\"",
                         { } value => value,
                     }
                 );

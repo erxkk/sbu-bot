@@ -51,7 +51,7 @@ namespace SbuBot.Commands.Modules
         [Description("Replies with `Pong!` after the given timespan or instantly if no timespan is specified.")]
         [Usage("ping", "ping in 3 seconds")]
         public DiscordCommandResult Send(
-            [OverrideDefault("now")][Description("The timestamp at which to send the reply.")]
+            [OverrideDefault("{now}")][Description("The timestamp at which to send the reply.")]
             DateTime? timespan = null
         )
         {
@@ -116,7 +116,6 @@ namespace SbuBot.Commands.Modules
             }
         }
 
-        // currently not before/after execute is done etc
         [Group("do")]
         [RequireBotOwner]
         [Description("A group of commands that invoke other commands with a proxy context.")]
@@ -181,7 +180,7 @@ namespace SbuBot.Commands.Modules
         [RequireBotOwner]
         [Description("Sets the bot lock state to the given state, or switches it if no state is specified.")]
         public DiscordCommandResult Lock(
-            [OverrideDefault("!state")][Description("THe new lock state to set the bot to.")]
+            [OverrideDefault("{!state}")][Description("THe new lock state to set the bot to.")]
             bool? set = null
         )
         {

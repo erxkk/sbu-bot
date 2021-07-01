@@ -46,7 +46,7 @@ namespace SbuBot.Commands.Modules
                 "archive https://discord.com/channels/732210852849123418/732231139233759324/836993360274784297"
             )]
             public async Task<DiscordCommandResult> ArchiveMessageAsync(
-                [OverrideDefault("@reply")][Description("The message that should be archived.")]
+                [OverrideDefault("{@reply}")][Description("The message that should be archived.")]
                 IUserMessage? message = null,
                 [Description("Whether or not the original message should be unpinned.")]
                 bool unpinOriginal = true
@@ -92,7 +92,7 @@ namespace SbuBot.Commands.Modules
             )]
             [Usage("archive all", "archive all #channel", "archive all 732211844315349005")]
             public async Task<DiscordCommandResult> ArchiveAllAsync(
-                [OverrideDefault("#here")][Description("The channel of which the pins should be archived.")]
+                [OverrideDefault("{#here}")][Description("The channel of which the pins should be archived.")]
                 ITextChannel? channel = null,
                 [Description("Whether or not the original messages should be unpinned.")]
                 bool unpinOriginals = true

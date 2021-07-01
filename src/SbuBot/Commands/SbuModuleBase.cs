@@ -16,6 +16,7 @@ namespace SbuBot.Commands
 {
     public abstract class SbuModuleBase : DiscordGuildModuleBase
     {
+        // TODO: could move FillPages to command utility and use ArrayPageProvider with modified FillPages?
         protected DiscordMenuCommandResult FilledPages(
             IEnumerable<string> contents,
             int itemsPerPage = -1,
@@ -24,6 +25,17 @@ namespace SbuBot.Commands
             SbuUtility.FillPages(contents, itemsPerPage)
                 .Select(p => new Page().WithEmbeds((embedModifier?.Invoke(new()) ?? new()).WithDescription(p)))
         );
+
+        public DiscordMenuCommandResult CountedPages(params LocalEmbed[] embeds)
+            => Pages(
+                new ArrayPageProvider<LocalEmbed>(
+                    embeds,
+                    (view, item) => new Page().WithEmbeds(
+                        item[0].WithFooter($"{view.CurrentPageIndex + 1}/{view.PageProvider.PageCount}")
+                    ),
+                    1
+                )
+            );
 
         protected DiscordMenuCommandResult HelpView() => View(new RootView(Context.Bot.Commands));
 

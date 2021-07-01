@@ -6,10 +6,10 @@ namespace SbuBot
     {
         public const char BULLET = '•';
         public const char ELLIPSES = '…';
-        public const char DESCRIPTOR_SEPARATOR = '|';
+        public const string DESCRIPTOR_SEPARATOR = "::";
         public const string DEFAULT_PREFIX = "sbu";
 
-        public static readonly Version VERSION = new(0, 4, 11);
+        public static readonly Version VERSION = new(0, 4, 12);
 
         public static readonly string[] RESERVED_KEYWORDS =
         {
