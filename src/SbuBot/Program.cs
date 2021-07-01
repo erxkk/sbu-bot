@@ -18,6 +18,7 @@ using Microsoft.Extensions.Logging;
 using SbuBot;
 using SbuBot.Logging;
 using SbuBot.Models;
+using SbuBot.Services;
 
 using Serilog;
 
@@ -31,14 +32,18 @@ try
                 .Build()
         )
         .UseSerilog(
-            (_, _, logging) => logging
+            (ctx, _, logging) => logging
                 .MinimumLevel.Verbose()
-                .Destructure.ToMaximumDepth(3)
+                .Destructure.ToMaximumDepth(4)
                 .Destructure.ToMaximumCollectionCount(5)
                 .Destructure.ToMaximumStringLength(50)
                 .Destructure.ByTransforming<Snowflake>(snowflake => snowflake.RawValue)
+                .Destructure
+                .ByTransforming<SchedulerService.Entry>(entry => new { entry.Id, Remaining = entry.RecurringCount })
+                .Destructure
+                .ByTransforming<SbuReminder>(reminder => new { reminder.Id, Owner = reminder.OwnerId })
                 .WriteTo.File(
-                    "logs/log.txt",
+                    $"{ctx.Configuration["Log:Path"]}/log.txt",
                     outputTemplate:
                     "[{Timestamp:HH:mm:ss:fff zzz} {Level:u3} : {SourceContext}] {Message:l}{NewLine}{Exception}",
                     rollingInterval: RollingInterval.Day

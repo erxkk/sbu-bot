@@ -92,11 +92,10 @@ namespace SbuBot.Services
             _schedulerService.Schedule(
                 reminder.Id,
                 reminderCallback,
-                reminder.DueAt - DateTimeOffset.Now,
-                0
+                reminder.DueAt - DateTimeOffset.Now
             );
 
-            Logger.LogDebug("Scheduled {@Reminder}", reminder.Id);
+            Logger.LogDebug("Scheduled {@Reminder}", reminder);
 
             async Task reminderCallback(SchedulerService.Entry entry)
             {
@@ -117,7 +116,7 @@ namespace SbuBot.Services
                             )
                     );
 
-                    Logger.LogDebug("Dispatched {@Reminder}", reminder.Id);
+                    Logger.LogDebug("Dispatched {@Reminder}", reminder);
                 }
                 catch (Exception ex)
                 {
@@ -138,7 +137,7 @@ namespace SbuBot.Services
                         await context.SaveChangesAsync(entry.CancellationToken);
                     }
 
-                    Logger.LogTrace("Removed internally {@Reminder}", reminder.Id);
+                    Logger.LogTrace("Removed internally {@Reminder}", reminder);
                 }
             }
         }
@@ -170,7 +169,7 @@ namespace SbuBot.Services
                 "Rescheduled: {@PreviousTimespan} -> {@NewTimespan} : {@Reminder}",
                 previousDueAt,
                 reminder.DueAt,
-                reminder.Id
+                reminder
             );
         }
 
@@ -194,7 +193,7 @@ namespace SbuBot.Services
 
             _schedulerService.Cancel(id);
 
-            Logger.LogDebug("Unscheduled: {@Reminder}", reminder.Id);
+            Logger.LogDebug("Cancelled: {@Reminder}", reminder);
         }
 
         public async Task CancelAsync(Func<KeyValuePair<Guid, SbuReminder>, bool> query)
@@ -224,7 +223,7 @@ namespace SbuBot.Services
                 await context.SaveChangesAsync();
             }
 
-            Logger.LogDebug("Unscheduled: {@Reminders}", new { Amount = count });
+            Logger.LogDebug("Cancelled: {@Reminders}", reminders.Select(p => p.Value));
         }
     }
 }

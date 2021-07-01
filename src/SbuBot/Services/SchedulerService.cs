@@ -23,7 +23,7 @@ namespace SbuBot.Services
                     keyValuePair.Value.Timer.Dispose();
             }
 
-            return base.StopAsync(cancellationToken);
+            return Task.CompletedTask;
         }
 
         public Guid Schedule(
@@ -100,9 +100,11 @@ namespace SbuBot.Services
 
         public bool Reschedule(Guid id, TimeSpan timeSpan)
         {
+            Entry? entry;
+
             lock (this)
             {
-                if (!_scheduleEntries.TryGetValue(id, out var entry))
+                if (!_scheduleEntries.TryGetValue(id, out entry))
                 {
                     Logger.LogWarning("Could not reschedule to {@NewTimespan}, not found : {@Entry}", timeSpan, id);
                     return false;
@@ -111,15 +113,18 @@ namespace SbuBot.Services
                 entry.Timer.Change(timeSpan, timeSpan);
             }
 
-            Logger.LogTrace("Rescheduled: {@Entry} -> {@NewTimespan}", id, timeSpan);
+            Logger.LogTrace("Rescheduled: {@Entry} -> {@NewTimespan}", entry, timeSpan);
+
             return true;
         }
 
         public bool Cancel(Guid id)
         {
+            Entry? entry;
+
             lock (this)
             {
-                if (!_scheduleEntries.Remove(id, out var entry))
+                if (!_scheduleEntries.Remove(id, out entry))
                 {
                     Logger.LogWarning("Could not cancel, not found : {@Entry}", id);
                     return false;
@@ -128,7 +133,7 @@ namespace SbuBot.Services
                 entry.Timer.Dispose();
             }
 
-            Logger.LogTrace("Unscheduled: {@Entry}", id);
+            Logger.LogTrace("Cancelled: {@Entry}", entry);
             return true;
         }
 
