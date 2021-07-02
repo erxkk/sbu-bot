@@ -249,7 +249,7 @@ namespace SbuBot.Commands.Modules
             }
         }
 
-        [Group("remove", "delete")]
+        [Group("remove", "rm", "delete")]
         [Description("A group of commands for removing tags.")]
         public sealed class RemoveGroup : SbuModuleBase
         {

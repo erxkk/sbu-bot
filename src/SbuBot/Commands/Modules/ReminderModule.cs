@@ -124,7 +124,7 @@ namespace SbuBot.Commands.Modules
             );
         }
 
-        [Group("remove", "delete", "cancel")]
+        [Group("remove", "rm", "delete", "cancel")]
         [Description("A group of commands for removing reminders.")]
         public sealed class RemoveGroup : SbuModuleBase
         {
