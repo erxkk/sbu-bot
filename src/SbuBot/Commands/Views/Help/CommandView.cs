@@ -20,14 +20,16 @@ namespace SbuBot.Commands.Views.Help
         {
             _command = command;
 
-            StringBuilder description = new(512);
+            StringBuilder description = new("**Signature:**\n", 512);
             command.AppendTo(description.Append('`'));
-            description.Append('`');
+            description.Append('`').Append('\n').Append('\n');
 
-            description.AppendLine("`\n**Description:**").AppendLine(command.Description ?? command.Module.Description);
+            description.AppendLine("**Description:**")
+                .AppendLine(command.Description ?? command.Module.Description)
+                .Append('\n');
 
             if ((command.Remarks ?? command.Module.Remarks) is { } remarks)
-                description.AppendLine("**Remarks:**").AppendLine(remarks);
+                description.AppendLine("**Remarks:**").AppendLine(remarks).Append('\n');
 
             if (command.Attributes.OfType<UsageAttribute>().FirstOrDefault() is { } usage)
             {
@@ -39,6 +41,7 @@ namespace SbuBot.Commands.Views.Help
                         .Append(' ')
                         .Append('`')
                         .Append(SbuGlobals.DEFAULT_PREFIX)
+                        .Append(' ')
                         .Append(example)
                         .Append('`')
                         .Append('\n');
@@ -61,11 +64,11 @@ namespace SbuBot.Commands.Views.Help
             {
                 TemplateMessage.Embeds[0]
                     .AddInlineField(
-                        parameter.Name,
+                        parameter.Format(),
                         string.Format(
                             "**Description:**\n{0}{1}",
                             parameter.Description,
-                            (parameter.Remarks is { } ? "\n**Remarks:**\n" + parameter.Remarks : "")
+                            (parameter.Remarks is { } ? "\n\n**Remarks:**\n" + parameter.Remarks : "")
                         )
                     );
             }
@@ -73,7 +76,7 @@ namespace SbuBot.Commands.Views.Help
 
         public override ValueTask GoToParent(ButtonEventArgs e)
         {
-            Menu.View = new ModuleView(_command.Module);
+            Menu.View = _command.Module.IsGroup() ? new GroupView(_command.Module) : new ModuleView(_command.Module);
             return default;
         }
     }

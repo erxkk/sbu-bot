@@ -20,10 +20,10 @@ namespace SbuBot.Commands.Views.Help
             _module = module;
 
             StringBuilder description = new StringBuilder("**Description:**\n", 512)
-                .AppendLine(module.Description);
+                .AppendLine(module.Description).Append('\n');
 
             if (module.Remarks is { })
-                description.AppendLine("**Remarks:**").AppendLine(module.Remarks);
+                description.AppendLine("**Remarks:**").AppendLine(module.Remarks).Append('\n');
 
             if (module.Submodules.Count > 0)
                 description.AppendLine("**Submodules:**");
@@ -45,14 +45,14 @@ namespace SbuBot.Commands.Views.Help
                         }
                     )
                     {
-                        Label = submodule.Aliases.Count != 0 ? submodule.Aliases[0] : submodule.Name,
+                        Label = submodule.FullAliases.Count != 0 ? submodule.FullAliases[0] : submodule.Name,
                         Style = ButtonComponentStyle.Secondary,
                     }
                 );
             }
 
             if (module.Commands.Count > 0)
-                description.AppendLine("**Commands:**");
+                description.Append('\n').AppendLine("**Commands:**");
 
             foreach (Command command in module.Commands)
             {
@@ -68,7 +68,7 @@ namespace SbuBot.Commands.Views.Help
                         }
                     )
                     {
-                        Label = command.Name,
+                        Label = command.FullAliases[0],
                         Style = ButtonComponentStyle.Secondary,
                     }
                 );

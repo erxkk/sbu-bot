@@ -44,13 +44,13 @@ namespace SbuBot.Commands.Views.Help
                 );
             }
 
-            description.AppendLine("**Description:**").AppendLine(group.Description);
+            description.Append('\n').AppendLine("**Description:**").AppendLine(group.Description).Append('\n');
 
             if (group.Remarks is { })
                 description.AppendLine("**Remarks:**").AppendLine(group.Remarks);
 
             TemplateMessage.Embeds[0]
-                .WithTitle(group.Aliases[0])
+                .WithTitle(group.FullAliases[0])
                 .WithDescription(description.ToString());
 
             if (group.Aliases.Count != 0)

@@ -46,7 +46,7 @@ namespace SbuBot.Commands
         protected DiscordMenuCommandResult HelpView(IEnumerable<Command> commands)
         {
             return View(
-                !commands.GroupBy(o => o.Name).HasAtLeast(2)
+                !commands.GroupBy(o => o.Module).HasAtLeast(2)
                     ? new SearchMatchView(commands)
                     : new GroupView(commands.First().Module)
             );
