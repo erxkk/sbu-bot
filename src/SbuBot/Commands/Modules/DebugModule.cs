@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 
 using Disqord;
 using Disqord.Bot;
+using Disqord.Gateway;
 using Disqord.Rest;
 
 using Microsoft.Extensions.DependencyInjection;
@@ -11,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Qmmands;
 
 using SbuBot.Commands.Attributes;
+using SbuBot.Evaluation;
 using SbuBot.Services;
 
 namespace SbuBot.Commands.Modules
@@ -24,10 +26,10 @@ namespace SbuBot.Commands.Modules
         {
             [Command]
             [Description("Replies with the given message.")]
-            [Usage("echo echo", "echo blah blah blah")]
+            [Usage("echo", "echo echo", "echo blah blah blah")]
             public DiscordCommandResult Echo(
                 [Description("The message to reply with.")]
-                string message
+                string message = "echo!"
             ) => Reply(message);
 
             [Command]
@@ -39,7 +41,7 @@ namespace SbuBot.Commands.Modules
                 [Description("The target channel in which to send the message in.")]
                 ITextChannel target,
                 [Description("The message to reply with.")]
-                string message
+                string message = "echo!"
             )
             {
                 await Context.Message.DeleteAsync();
@@ -79,41 +81,26 @@ namespace SbuBot.Commands.Modules
             string expression
         )
         {
-            EvalService service = Context.Services.GetRequiredService<EvalService>();
-            DateTimeOffset startTime = DateTimeOffset.Now;
-            CompilationResult compilationResult = service.CreateAndCompile(expression, Context);
+            LocalEmbed[] embeds = new LocalEmbed[2];
+            CompilationResult compilationResult = Eval.CreateAndCompile(expression, Context);
+            embeds[0] = compilationResult.ToEmbed();
 
-            // TODO: refine to include compilation time etc
-            switch (compilationResult)
+            if (compilationResult is CompilationResult.Completed completed)
             {
-                case CompilationResult.Completed compilationCompleted:
+                ScriptResult result = await completed.RunAsync();
+
+                switch (result)
                 {
-                    ScriptResult scriptResult = await compilationCompleted.RunAsync();
+                    case ScriptResult.Completed { ReturnValue: null }:
+                        break;
 
-                    return scriptResult switch
-                    {
-                        ScriptResult.Completed scriptCompleted => Reply(
-                            scriptCompleted.ReturnValue?.ToString() ?? "<null>"
-                        ),
-                        ScriptResult.Failed scriptFailed => Reply(scriptFailed.Exception.ToString()),
-                        _ => throw new ArgumentOutOfRangeException(nameof(scriptResult), scriptResult, null),
-                    };
+                    default:
+                        embeds[1] = result.ToEmbed();
+                        break;
                 }
-
-                case CompilationResult.Failed compilationFailed:
-                {
-                    return FilledPages(
-                        compilationFailed.Diagnostics.Select(d => d.ToString()),
-                        embedModifier: embed => embed
-                            .WithTitle("Compilation failed")
-                            .WithFooter("Failed")
-                            .WithTimestamp(startTime + compilationFailed.CompilationTime)
-                    );
-                }
-
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(compilationResult), compilationResult, null);
             }
+
+            return Reply(embeds);
         }
 
         [Group("do")]
@@ -135,7 +122,7 @@ namespace SbuBot.Commands.Modules
                     Context.Prefix,
                     command,
                     new ProxyMessage(Context.Message, command, member, channel.Id),
-                    Context.Channel,
+                    (channel as CachedTextChannel) ?? Context.Channel,
                     Context.Services
                 ),
                 context => context.Bot.ExecuteAsync(context)
@@ -146,34 +133,14 @@ namespace SbuBot.Commands.Modules
             public void DoAsUser(
                 [Description("The proxy author.")] IMember member,
                 [Description("The proxy command.")] string command = "ping"
-            ) => Context.Bot.Queue.Post(
-                new DiscordGuildCommandContext(
-                    Context.Bot,
-                    Context.Prefix,
-                    command,
-                    new ProxyMessage(Context.Message, command, member),
-                    Context.Channel,
-                    Context.Services
-                ),
-                context => context.Bot.ExecuteAsync(context)
-            );
+            ) => Do(member, Context.Channel, command);
 
             [Command("in")]
             [Description("Sends a given proxy command, or `ping` if not specified, in a given channel.")]
             public void DoInChannel(
                 [Description("The proxy channel.")] ITextChannel channel,
                 [Description("The proxy command.")] string command = "ping"
-            ) => Context.Bot.Queue.Post(
-                new DiscordGuildCommandContext(
-                    Context.Bot,
-                    Context.Prefix,
-                    command,
-                    new ProxyMessage(Context.Message, command, proxyChannelId: channel.Id),
-                    Context.Channel,
-                    Context.Services
-                ),
-                context => context.Bot.ExecuteAsync(context)
-            );
+            ) => Do(Context.Author, channel, command);
         }
 
         [Command("lock")]
