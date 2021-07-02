@@ -9,7 +9,7 @@ namespace SbuBot
         public const string DESCRIPTOR_SEPARATOR = "::";
         public const string DEFAULT_PREFIX = "sbu";
 
-        public static readonly Version VERSION = new(0, 4, 19);
+        public static readonly Version VERSION = new(0, 4, 20);
 
         public static readonly string[] RESERVED_KEYWORDS =
         {

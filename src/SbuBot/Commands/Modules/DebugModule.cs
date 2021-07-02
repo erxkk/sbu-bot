@@ -74,34 +74,71 @@ namespace SbuBot.Commands.Modules
             return Reply($"Scheduled pong to be sent in `{timespan}`.");
         }
 
-        [Command("eval")]
+        [Group("eval")]
         [RequireBotOwner]
         [Description("Compiles and runs a C#-Script and returns the script result.")]
-        public async Task<DiscordCommandResult> EvalAsync(
-            [Description("The expression to evaluate.")]
-            string expression
-        )
+        [Remarks("Code may be given as plain code or as a code block with `cs` or `csharp` language.")]
+        public class EvalGroup : SbuModuleBase
         {
-            List<LocalEmbed> embeds = new(2);
-            CompilationResult compilationResult = Eval.CreateAndCompile(expression, Context);
-            embeds.Add(compilationResult.ToEmbed());
-
-            if (compilationResult is CompilationResult.Completed completed)
+            [Command]
+            public async Task<DiscordCommandResult> EvalMessageAsync(
+                [OverrideDefault("{@reply}")][Description("A message containing the code to evaluate.")]
+                IUserMessage? codeMessage = null
+            )
             {
-                ScriptResult result = await completed.RunAsync();
+                codeMessage ??= Context.Message.ReferencedMessage.HasValue
+                    ? Context.Message.ReferencedMessage.Value
+                    : null;
 
-                switch (result)
-                {
-                    case ScriptResult.Completed { ReturnValue: null }:
-                        break;
+                if (codeMessage is null)
+                    return Reply("No expression or message reference given.");
 
-                    default:
-                        embeds.Add(result.ToEmbed());
-                        break;
-                }
+                string code = Context.Message.ReferencedMessage.Value.Content;
+                int index = code.IndexOf("```", StringComparison.OrdinalIgnoreCase);
+
+                if (index != -1)
+                    code = code[index..];
+
+                return await EvalAsync(code);
             }
 
-            return Reply(embeds.ToArray());
+            [Command]
+            public async Task<DiscordCommandResult> EvalAsync([Description("The code to evaluate.")] string code)
+            {
+                code = cleanUp(code);
+
+                List<LocalEmbed> embeds = new(2);
+                CompilationResult compilationResult = Eval.CreateAndCompile(code, Context);
+                embeds.Add(compilationResult.ToEmbed());
+
+                if (compilationResult is CompilationResult.Completed completed)
+                {
+                    ScriptResult result = await completed.RunAsync();
+
+                    if (result is ScriptResult.Completed { ReturnValue: { } })
+                        embeds.Add(result.ToEmbed());
+                }
+
+                return Reply(embeds.ToArray());
+
+                static string cleanUp(string expression)
+                {
+                    if (!expression.StartsWith("```"))
+                        return expression;
+
+                    ReadOnlySpan<char> span = expression.AsSpan();
+
+                    span = span[3..^3];
+
+                    if (span.StartsWith("cs".AsSpan()))
+                        span = span[2..];
+
+                    if (span.StartsWith("harp".AsSpan()))
+                        span = span[4..];
+
+                    return span.ToString();
+                }
+            }
         }
 
         [Group("do")]
