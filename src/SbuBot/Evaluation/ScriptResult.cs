@@ -20,11 +20,10 @@ namespace SbuBot.Evaluation
                 => ReturnValue = returnValue;
 
             // TODO: write inspection methods for verbose info on return values
-            public override LocalEmbed ToEmbed()
-                => base.ToEmbed()
-                    .WithTitle("Result")
-                    .WithDescription(Markdown.CodeBlock(ReturnValue?.ToString() ?? "{null}"))
-                    .WithColor(Color.Green);
+            public override LocalEmbed ToEmbed() => base.ToEmbed()
+                .WithTitle("Result")
+                .WithDescription(Markdown.CodeBlock(ReturnValue?.ToString() ?? "{null}"))
+                .WithColor(Color.Green);
         }
 
         public sealed class Failed : ScriptResult

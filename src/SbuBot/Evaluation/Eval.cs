@@ -22,11 +22,14 @@ namespace SbuBot.Evaluation
             "Disqord.Bot",
             "Disqord.Gateway",
             "Disqord.Rest",
+            "SbuBot",
+            "SbuBot.Models",
         };
 
-        public static readonly Assembly[] REFERENCES = Assembly.GetCallingAssembly()
+        public static readonly Assembly[] REFERENCES = typeof(Eval).Assembly
             .GetReferencedAssemblies()
             .Select(Assembly.Load)
+            .Append(typeof(Eval).Assembly)
             .ToArray();
 
         public static readonly ScriptOptions SCRIPT_OPTIONS = ScriptOptions.Default
@@ -45,7 +48,7 @@ namespace SbuBot.Evaluation
             if (diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error))
                 return new CompilationResult.Failed(diagnostics, sw.Elapsed);
 
-            return new CompilationResult.Completed(script, new ScriptGlobals(context), diagnostics, sw.Elapsed);
+            return new CompilationResult.Completed(script, new(context), diagnostics, sw.Elapsed);
         }
     }
 }

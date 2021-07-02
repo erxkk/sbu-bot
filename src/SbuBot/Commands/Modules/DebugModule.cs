@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -81,9 +82,9 @@ namespace SbuBot.Commands.Modules
             string expression
         )
         {
-            LocalEmbed[] embeds = new LocalEmbed[2];
+            List<LocalEmbed> embeds = new(2);
             CompilationResult compilationResult = Eval.CreateAndCompile(expression, Context);
-            embeds[0] = compilationResult.ToEmbed();
+            embeds.Add(compilationResult.ToEmbed());
 
             if (compilationResult is CompilationResult.Completed completed)
             {
@@ -95,12 +96,12 @@ namespace SbuBot.Commands.Modules
                         break;
 
                     default:
-                        embeds[1] = result.ToEmbed();
+                        embeds.Add(result.ToEmbed());
                         break;
                 }
             }
 
-            return Reply(embeds);
+            return Reply(embeds.ToArray());
         }
 
         [Group("do")]
