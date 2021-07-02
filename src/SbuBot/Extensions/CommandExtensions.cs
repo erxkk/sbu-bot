@@ -85,7 +85,7 @@ namespace SbuBot
             if (builder is null)
                 throw new ArgumentNullException(nameof(builder));
 
-            builder.Append(@this.Name);
+            builder.Append(@this.IsOptional ? '[' : '<').Append(@this.Name);
 
             if (@this.IsMultiple)
             {
