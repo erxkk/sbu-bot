@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting.Internal;
 
 using SbuBot.Extensions;
 
@@ -17,8 +18,8 @@ namespace SbuBot.Models
 {
     public sealed class SbuDbContext : DbContext
     {
-        private readonly SbuBot? _sbuBot;
-        private readonly SbuBotConfiguration _configuration;
+        private readonly SbuBot _sbuBot;
+        private readonly SbuConfiguration _configuration;
 
 #nullable disable
         public DbSet<SbuGuild> Guilds { get; set; }
@@ -28,7 +29,7 @@ namespace SbuBot.Models
         public DbSet<SbuReminder> Reminders { get; set; }
 #nullable enable
 
-        public SbuDbContext(SbuBot? sbuBot, SbuBotConfiguration configuration)
+        public SbuDbContext(SbuBot sbuBot, SbuConfiguration configuration)
         {
             _sbuBot = sbuBot;
             _configuration = configuration;
@@ -52,7 +53,7 @@ namespace SbuBot.Models
             Func<IQueryable<SbuColorRole>, IQueryable<SbuColorRole>>? query = null
         ) => (query is { } ? query(ColorRoles) : ColorRoles).FirstOrDefaultAsync(
             m => m.Id == roleId && m.GuildId == guildId,
-            _sbuBot?.StoppingToken ?? default
+            _sbuBot.StoppingToken
         )!;
 
         public SbuMember AddMember(IMember member)
@@ -73,7 +74,7 @@ namespace SbuBot.Models
             Func<IQueryable<SbuMember>, IQueryable<SbuMember>>? query = null
         ) => (query is { } ? query(Members) : Members).FirstOrDefaultAsync(
             m => m.Id == memberId && m.GuildId == guildId,
-            _sbuBot?.StoppingToken ?? default
+            _sbuBot.StoppingToken
         )!;
 
         public SbuGuild AddGuild(IGuild guild)
@@ -93,7 +94,7 @@ namespace SbuBot.Models
             Func<IQueryable<SbuGuild>, IQueryable<SbuGuild>>? query = null
         ) => (query is { } ? query(Guilds) : Guilds).FirstOrDefaultAsync(
             m => m.Id == guildId,
-            _sbuBot?.StoppingToken ?? default
+            _sbuBot.StoppingToken
         )!;
 
         public SbuTag AddTag(Snowflake ownerId, Snowflake guildId, string name, string content)
@@ -109,7 +110,7 @@ namespace SbuBot.Models
             Func<IQueryable<SbuTag>, IQueryable<SbuTag>>? query = null
         ) => (query is { } ? query(Tags) : Tags).FirstOrDefaultAsync(
             t => t.Name == name && t.GuildId == guildId,
-            _sbuBot?.StoppingToken ?? default
+            _sbuBot.StoppingToken
         )!;
 
         public Task<SbuTag?> GetTagAsync(
@@ -117,11 +118,18 @@ namespace SbuBot.Models
             Func<IQueryable<SbuTag>, IQueryable<SbuTag>>? query = null
         ) => (query is { } ? query(Tags) : Tags).FirstOrDefaultAsync(
             t => t.Id == id,
-            _sbuBot?.StoppingToken ?? default
+            _sbuBot.StoppingToken
         )!;
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
-            => base.SaveChangesAsync(_sbuBot?.StoppingToken ?? cancellationToken);
+        {
+            // TODO: change db connection to dev db later
+            // Don't commit any changes for now
+            if (!_configuration.IsProduction)
+                return Task.FromResult(1);
+
+            return base.SaveChangesAsync(_sbuBot.StoppingToken);
+        }
 
 #region Configuration
 
@@ -162,7 +170,7 @@ namespace SbuBot.Models
                     .AddJsonFile("migrations.json")
                     .Build();
 
-                return new(null, new(configuration));
+                return new(null!, new(configuration, new HostingEnvironment()));
             }
         }
 

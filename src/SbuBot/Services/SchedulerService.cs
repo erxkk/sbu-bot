@@ -3,17 +3,17 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-using Disqord.Bot.Hosting;
-
 using Kkommon.Extensions.Arithmetic;
 
 using Microsoft.Extensions.Logging;
 
 namespace SbuBot.Services
 {
-    public sealed class SchedulerService : DiscordBotService
+    public sealed class SchedulerService : SbuBotServiceBase
     {
         private readonly Dictionary<Guid, Entry> _scheduleEntries = new();
+
+        public SchedulerService(SbuConfiguration configuration) : base(configuration) { }
 
         public override Task StopAsync(CancellationToken cancellationToken)
         {

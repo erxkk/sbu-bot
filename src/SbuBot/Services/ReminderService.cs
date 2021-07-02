@@ -5,7 +5,6 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Disqord;
-using Disqord.Bot.Hosting;
 using Disqord.Rest;
 
 using Microsoft.EntityFrameworkCore;
@@ -16,13 +15,14 @@ using SbuBot.Models;
 
 namespace SbuBot.Services
 {
-    public sealed class ReminderService : DiscordBotService
+    public sealed class ReminderService : SbuBotServiceBase
     {
         private readonly SchedulerService _schedulerService;
 
         private readonly Dictionary<Guid, SbuReminder> _currentReminders = new();
 
-        public ReminderService(SchedulerService schedulerService) => _schedulerService = schedulerService;
+        public ReminderService(SbuConfiguration configuration, SchedulerService schedulerService) : base(configuration)
+            => _schedulerService = schedulerService;
 
         public IReadOnlyDictionary<Guid, SbuReminder> GetCurrentReminders()
         {

@@ -16,19 +16,24 @@ using SbuBot.Models;
 
 namespace SbuBot.Services
 {
-    public sealed class ConsistencyService : DiscordBotService
+    public sealed class ConsistencyService : SbuBotServiceBase
     {
         private readonly HashSet<Snowflake> _handledAddedRoles = new();
         private readonly HashSet<Snowflake> _handledRemovedRoles = new();
 
         public override int Priority => int.MaxValue;
 
+        public ConsistencyService(SbuConfiguration configuration) : base(configuration) { }
+
         public void IgnoreAddedRole(Snowflake roleId) => _handledAddedRoles.Add(roleId);
         public void IgnoreRemovedRole(Snowflake roleId) => _handledRemovedRoles.Add(roleId);
 
-        // TODO: fix discrepancies, don't await chunking + only use one event to handle guild inserts
+        // TODO: fix discrepancies, don't await chunking? + only use one event to handle guild inserts
         protected override async ValueTask OnGuildAvailable(GuildAvailableEventArgs e)
         {
+            if (!Configuration.IsProduction)
+                return;
+
             using (IServiceScope scope = Bot.Services.CreateScope())
             {
                 SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
@@ -45,6 +50,9 @@ namespace SbuBot.Services
 
         protected override async ValueTask OnJoinedGuild(JoinedGuildEventArgs e)
         {
+            if (!Configuration.IsProduction)
+                return;
+
             using (IServiceScope scope = Bot.Services.CreateScope())
             {
                 SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
@@ -61,6 +69,9 @@ namespace SbuBot.Services
 
         protected override async ValueTask OnLeftGuild(LeftGuildEventArgs e)
         {
+            if (!Configuration.IsProduction)
+                return;
+
             using (IServiceScope scope = Bot.Services.CreateScope())
             {
                 SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
@@ -79,6 +90,9 @@ namespace SbuBot.Services
 
         protected override async ValueTask OnMemberJoined(MemberJoinedEventArgs e)
         {
+            if (!Configuration.IsProduction)
+                return;
+
             if (e.Member.IsBot)
                 return;
 
@@ -98,6 +112,9 @@ namespace SbuBot.Services
 
         protected override async ValueTask OnMemberUpdated(MemberUpdatedEventArgs e)
         {
+            if (!Configuration.IsProduction)
+                return;
+
             if (e.NewMember.IsBot)
                 return;
 
@@ -160,6 +177,9 @@ namespace SbuBot.Services
 
         protected override async ValueTask OnMemberLeft(MemberLeftEventArgs e)
         {
+            if (!Configuration.IsProduction)
+                return;
+
             if (e.User.IsBot)
                 return;
 
@@ -179,6 +199,9 @@ namespace SbuBot.Services
 
         protected override async ValueTask OnMessageReceived(BotMessageReceivedEventArgs e)
         {
+            if (!Configuration.IsProduction)
+                return;
+
             if (e.Member.IsBot)
                 return;
 
@@ -201,6 +224,9 @@ namespace SbuBot.Services
 
         protected override async ValueTask OnRoleDeleted(RoleDeletedEventArgs e)
         {
+            if (!Configuration.IsProduction)
+                return;
+
             if (e.Role.Position >= Bot.GetColorRoleSeparator().Position)
                 return;
 

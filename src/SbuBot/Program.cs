@@ -3,7 +3,6 @@ using System.IO;
 
 using Disqord;
 using Disqord.Bot.Hosting;
-using Disqord.Gateway;
 
 using EFCoreSecondLevelCacheInterceptor;
 
@@ -21,6 +20,7 @@ using SbuBot.Models;
 using SbuBot.Services;
 
 using Serilog;
+using Serilog.Events;
 
 try
 {
@@ -44,17 +44,18 @@ try
                 .ByTransforming<SbuReminder>(reminder => new { reminder.Id, Owner = reminder.OwnerId })
                 .WriteTo.File(
                     $"{ctx.Configuration["Log:Path"]}/log.txt",
-                    outputTemplate:
+                    ctx.HostingEnvironment.IsProduction() ? LogEventLevel.Debug : LogEventLevel.Verbose,
                     "[{Timestamp:HH:mm:ss:fff zzz} {Level:u3} : {SourceContext}] {Message:l}{NewLine}{Exception}",
-                    rollingInterval: RollingInterval.Day
+                    rollingInterval:
+                    RollingInterval.Day
                 )
                 .WriteTo.Console(
-                    outputTemplate:
+                    ctx.HostingEnvironment.IsProduction() ? LogEventLevel.Information : LogEventLevel.Verbose,
                     "[{Timestamp:HH:mm:ss} {Level:u3} : {SourceContext}] {Message:l}{NewLine}{Exception}"
                 )
         )
         .ConfigureServices(
-            (ctx, services) => services
+            (_, services) => services
                 .AddHttpClient()
                 .AddDbContext<SbuDbContext>()
                 .AddEFSecondLevelCache(
@@ -62,16 +63,18 @@ try
                         .CacheAllQueries(CacheExpirationMode.Sliding, TimeSpan.FromMinutes(5))
                         .DisableLogging()
                 )
-                .AddSingleton(new SbuBotConfiguration(ctx.Configuration))
+                .AddSingleton<SbuConfiguration>()
                 .AddSingleton(typeof(ILogger<>), typeof(ShortContextLogger<>))
-                .AddSingleton(new EnglishTimeParser(new(new("en-US"), ClockType.TwentyFourHour)))
+                .AddSingleton(_ => new EnglishTimeParser(new(new("en-US"), ClockType.TwentyFourHour)))
         )
         .ConfigureDiscordBot<SbuBot.SbuBot>(
             (ctx, bot) =>
             {
-                bot.Token = ctx.Configuration["Discord:Token"];
-                bot.Prefixes = new[] { SbuGlobals.DEFAULT_PREFIX };
-                bot.Intents = GatewayIntents.Recommended;
+                bot.Token = ctx.HostingEnvironment.IsProduction()
+                    ? ctx.Configuration["Discord:Token"]
+                    : ctx.Configuration["Discord:DevToken"];
+
+                bot.Prefixes = new[] { ctx.HostingEnvironment.IsProduction() ? SbuGlobals.DEFAULT_PREFIX : "dev" };
             }
         );
 

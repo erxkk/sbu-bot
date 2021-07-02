@@ -16,9 +16,9 @@ using Microsoft.Extensions.Logging;
 namespace SbuBot.Services
 {
     // TODO: overhaul to either be extension methods or find a reason for this to be a service
-    public sealed class EvalService : DiscordBotService
+    public sealed class EvalService : SbuBotServiceBase
     {
-        public EvalService(ILogger<EvalService> logger, DiscordBotBase bot) : base(logger, bot) { }
+        public EvalService(SbuConfiguration configuration) : base(configuration) { }
 
         public CompilationResult CreateAndCompile(string code, DiscordGuildCommandContext context)
         {

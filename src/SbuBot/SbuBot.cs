@@ -25,7 +25,7 @@ namespace SbuBot
         public bool IsLocked { get; set; }
 
         public SbuBot(
-            SbuBotConfiguration config,
+            SbuConfiguration config,
             IOptions<DiscordBotConfiguration> options,
             ILogger<SbuBot> logger,
             IServiceProvider services,
