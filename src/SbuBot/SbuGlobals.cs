@@ -9,18 +9,18 @@ namespace SbuBot
         public const string DESCRIPTOR_SEPARATOR = "::";
         public const string DEFAULT_PREFIX = "sbu";
 
-        public static readonly Version VERSION = new(0, 4, 20);
+        public static readonly Version VERSION = new(0, 4, 21);
 
         public static readonly string[] RESERVED_KEYWORDS =
         {
             // common command names
-            "help", "claim", "take", "create", "make", "new", "list", "delete", "remove", "rm", "transfer",
+            "help", "claim", "take", "create", "make", "new", "list", "delete", "remove", "rm", "transfer", "cancel",
 
             // identifiers
-            "all", "none", "mine", "reserved", "cancel",
+            "all", "none", "mine", "reserved",
 
             // control flow
-            "abort", "yes", "no",
+            "yes", "confirm", "no", "abort",
         };
 
         public static class Github

@@ -80,7 +80,7 @@ namespace SbuBot.Extensions
                     || received.Message.Content.Equals("abort", StringComparison.OrdinalIgnoreCase) =>
                     ConfirmationResult.Aborted,
                 { } received when received.Message.Content.Equals("yes", StringComparison.OrdinalIgnoreCase)
-                    || received.Message.Content.Equals("continue", StringComparison.OrdinalIgnoreCase) =>
+                    || received.Message.Content.Equals("confirm", StringComparison.OrdinalIgnoreCase) =>
                     ConfirmationResult.Confirmed,
                 _ => ConfirmationResult.Timeout,
             };
