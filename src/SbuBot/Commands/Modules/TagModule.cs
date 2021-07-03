@@ -50,7 +50,7 @@ namespace SbuBot.Commands.Modules
         public sealed class CreateGroup : SbuModuleBase
         {
             [Command]
-            [Usage("tag create tagggg | new tag who dis", "t make da dog | what da dog doin", "tag new h | h")]
+            [Usage("tag create tagggg :: new tag who dis", "t make da dog :: what da dog doin", "tag new h :: h")]
             public async Task<DiscordCommandResult> CreateAsync(
                 [Description("The tag descriptor.")] TagDescriptor tagDescriptor
             )
@@ -205,7 +205,7 @@ namespace SbuBot.Commands.Modules
         public sealed class EditGroup : SbuModuleBase
         {
             [Command]
-            [Usage("tag edit da dog | what da dog doin now", "t change h | h!!!")]
+            [Usage("tag edit da dog :: what da dog doin now", "t change h :: h!!!")]
             public async Task<DiscordCommandResult> EditAsync(
                 [Description("The tag descriptor.")] TagDescriptor tagDescriptor
             )

@@ -25,15 +25,16 @@ namespace SbuBot.Commands.Modules
     [Remarks("Reminder timestamps may be given as human readable timespans or strictly colon `:` separated integers.")]
     public sealed class ReminderModule : SbuModuleBase
     {
+        // TODO: command shortcut mapping
         [Group("create", "make", "new")]
         [Description("Creates a new reminder with the given timestamp and optional message.")]
         public sealed class CreateGroup : SbuModuleBase
         {
             [Command]
             [Usage(
-                "reminder create in 3 days | do the thing",
-                "reminder make in 3 days | do the thing",
-                "remindeme new in 3 days | do the thing"
+                "reminder create in 3 days :: do the thing",
+                "reminder make in 3 days :: do the thing",
+                "remindeme new in 3 days :: do the thing"
             )]
             public async Task<DiscordCommandResult> CreateAsync(
                 [Description("The reminder descriptor.")]
@@ -102,7 +103,7 @@ namespace SbuBot.Commands.Modules
 
         [Command("edit", "change")]
         [Description("Reschedules the given reminder.")]
-        [Usage("reminder edit in 2 days", "reminder change in 5 seconds")]
+        [Usage("reminder edit last in 2 days", "reminder change 936DA01F-9ABD-4d9d-80C7-02AF85C822A8 in 5 seconds")]
         public async Task<DiscordCommandResult> RescheduleAsync(
             [AuthorMustOwn][Description("The reminder to reschedule.")]
             SbuReminder reminder,
