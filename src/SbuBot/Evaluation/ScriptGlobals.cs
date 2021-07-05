@@ -11,6 +11,7 @@ using Kkommon.Extensions.Enumerable;
 
 using Qmmands;
 
+using SbuBot.Commands;
 using SbuBot.Commands.Views.Help;
 
 namespace SbuBot.Evaluation

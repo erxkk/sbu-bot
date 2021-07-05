@@ -6,7 +6,7 @@ using Disqord.Gateway;
 namespace SbuBot.Extensions
 {
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public static class DiscordBotExtensions
+    public static class BotExtensions
     {
         public static CachedRole GetColorRoleSeparator(this DiscordBotBase @this) => @this.GetRole(
             SbuGlobals.Guild.SELF,

@@ -72,7 +72,6 @@ namespace SbuBot.Commands.Modules
                 .WithDescription(GuideStatic.ESCAPING_EXAMPLES)
         );
 
-        // TODO: add paginator that avoids buttons on 1 page
         [Group("command", "commands")]
         [Description("A group of commands for displaying command information.")]
         public sealed class CommandGroup : SbuModuleBase
@@ -98,7 +97,7 @@ namespace SbuBot.Commands.Modules
                 );
             }
 
-            [Command("list")]
+            [Command("list", "ls")]
             [Description("Lists all commands.")]
             public async ValueTask<DiscordCommandResult> ListAsync()
             {

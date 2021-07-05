@@ -20,13 +20,12 @@ using SbuBot.Services;
 
 namespace SbuBot.Commands.Modules
 {
-    [Group("reminder", "remind", "remindme")]
+    [Group("reminder", "remind")]
     [Description("A collection of commands for creating modifying and removing reminders.")]
     [Remarks("Reminder timestamps may be given as human readable timespans or strictly colon `:` separated integers.")]
     public sealed class ReminderModule : SbuModuleBase
     {
-        // TODO: command shortcut mapping
-        [Group("create", "make", "new")]
+        [Group("create", "make", "mk", "me")]
         [Description("Creates a new reminder with the given timestamp and optional message.")]
         public sealed class CreateGroup : SbuModuleBase
         {
@@ -34,7 +33,7 @@ namespace SbuBot.Commands.Modules
             [Usage(
                 "reminder create in 3 days :: do the thing",
                 "reminder make in 3 days :: do the thing",
-                "remindeme new in 3 days :: do the thing"
+                "remind me new in 3 days :: do the thing"
             )]
             public async Task<DiscordCommandResult> CreateAsync(
                 [Description("The reminder descriptor.")]
@@ -61,7 +60,7 @@ namespace SbuBot.Commands.Modules
             }
 
             [Command]
-            [Usage("reminder create do the thing", "reminder make do the thing", "remindeme new do the thing")]
+            [Usage("reminder create do the thing", "reminder make do the thing", "remind me do the thing")]
             public async Task<DiscordCommandResult> CreateInteractiveAsync(
                 [Maximum(SbuReminder.MAX_MESSAGE_LENGTH)][Description("The optional message of the reminder.")]
                 string? message = null
@@ -101,6 +100,42 @@ namespace SbuBot.Commands.Modules
             }
         }
 
+        [Command("list", "ls")]
+        [Description("Lists the given reminder or all if non is given.")]
+        [Usage("reminder list", "reminder list last", "reminder list 936DA01F-9ABD-4d 9d-80C7-02AF85C822A8")]
+        public DiscordCommandResult List(
+            [AuthorMustOwn]
+            [Description("The reminder that should be listed.")]
+            [Remarks("Lists all reminders if none is specified.")]
+            SbuReminder? reminder = null
+        )
+        {
+            if (reminder is { })
+            {
+                return Reply(
+                    new LocalEmbed()
+                        .WithTitle("Reminder")
+                        .WithDescription(reminder.Message)
+                        .WithFooter("Due")
+                        .WithTimestamp(reminder.DueAt)
+                );
+            }
+
+            if (Context.Services.GetRequiredService<ReminderService>().GetCurrentReminders()
+                is not { Count: > 0 } reminders)
+                return Reply("You have no reminders.");
+
+            return FilledPages(
+                reminders.Values
+                    .Where(r => r.OwnerId == Context.Author.Id)
+                    .Select(
+                        r => $"[`{r.Id}`]({r.JumpUrl})\nDue {Markdown.Timestamp(r.DueAt)}\n"
+                            + $"{(r.Message is { } ? $"\"{r.Message}\"" : "No Message")}\n"
+                    ),
+                embedModifier: embed => embed.WithTitle("Your Reminders")
+            );
+        }
+
         [Command("edit", "change")]
         [Description("Reschedules the given reminder.")]
         [Usage("reminder edit last in 2 days", "reminder change 936DA01F-9ABD-4d9d-80C7-02AF85C822A8 in 5 seconds")]
@@ -125,7 +160,7 @@ namespace SbuBot.Commands.Modules
             );
         }
 
-        [Group("remove", "rm", "delete", "cancel")]
+        [Group("remove", "rm", "delete", "cancel", "stop")]
         [Description("A group of commands for removing reminders.")]
         public sealed class RemoveGroup : SbuModuleBase
         {
@@ -177,44 +212,6 @@ namespace SbuBot.Commands.Modules
                     .CancelAsync(r => r.Value.OwnerId == Context.Author.Id);
 
                 return Reply("Cancelled all reminders.");
-            }
-        }
-
-        [Group("list")]
-        [Description("A group of commands for listing reminders.")]
-        public sealed class ListGroup : SbuModuleBase
-        {
-            [Command]
-            [Description("Lists the given reminder.")]
-            [Usage("reminder list last", "reminder list 936DA01F-9ABD-4d9d-80C7-02AF85C822A8")]
-            public DiscordCommandResult List(
-                [AuthorMustOwn][Description("The reminder that should be listed.")]
-                SbuReminder reminder
-            ) => Reply(
-                new LocalEmbed()
-                    .WithTitle("Reminder")
-                    .WithDescription(reminder.Message)
-                    .WithFooter("Due")
-                    .WithTimestamp(reminder.DueAt)
-            );
-
-            [Command("all")]
-            [Description("Lists all of the command author's reminders.")]
-            public async Task<DiscordCommandResult> ListAllAsync()
-            {
-                if (Context.Services.GetRequiredService<ReminderService>().GetCurrentReminders()
-                    is not { Count: > 0 } reminders)
-                    return Reply("You have no reminders.");
-
-                return FilledPages(
-                    reminders.Values
-                        .Where(r => r.OwnerId == Context.Author.Id)
-                        .Select(
-                            r => $"[`{r.Id}`]({r.JumpUrl})\n{r.DueAt}\n"
-                                + $"{(r.Message is { } ? $"\"{r.Message}\"" : "No Message")}\n"
-                        ),
-                    embedModifier: embed => embed.WithTitle("Your Reminders")
-                );
             }
         }
     }

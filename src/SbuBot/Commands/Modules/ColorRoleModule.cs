@@ -79,7 +79,7 @@ namespace SbuBot.Commands.Modules
             }
         }
 
-        [Command("create", "make", "new")]
+        [Command("create", "make", "mk")]
         [RequireColorRole(false)]
         [Description("Creates a new color role.")]
         [Usage("role create #afafaf my gray role", "r make green dream role dream role")]
@@ -197,7 +197,7 @@ namespace SbuBot.Commands.Modules
             return Reply("Your color role has been removed.");
         }
 
-        [Command("transfer")]
+        [Command("transfer", "mv")]
         [RequireColorRole]
         [Description("Transfers the authors color role to the given member.")]
         [Usage("role transfer @user", "r transfer 352815253828141056", "r transfer Allah")]

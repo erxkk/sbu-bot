@@ -8,7 +8,7 @@ using Qmmands;
 
 using SbuBot.Commands.Attributes;
 
-namespace SbuBot
+namespace SbuBot.Commands
 {
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class CommandExtensions

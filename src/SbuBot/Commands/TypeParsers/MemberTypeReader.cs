@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 
 using Disqord;
@@ -19,6 +20,14 @@ namespace SbuBot.Commands.TypeParsers
         )
         {
             SbuMember? member = null;
+
+            if (value.Equals("me", StringComparison.OrdinalIgnoreCase))
+            {
+                return await context.GetMemberAsync(context.Author) is { } queriedMember
+                    ? TypeParser<SbuMember>.Success(queriedMember)
+                    : TypeParser<SbuMember>.Failure("Could not find reminder.");
+            }
+
             TypeParser<IMember> memberParser = context.Bot.Commands.GetTypeParser<IMember>();
 
             if (await memberParser.ParseAsync(parameter, value, context) is { IsSuccessful: true } memberParseResult)

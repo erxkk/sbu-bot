@@ -20,7 +20,7 @@ using SbuBot.Models;
 namespace SbuBot.Extensions
 {
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public static class DiscordCommandContextExtensions
+    public static class ContextExtensions
     {
         public static void RepostAsAlias(this DiscordGuildCommandContext @this, string alias) => @this.Bot.Queue.Post(
             new DiscordGuildCommandContext(
@@ -103,9 +103,7 @@ namespace SbuBot.Extensions
                 _ => new Result<string?, Unit>.Success(null),
             };
         }
-    }
-
-    public enum ConfirmationResult
+    }   public enum ConfirmationResult
     {
         Timeout,
         Aborted,

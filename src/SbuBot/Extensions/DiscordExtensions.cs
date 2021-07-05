@@ -5,8 +5,6 @@ using System.Linq;
 using Disqord;
 using Disqord.Gateway;
 
-using SbuBot.Exceptions;
-
 namespace SbuBot.Extensions
 {
     [EditorBrowsable(EditorBrowsableState.Never)]

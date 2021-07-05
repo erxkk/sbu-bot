@@ -90,7 +90,7 @@ namespace SbuBot.Commands.Modules
             return Reply($"Found {userCount} users, {roleCount} of which have a suitable color role.");
         }
 
-        [Command("transfer")]
+        [Command("transfer", "mv")]
         [RequireAdmin]
         [Description("Transfers a members database entries to another member.")]
         public async Task<DiscordCommandResult> TransferAllAsync(

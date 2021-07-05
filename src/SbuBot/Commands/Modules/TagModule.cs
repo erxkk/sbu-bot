@@ -45,7 +45,7 @@ namespace SbuBot.Commands.Modules
             return Reply("Tag claimed.");
         }
 
-        [Group("create", "make", "new")]
+        [Group("create", "make", "mk")]
         [Description("Creates a new tag with the given name and content.")]
         public sealed class CreateGroup : SbuModuleBase
         {
@@ -140,21 +140,18 @@ namespace SbuBot.Commands.Modules
             }
         }
 
-        [Group("list")]
+        [Group("list", "ls")]
         [Description("A group of commands for listing tags.")]
         public sealed class ListGroup : SbuModuleBase
         {
             [Command]
             [Description("Lists the tags of a given member, or of the command author if no member is specified.")]
-            [Usage("tag list", "t list @user", "tag list 352815253828141056", "tag list Allah")]
+            [Usage("tag list me", "t list @user", "tag list 352815253828141056", "tag list Allah")]
             public async Task<DiscordCommandResult> ListFromOwnerAsync(
-                [OverrideDefault("{@author}")]
                 [Description("The member who's tags should be listed.")]
-                [Remarks("Defaults to the command author.")]
-                SbuMember? owner = null
+                SbuMember owner
             )
             {
-                owner ??= await Context.GetAuthorAsync();
                 bool notAuthor = owner.Id != Context.Author.Id;
 
                 List<SbuTag> tags = await Context.GetSbuDbContext()
@@ -177,7 +174,7 @@ namespace SbuBot.Commands.Modules
                 );
             }
 
-            [Command("all")]
+            [Command]
             [Description("Lists all tags.")]
             public async Task<DiscordCommandResult> ListAllAsync()
             {
@@ -189,10 +186,9 @@ namespace SbuBot.Commands.Modules
                 return FilledPages(
                     tags.Select(
                         t => string.Format(
-                            "**Name:** {0}\n**Owner:** {1}\n**Content:** {2}",
+                            "**Name:** {0}\n**Owner:** {1}",
                             t.Name,
-                            t.OwnerId is { } ? Mention.User(t.Owner!.Id) : "None",
-                            t.Content
+                            t.OwnerId is { } ? Mention.User(t.Owner!.Id) : "None"
                         )
                     ),
                     embedModifier: embed => embed.WithTitle("Tags")
@@ -317,7 +313,7 @@ namespace SbuBot.Commands.Modules
             }
         }
 
-        [Group("transfer")]
+        [Group("transfer", "mv")]
         [Description("A group of commands for transferring tags.")]
         public sealed class TransferGroup : SbuModuleBase
         {

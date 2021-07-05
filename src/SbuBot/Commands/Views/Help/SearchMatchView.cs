@@ -46,7 +46,8 @@ namespace SbuBot.Commands.Views.Help
             if (e.Interaction.SelectedValues.Count != 1)
                 return default;
 
-            Menu.View = new CommandView(_commands[Convert.ToInt32(e.Interaction.SelectedValues[0])]);
+            Command command = _commands[Convert.ToInt32(e.Interaction.SelectedValues[0])];
+            Menu.View = command.Module.IsGroup() ? new GroupView(command.Module) : new CommandView(command);
 
             return default;
         }
