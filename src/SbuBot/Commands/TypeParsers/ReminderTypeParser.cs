@@ -21,6 +21,7 @@ namespace SbuBot.Commands.TypeParsers
             DiscordGuildCommandContext context
         )
         {
+            // TODO: fetch reminders form db if not production as they are not loaded on start up or load with meaningless dispatch
             ReminderService service = context.Services.GetRequiredService<ReminderService>();
 
             if (value.Equals("last", StringComparison.OrdinalIgnoreCase))

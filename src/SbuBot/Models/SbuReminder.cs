@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace SbuBot.Models
 {
-    public sealed class SbuReminder : SbuEntityBase, ISbuOwnedEntity, ISbuGuildEntity
+    public sealed class SbuReminder : ISbuOwnedEntity, ISbuGuildEntity
     {
         public const int MAX_MESSAGE_LENGTH = 1024;
         public Guid Id { get; }

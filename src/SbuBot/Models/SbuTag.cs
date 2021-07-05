@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace SbuBot.Models
 {
-    public sealed class SbuTag : SbuEntityBase, ISbuEntity, ISbuOwnedEntity, ISbuGuildEntity
+    public sealed class SbuTag : ISbuEntity, ISbuOwnedEntity, ISbuGuildEntity
     {
         public const int MIN_NAME_LENGTH = 3;
         public const int MAX_NAME_LENGTH = 128;

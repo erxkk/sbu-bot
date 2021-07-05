@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace SbuBot.Models
 {
-    public sealed class SbuColorRole : SbuEntityBase, ISbuDiscordEntity, ISbuOwnedEntity, ISbuGuildEntity
+    public sealed class SbuColorRole : ISbuDiscordEntity, ISbuOwnedEntity, ISbuGuildEntity
     {
         public const int MAX_NAME_LENGTH = 100;
         public Snowflake Id { get; }

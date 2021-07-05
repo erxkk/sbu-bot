@@ -23,7 +23,10 @@ namespace SbuBot.Evaluation
             "Disqord.Gateway",
             "Disqord.Rest",
             "SbuBot",
+            "SbuBot.Extensions",
+            "SbuBot.Inspection",
             "SbuBot.Models",
+            "SbuBot.Services",
         };
 
         public static readonly Assembly[] REFERENCES = typeof(Eval).Assembly

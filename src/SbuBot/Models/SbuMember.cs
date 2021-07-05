@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace SbuBot.Models
 {
-    public sealed class SbuMember : SbuEntityBase, ISbuDiscordEntity, ISbuGuildEntity
+    public sealed class SbuMember : ISbuDiscordEntity, ISbuGuildEntity
     {
         public Snowflake Id { get; }
         public Snowflake GuildId { get; }
