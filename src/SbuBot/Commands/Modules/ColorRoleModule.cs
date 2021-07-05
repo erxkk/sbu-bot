@@ -180,7 +180,7 @@ namespace SbuBot.Commands.Modules
             }
         }
 
-        [Command("remove", "rm", "delete")]
+        [Command("delete", "remove", "rm")]
         [RequireColorRole]
         [Description("Removes the authors color role.")]
         public async Task<DiscordCommandResult> RemoveAsync()
