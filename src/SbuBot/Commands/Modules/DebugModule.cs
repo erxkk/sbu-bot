@@ -109,7 +109,10 @@ namespace SbuBot.Commands.Modules
 
                 List<LocalEmbed> embeds = new(2);
                 CompilationResult compilationResult = Eval.CreateAndCompile(code, Context);
-                embeds.Add(compilationResult.ToEmbed());
+
+                if (compilationResult is CompilationResult.Completed { Diagnostics: { Count: > 0 } }
+                    or CompilationResult.Failed)
+                    embeds.Add(compilationResult.ToEmbed());
 
                 if (compilationResult is CompilationResult.Completed completed)
                 {

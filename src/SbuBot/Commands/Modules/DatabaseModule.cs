@@ -157,94 +157,58 @@ namespace SbuBot.Commands.Modules
             [Command]
             public DiscordCommandResult InspectMember(
                 [Description("The member to inspect.")]
-                SbuMember member,
-                [Description("Additional members to inspect.")]
-                params SbuMember[] additionalMembers
+                SbuMember member
             ) => Reply(
-                additionalMembers.Prepend(member)
-                    .Select(
-                        m => new LocalEmbed()
-                            .WithAuthor(Context.Guild.GetMember(m.Id))
-                            .WithDescription(Markdown.CodeBlock("yml", m))
-                            .AddInlineField("Self", Mention.User(m.Id))
-                            .AddInlineField(
-                                "ColorRole",
-                                m.ColorRole is { } ? Mention.Role(m.ColorRole.Id) : "None"
-                            )
-                    )
-                    .ToArray()
+                new LocalEmbed()
+                    .WithAuthor(Context.Guild.GetMember(member.Id))
+                    .WithDescription(Markdown.CodeBlock("yml", member.GetInspection()))
+                    .AddInlineField("Self", Mention.User(member.Id))
+                    .AddInlineField("ColorRole", member.ColorRole is { } ? Mention.Role(member.ColorRole.Id) : "None")
             );
 
             [Command]
-            public DiscordCommandResult InspectRole(
-                [Description("The role to inspect.")] SbuColorRole role,
-                [Description("Additional roles to inspect.")]
-                params SbuColorRole[] additionalRoles
-            ) => Reply(
-                additionalRoles.Prepend(role)
-                    .Select(
-                        r =>
-                        {
-                            LocalEmbed embed = new LocalEmbed()
-                                .WithTitle("Role")
-                                .WithDescription(Markdown.CodeBlock("yml", r))
-                                .AddInlineField("Self", Mention.Role(r.Id))
-                                .AddInlineField(
-                                    "Owner",
-                                    r.OwnerId is { } ? Mention.User(r.OwnerId.Value) : "None"
-                                );
+            public DiscordCommandResult InspectRole([Description("The role to inspect.")] SbuColorRole role)
+            {
+                LocalEmbed embed = new LocalEmbed()
+                    .WithTitle("Role")
+                    .WithDescription(Markdown.CodeBlock("yml", role.GetInspection()))
+                    .AddInlineField("Self", Mention.Role(role.Id))
+                    .AddInlineField("Owner", role.OwnerId is { } ? Mention.User(role.OwnerId.Value) : "None");
 
-                            if (r.OwnerId is { })
-                                embed.WithAuthor(Context.Guild.GetMember(r.OwnerId.Value));
+                if (role.OwnerId is { })
+                    embed.WithAuthor(Context.Guild.GetMember(role.OwnerId.Value));
 
-                            return embed;
-                        }
-                    )
-                    .ToArray()
-            );
+                return Reply(embed);
+            }
 
             [Command]
             public DiscordCommandResult InspectTag(
-                [Description("The tag to inspect.")] SbuTag tag,
-                [Description("Additional tags to inspect.")]
-                params SbuTag[] additionalTags
-            ) => Reply(
-                additionalTags.Prepend(tag)
-                    .Select(
-                        t =>
-                        {
-                            LocalEmbed embed = new LocalEmbed()
-                                .WithTitle("Tag")
-                                .WithDescription(Markdown.CodeBlock("yml", t))
-                                .AddInlineField("Owner", t.OwnerId is { } ? Mention.User(t.OwnerId.Value) : "None");
+                [Description("The tag to inspect.")] SbuTag tag
+            )
+            {
+                LocalEmbed embed = new LocalEmbed()
+                    .WithTitle("Tag")
+                    .WithDescription(Markdown.CodeBlock("yml", tag.GetInspection(3)))
+                    .AddInlineField("Owner", tag.OwnerId is { } ? Mention.User(tag.OwnerId.Value) : "None");
 
-                            if (t.OwnerId is { })
-                                embed.WithAuthor(Context.Guild.GetMember(t.OwnerId.Value));
+                if (tag.OwnerId is { })
+                    embed.WithAuthor(Context.Guild.GetMember(tag.OwnerId.Value));
 
-                            return embed;
-                        }
-                    )
-                    .ToArray()
-            );
+                return Reply(embed);
+            }
 
             [Command]
             public DiscordCommandResult InspectTag(
                 [Description("The reminder to inspect.")]
-                SbuReminder reminder,
-                [Description("Additional reminders to inspect.")]
-                params SbuReminder[] additionalReminders
+                SbuReminder reminder
             ) => Reply(
-                additionalReminders.Prepend(reminder)
-                    .Select(
-                        r => new LocalEmbed()
-                            .WithAuthor(Context.Guild.GetMember(r.OwnerId.Value))
-                            .WithTitle("Reminder")
-                            .WithDescription(Markdown.CodeBlock("yml", r))
-                            .AddInlineField("Owner", Mention.User(r.OwnerId.Value))
-                            .AddInlineField("CreatedAt", r.CreatedAt)
-                            .AddInlineField("DueAt", r.DueAt)
-                    )
-                    .ToArray()
+                new LocalEmbed()
+                    .WithAuthor(Context.Guild.GetMember(reminder.OwnerId.Value))
+                    .WithTitle("Reminder")
+                    .WithDescription(Markdown.CodeBlock("yml", reminder.GetInspection()))
+                    .AddInlineField("Owner", Mention.User(reminder.OwnerId.Value))
+                    .AddInlineField("CreatedAt", reminder.CreatedAt)
+                    .AddInlineField("DueAt", reminder.DueAt)
             );
         }
     }

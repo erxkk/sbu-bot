@@ -1,33 +1,20 @@
-using System;
 using System.ComponentModel;
-using System.Linq;
 using System.Text;
+
+using Disqord;
+
+using SbuBot.Inspection;
 
 namespace SbuBot.Extensions
 {
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class StandardLibraryExtensions
     {
-        public static string Indent(this string @this, int count)
+        public static string GetInspection(this object @object, int maxDepth = 1)
         {
-            if (@this is null)
-                throw new ArgumentNullException(nameof(@this));
-
-            if (count <= 0)
-                throw new ArgumentOutOfRangeException(nameof(count), count, "Count must not be less than 1.");
-
-            StringBuilder sb = new StringBuilder(@this.Length + count * (@this.Count(c => c == '\n') + 1)).Append("  ");
-            ReadOnlySpan<char> span = @this.AsSpan();
-
-            for (var i = 0; i < span.Length; i++)
-            {
-                sb.Append(span[i]);
-
-                if (span[i] == '\n')
-                    sb.Append("  ");
-            }
-
-            return sb.ToString();
+            StringBuilder builder = new(LocalEmbed.MAX_DESCRIPTION_LENGTH / 2, LocalEmbed.MAX_DESCRIPTION_LENGTH);
+            Inspect.AppendInspectionTo(builder, @object, maxDepth);
+            return builder.ToString();
         }
     }
 }
