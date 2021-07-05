@@ -32,7 +32,7 @@ namespace SbuBot.Evaluation
             => Reply(new LocalMessage().WithContent(content).WithEmbeds(embeds));
 
         public DiscordResponseCommandResult Reply(LocalMessage message) => Response(
-            message.WithReply(Context.Message.Id, Context.ChannelId, Context.GuildId, false)
+            message.WithReply(Context.Message.Id, Context.ChannelId, Context.GuildId)
         );
 
         public DiscordResponseCommandResult Response(string content)
@@ -55,9 +55,9 @@ namespace SbuBot.Evaluation
 
         public DiscordMenuCommandResult Pages(params Page[] pages) => Pages((IEnumerable<Page>) pages);
 
-        public DiscordMenuCommandResult Pages(IEnumerable<Page> pages) => Pages(new PageProvider(pages));
+        public DiscordMenuCommandResult Pages(IEnumerable<Page> pages) => Pages(new ListPageProvider(pages));
 
-        public DiscordMenuCommandResult Pages(IPageProvider pageProvider) => View(new PagedView(pageProvider));
+        public DiscordMenuCommandResult Pages(PageProvider pageProvider) => View(new PagedView(pageProvider));
 
         public DiscordMenuCommandResult View(ViewBase view)
             => new(Context, new InteractiveMenu(Context.Author.Id) { View = view });

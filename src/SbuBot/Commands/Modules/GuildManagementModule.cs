@@ -41,7 +41,7 @@ namespace SbuBot.Commands.Modules
                 + "replying to the message. In this case the message id/link must be used as message argument."
             )]
             [Usage(
-                "archive (with reply)",
+                "archive (with {@reply})",
                 "archive 836993360274784297",
                 "archive https://discord.com/channels/732210852849123418/732231139233759324/836993360274784297"
             )]
@@ -294,7 +294,7 @@ namespace SbuBot.Commands.Modules
                     try
                     {
                         Stream currentStream = await client.GetStreamAsync(
-                            Discord.Cdn.GetCustomEmojiUrl(customEmoji.Id, customEmoji.IsAnimated),
+                            Discord.Cdn.GetCustomEmojiUrl(customEmoji.Id, CdnAssetFormat.Automatic),
                             cts.Token
                         );
 

@@ -10,6 +10,7 @@ namespace SbuBot.Commands.Modules
     public sealed class FunModule : SbuModuleBase
     {
         [Command("sex")]
+        [Description("SEX!!!!!")]
         public DiscordCommandResult Sex() => Reply(
             new LocalMessage()
                 .WithContent("sex!!!")
@@ -17,10 +18,9 @@ namespace SbuBot.Commands.Modules
                     Enumerable.Repeat(
                         new LocalRowComponent().WithComponents(
                             Enumerable.Repeat(
-                                new LocalButtonComponent
+                                new LocalLinkButtonComponent
                                 {
                                     Label = "Sex!!!",
-                                    Style = ButtonComponentStyle.Link,
                                     Url = "https://knowyourmeme.com/memes/trollface",
                                 },
                                 5

@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,41 +15,30 @@ namespace SbuBot.Commands.Views.Help
 {
     public sealed class GroupView : HelpView
     {
-        private readonly Module _group;
+        private readonly Module _parent;
+        private readonly ImmutableDictionary<int, Command> _commands;
 
         public GroupView(Module group)
         {
-            _group = group;
+            _parent = group.Parent;
+            _commands = group.Commands.ToImmutableDictionary(k => k.GetHashCode(), v => v);
 
             StringBuilder description = new("**Signatures:**\n", 512);
+            SelectionViewComponent selection = new(_selectOverload);
 
-            foreach (Command command in group.Commands)
+            foreach ((int id, Command command) in _commands)
             {
                 command.AppendTo(description.Append(SbuGlobals.BULLET).Append(' ').Append('`'));
                 description.Append('`').Append('\n');
-
-                string paramSig = command.FormatParameters(false);
-
-                AddComponent(
-                    new ButtonViewComponent(
-                        _ =>
-                        {
-                            Menu.View = new CommandView(command);
-                            return default;
-                        }
-                    )
-                    {
-                        Label = string.IsNullOrWhiteSpace(paramSig) ? "--" : paramSig,
-                        Row = 1,
-                        Style = ButtonComponentStyle.Secondary,
-                    }
-                );
+                selection.Options.Add(new(command.FormatParameters(false).TrimOrSelf(25), id.ToString()));
             }
 
             description.Append('\n').AppendLine("**Description:**").AppendLine(group.Description).Append('\n');
 
             if (group.Remarks is { })
                 description.AppendLine("**Remarks:**").AppendLine(group.Remarks);
+
+            AddComponent(selection);
 
             TemplateMessage.Embeds[0]
                 .WithTitle(group.FullAliases[0])
@@ -60,12 +51,18 @@ namespace SbuBot.Commands.Views.Help
             }
         }
 
-        public override ValueTask GoToParent(ButtonEventArgs e)
+        private ValueTask _selectOverload(SelectionEventArgs e)
         {
-            if (_group.Parent is null)
+            if (e.Interaction.SelectedValues.Count != 1)
                 return default;
 
-            Menu.View = new ModuleView(_group.Parent);
+            Menu.View = new CommandView(_commands[Convert.ToInt32(e.Interaction.SelectedValues[0])]);
+            return default;
+        }
+
+        public override ValueTask GoToParent(ButtonEventArgs e)
+        {
+            Menu.View = new ModuleView(_parent);
             return default;
         }
     }

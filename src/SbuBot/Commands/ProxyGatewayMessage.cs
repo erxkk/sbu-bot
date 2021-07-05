@@ -36,7 +36,7 @@ namespace SbuBot.Commands
         public MessageApplication Application => _originalGatewayUserMessage.Application;
         public MessageReference Reference => _originalGatewayUserMessage.Reference;
         public MessageFlag Flags => _originalGatewayUserMessage.Flags;
-        public IReadOnlyList<Sticker> Stickers => _originalGatewayUserMessage.Stickers;
+        public IReadOnlyList<MessageSticker> Stickers => _originalGatewayUserMessage.Stickers;
         public Optional<IUserMessage> ReferencedMessage => _originalGatewayUserMessage.ReferencedMessage;
         public IReadOnlyList<IComponent> Components => _originalGatewayUserMessage.Components;
 

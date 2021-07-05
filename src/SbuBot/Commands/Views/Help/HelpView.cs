@@ -2,6 +2,7 @@ using System.Threading.Tasks;
 
 using Disqord;
 using Disqord.Extensions.Interactivity.Menus;
+using Disqord.Rest;
 
 namespace SbuBot.Commands.Views.Help
 {
@@ -12,8 +13,8 @@ namespace SbuBot.Commands.Views.Help
             AddComponent(
                 new ButtonViewComponent(GoToParent)
                 {
-                    Label = "⮝",
-                    Style = ButtonComponentStyle.Secondary,
+                    Emoji = LocalEmoji.Unicode("◀️"),
+                    Style = LocalButtonComponentStyle.Secondary,
                     Row = 4,
                     Position = 0,
                     IsDisabled = hasNoParent,
@@ -22,5 +23,14 @@ namespace SbuBot.Commands.Views.Help
         }
 
         public virtual ValueTask GoToParent(ButtonEventArgs e) => default;
+
+        [Button(Emoji = "⏹️", Row = 4, Position = 1, Style = LocalButtonComponentStyle.Secondary)]
+        public ValueTask StopMenu(ButtonEventArgs e)
+        {
+            if (Menu is InteractiveMenu menu)
+                menu.Message.DeleteAsync();
+
+            return Menu.StopAsync();
+        }
     }
 }
