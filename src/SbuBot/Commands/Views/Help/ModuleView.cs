@@ -30,14 +30,14 @@ namespace SbuBot.Commands.Views.Help
                 .Append('\n');
 
             if (module.Remarks is { })
-                description.AppendLine("**Remarks:**").AppendLine(module.Remarks).Append('\n');
+                description.AppendLine("**Remarks:**").AppendLine(module.Remarks);
 
             SelectionViewComponent moduleSelection = new(_selectModule);
             SelectionViewComponent commandSelection = new(_selectCommand);
 
             if (_submodules.Count != 0)
             {
-                description.AppendLine("**Submodules:**");
+                description.Append('\n').AppendLine("**Submodules:**");
 
                 foreach ((int id, Module submodule) in _submodules)
                 {
