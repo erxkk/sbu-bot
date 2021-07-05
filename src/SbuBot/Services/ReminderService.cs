@@ -38,6 +38,9 @@ namespace SbuBot.Services
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            if (!Configuration.IsProduction)
+                return;
+
             List<SbuReminder> notDispatchedReminders;
 
             using (IServiceScope scope = Bot.Services.CreateScope())
@@ -55,8 +58,6 @@ namespace SbuBot.Services
 
                 await ScheduleAsync(notDispatchedReminder, false);
             }
-
-            await base.ExecuteAsync(stoppingToken);
         }
 
         public async Task ScheduleAsync(
