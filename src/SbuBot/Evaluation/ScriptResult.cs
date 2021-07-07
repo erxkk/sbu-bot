@@ -23,7 +23,7 @@ namespace SbuBot.Evaluation
 
             public override LocalEmbed ToEmbed() => base.ToEmbed()
                 .WithTitle("Result")
-                .WithDescription(Markdown.CodeBlock(ReturnValue?.GetInspection() ?? "{null}"))
+                .WithDescription(Markdown.CodeBlock("yml", ReturnValue?.GetInspection() ?? "{null}"))
                 .WithColor(Color.Green);
         }
 
