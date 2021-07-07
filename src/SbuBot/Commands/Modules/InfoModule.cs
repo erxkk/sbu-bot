@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 
 using Disqord;
 using Disqord.Bot;
-using Disqord.Gateway;
 using Disqord.Rest;
 
 using Qmmands;
@@ -99,22 +98,12 @@ namespace SbuBot.Commands.Modules
 
             [Command("list", "ls")]
             [Description("Lists all commands.")]
-            public async ValueTask<DiscordCommandResult> ListAsync()
+            public DiscordCommandResult List()
             {
                 IReadOnlyList<Command> commands = Context.Bot.Commands.GetAllCommands();
-                List<Command> filteredCommands = new();
-
-                if (!Context.Author.GetGuildPermissions().Administrator)
-                {
-                    foreach (var cmd in commands)
-                    {
-                        if (await cmd.RunChecksAsync(Context) is { IsSuccessful: true })
-                            filteredCommands.Add(cmd);
-                    }
-                }
 
                 return FilledPages(
-                    filteredCommands.Select(
+                    commands.Select(
                         cmd => cmd.IsEnabled ? $"`{cmd.Format()}`" : $"~~`{cmd.Format()}`~~"
                     ),
                     embedModifier: embed => embed.WithTitle("Commands")

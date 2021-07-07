@@ -9,7 +9,7 @@ namespace SbuBot
         public const string DESCRIPTOR_SEPARATOR = "::";
         public const string DEFAULT_PREFIX = "sbu";
 
-        public static readonly Version VERSION = new(0, 5, 7);
+        public static readonly Version VERSION = new(0, 5, 8);
 
         public static readonly string[] RESERVED_KEYWORDS =
         {
@@ -41,6 +41,14 @@ namespace SbuBot
             public const ulong OWNER = 356017256481685506UL;
             public const string NAME = "Allah 2";
             public const ushort DISCRIMINATOR = 1552;
+        }
+
+        public static class TestBot
+        {
+            public const ulong SELF = 710538840728928327UL;
+            public const ulong OWNER = 356017256481685506UL;
+            public const string NAME = "retard";
+            public const ushort DISCRIMINATOR = 8283;
         }
 
         public static class Guild
