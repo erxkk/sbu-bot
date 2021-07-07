@@ -122,7 +122,7 @@ namespace SbuBot.Commands.Modules
             }
         }
 
-        [Command("help", "h", "how")]
+        [Command("help", "h", "?")]
         [Description(
             "Interactively displays information about for a given command/module, or displays all modules if non is "
             + "given."

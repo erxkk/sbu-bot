@@ -9,12 +9,12 @@ namespace SbuBot
         public const string DESCRIPTOR_SEPARATOR = "::";
         public const string DEFAULT_PREFIX = "sbu";
 
-        public static readonly Version VERSION = new(0, 5, 6);
+        public static readonly Version VERSION = new(0, 5, 7);
 
         public static readonly string[] RESERVED_KEYWORDS =
         {
             // common command names
-            "help",
+            "help", "h", "?",
             "claim", "take",
             "create", "make", "mk",
             "list", "ls",
