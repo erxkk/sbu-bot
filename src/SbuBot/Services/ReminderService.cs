@@ -24,8 +24,17 @@ namespace SbuBot.Services
         public ReminderService(SbuConfiguration configuration, SchedulerService schedulerService) : base(configuration)
             => _schedulerService = schedulerService;
 
-        public IReadOnlyDictionary<Guid, SbuReminder> GetCurrentReminders()
+        public async ValueTask<IReadOnlyDictionary<Guid, SbuReminder>> GetRemindersAsync()
         {
+            if (!Configuration.IsProduction)
+            {
+                using (IServiceScope scope = Bot.Services.CreateScope())
+                {
+                    SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
+                    return await context.Reminders.ToDictionaryAsync(k => k.Id, v => v, Bot.StoppingToken);
+                }
+            }
+
             Dictionary<Guid, SbuReminder> copy;
 
             lock (this)
@@ -204,7 +213,7 @@ namespace SbuBot.Services
 
             int count = 0;
 
-            IEnumerable<KeyValuePair<Guid, SbuReminder>> reminders = GetCurrentReminders().Where(query);
+            IEnumerable<KeyValuePair<Guid, SbuReminder>> reminders = (await GetRemindersAsync()).Where(query);
 
             lock (this)
             {

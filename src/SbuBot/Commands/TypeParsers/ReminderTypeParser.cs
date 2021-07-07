@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -21,12 +22,12 @@ namespace SbuBot.Commands.TypeParsers
             DiscordGuildCommandContext context
         )
         {
-            // TODO: fetch reminders form db if not production as they are not loaded on start up or load with meaningless dispatch
             ReminderService service = context.Services.GetRequiredService<ReminderService>();
+            IReadOnlyDictionary<Guid, SbuReminder> reminders = await service.GetRemindersAsync();
 
             if (value.Equals("last", StringComparison.OrdinalIgnoreCase))
             {
-                return service.GetCurrentReminders()
+                return reminders
                     .Values.FirstOrDefault(
                         r => r.OwnerId == context.Author.Id && r.GuildId == context.GuildId
                     ) is { } queriedReminder
@@ -39,7 +40,7 @@ namespace SbuBot.Commands.TypeParsers
             if (await guidParser.ParseAsync(parameter, value, context) is not { IsSuccessful: true } guidParseResult)
                 return Failure("Could not parse reminder.");
 
-            return service.GetCurrentReminders().TryGetValue(guidParseResult.Value, out var indexedReminder)
+            return reminders.TryGetValue(guidParseResult.Value, out var indexedReminder)
                 ? Success(indexedReminder)
                 : Failure("Could not find reminder.");
         }

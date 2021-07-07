@@ -115,7 +115,7 @@ namespace SbuBot.Commands.Modules
         [Command("list", "ls")]
         [Description("Lists the given reminder or all if non is given.")]
         [Usage("reminder list", "reminder list last", "reminder list 936DA01F-9ABD-4d 9d-80C7-02AF85C822A8")]
-        public DiscordCommandResult List(
+        public async Task<DiscordCommandResult> ListAsync(
             [AuthorMustOwn]
             [Description("The reminder that should be listed.")]
             [Remarks("Lists all reminders if none is specified.")]
@@ -133,7 +133,7 @@ namespace SbuBot.Commands.Modules
                 );
             }
 
-            if (Context.Services.GetRequiredService<ReminderService>().GetCurrentReminders()
+            if (await Context.Services.GetRequiredService<ReminderService>().GetRemindersAsync()
                 is not { Count: > 0 } reminders)
                 return Reply("You have no reminders.");
 

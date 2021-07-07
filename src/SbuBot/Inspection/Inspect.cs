@@ -114,7 +114,8 @@ namespace SbuBot.Inspection
 
             FieldInfo[] fields = type.GetFields(BindingFlags.Instance | BindingFlags.Public);
 
-            // TODO: find better way to filter out explicit interface impl?
+            // if a method is both final (sealed) and private it means it must be an explicit interface impl, because it
+            // cannot be declared as both abstract/virtual and private
             PropertyInfo[] properties = type.GetProperties(BindingFlags.Instance | BindingFlags.Public)
                 .Where(p => !p.GetAccessors().All(a => a.IsFinal && a.IsPrivate))
                 .ToArray();
