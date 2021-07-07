@@ -7,6 +7,7 @@ using Qmmands;
 
 namespace SbuBot.Commands.Modules
 {
+    [Description("A collection of fun commands.")]
     public sealed class FunModule : SbuModuleBase
     {
         [Command("sex")]

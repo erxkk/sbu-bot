@@ -26,8 +26,7 @@ namespace SbuBot.Commands.Views.Help
             _commands = module.Commands.ToImmutableDictionary(k => k.GetHashCode(), v => v);
 
             StringBuilder description = new StringBuilder("**Description:**\n", 512)
-                .AppendLine(module.Description)
-                .Append('\n');
+                .AppendLine(module.Description);
 
             if (module.Remarks is { })
                 description.AppendLine("**Remarks:**").AppendLine(module.Remarks);
