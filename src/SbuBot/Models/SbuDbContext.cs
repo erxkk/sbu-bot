@@ -122,14 +122,7 @@ namespace SbuBot.Models
         )!;
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
-        {
-            // TODO: change db connection to dev db later
-            // Don't commit any changes for now
-            if (!_configuration.IsProduction)
-                return Task.FromResult(1);
-
-            return base.SaveChangesAsync(_sbuBot.StoppingToken);
-        }
+            => base.SaveChangesAsync(_sbuBot.StoppingToken);
 
 #region Configuration
 

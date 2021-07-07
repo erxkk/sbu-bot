@@ -61,7 +61,6 @@ namespace SbuBot.Inspection
 
             if (!Reflect.IsValueComparable(type) && !traversedObjects.Add(obj))
             {
-                // TODO: create some ref for recursive objects?
                 builder.Append("{@}");
                 return;
             }

@@ -28,7 +28,6 @@ namespace SbuBot.Services
         public void IgnoreAddedRole(Snowflake roleId) => _handledAddedRoles.Add(roleId);
         public void IgnoreRemovedRole(Snowflake roleId) => _handledRemovedRoles.Add(roleId);
 
-        // TODO: fix discrepancies, don't await chunking? + only use one event to handle guild inserts
         protected override async ValueTask OnGuildAvailable(GuildAvailableEventArgs e)
         {
             if (!Configuration.IsProduction)
@@ -45,7 +44,9 @@ namespace SbuBot.Services
                 }
             }
 
-            await Bot.Chunker.ChunkAsync(e.Guild);
+            // only chunk sbu for now
+            if (e.GuildId == SbuGlobals.Guild.SELF)
+                await Bot.Chunker.ChunkAsync(e.Guild);
         }
 
         protected override async ValueTask OnJoinedGuild(JoinedGuildEventArgs e)
