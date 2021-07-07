@@ -24,8 +24,8 @@ namespace SbuBot.Commands.TypeParsers
             if (value.Equals("me", StringComparison.OrdinalIgnoreCase))
             {
                 return await context.GetMemberAsync(context.Author) is { } queriedMember
-                    ? TypeParser<SbuMember>.Success(queriedMember)
-                    : TypeParser<SbuMember>.Failure("Could not find reminder.");
+                    ? Success(queriedMember)
+                    : Failure("Could not find reminder.");
             }
 
             TypeParser<IMember> memberParser = context.Bot.Commands.GetTypeParser<IMember>();
@@ -39,8 +39,8 @@ namespace SbuBot.Commands.TypeParsers
             }
 
             return member is { }
-                ? TypeParser<SbuMember>.Success(member)
-                : TypeParser<SbuMember>.Failure("Could not find member.");
+                ? Success(member)
+                : Failure("Could not find member.");
         }
     }
 }

@@ -27,7 +27,7 @@ namespace SbuBot.Inspection
             int indentationDelta = 2,
             int itemCount = 5,
             int maxStringLength = 32
-        ) => Inspect.AppendObjectInspectionTo(
+        ) => AppendObjectInspectionTo(
             builder,
             obj,
             new HashSet<object>(),
@@ -66,7 +66,7 @@ namespace SbuBot.Inspection
                 return;
             }
 
-            if (Inspect.LITERALS.GetValueOrDefault(type) is { } literalizer)
+            if (LITERALS.GetValueOrDefault(type) is { } literalizer)
             {
                 builder.Append(literalizer(obj));
                 return;
@@ -92,7 +92,7 @@ namespace SbuBot.Inspection
 
             if (obj is IEnumerable enumerable)
             {
-                Inspect.AppendEnumerableInspectionTo(
+                AppendEnumerableInspectionTo(
                     builder,
                     enumerable,
                     traversedObjects,
@@ -162,7 +162,7 @@ namespace SbuBot.Inspection
                 for (int i = 0; i < indentation + indentationDelta; i++)
                     builder.Append(' ');
 
-                Inspect.AppendObjectInspectionTo(
+                AppendObjectInspectionTo(
                     builder.Append(memberName).Append(':').Append(' '),
                     member,
                     traversedObjects,
@@ -210,7 +210,7 @@ namespace SbuBot.Inspection
                         break;
                     }
 
-                    Inspect.AppendObjectInspectionTo(
+                    AppendObjectInspectionTo(
                         builder,
                         obj,
                         traversedObjects,
@@ -242,7 +242,7 @@ namespace SbuBot.Inspection
                 builder.Append(' ').Append('(').Append(collection.Count).Append(')');
         }
 
-        private static bool checkOneLineable(StringBuilder builder, int appendCount)
+        private static bool fitsOneLine(StringBuilder builder, int appendCount)
         {
             int index = 0;
 
@@ -254,7 +254,7 @@ namespace SbuBot.Inspection
                     break;
             }
 
-            return (builder.Length - index) + appendCount < Inspect.MAX_EMBED_CODE_BLOCK_WIDTH;
+            return (builder.Length - index) + appendCount < MAX_EMBED_CODE_BLOCK_WIDTH;
         }
     }
 }

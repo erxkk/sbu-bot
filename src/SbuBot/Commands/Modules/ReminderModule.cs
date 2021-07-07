@@ -68,14 +68,26 @@ namespace SbuBot.Commands.Modules
             {
                 TypeParser<DateTime> parser = Context.Bot.Commands.GetTypeParser<DateTime>();
 
-                string? timestamp = null;
+                string? timestamp;
                 await Reply("When do you want to be reminded?");
 
-                if (await Context.WaitFollowUpForAsync() is Result<string?, Unit>.Success followUp)
-                    timestamp = followUp.Value;
+                switch (await Context.WaitFollowUpForAsync())
+                {
+                    case Result<string, FollowUpError>.Success followUp:
+                        timestamp = followUp.Value;
+                        break;
 
-                if (timestamp is null)
-                    return Reply("Aborted: You did not provide a timestamp.");
+                    case Result<string, FollowUpError>.Error error:
+                        return Reply(
+                            error.Value == FollowUpError.Aborted
+                                ? "Aborted."
+                                : "Aborted: You did not provide a timestamp."
+                        );
+
+                    // unreachable
+                    default:
+                        throw new();
+                }
 
                 TypeParserResult<DateTime>? parseResult = await parser.ParseAsync(
                     null,

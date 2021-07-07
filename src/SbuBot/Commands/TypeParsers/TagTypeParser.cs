@@ -37,7 +37,7 @@ namespace SbuBot.Commands.TypeParsers
                 }
             }
 
-            return tag is { } ? TypeParser<SbuTag>.Success(tag) : TypeParser<SbuTag>.Failure("Could not find tag.");
+            return tag is { } ? Success(tag) : Failure("Could not find tag.");
         }
     }
 }

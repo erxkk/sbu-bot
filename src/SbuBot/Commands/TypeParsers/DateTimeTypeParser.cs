@@ -23,9 +23,9 @@ namespace SbuBot.Commands.TypeParsers
             EnglishTimeParser timeParser = context.Services.GetRequiredService<EnglishTimeParser>();
 
             if (timeParser.Parse(value) is ISuccessfulTimeParsingResult<DateTime> result)
-                return TypeParser<DateTime>.Success(result.Value);
+                return Success(result.Value);
 
-            return TypeParser<DateTime>.Failure("Could not parse timestamp.");
+            return Failure("Could not parse timestamp.");
         }
     }
 }

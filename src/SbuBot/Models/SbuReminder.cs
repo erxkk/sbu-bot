@@ -116,7 +116,7 @@ namespace SbuBot.Models
                 builder.Property(t => t.GuildId);
                 builder.Property(t => t.ChannelId);
                 builder.Property(t => t.MessageId);
-                builder.Property(t => t.Message).HasMaxLength(SbuReminder.MAX_MESSAGE_LENGTH);
+                builder.Property(t => t.Message).HasMaxLength(MAX_MESSAGE_LENGTH);
                 builder.Property(t => t.CreatedAt);
                 builder.Property(t => t.DueAt);
 

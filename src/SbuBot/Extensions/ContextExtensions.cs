@@ -86,7 +86,9 @@ namespace SbuBot.Extensions
             };
         }
 
-        public static async Task<Result<string?, Unit>> WaitFollowUpForAsync(this DiscordGuildCommandContext @this)
+        public static async Task<Result<string, FollowUpError>> WaitFollowUpForAsync(
+            this DiscordGuildCommandContext @this
+        )
         {
             MessageReceivedEventArgs? args;
 
@@ -97,16 +99,24 @@ namespace SbuBot.Extensions
 
             return args switch
             {
-                { } received when !received.Message.Content.Equals("abort", StringComparison.OrdinalIgnoreCase)
-                    => new Result<string?, Unit>.Error(new()),
-                { } received => new Result<string?, Unit>.Success(received.Message.Content),
-                _ => new Result<string?, Unit>.Success(null),
+                { } received => !received.Message.Content.Equals("abort", StringComparison.OrdinalIgnoreCase)
+                    ? new Result<string, FollowUpError>.Success(received.Message.Content)
+                    : new Result<string, FollowUpError>.Error(FollowUpError.Aborted),
+                _ => new Result<string, FollowUpError>.Error(FollowUpError.Timeout),
             };
         }
-    }   public enum ConfirmationResult
+    }
+
+    public enum ConfirmationResult
     {
         Timeout,
         Aborted,
         Confirmed,
+    }
+
+    public enum FollowUpError
+    {
+        Timeout,
+        Aborted,
     }
 }

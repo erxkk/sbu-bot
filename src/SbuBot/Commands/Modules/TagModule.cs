@@ -74,16 +74,26 @@ namespace SbuBot.Commands.Modules
             [Command]
             public async Task<DiscordCommandResult> CreateInteractiveAsync()
             {
-                string? name = null;
+                string? name;
                 await Reply("How should the tag be called? (spaces are allowed)");
 
-                if (await Context.WaitFollowUpForAsync() is Result<string?, Unit>.Success nameFollowUp)
-                    name = nameFollowUp.Value;
+                switch (await Context.WaitFollowUpForAsync())
+                {
+                    case Result<string, FollowUpError>.Success followUp:
+                        name = followUp.Value.Trim();
+                        break;
 
-                if (name is null)
-                    return Reply("Aborted: You did not provide a tag name.");
+                    case Result<string, FollowUpError>.Error error:
+                        return Reply(
+                            error.Value == FollowUpError.Aborted
+                                ? "Aborted."
+                                : "Aborted: You did not provide a tag name."
+                        );
 
-                name = name.Trim();
+                    // unreachable
+                    default:
+                        throw new();
+                }
 
                 switch (SbuTag.IsValidTagName(name))
                 {
@@ -110,20 +120,33 @@ namespace SbuBot.Commands.Modules
                 if (await Context.GetTagAsync(name) is { })
                     return Reply("Tag with same name already exists.");
 
-                string? content = null;
+                string? content;
                 await Reply("What do you want the tag content to be?");
 
-                if (await Context.WaitFollowUpForAsync() is Result<string?, Unit>.Success contentFollowUp)
-                    content = contentFollowUp.Value;
-
-                if (content is null)
-                    return Reply("Aborted: You did not provide tag content.");
-
-                if (content.Length > SbuTag.MAX_CONTENT_LENGTH)
+                switch (await Context.WaitFollowUpForAsync())
                 {
-                    return Reply(
-                        $"Aborted: The tag content must be at most {SbuTag.MAX_CONTENT_LENGTH} characters long."
-                    );
+                    case Result<string, FollowUpError>.Success followUp:
+                        content = followUp.Value.Trim();
+
+                        if (content.Length > SbuTag.MAX_CONTENT_LENGTH)
+                        {
+                            return Reply(
+                                $"Aborted: The tag content must be at most {SbuTag.MAX_CONTENT_LENGTH} characters long."
+                            );
+                        }
+
+                        break;
+
+                    case Result<string, FollowUpError>.Error error:
+                        return Reply(
+                            error.Value == FollowUpError.Aborted
+                                ? "Aborted."
+                                : "Aborted: You did not provide tag content."
+                        );
+
+                    // unreachable
+                    default:
+                        throw new();
                 }
 
                 Context.GetSbuDbContext()
@@ -228,14 +251,34 @@ namespace SbuBot.Commands.Modules
                 SbuTag tag
             )
             {
-                string? content = null;
+                string? content;
                 await Reply("What do you want the tag content to be?");
 
-                if (await Context.WaitFollowUpForAsync() is Result<string?, Unit>.Success contentFollowUp)
-                    content = contentFollowUp.Value;
+                switch (await Context.WaitFollowUpForAsync())
+                {
+                    case Result<string, FollowUpError>.Success followUp:
+                        content = followUp.Value.Trim();
 
-                if (content is null)
-                    return Reply("Aborted: You did not provide tag content.");
+                        if (content.Length > SbuTag.MAX_CONTENT_LENGTH)
+                        {
+                            return Reply(
+                                $"Aborted: The tag content must be at most {SbuTag.MAX_CONTENT_LENGTH} characters long."
+                            );
+                        }
+
+                        break;
+
+                    case Result<string, FollowUpError>.Error error:
+                        return Reply(
+                            error.Value == FollowUpError.Aborted
+                                ? "Aborted."
+                                : "Aborted: You did not provide tag content."
+                        );
+
+                    // unreachable
+                    default:
+                        throw new();
+                }
 
                 tag.Content = content.Trim();
                 Context.GetSbuDbContext().Tags.Update(tag);

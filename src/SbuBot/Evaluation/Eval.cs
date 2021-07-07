@@ -36,13 +36,13 @@ namespace SbuBot.Evaluation
             .ToArray();
 
         public static readonly ScriptOptions SCRIPT_OPTIONS = ScriptOptions.Default
-            .WithImports(Eval.IMPORTS)
+            .WithImports(IMPORTS)
             .WithAllowUnsafe(true)
-            .WithReferences(Eval.REFERENCES);
+            .WithReferences(REFERENCES);
 
         public static CompilationResult CreateAndCompile(string code, DiscordGuildCommandContext context)
         {
-            Script<object> script = CSharpScript.Create(code, Eval.SCRIPT_OPTIONS, typeof(ScriptGlobals));
+            Script<object> script = CSharpScript.Create(code, SCRIPT_OPTIONS, typeof(ScriptGlobals));
 
             var sw = Stopwatch.StartNew();
             ImmutableArray<Diagnostic> diagnostics = script.Compile();

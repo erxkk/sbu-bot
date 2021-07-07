@@ -105,7 +105,7 @@ namespace SbuBot.Services
                     await Bot.SendMessageAsync(
                         reminder.ChannelId,
                         new LocalMessage()
-                            .WithReply(reminder.MessageId, reminder.ChannelId, SbuGlobals.Guild.SELF, false)
+                            .WithReply(reminder.MessageId, reminder.ChannelId, SbuGlobals.Guild.SELF)
                             .WithEmbeds(
                                 new LocalEmbed()
                                     .WithTitle("Reminder")

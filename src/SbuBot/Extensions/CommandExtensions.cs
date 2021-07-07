@@ -16,9 +16,6 @@ namespace SbuBot.Commands
         public static bool IsGroup(this Module @this)
             => @this.Name.EndsWith("Group") && @this.Commands.All(c => c.Description is null);
 
-        public static IEnumerable<Command> Defaults(this Module @this)
-            => @this.Commands.Where(c => c.Aliases.Count == 0);
-
         public static void AppendTo(
             this Command @this,
             StringBuilder builder,

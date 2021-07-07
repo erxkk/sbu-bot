@@ -30,18 +30,18 @@ namespace SbuBot.Commands.TypeParsers
                     .Values.FirstOrDefault(
                         r => r.OwnerId == context.Author.Id && r.GuildId == context.GuildId
                     ) is { } queriedReminder
-                    ? TypeParser<SbuReminder>.Success(queriedReminder)
-                    : TypeParser<SbuReminder>.Failure("Could not find reminder.");
+                    ? Success(queriedReminder)
+                    : Failure("Could not find reminder.");
             }
 
             TypeParser<Guid> guidParser = context.Bot.Commands.GetTypeParser<Guid>();
 
             if (await guidParser.ParseAsync(parameter, value, context) is not { IsSuccessful: true } guidParseResult)
-                return TypeParser<SbuReminder>.Failure("Could not parse reminder.");
+                return Failure("Could not parse reminder.");
 
             return service.GetCurrentReminders().TryGetValue(guidParseResult.Value, out var indexedReminder)
-                ? TypeParser<SbuReminder>.Success(indexedReminder)
-                : TypeParser<SbuReminder>.Failure("Could not find reminder.");
+                ? Success(indexedReminder)
+                : Failure("Could not find reminder.");
         }
     }
 }

@@ -19,22 +19,22 @@ namespace SbuBot.Commands.TypeParsers
         )
         {
             if (values.Length != 2)
-                return TypeParser<TagDescriptor>.Failure($"Two parts were expected, found {values.Length}.");
+                return Failure($"Two parts were expected, found {values.Length}.");
 
             switch (SbuTag.IsValidTagName(values[0]))
             {
                 case SbuTag.ValidNameType.TooShort:
-                    return TypeParser<TagDescriptor>.Failure(
+                    return Failure(
                         $"The tag name must be at least {SbuTag.MIN_NAME_LENGTH} characters long."
                     );
 
                 case SbuTag.ValidNameType.TooLong:
-                    return TypeParser<TagDescriptor>.Failure(
+                    return Failure(
                         $"The tag name must be at most {SbuTag.MAX_NAME_LENGTH} characters long."
                     );
 
                 case SbuTag.ValidNameType.Reserved:
-                    return TypeParser<TagDescriptor>.Failure("The tag name cannot be a reserved keyword.");
+                    return Failure("The tag name cannot be a reserved keyword.");
 
                 case SbuTag.ValidNameType.Valid:
                     break;
@@ -45,12 +45,12 @@ namespace SbuBot.Commands.TypeParsers
 
             if (values[1].Length > SbuTag.MAX_CONTENT_LENGTH)
             {
-                return TypeParser<TagDescriptor>.Failure(
+                return Failure(
                     $"The tag content must be at most {SbuTag.MAX_CONTENT_LENGTH} characters long."
                 );
             }
 
-            return TypeParser<TagDescriptor>.Success(new() { Name = values[0], Content = values[1] });
+            return Success(new() { Name = values[0], Content = values[1] });
         }
     }
 }

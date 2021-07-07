@@ -42,13 +42,7 @@ namespace SbuBot.Inspection
             Type nullable = typeof(Nullable<>);
 
             if (type == nullable)
-            {
-                // does this check make sense?
-                if (nullable.GetProperty("HasValue")!.GetValue(obj) is false)
-                    return null;
-
                 obj = nullable.GetProperty("Value")!.GetValue(obj)!;
-            }
 
             return obj;
         }

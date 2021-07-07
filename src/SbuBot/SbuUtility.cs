@@ -43,7 +43,7 @@ namespace SbuBot
             {
                 Attachment attachment = message.Attachments[0];
 
-                if (SbuUtility.IMAGE_FILE_REGEX.IsMatch(attachment.FileName))
+                if (IMAGE_FILE_REGEX.IsMatch(attachment.FileName))
                     embed.WithImageUrl(attachment.Url);
                 else
                     embed.AddField("Unknown-Media-Type-Url", Markdown.Link("Click here!", attachment.Url), true);

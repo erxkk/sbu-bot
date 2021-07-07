@@ -28,8 +28,8 @@ namespace SbuBot.Commands.TypeParsers
                     }
 
                     return message is { }
-                        ? TypeParser<IMessage>.Success(message)
-                        : TypeParser<IMessage>.Failure("Could not find message.");
+                        ? Success(message)
+                        : Failure("Could not find message.");
                 }
 
                 if (SbuUtility.TryParseMessageLink(value, out var idPair))
@@ -40,12 +40,12 @@ namespace SbuBot.Commands.TypeParsers
                     }
 
                     return message is { }
-                        ? TypeParser<IMessage>.Success(message)
-                        : TypeParser<IMessage>.Failure("Could not find message.");
+                        ? Success(message)
+                        : Failure("Could not find message.");
                 }
             }
 
-            return TypeParser<IMessage>.Failure("Could not parse message.");
+            return Failure("Could not parse message.");
         }
     }
 }

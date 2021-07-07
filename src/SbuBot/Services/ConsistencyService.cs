@@ -144,11 +144,8 @@ namespace SbuBot.Services
             {
                 SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
 
-                if (await context.Guilds.FirstOrDefaultAsync(g => g.Id == e.NewMember.GuildId) is not { } guild)
-                {
-                    await base.OnMemberUpdated(e);
+                if (await context.Guilds.FirstOrDefaultAsync(g => g.Id == e.NewMember.GuildId) is null)
                     return;
-                }
 
                 if (await context.GetMemberAsync(e.NewMember) is not { } member)
                 {

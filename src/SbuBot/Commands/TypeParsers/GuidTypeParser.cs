@@ -14,7 +14,7 @@ namespace SbuBot.Commands
             string value,
             DiscordCommandContext context
         ) => Guid.TryParse(value, out Guid guid)
-            ? TypeParser<Guid>.Success(guid)
-            : TypeParser<Guid>.Failure("Could not parse id.");
+            ? Success(guid)
+            : Failure("Could not parse id.");
     }
 }

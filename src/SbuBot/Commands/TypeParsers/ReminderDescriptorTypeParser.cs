@@ -24,11 +24,11 @@ namespace SbuBot.Commands.TypeParsers
         )
         {
             if (values.Length != 2)
-                return TypeParser<ReminderDescriptor>.Failure($"Two parts were expected, found {values.Length}.");
+                return Failure($"Two parts were expected, found {values.Length}.");
 
             if (values[1].Length > SbuReminder.MAX_MESSAGE_LENGTH)
             {
-                return TypeParser<ReminderDescriptor>.Failure(
+                return Failure(
                     $"The given message must at most be {SbuReminder.MAX_MESSAGE_LENGTH} characters long."
                 );
             }
@@ -36,11 +36,11 @@ namespace SbuBot.Commands.TypeParsers
             EnglishTimeParser timeParser = context.Services.GetRequiredService<EnglishTimeParser>();
 
             if (timeParser.Parse(values[0]) is not ISuccessfulTimeParsingResult<DateTime> result)
-                return TypeParser<ReminderDescriptor>.Failure("Could not parse timestamp.");
+                return Failure("Could not parse timestamp.");
 
             return result.Value > DateTimeOffset.Now
-                ? TypeParser<ReminderDescriptor>.Success(new() { Timestamp = result.Value, Message = values[1] })
-                : TypeParser<ReminderDescriptor>.Failure("The given timestamp must be in the future.");
+                ? Success(new() { Timestamp = result.Value, Message = values[1] })
+                : Failure("The given timestamp must be in the future.");
         }
     }
 }

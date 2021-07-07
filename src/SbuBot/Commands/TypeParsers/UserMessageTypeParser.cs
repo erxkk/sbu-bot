@@ -28,8 +28,8 @@ namespace SbuBot.Commands.TypeParsers
                     }
 
                     return message is { }
-                        ? TypeParser<IUserMessage>.Success(message)
-                        : TypeParser<IUserMessage>.Failure("Could not find message.");
+                        ? Success(message)
+                        : Failure("Could not find message.");
                 }
 
                 if (SbuUtility.TryParseMessageLink(value, out (Snowflake ChannelId, Snowflake MessageId) idPair))
@@ -41,12 +41,12 @@ namespace SbuBot.Commands.TypeParsers
                     }
 
                     return message is { }
-                        ? TypeParser<IUserMessage>.Success(message)
-                        : TypeParser<IUserMessage>.Failure("Could not find message.");
+                        ? Success(message)
+                        : Failure("Could not find message.");
                 }
             }
 
-            return TypeParser<IUserMessage>.Failure("Could not parse message.");
+            return Failure("Could not parse message.");
         }
     }
 }

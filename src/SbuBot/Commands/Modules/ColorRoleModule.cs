@@ -95,15 +95,25 @@ namespace SbuBot.Commands.Modules
             {
                 await Reply("What do you want the role name to be?");
 
-                if (await Context.WaitFollowUpForAsync() is Result<string?, Unit>.Success followUp)
-                    name = followUp.Value;
+                switch (await Context.WaitFollowUpForAsync())
+                {
+                    case Result<string, FollowUpError>.Success followUp:
+                        name = followUp.Value;
 
-                if (name is null)
-                    await Reply("You didn't provide a role name so i just named it after yourself.");
-                else if (name.Length > 100)
-                    return Reply("The role name must be shorter than 100 characters.");
+                        if (name.Length > SbuColorRole.MAX_NAME_LENGTH)
+                            return Reply("The role name must be shorter than 100 characters.");
 
-                name ??= Context.Author.Nick ?? Context.Author.Name;
+                        break;
+
+                    case Result<string, FollowUpError>.Error error:
+                        if (error.Value == FollowUpError.Aborted)
+                            return Reply("Aborted");
+
+                        await Reply("You didn't provide a role name so i just named it after yourself.");
+
+                        name = Context.Author.Nick ?? Context.Author.Name;
+                        break;
+                }
             }
 
             IRole role = await Context.Guild.CreateRoleAsync(

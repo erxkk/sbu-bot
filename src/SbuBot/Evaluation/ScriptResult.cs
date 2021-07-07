@@ -2,6 +2,8 @@ using System;
 
 using Disqord;
 
+using SbuBot.Extensions;
+
 namespace SbuBot.Evaluation
 {
     public abstract class ScriptResult
@@ -19,10 +21,9 @@ namespace SbuBot.Evaluation
             public Completed(TimeSpan completionTime, object? returnValue) : base(completionTime)
                 => ReturnValue = returnValue;
 
-            // TODO: write inspection methods for verbose info on return values
             public override LocalEmbed ToEmbed() => base.ToEmbed()
                 .WithTitle("Result")
-                .WithDescription(Markdown.CodeBlock(ReturnValue?.ToString() ?? "{null}"))
+                .WithDescription(Markdown.CodeBlock(ReturnValue?.GetInspection() ?? "{null}"))
                 .WithColor(Color.Green);
         }
 

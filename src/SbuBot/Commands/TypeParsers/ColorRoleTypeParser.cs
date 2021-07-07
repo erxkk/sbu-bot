@@ -33,8 +33,8 @@ namespace SbuBot.Commands.TypeParsers
             }
 
             return role is { }
-                ? TypeParser<SbuColorRole>.Success(role)
-                : TypeParser<SbuColorRole>.Failure("Could not find role.");
+                ? Success(role)
+                : Failure("Could not find role.");
         }
     }
 }
