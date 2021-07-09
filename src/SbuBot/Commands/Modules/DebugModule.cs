@@ -108,7 +108,7 @@ namespace SbuBot.Commands.Modules
                 code = cleanUp(code);
 
                 List<LocalEmbed> embeds = new(2);
-                CompilationResult compilationResult = Eval.CreateAndCompile(code, Context);
+                CompilationResult compilationResult = Eval.Compile(code, Context);
 
                 if (compilationResult is CompilationResult.Completed { Diagnostics: { Count: > 0 } }
                     or CompilationResult.Failed)
@@ -117,9 +117,7 @@ namespace SbuBot.Commands.Modules
                 if (compilationResult is CompilationResult.Completed completed)
                 {
                     ScriptResult result = await completed.RunAsync();
-
-                    if (result is ScriptResult.Completed { ReturnValue: { } })
-                        embeds.Add(result.ToEmbed());
+                    embeds.Add(result.ToEmbed());
                 }
 
                 return Reply(embeds.ToArray());

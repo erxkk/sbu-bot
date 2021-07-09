@@ -40,7 +40,7 @@ namespace SbuBot.Evaluation
             .WithAllowUnsafe(true)
             .WithReferences(REFERENCES);
 
-        public static CompilationResult CreateAndCompile(string code, DiscordGuildCommandContext context)
+        public static CompilationResult Compile(string code, DiscordGuildCommandContext context)
         {
             Script<object> script = CSharpScript.Create(code, SCRIPT_OPTIONS, typeof(ScriptGlobals));
 

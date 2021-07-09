@@ -149,7 +149,7 @@ namespace SbuBot.Inspection
                     appendMember(fieldInfo.GetValue(obj), fieldInfo.Name);
 
                 foreach (PropertyInfo propertyInfo in properties)
-                    appendMember(propertyInfo.GetValue(obj), propertyInfo.Name);
+                    appendMember(propertyInfo.SafeGetValue(obj), propertyInfo.Name);
 
                 for (int i = 0; i < indentation; i++)
                     builder.Append(' ');

@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 
 namespace SbuBot.Inspection
 {
@@ -42,9 +43,26 @@ namespace SbuBot.Inspection
             Type nullable = typeof(Nullable<>);
 
             if (type == nullable)
-                obj = nullable.GetProperty("Value")!.GetValue(obj)!;
+                obj = nullable.GetProperty("Value")!.GetValue(obj);
 
             return obj;
+        }
+
+        public static object? SafeGetValue(this PropertyInfo @this, object obj)
+        {
+            object? value = null;
+            bool isUndefined = false;
+
+            try
+            {
+                value = @this.GetValue(obj);
+            }
+            catch
+            {
+                isUndefined = true;
+            }
+
+            return isUndefined ? "{undefExtract}" : value;
         }
     }
 }
