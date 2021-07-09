@@ -31,12 +31,13 @@ namespace SbuBot
 
             LocalMessage pinMessage = new LocalMessage().WithEmbeds(embed);
 
-            // TODO: try parsing link if nothing is found
             if (message.Embeds.Count != 0)
             {
-                if (message.Embeds[0].Image is { } image)
-                    embed.WithImageUrl(image.Url);
-                else if (message.Embeds[0].Video is { } video)
+                Embed userEmbed = message.Embeds[0];
+
+                if ((userEmbed.Url ?? userEmbed.Image?.Url) is { } url)
+                    embed.WithImageUrl(url);
+                else if (userEmbed.Video is { } video)
                     embed.AddField("Video-Url", Markdown.Link("Click here!", video.Url), true);
             }
             else if (message.Attachments.Count != 0)
@@ -46,7 +47,7 @@ namespace SbuBot
                 if (IMAGE_FILE_REGEX.IsMatch(attachment.FileName))
                     embed.WithImageUrl(attachment.Url);
                 else
-                    embed.AddField("Unknown-Media-Type-Url", Markdown.Link("Click here!", attachment.Url), true);
+                    embed.AddField("Unknown-Media-Url", Markdown.Link("Click here!", attachment.Url), true);
             }
 
             return new Result<LocalMessage, string>.Success(pinMessage);

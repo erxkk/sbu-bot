@@ -71,7 +71,7 @@ namespace SbuBot.Commands.Modules
                         if (unpinOriginal && message.IsPinned)
                             await message.UnpinAsync();
 
-                        return null!;
+                        return Reply("Done.");
 
                     case Result<LocalMessage, string>.Error error:
                         return Reply(error);
@@ -129,7 +129,7 @@ namespace SbuBot.Commands.Modules
                     }
                 }
 
-                return Reply("Finished.");
+                return Reply("Done.");
             }
         }
 
