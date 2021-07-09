@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel;
 using System.Linq;
+using System.Threading.Tasks;
 
 using Disqord;
 using Disqord.Gateway;
@@ -10,6 +11,23 @@ namespace SbuBot.Extensions
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class DiscordExtensions
     {
+        public static LocalMessage WithReply(
+            this LocalMessage @this,
+            IUserMessage message,
+            bool failOnInvalid = false
+        )
+        {
+            if (@this == null)
+                throw new ArgumentNullException(nameof(@this));
+
+            @this.Reference ??= new();
+            @this.Reference.MessageId = message.Id;
+            @this.Reference.ChannelId = message.ChannelId;
+            @this.Reference.GuildId = message.Reference.GuildId;
+            @this.Reference.FailOnInvalid = failOnInvalid;
+            return @this;
+        }
+
         public static int GetHierarchy(this IMember @this)
         {
             if (@this is null)

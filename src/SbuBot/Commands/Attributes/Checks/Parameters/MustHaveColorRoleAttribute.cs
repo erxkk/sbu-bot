@@ -41,8 +41,8 @@ namespace SbuBot.Commands.Attributes.Checks.Parameters
             }
 
             return member.GetColorRole() is { } == MustHaveColorRole
-                ? ParameterCheckAttribute.Success()
-                : ParameterCheckAttribute.Failure(
+                ? Success()
+                : Failure(
                     string.Format("The given member must {0}have a color role.", MustHaveColorRole ? "" : "not ")
                 );
         }

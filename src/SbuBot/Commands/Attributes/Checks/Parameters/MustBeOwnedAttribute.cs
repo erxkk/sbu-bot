@@ -21,8 +21,8 @@ namespace SbuBot.Commands.Attributes.Checks.Parameters
             var ownedEntity = (argument as ISbuOwnedEntity)!;
 
             return (ownedEntity.OwnerId is { }) == MustBeOwned
-                ? ParameterCheckAttribute.Success()
-                : ParameterCheckAttribute.Failure(
+                ? Success()
+                : Failure(
                     MustBeOwned
                         ? string.Format(
                             "The {0} must be owned, but is not.",

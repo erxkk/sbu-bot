@@ -8,6 +8,7 @@ using Disqord;
 using Disqord.Bot;
 using Disqord.Extensions.Interactivity;
 using Disqord.Gateway;
+using Disqord.Rest;
 
 using Kkommon;
 
@@ -65,6 +66,9 @@ namespace SbuBot.Extensions
                 .Where(t => t.GuildId == @this.GuildId)
                 .ToListAsync(@this.Bot.StoppingToken);
 
+        public static Task<int> SaveChangesAsync(this DiscordGuildCommandContext @this)
+            => @this.GetSbuDbContext().SaveChangesAsync();
+
         public static async Task<ConfirmationResult> WaitForConfirmationAsync(this DiscordGuildCommandContext @this)
         {
             MessageReceivedEventArgs? args;
@@ -87,9 +91,12 @@ namespace SbuBot.Extensions
         }
 
         public static async Task<Result<string, FollowUpError>> WaitFollowUpForAsync(
-            this DiscordGuildCommandContext @this
+            this DiscordGuildCommandContext @this,
+            string prompt
         )
         {
+            await @this.Channel.SendMessageAsync(new LocalMessage().WithContent(prompt).WithReply(@this.Message));
+
             MessageReceivedEventArgs? args;
 
             await using (_ = @this.BeginYield())

@@ -20,8 +20,8 @@ namespace SbuBot.Commands.Attributes.Checks.Parameters
             => ((argument as ISbuOwnedEntity)!.OwnerId
                     == (await context.GetSbuDbContext().GetMemberAsync(context.Author))!.Id)
                 == AuthorMustOwn
-                    ? ParameterCheckAttribute.Success()
-                    : ParameterCheckAttribute.Failure(
+                    ? Success()
+                    : Failure(
                         string.Format(
                             "You must {0}to be the owner of the given {1}.",
                             AuthorMustOwn ? "" : "not ",

@@ -30,7 +30,8 @@ namespace SbuBot.Commands.Views.Help
             if (Menu is InteractiveMenu menu)
                 menu.Message.DeleteAsync();
 
-            return Menu.StopAsync();
+            Menu.Stop();
+            return default;
         }
     }
 }

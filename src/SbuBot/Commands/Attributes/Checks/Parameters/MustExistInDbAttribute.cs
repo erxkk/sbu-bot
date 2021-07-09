@@ -21,15 +21,15 @@ namespace SbuBot.Commands.Attributes.Checks.Parameters
             {
                 IMember member => (await context.GetSbuDbContext().GetMemberAsync(member) is { })
                     == MustExistInDb
-                        ? ParameterCheckAttribute.Success()
-                        : ParameterCheckAttribute.Failure(
+                        ? Success()
+                        : Failure(
                             $"The given member must {(MustExistInDb ? "" : "not ")}be in the database for "
                             + "this command."
                         ),
                 IRole role => (await context.GetSbuDbContext().GetColorRoleAsync(role) is { })
                     == MustExistInDb
-                        ? ParameterCheckAttribute.Success()
-                        : ParameterCheckAttribute.Failure(
+                        ? Success()
+                        : Failure(
                             $"The given role must {(MustExistInDb ? "" : "not ")}be in the database for "
                             + "this command."
                         ),

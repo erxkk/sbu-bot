@@ -17,8 +17,8 @@ namespace SbuBot.Commands.Attributes.Checks
                 throw new NotCachedException("Could not find user roles in cache.");
 
             return !roles.ContainsKey(SbuGlobals.Role.Perm.PIN)
-                ? CheckAttribute.Failure("You require the administrator role to use this command.")
-                : CheckAttribute.Success();
+                ? Failure("You require the administrator role to use this command.")
+                : Success();
         }
     }
 }

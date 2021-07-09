@@ -21,6 +21,7 @@ namespace SbuBot.Evaluation
             public Completed(TimeSpan completionTime, object? returnValue) : base(completionTime)
                 => ReturnValue = returnValue;
 
+            // TODO: make inspection configurable
             public override LocalEmbed ToEmbed() => base.ToEmbed()
                 .WithTitle("Result")
                 .WithDescription(Markdown.CodeBlock("yml", ReturnValue?.GetInspection(2) ?? "{null}"))

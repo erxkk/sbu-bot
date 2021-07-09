@@ -18,14 +18,14 @@ namespace SbuBot.Commands.Attributes.Checks.Parameters
             return argument switch
             {
                 TimeSpan timeSpan => now + timeSpan <= now
-                    ? ParameterCheckAttribute.Failure(MustBeFutureAttribute.FAILURE_REASON)
-                    : ParameterCheckAttribute.Success(),
+                    ? Failure(MustBeFutureAttribute.FAILURE_REASON)
+                    : Success(),
                 DateTime dateTime => dateTime <= now
-                    ? ParameterCheckAttribute.Failure(MustBeFutureAttribute.FAILURE_REASON)
-                    : ParameterCheckAttribute.Success(),
+                    ? Failure(MustBeFutureAttribute.FAILURE_REASON)
+                    : Success(),
                 DateTimeOffset dateTimeOffset => dateTimeOffset <= now
-                    ? ParameterCheckAttribute.Failure(MustBeFutureAttribute.FAILURE_REASON)
-                    : ParameterCheckAttribute.Success(),
+                    ? Failure(MustBeFutureAttribute.FAILURE_REASON)
+                    : Success(),
                 _ => throw new ArgumentException(null, nameof(argument)),
             };
         }

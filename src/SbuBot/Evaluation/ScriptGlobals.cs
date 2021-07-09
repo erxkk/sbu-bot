@@ -61,7 +61,7 @@ namespace SbuBot.Evaluation
         public DiscordMenuCommandResult Pages(PageProvider pageProvider) => View(new PagedView(pageProvider));
 
         public DiscordMenuCommandResult View(ViewBase view)
-            => new(Context, new InteractiveMenu(Context.Author.Id) { View = view });
+            => new(Context, new InteractiveMenu(Context.Author.Id, view));
 
         public DiscordMenuCommandResult Menu(MenuBase menu) => new(Context, menu);
 

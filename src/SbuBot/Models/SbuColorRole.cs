@@ -55,9 +55,9 @@ namespace SbuBot.Models
                     .OnDelete(DeleteBehavior.SetNull);
 
                 builder.HasOne(cr => cr.Guild)
-                    .WithMany(m => m.ColorRoles)
+                    .WithMany(g => g.ColorRoles)
                     .HasForeignKey(cr => cr.GuildId)
-                    .HasPrincipalKey(m => m.Id)
+                    .HasPrincipalKey(g => g.Id)
                     .OnDelete(DeleteBehavior.Cascade);
             }
         }

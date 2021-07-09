@@ -12,7 +12,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Disqord.Bot" Version="1.0.0-07052021-46" />
+      <PackageReference Include="Disqord.Bot" Version="1.0.0-07082021-50" />
       <PackageReference Include="EFCoreSecondLevelCacheInterceptor" Version="3.1.0" />
       <PackageReference Include="HumanTimeParser.English" Version="2.0.1-dev-835860444" />
       <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="3.10.0-3.final" />
@@ -37,6 +37,18 @@
       <None Update="config.yaml">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Update="Commands\Modules\GuildManagementModule.Archive.cs">
+        <DependentUpon>GuildManagementModule.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Commands\Modules\GuildManagementModule.Emotes.cs">
+        <DependentUpon>GuildManagementModule.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Commands\Modules\GuildManagementModule.Request.cs">
+        <DependentUpon>GuildManagementModule.cs</DependentUpon>
+      </Compile>
     </ItemGroup>
 
 </Project>

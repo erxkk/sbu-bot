@@ -12,8 +12,8 @@ namespace SbuBot.Commands.Attributes.Checks.Parameters
     {
         public override ValueTask<CheckResult> CheckAsync(object argument, DiscordGuildCommandContext context)
             => (argument as IRole)!.Color is { }
-                ? ParameterCheckAttribute.Success()
-                : ParameterCheckAttribute.Failure("The given role must be a color role.");
+                ? Success()
+                : Failure("The given role must be a color role.");
 
         public override bool CheckType(Type type) => type.IsAssignableTo(typeof(IRole));
     }

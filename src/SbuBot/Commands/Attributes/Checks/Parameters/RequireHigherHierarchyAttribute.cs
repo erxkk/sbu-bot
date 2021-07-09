@@ -29,8 +29,8 @@ namespace SbuBot.Commands.Attributes.Checks.Parameters
             };
 
             return context.Author.GetHierarchy() > targetHierarchy
-                ? ParameterCheckAttribute.Success()
-                : ParameterCheckAttribute.Failure(
+                ? Success()
+                : Failure(
                     $"The hierarchy of the {type} must be lower than yours."
                 );
         }

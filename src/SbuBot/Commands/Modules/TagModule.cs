@@ -40,7 +40,7 @@ namespace SbuBot.Commands.Modules
         {
             tag.OwnerId = Context.Author.Id;
             Context.GetSbuDbContext().Tags.Update(tag);
-            await Context.GetSbuDbContext().SaveChangesAsync();
+            await Context.SaveChangesAsync();
 
             return Reply("Tag claimed.");
         }
@@ -66,7 +66,7 @@ namespace SbuBot.Commands.Modules
                         tagDescriptor.Content
                     );
 
-                await Context.GetSbuDbContext().SaveChangesAsync();
+                await Context.SaveChangesAsync();
 
                 return Reply("Tag created.");
             }
@@ -75,9 +75,8 @@ namespace SbuBot.Commands.Modules
             public async Task<DiscordCommandResult> CreateInteractiveAsync()
             {
                 string? name;
-                await Reply("How should the tag be called? (spaces are allowed)");
 
-                switch (await Context.WaitFollowUpForAsync())
+                switch (await Context.WaitFollowUpForAsync("How should the tag be called? (spaces are allowed)."))
                 {
                     case Result<string, FollowUpError>.Success followUp:
                         name = followUp.Value.Trim();
@@ -121,9 +120,8 @@ namespace SbuBot.Commands.Modules
                     return Reply("Tag with same name already exists.");
 
                 string? content;
-                await Reply("What do you want the tag content to be?");
 
-                switch (await Context.WaitFollowUpForAsync())
+                switch (await Context.WaitFollowUpForAsync("What do you want the tag content to be?"))
                 {
                     case Result<string, FollowUpError>.Success followUp:
                         content = followUp.Value.Trim();
@@ -157,7 +155,7 @@ namespace SbuBot.Commands.Modules
                         content
                     );
 
-                await Context.GetSbuDbContext().SaveChangesAsync();
+                await Context.SaveChangesAsync();
 
                 return Reply("Tag created.");
             }
@@ -239,7 +237,7 @@ namespace SbuBot.Commands.Modules
 
                 tag.Content = tagDescriptor.Content;
                 Context.GetSbuDbContext().Tags.Update(tag);
-                await Context.GetSbuDbContext().SaveChangesAsync();
+                await Context.SaveChangesAsync();
 
                 return Reply("The tag has been updated.");
             }
@@ -252,9 +250,8 @@ namespace SbuBot.Commands.Modules
             )
             {
                 string? content;
-                await Reply("What do you want the tag content to be?");
 
-                switch (await Context.WaitFollowUpForAsync())
+                switch (await Context.WaitFollowUpForAsync("What do you want the tag content to be?"))
                 {
                     case Result<string, FollowUpError>.Success followUp:
                         content = followUp.Value.Trim();
@@ -282,7 +279,7 @@ namespace SbuBot.Commands.Modules
 
                 tag.Content = content.Trim();
                 Context.GetSbuDbContext().Tags.Update(tag);
-                await Context.GetSbuDbContext().SaveChangesAsync();
+                await Context.SaveChangesAsync();
 
                 return Reply("The tag has been updated.");
             }
@@ -317,7 +314,7 @@ namespace SbuBot.Commands.Modules
                 }
 
                 Context.GetSbuDbContext().Tags.Remove(tag);
-                await Context.GetSbuDbContext().SaveChangesAsync();
+                await Context.SaveChangesAsync();
 
                 return Reply("Tag removed.");
             }
@@ -350,7 +347,7 @@ namespace SbuBot.Commands.Modules
                     .ToListAsync(Context.Bot.StoppingToken);
 
                 Context.GetSbuDbContext().Tags.RemoveRange(tags);
-                await Context.GetSbuDbContext().SaveChangesAsync();
+                await Context.SaveChangesAsync();
 
                 return Reply("All tags removed.");
             }
@@ -372,7 +369,7 @@ namespace SbuBot.Commands.Modules
             {
                 tag.OwnerId = receiver.Id;
                 Context.GetSbuDbContext().Tags.Update(tag);
-                await Context.GetSbuDbContext().SaveChangesAsync();
+                await Context.SaveChangesAsync();
 
                 return Reply($"{Mention.User(receiver.Id)} now owns `{tag.Name}`.");
             }
@@ -416,7 +413,7 @@ namespace SbuBot.Commands.Modules
                     dbTag.OwnerId = receiver.Id;
 
                 Context.GetSbuDbContext().Tags.UpdateRange(tags);
-                await Context.GetSbuDbContext().SaveChangesAsync();
+                await Context.SaveChangesAsync();
 
                 return Reply($"{Mention.User(receiver.Id)} now owns all of your tags.");
             }

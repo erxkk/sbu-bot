@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 using Destructurama.Attributed;
@@ -12,6 +13,7 @@ namespace SbuBot.Models
     public sealed class SbuGuild : ISbuDiscordEntity
     {
         public Snowflake Id { get; }
+        public SbuGuildConfig Config { get; set; }
 
         // nav properties
         [NotLogged]
@@ -21,15 +23,26 @@ namespace SbuBot.Models
         public List<SbuColorRole> ColorRoles { get; } = new();
 
         [NotLogged]
-        public List<SbuReminder> Reminders { get; } = new();
-
-        [NotLogged]
         public List<SbuTag> Tags { get; } = new();
 
-        public SbuGuild(Snowflake id) => Id = id;
-        public SbuGuild(IGuild guild) => Id = guild.Id;
+        [NotLogged]
+        public List<SbuReminder> Reminders { get; } = new();
+
+        public SbuGuild(Snowflake id)
+        {
+            Id = id;
+            Config = SbuGuildConfig.Fun | SbuGuildConfig.Chat;
+        }
+
+        public SbuGuild(IGuild guild) : this(guild.Id) { }
 
 #region EFCore
+
+        public SbuGuild(Snowflake id, SbuGuildConfig config)
+        {
+            Id = id;
+            Config = config;
+        }
 
 #nullable disable
 
@@ -38,6 +51,8 @@ namespace SbuBot.Models
             public void Configure(EntityTypeBuilder<SbuGuild> builder)
             {
                 builder.HasKey(g => g.Id);
+
+                builder.Property(g => g.Config);
 
                 builder.HasMany(g => g.Members)
                     .WithOne(m => m.Guild)
@@ -66,5 +81,12 @@ namespace SbuBot.Models
         }
 
 #endregion
+    }
+
+    [Flags]
+    public enum SbuGuildConfig : byte
+    {
+        Fun,
+        Chat,
     }
 }

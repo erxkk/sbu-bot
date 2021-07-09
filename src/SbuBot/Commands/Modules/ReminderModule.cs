@@ -69,9 +69,8 @@ namespace SbuBot.Commands.Modules
                 TypeParser<DateTime> parser = Context.Bot.Commands.GetTypeParser<DateTime>();
 
                 string? timestamp;
-                await Reply("When do you want to be reminded?");
 
-                switch (await Context.WaitFollowUpForAsync())
+                switch (await Context.WaitFollowUpForAsync("When do you want to be reminded?"))
                 {
                     case Result<string, FollowUpError>.Success followUp:
                         timestamp = followUp.Value;

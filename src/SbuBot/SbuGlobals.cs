@@ -9,7 +9,7 @@ namespace SbuBot
         public const string DESCRIPTOR_SEPARATOR = "::";
         public const string DEFAULT_PREFIX = "sbu";
 
-        public static readonly Version VERSION = new(0, 5, 15);
+        public static readonly Version VERSION = new(0, 6, 0);
 
         public static readonly string[] RESERVED_KEYWORDS =
         {
@@ -43,10 +43,10 @@ namespace SbuBot
             public const ushort DISCRIMINATOR = 1552;
         }
 
-        public static class TestBot
+        public static class DevBot
         {
             public const ulong SELF = 710538840728928327UL;
-            public const ulong OWNER = 356017256481685506UL;
+            public const ulong OWNER = Bot.OWNER;
             public const string NAME = "retard";
             public const ushort DISCRIMINATOR = 8283;
         }
@@ -54,7 +54,7 @@ namespace SbuBot
         public static class Guild
         {
             public const ulong SELF = 732210852849123418UL;
-            public const ulong OWNER = 356017256481685506UL;
+            public const ulong OWNER = Bot.OWNER;
             public const string NAME = "Siege Bad Uninstall";
         }
 
@@ -153,7 +153,9 @@ namespace SbuBot
         public static class Emote
         {
             public const ulong SELF = 846789266041470977UL;
-            public const ulong OWNER = 356017256481685506UL;
+            public const ulong OWNER = Bot.OWNER;
+
+            public const ulong CUM = 863031236985356319UL;
 
             public static class Vote
             {
@@ -161,6 +163,14 @@ namespace SbuBot
                 public const ulong DOWN = 854440380031565834UL;
                 public const ulong NONE = 854441334852943903UL;
             }
+        }
+
+        public static class Member
+        {
+            public const ulong SELF = Bot.SELF;
+            public const ulong ERXKK = Bot.OWNER;
+            public const ulong DM = 675056356717232169UL;
+            public const ulong TOASTY = 145652148548403200UL;
         }
     }
 }
