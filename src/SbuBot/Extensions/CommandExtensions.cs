@@ -13,8 +13,7 @@ namespace SbuBot.Commands
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class CommandExtensions
     {
-        public static bool IsGroup(this Module @this)
-            => @this.Name.EndsWith("Group") && @this.Commands.All(c => c.Description is null);
+        public static bool IsGroup(this Module @this) => @this.Name.EndsWith("Group");
 
         public static void AppendTo(
             this Command @this,

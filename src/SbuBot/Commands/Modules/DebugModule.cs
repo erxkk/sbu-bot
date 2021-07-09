@@ -145,7 +145,7 @@ namespace SbuBot.Commands.Modules
         [Group("do")]
         [RequireBotOwner]
         [Description("A group of commands that invoke other commands with a proxy context.")]
-        public sealed class ProxyGroup : SbuModuleBase
+        public sealed class ProxySubModule : SbuModuleBase
         {
             [Command]
             [Description(

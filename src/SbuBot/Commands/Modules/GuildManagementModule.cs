@@ -32,7 +32,7 @@ namespace SbuBot.Commands.Modules
         [RequirePinBrigade(Group = "AdminOrPinBrigade"), RequireAdmin(Group = "AdminOrPinBrigade"),
          RequireGuild(SbuGlobals.Guild.SELF)]
         [Description("A group of commands for archiving messages.")]
-        public sealed class ArchiveGroup : SbuModuleBase
+        public sealed class ArchiveSubModule : SbuModuleBase
         {
             [Command]
             [Description("Archives the given message directly.")]
@@ -135,7 +135,7 @@ namespace SbuBot.Commands.Modules
 
         [Group("request")]
         [Description("A group of commands for requesting access to restricted channels or permissions.")]
-        public sealed class RequestGroup : SbuModuleBase
+        public sealed class RequestSubModule : SbuModuleBase
         {
             [Command("vote")]
             [Cooldown(1, 1, CooldownMeasure.Hours, CooldownBucketType.Member)]
@@ -257,7 +257,7 @@ namespace SbuBot.Commands.Modules
         [Group("emote")]
         [RequireBotGuildPermissions(Permission.ManageEmojis), RequireAuthorGuildPermissions(Permission.ManageEmojis)]
         [Description("A group of commands for creating and removing emotes.")]
-        public sealed class EmoteGroup : SbuModuleBase
+        public sealed class EmoteSubModule : SbuModuleBase
         {
             [Command("add")]
             [Description("Adds the given emote(s) to the server.")]

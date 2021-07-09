@@ -15,7 +15,7 @@ namespace SbuBot.Extensions
         public static string TrimOrSelf(this string @this, int length)
         {
             Preconditions.NotNull(@this, nameof(@this));
-            Preconditions.InRange(length, 1.., nameof(length));
+            Preconditions.Greater(length, 1, nameof(length));
 
             if (@this.Length <= length)
                 return @this;

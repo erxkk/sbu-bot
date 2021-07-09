@@ -137,7 +137,7 @@ namespace SbuBot.Commands.Modules
         [Group("edit", "change")]
         [RequireColorRole]
         [Description("A group of commands for editing color roles.")]
-        public sealed class EditGroup : SbuModuleBase
+        public sealed class EditSubModule : SbuModuleBase
         {
             [Command]
             [Description("Modifies the authors color role's color and name.")]

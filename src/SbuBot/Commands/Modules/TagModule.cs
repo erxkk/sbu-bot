@@ -290,7 +290,7 @@ namespace SbuBot.Commands.Modules
 
         [Group("delete", "remove", "rm")]
         [Description("A group of commands for removing tags.")]
-        public sealed class RemoveGroup : SbuModuleBase
+        public sealed class RemoveSubModule : SbuModuleBase
         {
             [Command]
             [Description("Removes a given tag.")]
@@ -358,7 +358,7 @@ namespace SbuBot.Commands.Modules
 
         [Group("transfer", "mv")]
         [Description("A group of commands for transferring tags.")]
-        public sealed class TransferGroup : SbuModuleBase
+        public sealed class TransferSubModule : SbuModuleBase
         {
             [Command]
             [Description("Transfers ownership of a given tag to the given member.")]
