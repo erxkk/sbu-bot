@@ -34,20 +34,6 @@ namespace SbuBot.Inspection
                 || type == typeof(byte?)
                 || type == typeof(sbyte?);
 
-        public static object? ExtractOrSelf(object? obj)
-        {
-            if (obj is null)
-                return obj;
-
-            Type type = obj.GetType();
-            Type nullable = typeof(Nullable<>);
-
-            if (type == nullable)
-                obj = nullable.GetProperty("Value")!.GetValue(obj);
-
-            return obj;
-        }
-
         public static object? SafeGetValue(this PropertyInfo @this, object obj)
         {
             object? value = null;

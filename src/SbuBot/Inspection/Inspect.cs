@@ -7,8 +7,11 @@ using System.Text;
 
 using Disqord;
 
+using ExtractorResult = Kkommon.Result<object?, string>;
+
 namespace SbuBot.Inspection
 {
+    // TODO: cleanup, stream line extraction process
     public static class Inspect
     {
         public const int MAX_EMBED_CODE_BLOCK_WIDTH = 60;
@@ -18,6 +21,14 @@ namespace SbuBot.Inspection
             [typeof(Snowflake)] = snowflake => ((Snowflake) snowflake).RawValue.ToString(),
             [typeof(Guid)] = guid => guid.ToString()!,
             [typeof(bool)] = @bool => @bool is true ? "true" : "false",
+        };
+
+        public static readonly Dictionary<Type, Func<object, ExtractorResult>> EXTRACTORS = new()
+        {
+            [typeof(Optional<>)] = optional
+                => typeof(Optional<>).GetProperty("HasValue")!.GetValue(optional) is true
+                    ? new ExtractorResult.Success(typeof(Optional<>).GetProperty("Value")!.GetValue(optional))
+                    : new ExtractorResult.Error("none"),
         };
 
         public static void AppendInspectionTo(
@@ -49,15 +60,31 @@ namespace SbuBot.Inspection
             int maxStringLength
         )
         {
-            obj = Reflect.ExtractOrSelf(obj);
+            Type type = obj?.GetType()!;
+
+            if (obj is { } && EXTRACTORS.TryGetValue(type, out var extractor))
+            {
+                switch (extractor(obj))
+                {
+                    case ExtractorResult.Success success:
+                        obj = success.Value;
+                        break;
+
+                    case ExtractorResult.Error error:
+                        builder.Append(error.Value);
+                        break;
+
+                    // unreachable
+                    default:
+                        throw new();
+                }
+            }
 
             if (obj is null)
             {
                 builder.Append("null");
                 return;
             }
-
-            Type type = obj.GetType();
 
             if (!Reflect.IsValueComparable(type) && !traversedObjects.Add(obj))
             {
@@ -214,8 +241,8 @@ namespace SbuBot.Inspection
                         builder,
                         obj,
                         traversedObjects,
-                        depth,
-                        indentation,
+                        depth - 1,
+                        indentation + indentationDelta,
                         indentationDelta,
                         itemCount,
                         maxStringLength
@@ -242,6 +269,7 @@ namespace SbuBot.Inspection
                 builder.Append(' ').Append('(').Append(collection.Count).Append(')');
         }
 
+        // TODO: change to method that removes newlines if something can be one-lined
         private static bool fitsOneLine(StringBuilder builder, int appendCount)
         {
             int index = 0;

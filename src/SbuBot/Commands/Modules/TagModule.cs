@@ -185,7 +185,7 @@ namespace SbuBot.Commands.Modules
                 if (tags.Count == 0)
                 {
                     return Reply(
-                        $"{(notAuthor ? Mention.User(owner.Id) + "doesn't" : "you don't")} own and tags."
+                        $"{(notAuthor ? Mention.User(owner.Id) + "doesn't" : "You don't")} own any tags."
                     );
                 }
 
