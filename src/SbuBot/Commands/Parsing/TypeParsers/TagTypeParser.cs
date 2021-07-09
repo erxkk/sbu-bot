@@ -8,7 +8,7 @@ using Qmmands;
 using SbuBot.Extensions;
 using SbuBot.Models;
 
-namespace SbuBot.Commands.TypeParsers
+namespace SbuBot.Commands.Parsing.TypeParsers
 {
     public sealed class TagTypeParser : DiscordGuildTypeParser<SbuTag>
     {

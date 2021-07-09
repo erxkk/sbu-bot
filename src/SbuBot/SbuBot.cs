@@ -14,9 +14,9 @@ using Microsoft.Extensions.Options;
 using Qmmands;
 
 using SbuBot.Commands;
-using SbuBot.Commands.Attributes;
-using SbuBot.Commands.TypeParsers.Descriptors;
-using SbuBot.Commands.TypeParsers;
+using SbuBot.Commands.Parsing.Descriptors;
+using SbuBot.Commands.Parsing.TypeParsers;
+using SbuBot.Models;
 
 namespace SbuBot
 {
@@ -46,6 +46,9 @@ namespace SbuBot
             Commands.AddTypeParser(new UserMessageTypeParser());
             Commands.AddTypeParser(new ReminderDescriptorTypeParser());
             Commands.AddTypeParser(new TagDescriptorTypeParser());
+
+            Commands.AddTypeParser(new OneOrAllTypeParser<SbuReminder>());
+            Commands.AddTypeParser(new OneOrAllTypeParser<SbuTag>());
 
             return base.AddTypeParsersAsync(cancellationToken);
         }

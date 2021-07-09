@@ -2,7 +2,7 @@ using System;
 
 using SbuBot.Models;
 
-namespace SbuBot.Commands.TypeParsers.Descriptors
+namespace SbuBot.Commands.Parsing.Descriptors
 {
     public readonly struct ReminderDescriptor : IDescriptor
     {

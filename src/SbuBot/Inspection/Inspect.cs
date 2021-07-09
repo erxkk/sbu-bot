@@ -62,7 +62,9 @@ namespace SbuBot.Inspection
         {
             Type type = obj?.GetType()!;
 
-            if (obj is { } && EXTRACTORS.TryGetValue(type, out var extractor))
+            if (obj is { }
+                && type.IsGenericType
+                && EXTRACTORS.TryGetValue(type.GetGenericTypeDefinition(), out var extractor))
             {
                 switch (extractor(obj))
                 {

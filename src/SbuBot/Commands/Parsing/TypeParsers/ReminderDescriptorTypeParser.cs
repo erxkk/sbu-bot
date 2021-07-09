@@ -10,10 +10,10 @@ using Microsoft.Extensions.DependencyInjection;
 
 using Qmmands;
 
-using SbuBot.Commands.TypeParsers.Descriptors;
+using SbuBot.Commands.Parsing.Descriptors;
 using SbuBot.Models;
 
-namespace SbuBot.Commands.TypeParsers
+namespace SbuBot.Commands.Parsing.TypeParsers
 {
     public sealed class ReminderDescriptorTypeParser : DescriptorTypeParserBase<ReminderDescriptor>
     {

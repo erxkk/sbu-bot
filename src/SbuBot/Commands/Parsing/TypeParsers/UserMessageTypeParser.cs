@@ -6,7 +6,7 @@ using Disqord.Rest;
 
 using Qmmands;
 
-namespace SbuBot.Commands.TypeParsers
+namespace SbuBot.Commands.Parsing.TypeParsers
 {
     public sealed class UserMessageTypeParser : DiscordTypeParser<IUserMessage>
     {

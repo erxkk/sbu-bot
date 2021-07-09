@@ -10,7 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 using Qmmands;
 
-namespace SbuBot.Commands.TypeParsers
+namespace SbuBot.Commands.Parsing.TypeParsers
 {
     public sealed class TimeSpanTypeParser : DiscordTypeParser<TimeSpan>
     {

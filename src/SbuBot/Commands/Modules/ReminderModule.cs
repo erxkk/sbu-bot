@@ -13,7 +13,8 @@ using Qmmands;
 
 using SbuBot.Commands.Attributes;
 using SbuBot.Commands.Attributes.Checks.Parameters;
-using SbuBot.Commands.TypeParsers.Descriptors;
+using SbuBot.Commands.Parsing;
+using SbuBot.Commands.Parsing.Descriptors;
 using SbuBot.Extensions;
 using SbuBot.Models;
 using SbuBot.Services;
@@ -171,58 +172,62 @@ namespace SbuBot.Commands.Modules
             );
         }
 
-        [Group("delete", "remove", "rm", "cancel", "stop")]
-        [Description("A group of commands for removing reminders.")]
-        public sealed class RemoveSubModule : SbuModuleBase
+        [Command("delete", "remove", "rm", "cancel", "stop")]
+        [Description("Cancels the given reminder.")]
+        [Usage(
+            "reminder remove last",
+            "reminder delete 936DA01F-9ABD-4d9d-80C7-02AF85C822A8",
+            "reminder cancel all"
+        )]
+        public async Task<DiscordCommandResult> CancelAsync(
+            [AuthorMustOwn][Description("The reminder that should be canceled.")]
+            OneOrAll<SbuReminder> reminder
+        )
         {
-            [Command]
-            [Description("Cancels the given reminder.")]
-            [Usage(
-                "reminder remove last",
-                "reminder delete 936DA01F-9ABD-4d9d-80C7-02AF85C822A8",
-                "remindme cancel last"
-            )]
-            public async Task<DiscordCommandResult> CancelAsync(
-                [AuthorMustOwn][Description("The reminder that should be canceled.")]
-                SbuReminder reminder
-            )
+            switch (reminder)
             {
-                await Context.Services.GetRequiredService<ReminderService>().CancelAsync(reminder.Id);
-
-                return Reply(
-                    new LocalEmbed()
-                        .WithTitle("Reminder Cancelled")
-                        .WithDescription(reminder.Message)
-                        .WithFooter("Cancelled")
-                        .WithCurrentTimestamp()
-                );
-            }
-
-            [Command("all")]
-            [Description("Cancels all of the command author's reminders.")]
-            public async Task<DiscordCommandResult> CancelAllAsync()
-            {
-                await Reply("Are you sure you want to cancel all your reminders? Respond `yes` to confirm.");
-
-                ConfirmationResult result = await Context.WaitForConfirmationAsync();
-
-                switch (result)
+                case OneOrAll<SbuReminder>.All:
                 {
-                    case ConfirmationResult.Timeout:
-                    case ConfirmationResult.Aborted:
-                        return Reply("Aborted.");
+                    ConfirmationResult confirmationResult = await Context.WaitForConfirmationAsync(
+                        "Are you sure you want to cancel all your reminders? Respond `yes` to confirm."
+                    );
 
-                    case ConfirmationResult.Confirmed:
-                        break;
+                    switch (confirmationResult)
+                    {
+                        case ConfirmationResult.Timeout:
+                        case ConfirmationResult.Aborted:
+                            return Reply("Aborted.");
 
-                    default:
-                        throw new ArgumentOutOfRangeException();
+                        case ConfirmationResult.Confirmed:
+                            break;
+
+                        // unreachable
+                        default:
+                            throw new();
+                    }
+
+                    await Context.Services.GetRequiredService<ReminderService>()
+                        .CancelAsync(r => r.Value.OwnerId == Context.Author.Id);
+
+                    return Reply("Cancelled all reminders.");
                 }
 
-                await Context.Services.GetRequiredService<ReminderService>()
-                    .CancelAsync(r => r.Value.OwnerId == Context.Author.Id);
+                case OneOrAll<SbuReminder>.Specific specific:
+                {
+                    await Context.Services.GetRequiredService<ReminderService>().CancelAsync(specific.Value.Id);
 
-                return Reply("Cancelled all reminders.");
+                    return Reply(
+                        new LocalEmbed()
+                            .WithTitle("Reminder Cancelled")
+                            .WithDescription(specific.Value.Message)
+                            .WithFooter("Cancelled")
+                            .WithCurrentTimestamp()
+                    );
+                }
+
+                // unreachable
+                default:
+                    throw new();
             }
         }
     }

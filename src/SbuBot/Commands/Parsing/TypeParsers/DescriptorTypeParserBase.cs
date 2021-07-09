@@ -6,9 +6,9 @@ using Disqord.Bot;
 
 using Qmmands;
 
-using SbuBot.Commands.TypeParsers.Descriptors;
+using SbuBot.Commands.Parsing.Descriptors;
 
-namespace SbuBot.Commands.TypeParsers
+namespace SbuBot.Commands.Parsing.TypeParsers
 {
     public abstract class DescriptorTypeParserBase<T> : DiscordGuildTypeParser<T> where T : struct, IDescriptor
     {

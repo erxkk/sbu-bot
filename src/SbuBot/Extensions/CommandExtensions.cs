@@ -7,6 +7,8 @@ using System.Text;
 using Qmmands;
 
 using SbuBot.Commands.Attributes;
+using SbuBot.Commands.Parsing;
+using SbuBot.Models;
 
 namespace SbuBot.Commands
 {
@@ -108,6 +110,15 @@ namespace SbuBot.Commands
                         { } value => value,
                     }
                 );
+            }
+            else if (@this.Type.IsGenericType && @this.Type.GetGenericTypeDefinition() == typeof(OneOrAll<>))
+            {
+                builder.Append(" | all");
+            }
+            else if (@this.Type == typeof(SbuReminder))
+            {
+                // create type appender?
+                builder.Append(" | last");
             }
 
             builder.Append(@this.IsOptional ? ']' : '>');

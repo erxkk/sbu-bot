@@ -1,10 +1,12 @@
 using System;
+using System.Reflection;
 using System.Threading.Tasks;
 
 using Disqord.Bot;
 
 using Qmmands;
 
+using SbuBot.Commands.Parsing;
 using SbuBot.Extensions;
 using SbuBot.Models;
 
@@ -17,9 +19,12 @@ namespace SbuBot.Commands.Attributes.Checks.Parameters
         public AuthorMustOwnAttribute(bool authorMustOwn = true) => AuthorMustOwn = authorMustOwn;
 
         public override async ValueTask<CheckResult> CheckAsync(object argument, DiscordGuildCommandContext context)
-            => ((argument as ISbuOwnedEntity)!.OwnerId
-                    == (await context.GetSbuDbContext().GetMemberAsync(context.Author))!.Id)
-                == AuthorMustOwn
+        {
+            if (argument is ISbuOwnedEntity entity)
+            {
+                bool authorDoesOwn = entity.OwnerId == (await context.GetAuthorAsync()).Id;
+
+                return authorDoesOwn == AuthorMustOwn
                     ? Success()
                     : Failure(
                         string.Format(
@@ -34,7 +39,18 @@ namespace SbuBot.Commands.Attributes.Checks.Parameters
                             }
                         )
                     );
+            }
 
-        public override bool CheckType(Type type) => type.IsAssignableTo(typeof(ISbuOwnedEntity));
+            // this check makes no sense, when all are specified it's queried in the command anyway
+            if (argument.GetType().GetGenericTypeDefinition() == typeof(OneOrAll<>))
+                return Success();
+
+            // unreachable
+            throw new();
+        }
+
+        public override bool CheckType(Type type) => type.IsAssignableTo(typeof(ISbuOwnedEntity))
+            || (type.GetGenericTypeDefinition() == typeof(OneOrAll<>)
+                && type.GetGenericArguments()[0].IsAssignableTo(typeof(ISbuOwnedEntity)));
     }
 }

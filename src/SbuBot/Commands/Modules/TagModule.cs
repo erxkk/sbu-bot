@@ -14,7 +14,8 @@ using Qmmands;
 
 using SbuBot.Commands.Attributes;
 using SbuBot.Commands.Attributes.Checks.Parameters;
-using SbuBot.Commands.TypeParsers.Descriptors;
+using SbuBot.Commands.Parsing;
+using SbuBot.Commands.Parsing.Descriptors;
 using SbuBot.Extensions;
 using SbuBot.Models;
 
@@ -285,137 +286,141 @@ namespace SbuBot.Commands.Modules
             }
         }
 
-        [Group("delete", "remove", "rm")]
-        [Description("A group of commands for removing tags.")]
-        public sealed class RemoveSubModule : SbuModuleBase
+        [Command("delete", "remove", "rm")]
+        [Description("Removes a given tag.")]
+        [Usage("tag remove da dog", "t delete h", "t rm all")]
+        public async Task<DiscordCommandResult> RemoveAsync(
+            [AuthorMustOwn][Description("The tag that should be removed.")]
+            OneOrAll<SbuTag> tag
+        )
         {
-            [Command]
-            [Description("Removes a given tag.")]
-            [Usage("tag remove da dog", "t delete h")]
-            public async Task<DiscordCommandResult> RemoveAsync(
-                [AuthorMustOwn][Description("The tag that should be removed.")]
-                SbuTag tag
-            )
+            switch (tag)
             {
-                await Reply("Are you sure you want to remove this tag? Respond `yes` to confirm.");
-                ConfirmationResult result = await Context.WaitForConfirmationAsync();
-
-                switch (result)
+                case OneOrAll<SbuTag>.All:
                 {
-                    case ConfirmationResult.Timeout:
-                    case ConfirmationResult.Aborted:
-                        return Reply("Aborted.");
+                    ConfirmationResult result = await Context.WaitForConfirmationAsync(
+                        "Are you sure you want to remove all your tags? Respond `yes` to confirm."
+                    );
 
-                    case ConfirmationResult.Confirmed:
-                        break;
+                    switch (result)
+                    {
+                        case ConfirmationResult.Timeout:
+                        case ConfirmationResult.Aborted:
+                            return Reply("Aborted.");
 
-                    default:
-                        throw new ArgumentOutOfRangeException();
+                        case ConfirmationResult.Confirmed:
+                            break;
+
+                        // unreachable
+                        default:
+                            throw new();
+                    }
+
+                    SbuMember owner = await Context.GetSbuDbContext().GetMemberAsync(Context.Author);
+
+                    List<SbuTag> tags = await Context.GetSbuDbContext()
+                        .Tags
+                        .Where(t => t.OwnerId == owner.Id)
+                        .ToListAsync(Context.Bot.StoppingToken);
+
+                    Context.GetSbuDbContext().Tags.RemoveRange(tags);
+                    await Context.SaveChangesAsync();
+
+                    return Reply("All tags removed.");
                 }
 
-                Context.GetSbuDbContext().Tags.Remove(tag);
-                await Context.SaveChangesAsync();
-
-                return Reply("Tag removed.");
-            }
-
-            [Command("all")]
-            [Description("Removes all of the command author's tags.")]
-            public async Task<DiscordCommandResult> RemoveAllAsync()
-            {
-                await Reply("Are you sure you want to remove all your tags? Respond `yes` to confirm.");
-                ConfirmationResult result = await Context.WaitForConfirmationAsync();
-
-                switch (result)
+                case OneOrAll<SbuTag>.Specific specific:
                 {
-                    case ConfirmationResult.Timeout:
-                    case ConfirmationResult.Aborted:
-                        return Reply("Aborted.");
+                    ConfirmationResult result = await Context.WaitForConfirmationAsync(
+                        "Are you sure you want to remove this tag? Respond `yes` to confirm."
+                    );
 
-                    case ConfirmationResult.Confirmed:
-                        break;
+                    switch (result)
+                    {
+                        case ConfirmationResult.Timeout:
+                        case ConfirmationResult.Aborted:
+                            return Reply("Aborted.");
 
-                    default:
-                        throw new ArgumentOutOfRangeException();
+                        case ConfirmationResult.Confirmed:
+                            break;
+
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
+
+                    Context.GetSbuDbContext().Tags.Remove(specific.Value);
+                    await Context.SaveChangesAsync();
+
+                    return Reply("Tag removed.");
                 }
 
-                SbuMember owner = await Context.GetSbuDbContext().GetMemberAsync(Context.Author);
-
-                List<SbuTag> tags = await Context.GetSbuDbContext()
-                    .Tags
-                    .Where(t => t.OwnerId == owner.Id)
-                    .ToListAsync(Context.Bot.StoppingToken);
-
-                Context.GetSbuDbContext().Tags.RemoveRange(tags);
-                await Context.SaveChangesAsync();
-
-                return Reply("All tags removed.");
+                // unreachable
+                default:
+                    throw new();
             }
         }
 
-        [Group("transfer", "mv")]
-        [Description("A group of commands for transferring tags.")]
-        public sealed class TransferSubModule : SbuModuleBase
+        [Command("transfer", "mv")]
+        [Description("Transfers ownership of a given tag to the given member.")]
+        [Usage("tag transfer @user da dog", "t transfer 352815253828141056 h", "t mv @user all")]
+        public async Task<DiscordCommandResult> TransferAsync(
+            [NotAuthor][Description("The member that should receive the given tag.")]
+            SbuMember receiver,
+            [AuthorMustOwn][Description("The tag that the given member should receive.")]
+            OneOrAll<SbuTag> tag
+        )
         {
-            [Command]
-            [Description("Transfers ownership of a given tag to the given member.")]
-            [Usage("tag transfer @user da dog", "t transfer 352815253828141056 h")]
-            public async Task<DiscordCommandResult> TransferAsync(
-                [NotAuthor][Description("The member that should receive the given tag.")]
-                SbuMember receiver,
-                [AuthorMustOwn][Description("The tag that the given member should receive.")]
-                SbuTag tag
-            )
+            switch (tag)
             {
-                tag.OwnerId = receiver.Id;
-                Context.GetSbuDbContext().Tags.Update(tag);
-                await Context.SaveChangesAsync();
-
-                return Reply($"{Mention.User(receiver.Id)} now owns `{tag.Name}`.");
-            }
-
-            [Command("all")]
-            [Description("Transfers ownership of all of the command author's tags to the given member.")]
-            [Usage("tag transfer all @user", "t transfer all 352815253828141056")]
-            public async Task<DiscordCommandResult> TransferAllAsync(
-                [NotAuthor][Description("The member that should receive the given tags.")]
-                SbuMember receiver
-            )
-            {
-                await Reply(
-                    string.Format(
-                        "Are you sure you want to transfer all your tags to {0}? Respond `yes` to confirm.",
-                        Mention.User(receiver.Id)
-                    )
-                );
-
-                ConfirmationResult result = await Context.WaitForConfirmationAsync();
-
-                switch (result)
+                case OneOrAll<SbuTag>.All:
                 {
-                    case ConfirmationResult.Timeout:
-                    case ConfirmationResult.Aborted:
-                        return Reply("Aborted.");
+                    ConfirmationResult result = await Context.WaitForConfirmationAsync(
+                        string.Format(
+                            "Are you sure you want to transfer all your tags to {0}? Respond `yes` to confirm.",
+                            Mention.User(receiver.Id)
+                        )
+                    );
 
-                    case ConfirmationResult.Confirmed:
-                        break;
+                    switch (result)
+                    {
+                        case ConfirmationResult.Timeout:
+                        case ConfirmationResult.Aborted:
+                            return Reply("Aborted.");
 
-                    default:
-                        throw new ArgumentOutOfRangeException();
+                        case ConfirmationResult.Confirmed:
+                            break;
+
+                        // unreachable
+                        default:
+                            throw new();
+                    }
+
+                    List<SbuTag> tags = await Context.GetSbuDbContext()
+                        .Tags
+                        .Where(t => t.OwnerId == Context.Author.Id)
+                        .ToListAsync(Context.Bot.StoppingToken);
+
+                    foreach (SbuTag dbTag in tags)
+                        dbTag.OwnerId = receiver.Id;
+
+                    Context.GetSbuDbContext().Tags.UpdateRange(tags);
+                    await Context.SaveChangesAsync();
+
+                    return Reply($"{Mention.User(receiver.Id)} now owns all of your tags.");
                 }
 
-                List<SbuTag> tags = await Context.GetSbuDbContext()
-                    .Tags
-                    .Where(t => t.OwnerId == Context.Author.Id)
-                    .ToListAsync(Context.Bot.StoppingToken);
+                case OneOrAll<SbuTag>.Specific specific:
+                {
+                    specific.Value.OwnerId = receiver.Id;
+                    Context.GetSbuDbContext().Tags.Update(specific.Value);
+                    await Context.SaveChangesAsync();
 
-                foreach (SbuTag dbTag in tags)
-                    dbTag.OwnerId = receiver.Id;
+                    return Reply($"{Mention.User(receiver.Id)} now owns `{specific.Value.Name}`.");
+                }
 
-                Context.GetSbuDbContext().Tags.UpdateRange(tags);
-                await Context.SaveChangesAsync();
-
-                return Reply($"{Mention.User(receiver.Id)} now owns all of your tags.");
+                // unreachable
+                default:
+                    throw new();
             }
         }
 

@@ -12,7 +12,7 @@ using Qmmands;
 using SbuBot.Models;
 using SbuBot.Services;
 
-namespace SbuBot.Commands.TypeParsers
+namespace SbuBot.Commands.Parsing.TypeParsers
 {
     public sealed class ReminderTypeParser : DiscordGuildTypeParser<SbuReminder>
     {

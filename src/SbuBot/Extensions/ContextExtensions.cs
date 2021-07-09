@@ -69,8 +69,12 @@ namespace SbuBot.Extensions
         public static Task<int> SaveChangesAsync(this DiscordGuildCommandContext @this)
             => @this.GetSbuDbContext().SaveChangesAsync();
 
-        public static async Task<ConfirmationResult> WaitForConfirmationAsync(this DiscordGuildCommandContext @this)
+        public static async Task<ConfirmationResult> WaitForConfirmationAsync(
+            this DiscordGuildCommandContext @this,
+            string prompt
+        )
         {
+            await @this.Channel.SendMessageAsync(new LocalMessage().WithContent(prompt).WithReply(@this.Message));
             MessageReceivedEventArgs? args;
 
             await using (_ = @this.BeginYield())
@@ -96,7 +100,6 @@ namespace SbuBot.Extensions
         )
         {
             await @this.Channel.SendMessageAsync(new LocalMessage().WithContent(prompt).WithReply(@this.Message));
-
             MessageReceivedEventArgs? args;
 
             await using (_ = @this.BeginYield())

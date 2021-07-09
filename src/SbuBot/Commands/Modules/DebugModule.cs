@@ -13,7 +13,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Qmmands;
 
 using SbuBot.Commands.Attributes;
+using SbuBot.Commands.Parsing;
 using SbuBot.Evaluation;
+using SbuBot.Extensions;
+using SbuBot.Models;
 using SbuBot.Services;
 
 namespace SbuBot.Commands.Modules
@@ -197,11 +200,12 @@ namespace SbuBot.Commands.Modules
 
         [Command("test")]
         [RequireBotOwner]
-        [Description("Sets the bot lock state to the given state, or switches it if no state is specified.")]
-        public DiscordCommandResult Test()
+        [Description("A test command.")]
+        public DiscordCommandResult Test([Description("A test parameter.")] OneOrAll<SbuTag> tag)
         {
-            //return FilledPages(Enumerable.Range(1, 9).Select(i => i.ToString()), 3);
-            return HelpView(Context.Bot.Commands.GetAllCommands().First(c => c.Aliases.Contains("as")));
+            // return FilledPages(Enumerable.Range(1, 9).Select(i => i.ToString()), 3);
+            // return HelpView(Context.Bot.Commands.GetAllCommands().First(c => c.Aliases.Contains("as")));
+            return Reply(new LocalEmbed().WithDescription(Markdown.CodeBlock("yml", tag.GetInspection(3))));
         }
     }
 }
