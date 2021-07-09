@@ -35,7 +35,9 @@ namespace SbuBot
             {
                 Embed userEmbed = message.Embeds[0];
 
-                if ((userEmbed.Url ?? userEmbed.Image?.Url) is { } url)
+                // use image type comparison to make sure it's actually an image that is being set
+                // marked as deprecated by discord
+                if (userEmbed.Type == "image" && (userEmbed.Url ?? userEmbed.Image?.Url) is { } url)
                     embed.WithImageUrl(url);
                 else if (userEmbed.Video is { } video)
                     embed.AddField("Video-Url", Markdown.Link("Click here!", video.Url), true);
