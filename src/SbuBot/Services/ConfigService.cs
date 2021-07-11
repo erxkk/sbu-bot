@@ -35,12 +35,15 @@ namespace SbuBot.Services
                 SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
                 SbuGuild guild = (await context.GetGuildAsync(guildId))!;
 
-                guild.Config = set ? guild.Config | value : ~(~guild.Config | value);
+                guild.Config = set ? guild.Config | value : guild.Config & ~value;
                 _guildConfigs[guildId] = guild.Config;
 
                 await context.SaveChangesAsync();
             }
         }
+
+        public SbuGuildConfig GetConfig(Snowflake guildId)
+            => GuildConfigs.GetValueOrDefault(guildId);
 
         public bool GetValue(Snowflake guildId, SbuGuildConfig value)
             => GuildConfigs.GetValueOrDefault(guildId).HasFlag(value);

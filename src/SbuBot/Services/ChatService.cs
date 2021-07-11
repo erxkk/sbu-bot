@@ -27,17 +27,6 @@ namespace SbuBot.Services
             if (!_configService.GetValue(e.GuildId.Value, SbuGuildConfig.Chat))
                 return;
 
-            using (IServiceScope scope = Bot.Services.CreateScope())
-            {
-                SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
-
-                if (await context.GetGuildAsync(e.GuildId.Value) is not { } guild)
-                    return;
-
-                if (guild.Config.HasFlag(SbuGuildConfig.Chat))
-                    return;
-            }
-
             const string mediaDomain = "media.discordapp.net";
             const string cdnDomain = "cdn.discordapp.com";
 

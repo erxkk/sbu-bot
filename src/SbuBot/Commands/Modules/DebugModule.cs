@@ -21,33 +21,20 @@ namespace SbuBot.Commands.Modules
     [Description("A collection of commands for debugging and testing.")]
     public sealed class DebugModule : SbuModuleBase
     {
-        [Group("echo")]
-        [Description("A group of commands for testing the bots channel access.")]
-        public sealed class EchoGroup : SbuModuleBase
+        [Command("echo")]
+        [RequireBotOwner]
+        [Description(
+            "Removes the original message and replies with the given message in the given target channel."
+        )]
+        public async Task EchoAsync(
+            [Description("The target channel in which to send the message in.")]
+            ITextChannel target,
+            [Description("The message to reply with.")]
+            string message = "echo!"
+        )
         {
-            [Command]
-            [Description("Replies with the given message.")]
-            [Usage("echo", "echo echo", "echo blah blah blah")]
-            public DiscordCommandResult Echo(
-                [Description("The message to reply with.")]
-                string message = "echo!"
-            ) => Reply(message);
-
-            [Command]
-            [RequireBotOwner]
-            [Description(
-                "Removes the original message and replies with the given message in the given target channel."
-            )]
-            public async Task EchoAsync(
-                [Description("The target channel in which to send the message in.")]
-                ITextChannel target,
-                [Description("The message to reply with.")]
-                string message = "echo!"
-            )
-            {
-                await Context.Message.DeleteAsync();
-                await target.SendMessageAsync(new LocalMessage().WithContent(message));
-            }
+            await Context.Message.DeleteAsync();
+            await target.SendMessageAsync(new LocalMessage().WithContent(message));
         }
 
         [Command("ping")]
@@ -187,6 +174,7 @@ namespace SbuBot.Commands.Modules
 
             bool wasDisabled = false;
 
+            // TODO: similar naming will always bring up the same submodule
             switch (matches.Count)
             {
                 case 0 when Context.Bot.Commands.GetAllModules().FirstOrDefault(m => m.FullAliases.Contains(query))
