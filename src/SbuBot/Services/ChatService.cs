@@ -24,11 +24,14 @@ namespace SbuBot.Services
             if (e.GuildId is null)
                 return;
 
+            if (e.Message.Author.Id == SbuGlobals.Bot.SELF)
+                return;
+
             if (!_configService.GetValue(e.GuildId.Value, SbuGuildConfig.Chat))
                 return;
 
-            const string mediaDomain = "media.discordapp.net";
-            const string cdnDomain = "cdn.discordapp.com";
+            const string mediaDomain = "https://media.discordapp.net/";
+            const string cdnDomain = "https://cdn.discordapp.com/";
 
             if (e.Message.Content.Contains(mediaDomain))
             {
