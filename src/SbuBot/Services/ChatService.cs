@@ -21,9 +21,6 @@ namespace SbuBot.Services
 
         protected override async ValueTask OnMessageReceived(BotMessageReceivedEventArgs e)
         {
-            if (!Configuration.IsProduction)
-                return;
-
             if (e.GuildId is null)
                 return;
 

@@ -11,10 +11,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace SbuBot.Models
 {
-    public sealed class SbuReminder : ISbuOwnedEntity, ISbuGuildEntity
+    public sealed class SbuReminder : ISbuOwnedGuildEntity
     {
         public const int MAX_MESSAGE_LENGTH = 1024;
-        public Guid Id { get; }
 
         [NotNull]
         public Snowflake? OwnerId { get; set; }
@@ -42,49 +41,24 @@ namespace SbuBot.Models
         public SbuGuild? Guild { get; }
 
         public SbuReminder(
-            Snowflake ownerId,
-            Snowflake guildId,
-            Snowflake channelId,
-            Snowflake messageId,
-            string? message,
-            DateTimeOffset createdAt,
-            DateTimeOffset dueAt
-        )
-        {
-            Id = Guid.NewGuid();
-            OwnerId = ownerId;
-            GuildId = guildId;
-            ChannelId = channelId;
-            MessageId = messageId;
-            Message = message;
-            CreatedAt = createdAt;
-            DueAt = dueAt;
-        }
-
-        public SbuReminder(
             DiscordGuildCommandContext context,
             Snowflake ownerId,
             Snowflake guildId,
             string? message,
             DateTimeOffset dueAt
-        )
-        {
-            Id = Guid.NewGuid();
-            OwnerId = ownerId;
-            GuildId = guildId;
-            ChannelId = context.ChannelId;
-            MessageId = context.Message.Id;
-            Message = message;
-            CreatedAt = DateTimeOffset.Now;
-            DueAt = dueAt;
-        }
+        ) : this(
+            ownerId,
+            guildId,
+            context.ChannelId,
+            context.Message.Id,
+            message,
+            DateTimeOffset.Now,
+            dueAt
+        ) { }
 
 #region EFCore
 
-#nullable disable
-
         internal SbuReminder(
-            Guid id,
             Snowflake? ownerId,
             Snowflake guildId,
             Snowflake channelId,
@@ -94,7 +68,6 @@ namespace SbuBot.Models
             DateTimeOffset dueAt
         )
         {
-            Id = id;
             OwnerId = ownerId;
             GuildId = guildId;
             ChannelId = channelId;
@@ -104,11 +77,12 @@ namespace SbuBot.Models
             DueAt = dueAt;
         }
 
+#nullable disable
         internal sealed class EntityTypeConfiguration : IEntityTypeConfiguration<SbuReminder>
         {
             public void Configure(EntityTypeBuilder<SbuReminder> builder)
             {
-                builder.HasKey(t => t.Id);
+                builder.HasKey(t => t.MessageId);
                 builder.HasIndex(t => t.OwnerId);
                 builder.HasIndex(t => t.GuildId);
 
@@ -122,8 +96,8 @@ namespace SbuBot.Models
 
                 builder.HasOne(r => r.Owner)
                     .WithMany(m => m.Reminders)
-                    .HasForeignKey(r => r.OwnerId)
-                    .HasPrincipalKey(m => m.Id)
+                    .HasForeignKey(r => new { r.OwnerId, r.GuildId })
+                    .HasPrincipalKey(m => new { m.Id, m.GuildId })
                     .OnDelete(DeleteBehavior.Cascade);
 
                 builder.HasOne(r => r.Guild)

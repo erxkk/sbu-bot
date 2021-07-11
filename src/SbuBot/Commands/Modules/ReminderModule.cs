@@ -141,7 +141,7 @@ namespace SbuBot.Commands.Modules
                 reminders.Values
                     .Where(r => r.OwnerId == Context.Author.Id)
                     .Select(
-                        r => $"[`{r.Id}`]({r.JumpUrl})\nDue {Markdown.Timestamp(r.DueAt)}\n"
+                        r => $"[`{r.MessageId}`]({r.JumpUrl})\nDue {Markdown.Timestamp(r.DueAt)}\n"
                             + $"{(r.Message is { } ? $"\"{r.Message}\"" : "No Message")}\n"
                     ),
                 embedModifier: embed => embed.WithTitle("Your Reminders")
@@ -150,7 +150,7 @@ namespace SbuBot.Commands.Modules
 
         [Command("edit", "change")]
         [Description("Reschedules the given reminder.")]
-        [Usage("reminder edit last in 2 days", "reminder change 936DA01F-9ABD-4d9d-80C7-02AF85C822A8 in 5 seconds")]
+        [Usage("reminder edit last in 2 days", "reminder change 936DA01F in 5 seconds")]
         public async Task<DiscordCommandResult> RescheduleAsync(
             [AuthorMustOwn][Description("The reminder to reschedule.")]
             SbuReminder reminder,
@@ -158,10 +158,8 @@ namespace SbuBot.Commands.Modules
             DateTime newTimestamp
         )
         {
-            if (newTimestamp + TimeSpan.FromMilliseconds(500) >= DateTimeOffset.Now)
-            {
-                await Context.Services.GetRequiredService<ReminderService>().RescheduleAsync(reminder.Id, newTimestamp);
-            }
+            await Context.Services.GetRequiredService<ReminderService>()
+                .RescheduleAsync(reminder.MessageId, newTimestamp);
 
             return Reply(
                 new LocalEmbed()
@@ -174,11 +172,7 @@ namespace SbuBot.Commands.Modules
 
         [Command("delete", "remove", "rm", "cancel", "stop")]
         [Description("Cancels the given reminder.")]
-        [Usage(
-            "reminder remove last",
-            "reminder delete 936DA01F-9ABD-4d9d-80C7-02AF85C822A8",
-            "reminder cancel all"
-        )]
+        [Usage("reminder remove last", "reminder delete 936DA01F", "reminder cancel all")]
         public async Task<DiscordCommandResult> CancelAsync(
             [AuthorMustOwn][Description("The reminder that should be canceled.")]
             OneOrAll<SbuReminder> reminder
@@ -207,14 +201,14 @@ namespace SbuBot.Commands.Modules
                     }
 
                     await Context.Services.GetRequiredService<ReminderService>()
-                        .CancelAsync(r => r.Value.OwnerId == Context.Author.Id);
+                        .CancelAsync(r => r.OwnerId == Context.Author.Id);
 
                     return Reply("Cancelled all reminders.");
                 }
 
                 case OneOrAll<SbuReminder>.Specific specific:
                 {
-                    await Context.Services.GetRequiredService<ReminderService>().CancelAsync(specific.Value.Id);
+                    await Context.Services.GetRequiredService<ReminderService>().CancelAsync(specific.Value.MessageId);
 
                     return Reply(
                         new LocalEmbed()

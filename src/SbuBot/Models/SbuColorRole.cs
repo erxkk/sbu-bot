@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace SbuBot.Models
 {
-    public sealed class SbuColorRole : ISbuDiscordEntity, ISbuOwnedEntity, ISbuGuildEntity
+    public sealed class SbuColorRole : ISbuDiscordEntity, ISbuOwnedGuildEntity
     {
         public const int MAX_NAME_LENGTH = 100;
         public Snowflake Id { get; }
@@ -21,21 +21,16 @@ namespace SbuBot.Models
         [NotLogged]
         public SbuGuild? Guild { get; }
 
-        public SbuColorRole(Snowflake id, Snowflake? ownerId, Snowflake guildId)
+        public SbuColorRole(IRole role, Snowflake ownerId) : this(role.Id, ownerId, role.GuildId) { }
+
+#region EFCore
+
+        internal SbuColorRole(Snowflake id, Snowflake? ownerId, Snowflake guildId)
         {
             Id = id;
             OwnerId = ownerId;
             GuildId = guildId;
         }
-
-        public SbuColorRole(IRole role, Snowflake ownerId)
-        {
-            Id = role.Id;
-            OwnerId = ownerId;
-            GuildId = role.GuildId;
-        }
-
-#region EFCore
 
 #nullable disable
 

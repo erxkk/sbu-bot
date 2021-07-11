@@ -13,7 +13,7 @@ namespace SbuBot.Commands.Views.Help
             AddComponent(
                 new ButtonViewComponent(GoToParent)
                 {
-                    Emoji = LocalEmoji.Unicode("◀️"),
+                    Emoji = LocalEmoji.Custom(SbuGlobals.Emote.Menu.BACK),
                     Style = LocalButtonComponentStyle.Secondary,
                     Row = 4,
                     Position = 0,
@@ -24,7 +24,7 @@ namespace SbuBot.Commands.Views.Help
 
         public virtual ValueTask GoToParent(ButtonEventArgs e) => default;
 
-        [Button(Emoji = "⏹️", Row = 4, Position = 1, Style = LocalButtonComponentStyle.Secondary)]
+        [Button(Emoji = SbuGlobals.Emote.Menu.STOP, Row = 4, Position = 1, Style = LocalButtonComponentStyle.Secondary)]
         public ValueTask StopMenu(ButtonEventArgs e)
         {
             if (Menu is InteractiveMenu menu)

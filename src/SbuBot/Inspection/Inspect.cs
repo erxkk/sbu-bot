@@ -23,11 +23,11 @@ namespace SbuBot.Inspection
             [typeof(bool)] = @bool => @bool is true ? "true" : "false",
         };
 
-        public static readonly Dictionary<Type, Func<object, ExtractorResult>> EXTRACTORS = new()
+        public static readonly Dictionary<Type, Func<object, Type, ExtractorResult>> EXTRACTORS = new()
         {
-            [typeof(Optional<>)] = optional
-                => typeof(Optional<>).GetProperty("HasValue")!.GetValue(optional) is true
-                    ? new ExtractorResult.Success(typeof(Optional<>).GetProperty("Value")!.GetValue(optional))
+            [typeof(Optional<>)] = (optional, nonGenericType)
+                => nonGenericType.GetProperty("HasValue")!.GetValue(optional) is true
+                    ? new ExtractorResult.Success(nonGenericType.GetProperty("Value")!.GetValue(optional))
                     : new ExtractorResult.Error("none"),
         };
 
@@ -62,11 +62,13 @@ namespace SbuBot.Inspection
         {
             Type type = obj?.GetType()!;
 
+            // TODO: add enum literal entry
+            // BUG: incorrect optional extraction
             if (obj is { }
                 && type.IsGenericType
                 && EXTRACTORS.TryGetValue(type.GetGenericTypeDefinition(), out var extractor))
             {
-                switch (extractor(obj))
+                switch (extractor(obj, type))
                 {
                     case ExtractorResult.Success success:
                         obj = success.Value;

@@ -28,17 +28,11 @@ namespace SbuBot.Models
         [NotLogged]
         public List<SbuReminder> Reminders { get; } = new();
 
-        public SbuGuild(Snowflake id)
-        {
-            Id = id;
-            Config = SbuGuildConfig.Fun | SbuGuildConfig.Chat;
-        }
-
-        public SbuGuild(IGuild guild) : this(guild.Id) { }
+        public SbuGuild(IGuild guild) : this(guild.Id, (SbuGuildConfig) 255) { }
 
 #region EFCore
 
-        public SbuGuild(Snowflake id, SbuGuildConfig config)
+        internal SbuGuild(Snowflake id, SbuGuildConfig config)
         {
             Id = id;
             Config = config;

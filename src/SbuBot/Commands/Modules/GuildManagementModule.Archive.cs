@@ -22,7 +22,7 @@ namespace SbuBot.Commands.Modules
     {
         [Group("archive")]
         [RequirePinBrigade(Group = "AdminOrPinBrigade"), RequireAdmin(Group = "AdminOrPinBrigade"),
-         RequireGuild(SbuGlobals.Guild.SELF)]
+         RequireGuild(SbuGlobals.Guild.Sbu.SELF)]
         [Description("A group of commands for archiving messages.")]
         public sealed class ArchiveSubModule : SbuModuleBase
         {

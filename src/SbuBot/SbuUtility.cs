@@ -24,7 +24,7 @@ namespace SbuBot
                     "Link to Original",
                     Markdown.Link(
                         "Click here!",
-                        Discord.MessageJumpLink(SbuGlobals.Guild.SELF, message.ChannelId, message.Id)
+                        Discord.MessageJumpLink(SbuGlobals.Guild.Sbu.SELF, message.ChannelId, message.Id)
                     ),
                     true
                 );

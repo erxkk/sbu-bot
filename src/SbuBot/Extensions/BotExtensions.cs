@@ -9,12 +9,12 @@ namespace SbuBot.Extensions
     public static class BotExtensions
     {
         public static CachedRole GetColorRoleSeparator(this DiscordBotBase @this) => @this.GetRole(
-            SbuGlobals.Guild.SELF,
+            SbuGlobals.Guild.Sbu.SELF,
             SbuGlobals.Role.Color.SELF
         );
 
         public static CachedChannel GetPinArchive(this DiscordBotBase @this) => @this.GetChannel(
-            SbuGlobals.Guild.SELF,
+            SbuGlobals.Guild.Sbu.SELF,
             SbuGlobals.Channel.Based.PIN_ARCHIVE
         );
     }

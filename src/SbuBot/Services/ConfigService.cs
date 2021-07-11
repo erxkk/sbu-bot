@@ -30,9 +30,6 @@ namespace SbuBot.Services
 
         public async Task SetValueAsync(Snowflake guildId, SbuGuildConfig value, bool set = true)
         {
-            if (!Configuration.IsProduction)
-                return;
-
             using (IServiceScope scope = Bot.Services.CreateScope())
             {
                 SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();

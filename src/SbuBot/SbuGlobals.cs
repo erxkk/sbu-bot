@@ -9,7 +9,7 @@ namespace SbuBot
         public const string DESCRIPTOR_SEPARATOR = "::";
         public const string DEFAULT_PREFIX = "sbu";
 
-        public static readonly Version VERSION = new(0, 7, 0);
+        public static readonly Version VERSION = new(0, 8, 0);
 
         public static readonly string[] RESERVED_KEYWORDS =
         {
@@ -53,9 +53,26 @@ namespace SbuBot
 
         public static class Guild
         {
-            public const ulong SELF = 732210852849123418UL;
-            public const ulong OWNER = Bot.OWNER;
-            public const string NAME = "Siege Bad Uninstall";
+            public static class Sbu
+            {
+                public const ulong SELF = 732210852849123418UL;
+                public const ulong OWNER = Bot.OWNER;
+                public const string NAME = "Siege Bad Uninstall";
+            }
+
+            public static class Lab
+            {
+                public const ulong SELF = 416256456505950215UL;
+                public const ulong OWNER = 183319356489465856UL;
+                public const string NAME = "Siege Bad Uninstall";
+            }
+
+            public static class LaFamilia
+            {
+                public const ulong SELF = 681285811945340959UL;
+                public const ulong OWNER = Bot.OWNER;
+                public const string NAME = "La Familia";
+            }
         }
 
         public static class Role
@@ -162,6 +179,15 @@ namespace SbuBot
                 public const ulong UP = 854440379948466176UL;
                 public const ulong DOWN = 854440380031565834UL;
                 public const ulong NONE = 854441334852943903UL;
+            }
+
+            public static class Menu
+            {
+                public const ulong BACK = 863135848828108811UL;
+                public const ulong FAST_BACK = 863141104559456286UL;
+                public const ulong FORWARD = 863139842581069864UL;
+                public const ulong FAST_FORWARD = 863141104567058442UL;
+                public const ulong STOP = 863139842748710962UL;
             }
         }
 

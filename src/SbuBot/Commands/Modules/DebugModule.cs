@@ -8,8 +8,6 @@ using Disqord.Bot;
 using Disqord.Gateway;
 using Disqord.Rest;
 
-using Microsoft.Extensions.DependencyInjection;
-
 using Qmmands;
 
 using SbuBot.Commands.Attributes;
@@ -17,7 +15,6 @@ using SbuBot.Commands.Parsing;
 using SbuBot.Evaluation;
 using SbuBot.Extensions;
 using SbuBot.Models;
-using SbuBot.Services;
 
 namespace SbuBot.Commands.Modules
 {
@@ -54,28 +51,8 @@ namespace SbuBot.Commands.Modules
         }
 
         [Command("ping")]
-        [Description("Replies with `Pong!` after the given timespan or instantly if no timespan is specified.")]
-        [Usage("ping", "ping in 3 seconds")]
-        public DiscordCommandResult Send(
-            [OverrideDefault("{now}")][Description("The timestamp at which to send the reply.")]
-            DateTime? timespan = null
-        )
-        {
-            if (timespan is null)
-                return Reply("Pong!");
-
-            SchedulerService service = Context.Services.GetRequiredService<SchedulerService>();
-
-            // Context.Yield()/BeginYield() with delay could be used here but this is for testing the scheduler service
-            service.Schedule(
-                _ => Context.Channel.SendMessageAsync(
-                    new LocalMessage().WithContent($"Ping was scheduled at: `{DateTime.Now}`, Pong!")
-                ),
-                timespan.Value - DateTime.Now
-            );
-
-            return Reply($"Scheduled pong to be sent in `{timespan}`.");
-        }
+        [Description("Replies with `Pong!`.")]
+        public DiscordCommandResult Send() => Reply("Pong!");
 
         [Group("eval")]
         [RequireBotOwner]
@@ -189,13 +166,88 @@ namespace SbuBot.Commands.Modules
         [RequireBotOwner]
         [Description("Sets the bot lock state to the given state, or switches it if no state is specified.")]
         public DiscordCommandResult Lock(
-            [OverrideDefault("{!state}")][Description("THe new lock state to set the bot to.")]
+            [OverrideDefault("{!state}")][Description("The new lock state to set the bot to.")]
             bool? set = null
         )
         {
             SbuBot bot = (Context.Bot as SbuBot)!;
             bot.IsLocked = set ?? !bot.IsLocked;
             return Reply($"{(bot.IsLocked ? "Locked" : "Unlocked")} the bot.");
+        }
+
+        [Command("toggle")]
+        [RequireBotOwner]
+        [Description("Disables/Enables a given command or module.")]
+        public DiscordCommandResult Toggle(
+            [Description("The command or module to disable/enable.")]
+            string query
+        )
+        {
+            IReadOnlyList<CommandMatch> matches = Context.Bot.Commands.FindCommands(query);
+
+            bool wasDisabled = false;
+
+            switch (matches.Count)
+            {
+                case 0 when Context.Bot.Commands.GetAllModules().FirstOrDefault(m => m.FullAliases.Contains(query))
+                    is { } module:
+                {
+                    if (module.IsEnabled)
+                    {
+                        module.Disable();
+                    }
+                    else
+                    {
+                        wasDisabled = true;
+                        module.Enable();
+                    }
+
+                    return Reply($"{(wasDisabled ? "Enabled" : "Disabled")} module.");
+                }
+
+                case 0:
+                    return Reply("No matching command or module found.");
+
+                case 1:
+                {
+                    if (matches[0].Command.IsEnabled)
+                    {
+                        matches[0].Command.Disable();
+                    }
+                    else
+                    {
+                        wasDisabled = true;
+                        matches[0].Command.Enable();
+                    }
+
+                    return Reply($"{(wasDisabled ? "Enabled" : "Disabled")} command.");
+                }
+
+                default:
+                    return Reply("More than one matching command or module found.");
+            }
+        }
+
+        [Command("chunk")]
+        [RequireBotOwner]
+        [Description("Chunks the current guild.")]
+        public async Task<DiscordCommandResult> Chunk()
+        {
+            await using (_ = Context.BeginYield())
+            {
+                await Context.Bot.Chunker.ChunkAsync(Context.Guild);
+            }
+
+            return Reply("Chunking finished.");
+        }
+
+        [Command("kill")]
+        [RequireBotOwner]
+        [Description("Fucking kills the bot oh my god...")]
+        public async Task Kill()
+        {
+            await Reply("Gn kid.");
+            Environment.Exit(1);
         }
 
         [Command("test")]

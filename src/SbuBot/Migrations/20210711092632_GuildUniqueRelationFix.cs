@@ -1,9 +1,8 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace SbuBot.Migrations
 {
-    public partial class FixedRelations : Migration
+    public partial class GuildUniqueRelationFix : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -11,7 +10,8 @@ namespace SbuBot.Migrations
                 name: "Guilds",
                 columns: table => new
                 {
-                    Id = table.Column<ulong>(type: "numeric(20,0)", nullable: false)
+                    Id = table.Column<ulong>(type: "numeric(20,0)", nullable: false),
+                    Config = table.Column<byte>(type: "smallint", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -28,13 +28,12 @@ namespace SbuBot.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Members", x => new { x.Id, x.GuildId });
-                    table.UniqueConstraint("AK_Members_Id", x => x.Id);
                     table.ForeignKey(
                         name: "FK_Members_Guilds_GuildId",
                         column: x => x.GuildId,
                         principalTable: "Guilds",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.SetNull);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -53,7 +52,7 @@ namespace SbuBot.Migrations
                         column: x => x.GuildId,
                         principalTable: "Guilds",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.SetNull);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_ColorRoles_Members_OwnerId_GuildId",
                         columns: x => new { x.OwnerId, x.GuildId },
@@ -66,18 +65,17 @@ namespace SbuBot.Migrations
                 name: "Reminders",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    MessageId = table.Column<ulong>(type: "numeric(20,0)", nullable: false),
                     OwnerId = table.Column<ulong>(type: "numeric(20,0)", nullable: true),
                     GuildId = table.Column<ulong>(type: "numeric(20,0)", nullable: false),
                     ChannelId = table.Column<ulong>(type: "numeric(20,0)", nullable: false),
-                    MessageId = table.Column<ulong>(type: "numeric(20,0)", nullable: false),
                     Message = table.Column<string>(type: "character varying(1024)", maxLength: 1024, nullable: true),
                     CreatedAt = table.Column<long>(type: "bigint", nullable: false),
                     DueAt = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Reminders", x => x.Id);
+                    table.PrimaryKey("PK_Reminders", x => x.MessageId);
                     table.ForeignKey(
                         name: "FK_Reminders_Guilds_GuildId",
                         column: x => x.GuildId,
@@ -85,10 +83,10 @@ namespace SbuBot.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Reminders_Members_OwnerId",
-                        column: x => x.OwnerId,
+                        name: "FK_Reminders_Members_OwnerId_GuildId",
+                        columns: x => new { x.OwnerId, x.GuildId },
                         principalTable: "Members",
-                        principalColumn: "Id",
+                        principalColumns: new[] { "Id", "GuildId" },
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -96,26 +94,25 @@ namespace SbuBot.Migrations
                 name: "Tags",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    OwnerId = table.Column<ulong>(type: "numeric(20,0)", nullable: true),
                     GuildId = table.Column<ulong>(type: "numeric(20,0)", nullable: false),
                     Name = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
+                    OwnerId = table.Column<ulong>(type: "numeric(20,0)", nullable: true),
                     Content = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Tags", x => x.Id);
+                    table.PrimaryKey("PK_Tags", x => new { x.Name, x.GuildId });
                     table.ForeignKey(
                         name: "FK_Tags_Guilds_GuildId",
                         column: x => x.GuildId,
                         principalTable: "Guilds",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.SetNull);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Tags_Members_OwnerId",
-                        column: x => x.OwnerId,
+                        name: "FK_Tags_Members_OwnerId_GuildId",
+                        columns: x => new { x.OwnerId, x.GuildId },
                         principalTable: "Members",
-                        principalColumn: "Id",
+                        principalColumns: new[] { "Id", "GuildId" },
                         onDelete: ReferentialAction.SetNull);
                 });
 
@@ -146,20 +143,29 @@ namespace SbuBot.Migrations
                 column: "OwnerId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Reminders_OwnerId_GuildId",
+                table: "Reminders",
+                columns: new[] { "OwnerId", "GuildId" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Tags_GuildId",
                 table: "Tags",
                 column: "GuildId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Tags_Name_GuildId",
+                name: "IX_Tags_Name",
                 table: "Tags",
-                columns: new[] { "Name", "GuildId" },
-                unique: true);
+                column: "Name");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Tags_OwnerId",
                 table: "Tags",
                 column: "OwnerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Tags_OwnerId_GuildId",
+                table: "Tags",
+                columns: new[] { "OwnerId", "GuildId" });
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

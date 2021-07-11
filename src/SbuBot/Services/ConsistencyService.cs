@@ -30,39 +30,23 @@ namespace SbuBot.Services
 
         protected override async ValueTask OnGuildAvailable(GuildAvailableEventArgs e)
         {
-            if (!Configuration.IsProduction)
-                return;
-
-            using (IServiceScope scope = Bot.Services.CreateScope())
-            {
-                SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
-
-                if (await context.GetGuildAsync(e.GuildId) is null)
-                {
-                    context.AddGuild(e.Guild);
-                    await context.SaveChangesAsync(Bot.StoppingToken);
-                }
-            }
-
-            // only chunk sbu for now
-            if (e.GuildId == SbuGlobals.Guild.SELF)
+            if (e.GuildId == SbuGlobals.Guild.Sbu.SELF
+                || e.GuildId == SbuGlobals.Guild.LaFamilia.SELF
+                || e.GuildId == SbuGlobals.Guild.Lab.SELF)
                 await Bot.Chunker.ChunkAsync(e.Guild);
         }
 
         protected override async ValueTask OnJoinedGuild(JoinedGuildEventArgs e)
         {
-            if (!Configuration.IsProduction)
-                return;
-
             using (IServiceScope scope = Bot.Services.CreateScope())
             {
                 SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
 
-                if (await context.GetGuildAsync(e.GuildId) is null)
-                {
-                    context.AddGuild(e.Guild);
-                    await context.SaveChangesAsync();
-                }
+                if (await context.GetGuildAsync(e.GuildId) is { })
+                    return;
+
+                context.AddGuild(e.Guild);
+                await context.SaveChangesAsync();
             }
 
             Logger.LogDebug("Guild inserted: {@Guild}", new { Id = e.GuildId });
@@ -70,9 +54,6 @@ namespace SbuBot.Services
 
         protected override async ValueTask OnLeftGuild(LeftGuildEventArgs e)
         {
-            if (!Configuration.IsProduction)
-                return;
-
             using (IServiceScope scope = Bot.Services.CreateScope())
             {
                 SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
@@ -82,7 +63,7 @@ namespace SbuBot.Services
                     return;
 
                 context.Guilds.Remove(guild);
-                await service.CancelAsync(r => r.Value.GuildId == guild.Id);
+                await service.CancelAsync(r => r.GuildId == guild.Id);
                 await context.SaveChangesAsync();
             }
 
@@ -91,9 +72,6 @@ namespace SbuBot.Services
 
         protected override async ValueTask OnMemberJoined(MemberJoinedEventArgs e)
         {
-            if (!Configuration.IsProduction)
-                return;
-
             if (e.Member.IsBot)
                 return;
 
@@ -113,9 +91,6 @@ namespace SbuBot.Services
 
         protected override async ValueTask OnMemberUpdated(MemberUpdatedEventArgs e)
         {
-            if (!Configuration.IsProduction)
-                return;
-
             if (e.NewMember.IsBot)
                 return;
 
@@ -175,9 +150,6 @@ namespace SbuBot.Services
 
         protected override async ValueTask OnMemberLeft(MemberLeftEventArgs e)
         {
-            if (!Configuration.IsProduction)
-                return;
-
             if (e.User.IsBot)
                 return;
 
@@ -189,7 +161,7 @@ namespace SbuBot.Services
                 if (await context.GetMemberAsync(e.User.Id, e.GuildId) is not { } member)
                     return;
 
-                await service.CancelAsync(r => r.Value.OwnerId == member.Id);
+                await service.CancelAsync(r => r.OwnerId == member.Id);
                 await context.SaveChangesAsync();
                 Logger.LogDebug("Member removed: {@Member}", new { e.User.Id, Guild = e.GuildId });
             }
@@ -197,9 +169,6 @@ namespace SbuBot.Services
 
         protected override async ValueTask OnMessageReceived(BotMessageReceivedEventArgs e)
         {
-            if (!Configuration.IsProduction)
-                return;
-
             if (e.Member.IsBot)
                 return;
 
@@ -222,9 +191,6 @@ namespace SbuBot.Services
 
         protected override async ValueTask OnRoleDeleted(RoleDeletedEventArgs e)
         {
-            if (!Configuration.IsProduction)
-                return;
-
             if (e.Role.Position >= Bot.GetColorRoleSeparator().Position)
                 return;
 

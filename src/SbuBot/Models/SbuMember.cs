@@ -27,19 +27,15 @@ namespace SbuBot.Models
         [NotLogged]
         public List<SbuReminder> Reminders { get; } = new();
 
-        public SbuMember(Snowflake id, Snowflake guildId)
+        public SbuMember(IMember member) : this(member.Id, member.GuildId) { }
+
+#region EFCore
+
+        internal SbuMember(Snowflake id, Snowflake guildId)
         {
             Id = id;
             GuildId = guildId;
         }
-
-        public SbuMember(IMember member)
-        {
-            Id = member.Id;
-            GuildId = member.GuildId;
-        }
-
-#region EFCore
 
 #nullable disable
         internal sealed class EntityTypeConfiguration : IEntityTypeConfiguration<SbuMember>
@@ -64,14 +60,14 @@ namespace SbuBot.Models
 
                 builder.HasMany(m => m.Tags)
                     .WithOne(t => t.Owner)
-                    .HasForeignKey(t => t.OwnerId)
-                    .HasPrincipalKey(m => m.Id)
+                    .HasForeignKey(t => new { t.OwnerId, t.GuildId })
+                    .HasPrincipalKey(m => new { m.Id, m.GuildId })
                     .OnDelete(DeleteBehavior.SetNull);
 
                 builder.HasMany(m => m.Reminders)
                     .WithOne(r => r.Owner)
-                    .HasForeignKey(r => r.OwnerId)
-                    .HasPrincipalKey(m => m.Id)
+                    .HasForeignKey(r => new { r.OwnerId, r.GuildId })
+                    .HasPrincipalKey(m => new { m.Id, m.GuildId })
                     .OnDelete(DeleteBehavior.Cascade);
             }
         }

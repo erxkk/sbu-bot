@@ -55,9 +55,6 @@ namespace SbuBot.Extensions
             => @this.GetSbuDbContext()
                 .GetTagAsync(name, @this.GuildId, t => t.Include(t => t.Guild).Include(t => t.Owner));
 
-        public static Task<SbuTag?> GetTagAsync(this DiscordGuildCommandContext @this, Guid id)
-            => @this.GetSbuDbContext().GetTagAsync(id, t => t.Include(t => t.Guild).Include(t => t.Owner));
-
         public static Task<List<SbuTag>> GetTagsAsync(this DiscordGuildCommandContext @this)
             => @this.GetSbuDbContext()
                 .Tags

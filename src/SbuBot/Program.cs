@@ -17,7 +17,6 @@ using Microsoft.Extensions.Logging;
 using SbuBot;
 using SbuBot.Logging;
 using SbuBot.Models;
-using SbuBot.Services;
 
 using Serilog;
 using Serilog.Events;
@@ -39,9 +38,7 @@ try
                 .Destructure.ToMaximumStringLength(50)
                 .Destructure.ByTransforming<Snowflake>(snowflake => snowflake.RawValue)
                 .Destructure
-                .ByTransforming<SchedulerService.Entry>(entry => new { entry.Id, Remaining = entry.RecurringCount })
-                .Destructure
-                .ByTransforming<SbuReminder>(reminder => new { reminder.Id, Owner = reminder.OwnerId })
+                .ByTransforming<SbuReminder>(reminder => new { Id = reminder.MessageId, Owner = reminder.OwnerId })
                 .WriteTo.File(
                     $"{ctx.Configuration["Log:Path"]}/log.txt",
                     ctx.HostingEnvironment.IsProduction() ? LogEventLevel.Debug : LogEventLevel.Verbose,

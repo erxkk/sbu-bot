@@ -1,4 +1,3 @@
-using System;
 using System.Threading.Tasks;
 
 using Disqord.Bot;
@@ -20,21 +19,9 @@ namespace SbuBot.Commands.Parsing.TypeParsers
         {
             SbuTag? tag;
 
-            TypeParser<Guid> guidParser = context.Bot.Commands.GetTypeParser<Guid>();
-
-            if (await guidParser.ParseAsync(parameter, value, context) is { IsSuccessful: true } guidParseResult)
+            await using (context.BeginYield())
             {
-                await using (context.BeginYield())
-                {
-                    tag = await context.GetTagAsync(guidParseResult.Value);
-                }
-            }
-            else
-            {
-                await using (context.BeginYield())
-                {
-                    tag = await context.GetTagAsync(value);
-                }
+                tag = await context.GetTagAsync(value);
             }
 
             return tag is { } ? Success(tag) : Failure("Could not find tag.");

@@ -10,13 +10,12 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace SbuBot.Models
 {
-    public sealed class SbuTag : ISbuEntity, ISbuOwnedEntity, ISbuGuildEntity
+    public sealed class SbuTag : ISbuOwnedGuildEntity
     {
         public const int MIN_NAME_LENGTH = 3;
         public const int MAX_NAME_LENGTH = 128;
         public const int MAX_CONTENT_LENGTH = 2048;
 
-        public Guid Id { get; }
         public Snowflake? OwnerId { get; set; }
         public Snowflake GuildId { get; }
         public string Name { get; }
@@ -29,34 +28,32 @@ namespace SbuBot.Models
         [NotLogged]
         public SbuGuild? Guild { get; }
 
-        public SbuTag(Snowflake ownerId, Snowflake guildId, string name, string content)
-        {
-            Id = Guid.NewGuid();
-            OwnerId = ownerId;
-            GuildId = guildId;
-            Name = name;
-            Content = content;
-        }
+        public SbuTag(Snowflake ownerId, Snowflake guildId, string name, string content) : this(
+            (Snowflake?) ownerId,
+            guildId,
+            name,
+            content
+        ) { }
 
 #region EFCore
 
-#nullable disable
-        internal SbuTag(Guid id, Snowflake? ownerId, Snowflake guildId, string name, string content)
+        internal SbuTag(Snowflake? ownerId, Snowflake guildId, string name, string content)
         {
-            Id = id;
             OwnerId = ownerId;
             GuildId = guildId;
             Name = name;
             Content = content;
         }
 
+#nullable disable
         internal sealed class EntityTypeConfiguration : IEntityTypeConfiguration<SbuTag>
         {
             public void Configure(EntityTypeBuilder<SbuTag> builder)
             {
-                builder.HasKey(t => t.Id);
+                builder.HasKey(t => new { t.Name, t.GuildId });
+                builder.HasIndex(t => t.Name);
                 builder.HasIndex(t => t.OwnerId);
-                builder.HasIndex(t => new { t.Name, t.GuildId }).IsUnique();
+                builder.HasIndex(t => t.GuildId);
 
                 builder.Property(t => t.OwnerId);
                 builder.Property(t => t.GuildId);
@@ -65,8 +62,8 @@ namespace SbuBot.Models
 
                 builder.HasOne(t => t.Owner)
                     .WithMany(m => m.Tags)
-                    .HasForeignKey(t => t.OwnerId)
-                    .HasPrincipalKey(m => m.Id)
+                    .HasForeignKey(t => new { t.OwnerId, t.GuildId })
+                    .HasPrincipalKey(m => new { m.Id, m.GuildId })
                     .OnDelete(DeleteBehavior.SetNull);
 
                 builder.HasOne(t => t.Guild)

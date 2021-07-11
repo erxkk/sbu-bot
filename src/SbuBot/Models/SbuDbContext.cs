@@ -113,19 +113,12 @@ namespace SbuBot.Models
             _sbuBot.StoppingToken
         )!;
 
-        public Task<SbuTag?> GetTagAsync(
-            Guid id,
-            Func<IQueryable<SbuTag>, IQueryable<SbuTag>>? query = null
-        ) => (query is { } ? query(Tags) : Tags).FirstOrDefaultAsync(
-            t => t.Id == id,
-            _sbuBot.StoppingToken
-        )!;
-
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
             => base.SaveChangesAsync(_sbuBot.StoppingToken);
 
 #region Configuration
 
+        // TODO: use Table-Per-Type HasBaseType on EntityTypeConfiguration once supported on ef core to reduce type config duplication
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
             => optionsBuilder.UseNpgsql(_configuration.DbConnectionString);
 
