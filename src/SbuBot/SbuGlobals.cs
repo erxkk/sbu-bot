@@ -9,7 +9,7 @@ namespace SbuBot
         public const string DESCRIPTOR_SEPARATOR = "::";
         public const string DEFAULT_PREFIX = "sbu";
 
-        public static readonly Version VERSION = new(0, 8, 4);
+        public static readonly Version VERSION = new(0, 8, 5);
 
         public static readonly string[] RESERVED_KEYWORDS =
         {
@@ -172,7 +172,10 @@ namespace SbuBot
             public const ulong SELF = 846789266041470977UL;
             public const ulong OWNER = Bot.OWNER;
 
-            public const ulong CUM = 863031236985356319UL;
+            public static class Misc
+            {
+                public const ulong CUM = 863031236985356319UL;
+            }
 
             public static class Vote
             {

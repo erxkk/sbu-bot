@@ -70,46 +70,5 @@ namespace SbuBot
             idPair = default;
             return false;
         }
-
-        public static IEnumerable<string> FillPages(
-            IEnumerable<string> source,
-            int maxElementsPerPage = -1,
-            int maxPageLength = 4096
-        )
-        {
-            var builder = new StringBuilder();
-            var elements = 0;
-
-            foreach (string item in source)
-            {
-                if (item.Length + 1 > maxPageLength)
-                {
-                    throw new ArgumentOutOfRangeException(
-                        nameof(source),
-                        item.Length,
-                        $"An item in the collection was longer than maximum page length of {maxPageLength}."
-                    );
-                }
-
-                if ((maxElementsPerPage == -1 || elements <= maxElementsPerPage)
-                    && builder.Length + item.Length + 1 <= maxPageLength)
-                {
-                    elements++;
-                    builder.AppendLine(item);
-
-                    continue;
-                }
-
-                yield return builder.ToString();
-
-                elements = 0;
-                builder.Clear().AppendLine(item);
-            }
-
-            if (builder.Length == 0)
-                throw new ArgumentException("Source cannot be empty", nameof(source));
-
-            yield return builder.ToString();
-        }
     }
 }

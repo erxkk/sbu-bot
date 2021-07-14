@@ -12,6 +12,7 @@ using Kkommon.Extensions.Enumerable;
 using Qmmands;
 
 using SbuBot.Commands;
+using SbuBot.Commands.Views;
 using SbuBot.Commands.Views.Help;
 
 namespace SbuBot.Evaluation
@@ -58,7 +59,7 @@ namespace SbuBot.Evaluation
 
         public DiscordMenuCommandResult Pages(IEnumerable<Page> pages) => Pages(new ListPageProvider(pages));
 
-        public DiscordMenuCommandResult Pages(PageProvider pageProvider) => View(new PagedView(pageProvider));
+        public DiscordMenuCommandResult Pages(PageProvider pageProvider) => View(new CustomPagedView(pageProvider));
 
         public DiscordMenuCommandResult View(ViewBase view)
             => new(Context, new InteractiveMenu(Context.Author.Id, view));
@@ -66,14 +67,11 @@ namespace SbuBot.Evaluation
         public DiscordMenuCommandResult Menu(MenuBase menu) => new(Context, menu);
 
         // SbuModuleBase
-        public DiscordMenuCommandResult FilledPages(
+        public DiscordMenuCommandResult DistributedPages(
             IEnumerable<string> contents,
             int itemsPerPage = -1,
-            Func<LocalEmbed, LocalEmbed>? embedModifier = null
-        ) => Pages(
-            SbuUtility.FillPages(contents, itemsPerPage)
-                .Select(p => new Page().WithEmbeds((embedModifier?.Invoke(new()) ?? new()).WithDescription(p)))
-        );
+            Func<LocalEmbed, LocalEmbed>? embedFactory = null
+        ) => Pages(new DistributedPageProvider(contents, itemsPerPage, embedFactory));
 
         public DiscordMenuCommandResult CountedPages(params LocalEmbed[] embeds)
             => Pages(

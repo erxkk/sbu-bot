@@ -31,7 +31,7 @@ namespace SbuBot.Services
                     break;
 
                 case SbuGlobals.Member.TOASTY when e.Message.Content.Equals("cum", StringComparison.OrdinalIgnoreCase):
-                    await e.Message.AddReactionAsync(LocalEmoji.Custom(SbuGlobals.Emote.CUM));
+                    await e.Message.AddReactionAsync(LocalEmoji.Custom(SbuGlobals.Emote.Misc.CUM));
                     break;
             }
         }
