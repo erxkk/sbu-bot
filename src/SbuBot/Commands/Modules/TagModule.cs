@@ -188,9 +188,9 @@ namespace SbuBot.Commands.Modules
                     );
                 }
 
-                return FilledPages(
+                return DistributedPages(
                     tags.Select(t => $"**Name:** {t.Name}\n**Content:** {t.Content}"),
-                    embedModifier: embed => embed.WithTitle(
+                    embedFactory: embed => embed.WithTitle(
                         $"{(notAuthor ? $"{Mention.User(owner.Id)}'s" : "Your")} Tags"
                     )
                 );
@@ -205,7 +205,7 @@ namespace SbuBot.Commands.Modules
                 if (tags.Count == 0)
                     return Reply("No tags found.");
 
-                return FilledPages(
+                return DistributedPages(
                     tags.Select(
                         t => string.Format(
                             "**Name:** {0}\n**Owner:** {1}",
@@ -213,7 +213,7 @@ namespace SbuBot.Commands.Modules
                             t.OwnerId is { } ? Mention.User(t.Owner!.Id) : "None"
                         )
                     ),
-                    embedModifier: embed => embed.WithTitle("Tags")
+                    embedFactory: embed => embed.WithTitle("Tags")
                 );
             }
         }

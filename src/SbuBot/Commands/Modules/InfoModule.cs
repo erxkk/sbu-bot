@@ -53,7 +53,7 @@ namespace SbuBot.Commands.Modules
 
         [Command("guide")]
         [Description("Displays an interactive guide that explains bot usage and help syntax.")]
-        public DiscordCommandResult Guide() => CountedPages(
+        public DiscordCommandResult Guide() => Pages(
             new LocalEmbed()
                 .WithTitle("Commands")
                 .WithDescription(GuideStatic.COMMANDS),
@@ -89,10 +89,10 @@ namespace SbuBot.Commands.Modules
                 if (matches.Count == 0)
                     return Reply("Couldn't find any commands for the given input.");
 
-                return FilledPages(
+                return DistributedPages(
                     matches.Select(m => m.Command)
                         .Select(cmd => cmd.IsEnabled ? $"`{cmd.Format()}`" : $"~~`{cmd.Format()}`~~"),
-                    embedModifier: embed => embed.WithTitle("Matched commands")
+                    embedFactory: embed => embed.WithTitle("Matched commands")
                 );
             }
 
@@ -102,11 +102,11 @@ namespace SbuBot.Commands.Modules
             {
                 IReadOnlyList<Command> commands = Context.Bot.Commands.GetAllCommands();
 
-                return FilledPages(
+                return DistributedPages(
                     commands.Select(
                         cmd => cmd.IsEnabled ? $"`{cmd.Format()}`" : $"~~`{cmd.Format()}`~~"
                     ),
-                    embedModifier: embed => embed.WithTitle("Commands")
+                    embedFactory: embed => embed.WithTitle("Commands")
                 );
             }
         }

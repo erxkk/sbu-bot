@@ -74,7 +74,7 @@ namespace SbuBot
         public static IEnumerable<string> FillPages(
             IEnumerable<string> source,
             int maxElementsPerPage = -1,
-            int maxPageLength = 2048
+            int maxPageLength = 4096
         )
         {
             var builder = new StringBuilder();

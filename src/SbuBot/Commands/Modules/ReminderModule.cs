@@ -137,14 +137,14 @@ namespace SbuBot.Commands.Modules
                 is not { Count: > 0 } reminders)
                 return Reply("You have no reminders.");
 
-            return FilledPages(
+            return DistributedPages(
                 reminders.Values
                     .Where(r => r.OwnerId == Context.Author.Id)
                     .Select(
                         r => $"[`{r.MessageId}`]({r.JumpUrl})\nDue {Markdown.Timestamp(r.DueAt)}\n"
                             + $"{(r.Message is { } ? $"\"{r.Message}\"" : "No Message")}\n"
                     ),
-                embedModifier: embed => embed.WithTitle("Your Reminders")
+                embedFactory: embed => embed.WithTitle("Your Reminders")
             );
         }
 
