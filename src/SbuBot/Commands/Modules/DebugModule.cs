@@ -11,18 +11,15 @@ using Disqord.Rest;
 using Qmmands;
 
 using SbuBot.Commands.Attributes;
-using SbuBot.Commands.Parsing;
-using SbuBot.Evaluation;
 using SbuBot.Extensions;
-using SbuBot.Models;
 
 namespace SbuBot.Commands.Modules
 {
+    [RequireBotOwner]
     [Description("A collection of commands for debugging and testing.")]
-    public sealed class DebugModule : SbuModuleBase
+    public sealed partial class DebugModule : SbuModuleBase
     {
         [Command("echo")]
-        [RequireBotOwner]
         [Description(
             "Removes the original message and replies with the given message in the given target channel."
         )]
@@ -37,80 +34,7 @@ namespace SbuBot.Commands.Modules
             await target.SendMessageAsync(new LocalMessage().WithContent(message));
         }
 
-        [Command("ping")]
-        [Description("Replies with `Pong!`.")]
-        public DiscordCommandResult Send() => Reply("Pong!");
-
-        [Group("eval")]
-        [RequireBotOwner]
-        [Description("Compiles and runs a C#-Script and returns the script result.")]
-        [Remarks("Code may be given as plain code or as a code block with `cs` or `csharp` language.")]
-        public class EvalGroup : SbuModuleBase
-        {
-            [Command]
-            public async Task<DiscordCommandResult> EvalMessageAsync(
-                [OverrideDefault("{@reply}")][Description("A message containing the code to evaluate.")]
-                IUserMessage? codeMessage = null
-            )
-            {
-                codeMessage ??= Context.Message.ReferencedMessage.HasValue
-                    ? Context.Message.ReferencedMessage.Value
-                    : null;
-
-                if (codeMessage is null)
-                    return Reply("No expression or message reference given.");
-
-                string code = Context.Message.ReferencedMessage.Value.Content;
-                int index = code.IndexOf("```", StringComparison.OrdinalIgnoreCase);
-
-                if (index != -1)
-                    code = code[index..];
-
-                return await EvalAsync(code);
-            }
-
-            [Command]
-            public async Task<DiscordCommandResult> EvalAsync([Description("The code to evaluate.")] string code)
-            {
-                code = cleanUp(code);
-
-                List<LocalEmbed> embeds = new(2);
-                CompilationResult compilationResult = Eval.Compile(code, Context);
-
-                if (compilationResult is CompilationResult.Completed { Diagnostics: { Count: > 0 } }
-                    or CompilationResult.Failed)
-                    embeds.Add(compilationResult.ToEmbed());
-
-                if (compilationResult is CompilationResult.Completed completed)
-                {
-                    ScriptResult result = await completed.RunAsync();
-                    embeds.Add(result.ToEmbed());
-                }
-
-                return Reply(embeds.ToArray());
-
-                static string cleanUp(string expression)
-                {
-                    if (!expression.StartsWith("```"))
-                        return expression;
-
-                    ReadOnlySpan<char> span = expression.AsSpan();
-
-                    span = span[3..^3];
-
-                    if (span.StartsWith("cs".AsSpan()))
-                        span = span[2..];
-
-                    if (span.StartsWith("harp".AsSpan()))
-                        span = span[4..];
-
-                    return span.ToString();
-                }
-            }
-        }
-
         [Group("do")]
-        [RequireBotOwner]
         [Description("A group of commands that invoke other commands with a proxy context.")]
         public sealed class ProxySubModule : SbuModuleBase
         {
@@ -150,7 +74,6 @@ namespace SbuBot.Commands.Modules
         }
 
         [Command("lock")]
-        [RequireBotOwner]
         [Description("Sets the bot lock state to the given state, or switches it if no state is specified.")]
         public DiscordCommandResult Lock(
             [OverrideDefault("{!state}")][Description("The new lock state to set the bot to.")]
@@ -163,7 +86,6 @@ namespace SbuBot.Commands.Modules
         }
 
         [Command("toggle")]
-        [RequireBotOwner]
         [Description("Disables/Enables a given command or module.")]
         public DiscordCommandResult Toggle(
             [Description("The command or module to disable/enable.")]
@@ -217,7 +139,6 @@ namespace SbuBot.Commands.Modules
         }
 
         [Command("chunk")]
-        [RequireBotOwner]
         [Description("Chunks the current guild.")]
         public async Task<DiscordCommandResult> Chunk()
         {
@@ -230,7 +151,6 @@ namespace SbuBot.Commands.Modules
         }
 
         [Command("kill")]
-        [RequireBotOwner]
         [Description("Fucking kills the bot oh my god...")]
         public async Task Kill()
         {
@@ -239,13 +159,24 @@ namespace SbuBot.Commands.Modules
         }
 
         [Command("test")]
-        [RequireBotOwner]
         [Description("A test command.")]
-        public DiscordCommandResult Test([Description("A test parameter.")] OneOrAll<SbuTag> tag)
+        public DiscordCommandResult Test()
         {
             // return FilledPages(Enumerable.Range(1, 9).Select(i => i.ToString()), 3);
             // return HelpView(Context.Bot.Commands.GetAllCommands().First(c => c.Aliases.Contains("as")));
-            return Reply(new LocalEmbed().WithDescription(Markdown.CodeBlock("yml", tag.GetInspection(3))));
+            // return Reply(new LocalEmbed().WithDescription(Markdown.CodeBlock("yml", tag.GetInspection(3))));
+
+            const SomeEnum enu = SomeEnum.Value1 | SomeEnum.Value2 | SomeEnum.Value3;
+            return Reply(enu.GetInspection(3));
+        }
+
+        [Flags]
+        private enum SomeEnum
+        {
+            Value1,
+            Value2,
+            Value3,
+            Value4,
         }
     }
 }

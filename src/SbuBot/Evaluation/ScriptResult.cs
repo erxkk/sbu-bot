@@ -12,7 +12,8 @@ namespace SbuBot.Evaluation
 
         private ScriptResult(TimeSpan completionTime) => CompletionTime = completionTime;
 
-        public virtual LocalEmbed ToEmbed() => new LocalEmbed().WithFooter(@$"{CompletionTime:s\.ffff\s}");
+        public virtual LocalEmbed ToEmbed() => new LocalEmbed()
+            .WithFooter(@$"{CompletionTime:s\.ffff\s}");
 
         public sealed class Completed : ScriptResult
         {
@@ -21,10 +22,9 @@ namespace SbuBot.Evaluation
             public Completed(TimeSpan completionTime, object? returnValue) : base(completionTime)
                 => ReturnValue = returnValue;
 
-            // TODO: make inspection configurable
             public override LocalEmbed ToEmbed() => base.ToEmbed()
                 .WithTitle("Result")
-                .WithDescription(Markdown.CodeBlock("yml", ReturnValue?.GetInspection(2) ?? "{null}"))
+                .WithDescription(Markdown.CodeBlock("yml", ReturnValue?.GetInspection() ?? "null"))
                 .WithColor(Color.Green);
         }
 

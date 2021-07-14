@@ -49,6 +49,24 @@
       <Compile Update="Commands\Modules\GuildManagementModule.Request.cs">
         <DependentUpon>GuildManagementModule.cs</DependentUpon>
       </Compile>
+      <Compile Update="Inspection\Inspect.Enum.cs">
+        <DependentUpon>Inspect.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Inspection\Inspect.Enumerable.cs">
+        <DependentUpon>Inspect.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Inspection\Inspect.Extraction.cs">
+        <DependentUpon>Inspect.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Inspection\Inspect.Object.cs">
+        <DependentUpon>Inspect.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Inspection\Inspect.Formatting.cs">
+        <DependentUpon>Inspect.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Commands\Modules\DebugModule.Eval.cs">
+        <DependentUpon>DebugModule.cs</DependentUpon>
+      </Compile>
     </ItemGroup>
 
 </Project>

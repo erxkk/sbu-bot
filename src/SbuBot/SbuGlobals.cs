@@ -9,7 +9,7 @@ namespace SbuBot
         public const string DESCRIPTOR_SEPARATOR = "::";
         public const string DEFAULT_PREFIX = "sbu";
 
-        public static readonly Version VERSION = new(0, 8, 2);
+        public static readonly Version VERSION = new(0, 8, 3);
 
         public static readonly string[] RESERVED_KEYWORDS =
         {
@@ -187,6 +187,7 @@ namespace SbuBot
                 public const ulong FAST_BACK = 863141104559456286UL;
                 public const ulong FORWARD = 863139842581069864UL;
                 public const ulong FAST_FORWARD = 863141104567058442UL;
+                public const ulong CONFIRM = 864823489948680202UL;
                 public const ulong STOP = 863139842748710962UL;
             }
         }
