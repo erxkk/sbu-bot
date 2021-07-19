@@ -9,8 +9,8 @@ using SbuBot.Models;
 namespace SbuBot.Migrations
 {
     [DbContext(typeof(SbuDbContext))]
-    [Migration("20210711092632_GuildUniqueRelationFix")]
-    partial class GuildUniqueRelationFix
+    [Migration("20210717210936_BreakingConstraints")]
+    partial class BreakingConstraints
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -19,6 +19,29 @@ namespace SbuBot.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63)
                 .HasAnnotation("ProductVersion", "5.0.6")
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+            modelBuilder.Entity("SbuBot.Models.SbuAutoResponse", b =>
+                {
+                    b.Property<string>("Trigger")
+                        .HasMaxLength(1024)
+                        .HasColumnType("character varying(1024)");
+
+                    b.Property<ulong>("GuildId")
+                        .HasColumnType("numeric(20,0)");
+
+                    b.Property<string>("Response")
+                        .IsRequired()
+                        .HasMaxLength(1024)
+                        .HasColumnType("character varying(1024)");
+
+                    b.HasKey("Trigger", "GuildId");
+
+                    b.HasIndex("GuildId");
+
+                    b.HasIndex("Trigger");
+
+                    b.ToTable("AutoResponses");
+                });
 
             modelBuilder.Entity("SbuBot.Models.SbuColorRole", b =>
                 {
@@ -115,8 +138,8 @@ namespace SbuBot.Migrations
 
                     b.Property<string>("Content")
                         .IsRequired()
-                        .HasMaxLength(2048)
-                        .HasColumnType("character varying(2048)");
+                        .HasMaxLength(1024)
+                        .HasColumnType("character varying(1024)");
 
                     b.Property<ulong?>("OwnerId")
                         .HasColumnType("numeric(20,0)");
@@ -132,6 +155,17 @@ namespace SbuBot.Migrations
                     b.HasIndex("OwnerId", "GuildId");
 
                     b.ToTable("Tags");
+                });
+
+            modelBuilder.Entity("SbuBot.Models.SbuAutoResponse", b =>
+                {
+                    b.HasOne("SbuBot.Models.SbuGuild", "Guild")
+                        .WithMany("AutoResponses")
+                        .HasForeignKey("GuildId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Guild");
                 });
 
             modelBuilder.Entity("SbuBot.Models.SbuColorRole", b =>
@@ -201,6 +235,8 @@ namespace SbuBot.Migrations
 
             modelBuilder.Entity("SbuBot.Models.SbuGuild", b =>
                 {
+                    b.Navigation("AutoResponses");
+
                     b.Navigation("ColorRoles");
 
                     b.Navigation("Members");

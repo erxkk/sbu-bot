@@ -25,7 +25,7 @@ namespace SbuBot.Commands.Parsing.TypeParsers
         {
             // TODO: parsing via hex number + display via hex number
             ReminderService service = context.Services.GetRequiredService<ReminderService>();
-            IReadOnlyDictionary<Snowflake, SbuReminder> reminders = await service.GetRemindersAsync();
+            IReadOnlyDictionary<Snowflake, SbuReminder> reminders = service.GetReminders();
 
             if (value.Equals("last", StringComparison.OrdinalIgnoreCase))
             {

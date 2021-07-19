@@ -198,7 +198,17 @@ namespace SbuBot.Commands.Modules
             }
 
             [Command]
-            public DiscordCommandResult InspectTag(
+            public DiscordCommandResult InspectAutoResponse(
+                [Description("The auto response to inspect.")]
+                SbuAutoResponse autoResponse
+            ) => Reply(
+                new LocalEmbed()
+                    .WithTitle("AutoResponse")
+                    .WithDescription(Markdown.CodeBlock("yml", autoResponse.GetInspection(3)))
+            );
+
+            [Command]
+            public DiscordCommandResult InspectReminder(
                 [Description("The reminder to inspect.")]
                 SbuReminder reminder
             ) => Reply(

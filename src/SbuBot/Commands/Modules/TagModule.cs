@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -51,20 +50,20 @@ namespace SbuBot.Commands.Modules
         public sealed class CreateGroup : SbuModuleBase
         {
             [Command]
-            [Usage("tag create tagggg :: new tag who dis", "t make da dog :: what da dog doin", "tag new h :: h")]
+            [Usage("tag create tagggg :: new tag who dis", "t make da dog :: what da dog doin", "tag mk h :: h")]
             public async Task<DiscordCommandResult> CreateAsync(
-                [Description("The tag descriptor.")] TagDescriptor tagDescriptor
+                [Description("The tag descriptor.")] TagDescriptor descriptor
             )
             {
-                if (await Context.GetTagAsync(tagDescriptor.Name) is { })
+                if (await Context.GetTagAsync(descriptor.Name) is { })
                     return Reply("A tag with same name already exists.");
 
                 Context.GetSbuDbContext()
                     .AddTag(
                         Context.Author.Id,
                         Context.Guild.Id,
-                        tagDescriptor.Name,
-                        tagDescriptor.Content
+                        descriptor.Name,
+                        descriptor.Content
                     );
 
                 await Context.SaveChangesAsync();
@@ -104,7 +103,7 @@ namespace SbuBot.Commands.Modules
 
                     case SbuTag.ValidNameType.TooLong:
                         return Reply(
-                            $"Aborted: The tag name must be at most {SbuTag.MAX_NAME_LENGTH} characters long."
+                            $"Aborted: The tag name can be at most {SbuTag.MAX_NAME_LENGTH} characters long."
                         );
 
                     case SbuTag.ValidNameType.Reserved:
@@ -113,8 +112,9 @@ namespace SbuBot.Commands.Modules
                     case SbuTag.ValidNameType.Valid:
                         break;
 
+                    // unreachable
                     default:
-                        throw new ArgumentOutOfRangeException();
+                        throw new();
                 }
 
                 if (await Context.GetTagAsync(name) is { })
@@ -130,7 +130,7 @@ namespace SbuBot.Commands.Modules
                         if (content.Length > SbuTag.MAX_CONTENT_LENGTH)
                         {
                             return Reply(
-                                $"Aborted: The tag content must be at most {SbuTag.MAX_CONTENT_LENGTH} characters long."
+                                $"Aborted: The tag content can be at most {SbuTag.MAX_CONTENT_LENGTH} characters long."
                             );
                         }
 
@@ -260,7 +260,7 @@ namespace SbuBot.Commands.Modules
                         if (content.Length > SbuTag.MAX_CONTENT_LENGTH)
                         {
                             return Reply(
-                                $"Aborted: The tag content must be at most {SbuTag.MAX_CONTENT_LENGTH} characters long."
+                                $"Aborted: The tag content can be at most {SbuTag.MAX_CONTENT_LENGTH} characters long."
                             );
                         }
 
@@ -316,11 +316,9 @@ namespace SbuBot.Commands.Modules
                             throw new();
                     }
 
-                    SbuMember owner = await Context.GetSbuDbContext().GetMemberAsync(Context.Author);
-
                     List<SbuTag> tags = await Context.GetSbuDbContext()
                         .Tags
-                        .Where(t => t.OwnerId == owner.Id)
+                        .Where(t => t.OwnerId == Context.Author.Id)
                         .ToListAsync(Context.Bot.StoppingToken);
 
                     Context.GetSbuDbContext().Tags.RemoveRange(tags);
@@ -344,8 +342,9 @@ namespace SbuBot.Commands.Modules
                         case ConfirmationResult.Confirmed:
                             break;
 
+                        // unreachable
                         default:
-                            throw new ArgumentOutOfRangeException();
+                            throw new();
                     }
 
                     Context.GetSbuDbContext().Tags.Remove(specific.Value);

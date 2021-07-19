@@ -30,7 +30,7 @@ namespace SbuBot.Commands.Parsing.TypeParsers
 
                 case SbuTag.ValidNameType.TooLong:
                     return Failure(
-                        $"The tag name must be at most {SbuTag.MAX_NAME_LENGTH} characters long."
+                        $"The tag name can be at most {SbuTag.MAX_NAME_LENGTH} characters long."
                     );
 
                 case SbuTag.ValidNameType.Reserved:
@@ -46,7 +46,7 @@ namespace SbuBot.Commands.Parsing.TypeParsers
             if (values[1].Length > SbuTag.MAX_CONTENT_LENGTH)
             {
                 return Failure(
-                    $"The tag content must be at most {SbuTag.MAX_CONTENT_LENGTH} characters long."
+                    $"The tag content can be at most {SbuTag.MAX_CONTENT_LENGTH} characters long."
                 );
             }
 

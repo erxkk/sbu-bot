@@ -63,6 +63,16 @@ namespace SbuBot.Extensions
                 .Where(t => t.GuildId == @this.GuildId)
                 .ToListAsync(@this.Bot.StoppingToken);
 
+        public static Task<SbuAutoResponse?> GetAutoResponseAsync(this DiscordGuildCommandContext @this, string trigger)
+            => @this.GetSbuDbContext().GetAutoResponseAsync(trigger, @this.GuildId, t => t.Include(t => t.Guild));
+
+        public static Task<List<SbuAutoResponse>> GetAutoResponsesAsync(this DiscordGuildCommandContext @this)
+            => @this.GetSbuDbContext()
+                .AutoResponses
+                .Include(t => t.Guild)
+                .Where(t => t.GuildId == @this.GuildId)
+                .ToListAsync(@this.Bot.StoppingToken);
+
         public static Task<int> SaveChangesAsync(this DiscordGuildCommandContext @this)
             => @this.GetSbuDbContext().SaveChangesAsync();
 

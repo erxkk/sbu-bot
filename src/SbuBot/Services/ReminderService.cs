@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -19,30 +20,17 @@ namespace SbuBot.Services
 {
     public sealed class ReminderService : SbuBotServiceBase
     {
-        private readonly Dictionary<Snowflake, Entry> _scheduleEntries = new();
-        private SemaphoreSlim _semaphoreSlim = new(1, 1);
+        private readonly ConcurrentDictionary<Snowflake, Entry> _scheduleEntries = new();
 
         public ReminderService(SbuConfiguration configuration) : base(configuration) { }
 
-        public async Task<IReadOnlyDictionary<Snowflake, SbuReminder>> GetRemindersAsync()
-        {
-            Dictionary<Snowflake, SbuReminder> copy;
-
-            using (_ = await _semaphoreSlim.EnterAsync())
-            {
-                copy = _scheduleEntries.ToDictionary(k => k.Key, v => v.Value.Reminder);
-            }
-
-            return copy;
-        }
+        public IReadOnlyDictionary<Snowflake, SbuReminder> GetReminders()
+            => _scheduleEntries.ToDictionary(k => k.Key, v => v.Value.Reminder);
 
         public override async Task StopAsync(CancellationToken cancellationToken)
         {
-            using (_ = await _semaphoreSlim.EnterAsync(cancellationToken))
-            {
-                foreach ((Snowflake _, Entry entry) in _scheduleEntries)
-                    await entry.Timer.DisposeAsync();
-            }
+            foreach ((Snowflake _, Entry entry) in _scheduleEntries)
+                await entry.Timer.DisposeAsync();
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -93,18 +81,15 @@ namespace SbuBot.Services
                 }
             }
 
-            using (_ = await _semaphoreSlim.EnterAsync())
-            {
-                _scheduleEntries[reminder.MessageId] = new(
-                    reminder,
-                    new(
-                        _timerCallback,
-                        reminder.MessageId,
-                        reminder.DueAt - now,
-                        Timeout.InfiniteTimeSpan
-                    )
-                );
-            }
+            _scheduleEntries[reminder.MessageId] = new(
+                reminder,
+                new(
+                    _timerCallback,
+                    reminder.MessageId,
+                    reminder.DueAt - now,
+                    Timeout.InfiniteTimeSpan
+                )
+            );
 
             Logger.LogDebug("Scheduled {@Reminder}", reminder);
         }
@@ -114,18 +99,15 @@ namespace SbuBot.Services
             DateTimeOffset now = DateTimeOffset.Now;
             Entry entry;
 
-            using (_ = await _semaphoreSlim.EnterAsync())
+            if (!_scheduleEntries.TryGetValue(id, out entry!))
             {
-                if (!_scheduleEntries.TryGetValue(id, out entry!))
-                {
-                    Logger.LogWarning(
-                        "Could not reschedule to {@NewTimestamp}, not found : {@Entry}",
-                        newTimestamp,
-                        id
-                    );
+                Logger.LogWarning(
+                    "Could not reschedule to {@NewTimestamp}, not found : {@Entry}",
+                    newTimestamp,
+                    id
+                );
 
-                    return;
-                }
+                return;
             }
 
             SbuReminder reminder = entry.Reminder;
@@ -152,13 +134,8 @@ namespace SbuBot.Services
 
         public async Task CancelAsync(Snowflake id)
         {
-            Entry entry;
-
-            using (_ = await _semaphoreSlim.EnterAsync())
-            {
-                if (!_scheduleEntries.Remove(id, out entry!))
-                    return;
-            }
+            if (!_scheduleEntries.TryRemove(id, out Entry? entry))
+                return;
 
             await entry.Timer.DisposeAsync();
             SbuReminder reminder = entry.Reminder;
@@ -184,21 +161,18 @@ namespace SbuBot.Services
             IEnumerable<KeyValuePair<Snowflake, Entry>> filtered = _scheduleEntries.Where(e => query(e.Value.Reminder));
             IEnumerable<SbuReminder> reminders = filtered.Select(e => e.Value.Reminder);
 
-            using (_ = await _semaphoreSlim.EnterAsync())
+            foreach ((Snowflake _, Entry entry) in filtered)
             {
-                foreach ((Snowflake _, Entry entry) in filtered)
-                {
-                    count++;
-                    await entry.Timer.DisposeAsync();
-                }
+                count++;
+                await entry.Timer.DisposeAsync();
+            }
 
-                using (IServiceScope scope = Bot.Services.CreateScope())
-                {
-                    SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
+            using (IServiceScope scope = Bot.Services.CreateScope())
+            {
+                SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
 
-                    context.Reminders.RemoveRange(reminders);
-                    await context.SaveChangesAsync();
-                }
+                context.Reminders.RemoveRange(reminders);
+                await context.SaveChangesAsync();
             }
 
             Logger.LogDebug("Cancelled: {@Reminders}", reminders);
@@ -211,15 +185,10 @@ namespace SbuBot.Services
 
         private async Task _timerCallbackAsync(Snowflake identifier)
         {
-            Entry? entry;
-
-            using (_ = await _semaphoreSlim.EnterAsync())
+            if (!_scheduleEntries.TryRemove(identifier, out Entry? entry))
             {
-                if (!_scheduleEntries.Remove(identifier, out entry))
-                {
-                    Logger.LogWarning("Could not dispatch, not found : {@Entry}", identifier);
-                    return;
-                }
+                Logger.LogWarning("Could not dispatch, not found : {@Entry}", identifier);
+                return;
             }
 
             await entry.Timer.DisposeAsync();

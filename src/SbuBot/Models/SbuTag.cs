@@ -14,7 +14,7 @@ namespace SbuBot.Models
     {
         public const int MIN_NAME_LENGTH = 3;
         public const int MAX_NAME_LENGTH = 128;
-        public const int MAX_CONTENT_LENGTH = 2048;
+        public const int MAX_CONTENT_LENGTH = 1024;
 
         public Snowflake? OwnerId { get; set; }
         public Snowflake GuildId { get; }
@@ -57,7 +57,7 @@ namespace SbuBot.Models
 
                 builder.Property(t => t.OwnerId);
                 builder.Property(t => t.GuildId);
-                builder.Property(t => t.Name).HasMaxLength(MAX_NAME_LENGTH);
+                builder.Property(t => t.Name).HasMaxLength(MAX_NAME_LENGTH).IsRequired();
                 builder.Property(t => t.Content).HasMaxLength(MAX_CONTENT_LENGTH).IsRequired();
 
                 builder.HasOne(t => t.Owner)
@@ -67,9 +67,9 @@ namespace SbuBot.Models
                     .OnDelete(DeleteBehavior.SetNull);
 
                 builder.HasOne(t => t.Guild)
-                    .WithMany(m => m.Tags)
+                    .WithMany(g => g.Tags)
                     .HasForeignKey(t => t.GuildId)
-                    .HasPrincipalKey(m => m.Id)
+                    .HasPrincipalKey(g => g.Id)
                     .OnDelete(DeleteBehavior.Cascade);
             }
         }

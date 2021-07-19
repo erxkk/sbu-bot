@@ -26,6 +26,7 @@ namespace SbuBot.Models
         public DbSet<SbuMember> Members { get; set; }
         public DbSet<SbuColorRole> ColorRoles { get; set; }
         public DbSet<SbuTag> Tags { get; set; }
+        public DbSet<SbuAutoResponse> AutoResponses { get; set; }
         public DbSet<SbuReminder> Reminders { get; set; }
 #nullable enable
 
@@ -113,6 +114,22 @@ namespace SbuBot.Models
             _sbuBot.StoppingToken
         )!;
 
+        public SbuAutoResponse AddAutoResponse(Snowflake guildId, string trigger, string response)
+        {
+            SbuAutoResponse sbuAutoResponse = new(guildId, trigger, response);
+            AutoResponses.Add(sbuAutoResponse);
+            return sbuAutoResponse;
+        }
+
+        public Task<SbuAutoResponse?> GetAutoResponseAsync(
+            string trigger,
+            Snowflake guildId,
+            Func<IQueryable<SbuAutoResponse>, IQueryable<SbuAutoResponse>>? query = null
+        ) => (query is { } ? query(AutoResponses) : AutoResponses).FirstOrDefaultAsync(
+            t => t.Trigger == trigger && t.GuildId == guildId,
+            _sbuBot.StoppingToken
+        )!;
+
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
             => base.SaveChangesAsync(_sbuBot.StoppingToken);
 
@@ -153,10 +170,10 @@ namespace SbuBot.Models
                     .SetBasePath(Directory.GetCurrentDirectory())
                     .AddEnvironmentVariables("DOTNET_")
                     .AddEnvironmentVariables("BOT_")
-                    .AddJsonFile("../migrations.json")
+                    .AddJsonFile("migrations.json")
                     .Build();
 
-                return new(null!, new(configuration, new HostingEnvironment()));
+                return new(null!, new(configuration));
             }
         }
 

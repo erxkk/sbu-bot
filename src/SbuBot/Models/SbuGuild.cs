@@ -26,6 +26,9 @@ namespace SbuBot.Models
         public List<SbuTag> Tags { get; } = new();
 
         [NotLogged]
+        public List<SbuAutoResponse> AutoResponses { get; } = new();
+
+        [NotLogged]
         public List<SbuReminder> Reminders { get; } = new();
 
         public SbuGuild(IGuild guild) : this(guild.Id, (SbuGuildConfig) 255) { }
@@ -66,6 +69,12 @@ namespace SbuBot.Models
                     .HasPrincipalKey(g => g.Id)
                     .OnDelete(DeleteBehavior.Cascade);
 
+                builder.HasMany(ar => ar.AutoResponses)
+                    .WithOne(g => g.Guild)
+                    .HasForeignKey(ar => ar.GuildId)
+                    .HasPrincipalKey(g => g.Id)
+                    .OnDelete(DeleteBehavior.Cascade);
+
                 builder.HasMany(g => g.Reminders)
                     .WithOne(r => r.Guild)
                     .HasForeignKey(r => r.GuildId)
@@ -81,6 +90,6 @@ namespace SbuBot.Models
     public enum SbuGuildConfig : byte
     {
         Fun,
-        Chat,
+        Respond,
     }
 }

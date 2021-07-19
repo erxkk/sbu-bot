@@ -2,7 +2,7 @@
 
 namespace SbuBot.Migrations
 {
-    public partial class GuildUniqueRelationFix : Migration
+    public partial class BreakingConstraints : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -16,6 +16,25 @@ namespace SbuBot.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Guilds", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AutoResponses",
+                columns: table => new
+                {
+                    GuildId = table.Column<ulong>(type: "numeric(20,0)", nullable: false),
+                    Trigger = table.Column<string>(type: "character varying(1024)", maxLength: 1024, nullable: false),
+                    Response = table.Column<string>(type: "character varying(1024)", maxLength: 1024, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AutoResponses", x => new { x.Trigger, x.GuildId });
+                    table.ForeignKey(
+                        name: "FK_AutoResponses_Guilds_GuildId",
+                        column: x => x.GuildId,
+                        principalTable: "Guilds",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -97,7 +116,7 @@ namespace SbuBot.Migrations
                     GuildId = table.Column<ulong>(type: "numeric(20,0)", nullable: false),
                     Name = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
                     OwnerId = table.Column<ulong>(type: "numeric(20,0)", nullable: true),
-                    Content = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: false)
+                    Content = table.Column<string>(type: "character varying(1024)", maxLength: 1024, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -115,6 +134,16 @@ namespace SbuBot.Migrations
                         principalColumns: new[] { "Id", "GuildId" },
                         onDelete: ReferentialAction.SetNull);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AutoResponses_GuildId",
+                table: "AutoResponses",
+                column: "GuildId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AutoResponses_Trigger",
+                table: "AutoResponses",
+                column: "Trigger");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ColorRoles_GuildId",
@@ -170,6 +199,9 @@ namespace SbuBot.Migrations
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "AutoResponses");
+
             migrationBuilder.DropTable(
                 name: "ColorRoles");
 

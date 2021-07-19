@@ -9,10 +9,13 @@ namespace SbuBot
         public const string DESCRIPTOR_SEPARATOR = "::";
         public const string DEFAULT_PREFIX = "sbu";
 
-        public static readonly Version VERSION = new(0, 8, 5);
+        public static readonly Version VERSION = new(0, 9, 0);
 
         public static readonly string[] RESERVED_KEYWORDS =
         {
+            // default prefix
+            DEFAULT_PREFIX,
+
             // common command names
             "help", "h", "?",
             "claim", "take",
@@ -37,8 +40,8 @@ namespace SbuBot
 
         public static class Bot
         {
-            public const ulong SELF = 849571821930283018UL;
-            public const ulong OWNER = 356017256481685506UL;
+            public const ulong SELF = Member.SELF;
+            public const ulong OWNER = Member.ERXKK;
             public const string NAME = "Allah 2";
             public const ushort DISCRIMINATOR = 1552;
         }
@@ -46,7 +49,7 @@ namespace SbuBot
         public static class DevBot
         {
             public const ulong SELF = 710538840728928327UL;
-            public const ulong OWNER = Bot.OWNER;
+            public const ulong OWNER = Member.ERXKK;
             public const string NAME = "retard";
             public const ushort DISCRIMINATOR = 8283;
         }
@@ -56,7 +59,7 @@ namespace SbuBot
             public static class Sbu
             {
                 public const ulong SELF = 732210852849123418UL;
-                public const ulong OWNER = Bot.OWNER;
+                public const ulong OWNER = Member.ERXKK;
                 public const string NAME = "Siege Bad Uninstall";
             }
 
@@ -70,7 +73,7 @@ namespace SbuBot
             public static class LaFamilia
             {
                 public const ulong SELF = 681285811945340959UL;
-                public const ulong OWNER = Bot.OWNER;
+                public const ulong OWNER = Member.ERXKK;
                 public const string NAME = "La Familia";
             }
         }
@@ -197,8 +200,8 @@ namespace SbuBot
 
         public static class Member
         {
-            public const ulong SELF = Bot.SELF;
-            public const ulong ERXKK = Bot.OWNER;
+            public const ulong SELF = 849571821930283018UL;
+            public const ulong ERXKK = 356017256481685506UL;
             public const ulong DM = 675056356717232169UL;
             public const ulong TOASTY = 145652148548403200UL;
         }

@@ -34,19 +34,19 @@ namespace SbuBot.Commands.Modules
             [Usage(
                 "reminder create in 3 days :: do the thing",
                 "reminder make in 3 days :: do the thing",
-                "remind me new in 3 days :: do the thing"
+                "remind me mk in 3 days :: do the thing"
             )]
             public async Task<DiscordCommandResult> CreateAsync(
                 [Description("The reminder descriptor.")]
-                ReminderDescriptor reminderDescriptor
+                ReminderDescriptor descriptor
             )
             {
                 SbuReminder newReminder = new(
                     Context,
                     Context.Author.Id,
                     Context.Guild.Id,
-                    reminderDescriptor.Message,
-                    reminderDescriptor.Timestamp
+                    descriptor.Message,
+                    descriptor.Timestamp
                 );
 
                 await Context.Services.GetRequiredService<ReminderService>().ScheduleAsync(newReminder);
@@ -54,7 +54,7 @@ namespace SbuBot.Commands.Modules
                 return Reply(
                     new LocalEmbed()
                         .WithTitle("Reminder Scheduled")
-                        .WithDescription(reminderDescriptor.Message)
+                        .WithDescription(descriptor.Message)
                         .WithFooter("Due")
                         .WithTimestamp(newReminder.DueAt)
                 );
@@ -133,7 +133,7 @@ namespace SbuBot.Commands.Modules
                 );
             }
 
-            if (await Context.Services.GetRequiredService<ReminderService>().GetRemindersAsync()
+            if (Context.Services.GetRequiredService<ReminderService>().GetReminders()
                 is not { Count: > 0 } reminders)
                 return Reply("You have no reminders.");
 

@@ -30,26 +30,23 @@ namespace SbuBot.Services
 
         protected override async ValueTask OnGuildAvailable(GuildAvailableEventArgs e)
         {
-            if (e.GuildId == SbuGlobals.Guild.Sbu.SELF
-                || e.GuildId == SbuGlobals.Guild.LaFamilia.SELF
-                || e.GuildId == SbuGlobals.Guild.Lab.SELF)
-                await Bot.Chunker.ChunkAsync(e.Guild);
-        }
-
-        protected override async ValueTask OnJoinedGuild(JoinedGuildEventArgs e)
-        {
             using (IServiceScope scope = Bot.Services.CreateScope())
             {
                 SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
 
-                if (await context.GetGuildAsync(e.GuildId) is { })
-                    return;
+                if (await context.GetGuildAsync(e.GuildId) is null)
+                {
+                    context.AddGuild(e.Guild);
+                    await context.SaveChangesAsync();
 
-                context.AddGuild(e.Guild);
-                await context.SaveChangesAsync();
+                    Logger.LogDebug("Guild inserted: {@Guild}", new { Id = e.GuildId });
+                }
             }
 
-            Logger.LogDebug("Guild inserted: {@Guild}", new { Id = e.GuildId });
+            if (e.GuildId == SbuGlobals.Guild.Sbu.SELF
+                || e.GuildId == SbuGlobals.Guild.LaFamilia.SELF
+                || e.GuildId == SbuGlobals.Guild.Lab.SELF)
+                await Bot.Chunker.ChunkAsync(e.Guild);
         }
 
         protected override async ValueTask OnLeftGuild(LeftGuildEventArgs e)

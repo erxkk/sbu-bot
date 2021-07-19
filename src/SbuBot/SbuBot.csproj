@@ -67,6 +67,9 @@
       <Compile Update="Commands\Modules\DebugModule.Eval.cs">
         <DependentUpon>DebugModule.cs</DependentUpon>
       </Compile>
+      <Compile Update="Commands\Modules\GuildManagementModule.AutoResponse.cs">
+        <DependentUpon>GuildManagementModule.cs</DependentUpon>
+      </Compile>
     </ItemGroup>
 
 </Project>

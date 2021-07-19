@@ -44,10 +44,13 @@ namespace SbuBot
             Commands.AddTypeParser(new TimeSpanTypeParser());
             Commands.AddTypeParser(new MessageTypeParser());
             Commands.AddTypeParser(new UserMessageTypeParser());
+
             Commands.AddTypeParser(new ReminderDescriptorTypeParser());
             Commands.AddTypeParser(new TagDescriptorTypeParser());
+            Commands.AddTypeParser(new AutoResponseDescriptorTypeParser());
 
             Commands.AddTypeParser(new OneOrAllTypeParser<SbuReminder>());
+            Commands.AddTypeParser(new OneOrAllTypeParser<SbuAutoResponse>());
             Commands.AddTypeParser(new OneOrAllTypeParser<SbuTag>());
 
             return base.AddTypeParsersAsync(cancellationToken);

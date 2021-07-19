@@ -24,6 +24,7 @@ namespace SbuBot.Services
             using (IServiceScope scope = Bot.Services.CreateScope())
             {
                 SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
+
                 _guildConfigs = await context.Guilds.ToDictionaryAsync(k => k.Id, v => v.Config, stoppingToken);
             }
         }
@@ -33,8 +34,8 @@ namespace SbuBot.Services
             using (IServiceScope scope = Bot.Services.CreateScope())
             {
                 SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
-                SbuGuild guild = (await context.GetGuildAsync(guildId))!;
 
+                SbuGuild guild = (await context.GetGuildAsync(guildId))!;
                 guild.Config = set ? guild.Config | value : guild.Config & ~value;
                 _guildConfigs[guildId] = guild.Config;
 
@@ -42,10 +43,10 @@ namespace SbuBot.Services
             }
         }
 
-        public SbuGuildConfig GetConfig(Snowflake guildId)
-            => GuildConfigs.GetValueOrDefault(guildId);
-
         public bool GetValue(Snowflake guildId, SbuGuildConfig value)
-            => GuildConfigs.GetValueOrDefault(guildId).HasFlag(value);
+            => _guildConfigs.GetValueOrDefault(guildId).HasFlag(value);
+
+        public SbuGuildConfig GetConfig(Snowflake guildId)
+            => _guildConfigs.GetValueOrDefault(guildId);
     }
 }
