@@ -18,7 +18,6 @@ namespace SbuBot.Commands.Parsing.TypeParsers
             DiscordGuildCommandContext context
         );
 
-        // TODO: ignore escaped separator (or don't, who tf uses "::" in a normal sentence?)
         public sealed override ValueTask<TypeParserResult<T>> ParseAsync(
             Parameter parameter,
             string value,

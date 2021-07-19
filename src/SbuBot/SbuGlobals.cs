@@ -6,12 +6,12 @@ namespace SbuBot
 {
     public static class SbuGlobals
     {
-        public const char BULLET = '•';
-        public const char ELLIPSES = '…';
+        public const string BULLET = "•";
+        public const string ELLIPSES = "…";
         public const string DESCRIPTOR_SEPARATOR = "::";
         public const string DEFAULT_PREFIX = "sbu";
 
-        public static readonly Version VERSION = new(0, 9, 1);
+        public static readonly Version VERSION = new(0, 9, 2);
 
         public static class Keywords
         {
@@ -38,6 +38,9 @@ namespace SbuBot
             static Keywords()
             {
                 ALL_RESERVED = COMMAND_ALIASES.SelectMany(e => e.Value.Append(e.Key))
+                    .Append(BULLET)
+                    .Append(ELLIPSES)
+                    .Append(DESCRIPTOR_SEPARATOR)
                     .Append(DEFAULT_PREFIX)
                     .Concat(CONTROL_FLOW)
                     .Concat(IDENTIFIERS)
