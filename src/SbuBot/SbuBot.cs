@@ -145,7 +145,8 @@ namespace SbuBot
                         parameterBuilder.Remarks = remarks;
                 }
 
-                if (SbuGlobals.Keywords.COMMAND_ALIASES.GetValueOrDefault(commandBuilder.Name) is { } aliases)
+                if (commandBuilder.Name is { }
+                    && SbuGlobals.Keywords.COMMAND_ALIASES.GetValueOrDefault(commandBuilder.Name) is { } aliases)
                 {
                     foreach (string alias in aliases)
                         commandBuilder.AddAlias(alias);
