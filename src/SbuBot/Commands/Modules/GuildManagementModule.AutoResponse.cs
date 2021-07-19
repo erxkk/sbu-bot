@@ -163,90 +163,90 @@ namespace SbuBot.Commands.Modules
                     return Reply("Auto response created.");
                 }
             }
-        }
 
-        [Command("list")]
-        [Description("Lists the auto responses of this server.")]
-        public DiscordCommandResult ListAsync()
-        {
-            ChatService service = Context.Services.GetRequiredService<ChatService>();
-
-            IReadOnlyDictionary<string, string> autoResponses = service.GetAutoResponses(Context.GuildId);
-
-            if (autoResponses.Count == 0)
-                return Reply("This server has not auto responses.");
-
-            return DistributedPages(
-                autoResponses.Select(ar => $"**Trigger:** {ar.Key}\n**Response:** {ar.Value}"),
-                embedFactory: embed => embed.WithTitle("Auto Responses")
-            );
-        }
-
-        [Command("delete")]
-        [Description("Removes a given auto response.")]
-        [Usage("auto remove what da dog doin", "auto delete h", "auto rm all")]
-        public async Task<DiscordCommandResult> RemoveAsync(
-            [Description("The auto response that should be removed.")]
-            OneOrAll<SbuAutoResponse> autoResponse
-        )
-        {
-            ChatService service = Context.Services.GetRequiredService<ChatService>();
-
-            switch (autoResponse)
+            [Command("list")]
+            [Description("Lists the auto responses of this server.")]
+            public DiscordCommandResult List()
             {
-                case OneOrAll<SbuAutoResponse>.All:
+                ChatService service = Context.Services.GetRequiredService<ChatService>();
+
+                IReadOnlyDictionary<string, string> autoResponses = service.GetAutoResponses(Context.GuildId);
+
+                if (autoResponses.Count == 0)
+                    return Reply("This server has not auto responses.");
+
+                return DistributedPages(
+                    autoResponses.Select(ar => $"**Trigger:** {ar.Key}\n**Response:** {ar.Value}"),
+                    embedFactory: embed => embed.WithTitle("Auto Responses")
+                );
+            }
+
+            [Command("delete")]
+            [Description("Removes a given auto response.")]
+            [Usage("auto remove what da dog doin", "auto delete h", "auto rm all")]
+            public async Task<DiscordCommandResult> RemoveAsync(
+                [Description("The auto response that should be removed.")]
+                OneOrAll<SbuAutoResponse> autoResponse
+            )
+            {
+                ChatService service = Context.Services.GetRequiredService<ChatService>();
+
+                switch (autoResponse)
                 {
-                    ConfirmationResult result = await Context.WaitForConfirmationAsync(
-                        "Are you sure you want to remove all auto responses? Respond `yes` to confirm."
-                    );
-
-                    switch (result)
+                    case OneOrAll<SbuAutoResponse>.All:
                     {
-                        case ConfirmationResult.Timeout:
-                        case ConfirmationResult.Aborted:
-                            return Reply("Aborted.");
+                        ConfirmationResult result = await Context.WaitForConfirmationAsync(
+                            "Are you sure you want to remove all auto responses? Respond `yes` to confirm."
+                        );
 
-                        case ConfirmationResult.Confirmed:
-                            break;
+                        switch (result)
+                        {
+                            case ConfirmationResult.Timeout:
+                            case ConfirmationResult.Aborted:
+                                return Reply("Aborted.");
 
-                        // unreachable
-                        default:
-                            throw new();
+                            case ConfirmationResult.Confirmed:
+                                break;
+
+                            // unreachable
+                            default:
+                                throw new();
+                        }
+
+                        await service.RemoveAutoResponsesAsync(Context.GuildId);
+
+                        return Reply("All auto responses removed.");
                     }
 
-                    await service.RemoveAutoResponsesAsync(Context.GuildId);
-
-                    return Reply("All auto responses removed.");
-                }
-
-                case OneOrAll<SbuAutoResponse>.Specific specific:
-                {
-                    ConfirmationResult result = await Context.WaitForConfirmationAsync(
-                        "Are you sure you want to remove this tag? Respond `yes` to confirm."
-                    );
-
-                    switch (result)
+                    case OneOrAll<SbuAutoResponse>.Specific specific:
                     {
-                        case ConfirmationResult.Timeout:
-                        case ConfirmationResult.Aborted:
-                            return Reply("Aborted.");
+                        ConfirmationResult result = await Context.WaitForConfirmationAsync(
+                            "Are you sure you want to remove this tag? Respond `yes` to confirm."
+                        );
 
-                        case ConfirmationResult.Confirmed:
-                            break;
+                        switch (result)
+                        {
+                            case ConfirmationResult.Timeout:
+                            case ConfirmationResult.Aborted:
+                                return Reply("Aborted.");
 
-                        // unreachable
-                        default:
-                            throw new();
+                            case ConfirmationResult.Confirmed:
+                                break;
+
+                            // unreachable
+                            default:
+                                throw new();
+                        }
+
+                        await service.RemoveAutoResponseAsync(Context.GuildId, specific.Value.Trigger);
+
+                        return Reply("Auto response removed.");
                     }
 
-                    await service.RemoveAutoResponseAsync(Context.GuildId, specific.Value.Trigger);
-
-                    return Reply("Auto response removed.");
+                    // unreachable
+                    default:
+                        throw new();
                 }
-
-                // unreachable
-                default:
-                    throw new();
             }
         }
     }

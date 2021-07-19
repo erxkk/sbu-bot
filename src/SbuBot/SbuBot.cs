@@ -19,6 +19,8 @@ using SbuBot.Commands.Parsing.Descriptors;
 using SbuBot.Commands.Parsing.TypeParsers;
 using SbuBot.Models;
 
+using Module = Qmmands.Module;
+
 namespace SbuBot
 {
     public sealed class SbuBot : DiscordBot
@@ -145,11 +147,25 @@ namespace SbuBot
                         parameterBuilder.Remarks = remarks;
                 }
 
-                if (commandBuilder.Name is { }
-                    && SbuGlobals.Keywords.COMMAND_ALIASES.GetValueOrDefault(commandBuilder.Name) is { } aliases)
+                if (commandBuilder.Aliases.Count > 0
+                    && SbuGlobals.Keywords.COMMAND_ALIASES.GetValueOrDefault(commandBuilder.Aliases.First())
+                        is { } aliases
+                )
                 {
                     foreach (string alias in aliases)
                         commandBuilder.AddAlias(alias);
+                }
+            }
+
+            foreach (ModuleBuilder subModuleBuilder in CommandUtilities.EnumerateAllSubmodules(moduleBuilder))
+            {
+                if (subModuleBuilder.Aliases.Count > 0
+                    && SbuGlobals.Keywords.COMMAND_ALIASES.GetValueOrDefault(subModuleBuilder.Aliases.First())
+                        is { } aliases
+                )
+                {
+                    foreach (string alias in aliases)
+                        subModuleBuilder.AddAlias(alias);
                 }
             }
 
