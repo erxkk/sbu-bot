@@ -17,9 +17,6 @@ using Qmmands;
 using SbuBot.Commands;
 using SbuBot.Commands.Parsing.Descriptors;
 using SbuBot.Commands.Parsing.TypeParsers;
-using SbuBot.Models;
-
-using Module = Qmmands.Module;
 
 namespace SbuBot
 {
@@ -38,23 +35,26 @@ namespace SbuBot
 
         protected override ValueTask AddTypeParsersAsync(CancellationToken cancellationToken = default)
         {
-            Commands.AddTypeParser(new ColorRoleTypeParser());
-            Commands.AddTypeParser(new DateTimeTypeParser());
             Commands.AddTypeParser(new GuidTypeParser());
+
+            Commands.AddTypeParser(new ColorRoleTypeParser());
             Commands.AddTypeParser(new MemberTypeReader());
-            Commands.AddTypeParser(new ReminderTypeParser());
-            Commands.AddTypeParser(new TagTypeParser());
+
             Commands.AddTypeParser(new TimeSpanTypeParser());
+            Commands.AddTypeParser(new DateTimeTypeParser());
+
+            Commands.AddTypeParserVariants(new TagTypeParser());
+            Commands.AddTypeParserVariants(new ReminderTypeParser());
+            Commands.AddTypeParserVariants(new AutoResponseTypeParser());
+
             Commands.AddTypeParser(new MessageTypeParser());
             Commands.AddTypeParser(new UserMessageTypeParser());
 
-            Commands.AddTypeParser(new ReminderDescriptorTypeParser());
             Commands.AddTypeParser(new TagDescriptorTypeParser());
+            Commands.AddTypeParser(new ReminderDescriptorTypeParser());
             Commands.AddTypeParser(new AutoResponseDescriptorTypeParser());
 
-            Commands.AddTypeParser(new OneOrAllTypeParser<SbuReminder>());
-            Commands.AddTypeParser(new OneOrAllTypeParser<SbuAutoResponse>());
-            Commands.AddTypeParser(new OneOrAllTypeParser<SbuTag>());
+            Commands.AddTypeParserVariants<IUserMessage>();
 
             return base.AddTypeParsersAsync(cancellationToken);
         }

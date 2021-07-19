@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices.ComTypes;
 using System.Threading.Tasks;
 
 using Disqord;
@@ -15,6 +13,36 @@ namespace SbuBot.Commands.Modules
 {
     public sealed partial class DebugModule
     {
+        [Command("eval")]
+        [Description("Compiles and runs a C#-Script.")]
+        [Remarks("Code may be given as plain code or as a code block with `cs` or `csharp` language.")]
+        public async Task EvalAsync([Description("The code to run.")] string code)
+        {
+            LocalMessage reply = new();
+
+            code = _evalCleanUp(code);
+            await _compileAndRunScriptAsync(code, reply);
+
+            if (reply.Embeds.Count != 0)
+                await Reply(reply);
+            else
+                await Context.Message.AddReactionAsync(LocalEmoji.Custom(SbuGlobals.Emote.Menu.CONFIRM));
+        }
+
+        [Command("inspect")]
+        [Description("Returns an inspection for the given expression's return value.")]
+        public async Task<DiscordCommandResult> Inspect(
+            [Description("The expression to inspect.")]
+            string expression
+        )
+        {
+            LocalMessage reply = new();
+
+            expression = _evalCleanUp(expression);
+            await _compileAndRunScriptAsync($"return {expression};", reply, true);
+            return Reply(reply);
+        }
+
         private static string _evalCleanUp(string expression)
         {
             ReadOnlySpan<char> span = expression.AsSpan();
@@ -68,38 +96,6 @@ namespace SbuBot.Commands.Modules
                     break;
                 }
             }
-        }
-
-        [Command("eval")]
-        [Description("Compiles and runs a C#-Script.")]
-        [Remarks("Code may be given as plain code or as a code block with `cs` or `csharp` language.")]
-        public async Task EvalAsync([Description("The code to run.")] string code)
-        {
-            LocalMessage reply = new();
-
-            code = _evalCleanUp(code);
-            await _compileAndRunScriptAsync(code, reply);
-
-            if (reply.Embeds.Count != 0)
-                await Reply(reply);
-            else
-                await Context.Message.AddReactionAsync(LocalEmoji.Custom(SbuGlobals.Emote.Menu.CONFIRM));
-        }
-
-        [Command("inspect")]
-        [Description("Returns an inspection for the given expression's return value.")]
-        public async Task<DiscordCommandResult> Inspect(
-            [Description("The expression to inspect.")]
-            string expression
-        )
-        {
-            // TODO: create custom type that can be parsed to query common stuff like db etc
-            // currently need `return {expr};` as input
-            LocalMessage reply = new();
-
-            expression = _evalCleanUp(expression);
-            await _compileAndRunScriptAsync(expression, reply, true);
-            return Reply(reply);
         }
     }
 }

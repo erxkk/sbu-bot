@@ -11,14 +11,21 @@ namespace SbuBot
         public const string DESCRIPTOR_SEPARATOR = "::";
         public const string DEFAULT_PREFIX = "sbu";
 
-        public static readonly Version VERSION = new(0, 9, 4);
+        public static readonly Version VERSION = new(0, 9, 5);
 
         public static class Keywords
         {
-            public static readonly IReadOnlyList<string> ALL_RESERVED;
+            public static readonly IReadOnlySet<string> ALL_RESERVED;
+            public static readonly IReadOnlySet<string> IDENTIFIERS;
+            public static readonly IReadOnlySet<string> CONTROL_FLOW;
+            public static readonly IReadOnlyDictionary<string, string[]> COMMAND_ALIASES;
 
-            public static readonly IReadOnlyDictionary<string, string[]> COMMAND_ALIASES
-                = new Dictionary<string, string[]>
+            static Keywords()
+            {
+                IDENTIFIERS = new HashSet<string> { "all", "none", "mine", "reserved" };
+                CONTROL_FLOW = new HashSet<string> { "yes", "confirm", "no", "abort" };
+
+                COMMAND_ALIASES = new Dictionary<string, string[]>
                 {
                     ["help"] = new[] { "h", "?" },
                     ["claim"] = new[] { "take" },
@@ -29,14 +36,6 @@ namespace SbuBot
                     ["transfer"] = new[] { "mv" },
                 };
 
-            public static readonly IReadOnlySet<string> IDENTIFIERS
-                = new HashSet<string> { "all", "none", "mine", "reserved" };
-
-            public static readonly IReadOnlySet<string> CONTROL_FLOW
-                = new HashSet<string> { "yes", "confirm", "no", "abort" };
-
-            static Keywords()
-            {
                 ALL_RESERVED = COMMAND_ALIASES.SelectMany(e => e.Value.Append(e.Key))
                     .Append(BULLET)
                     .Append(ELLIPSES)
@@ -44,7 +43,7 @@ namespace SbuBot
                     .Append(DEFAULT_PREFIX)
                     .Concat(CONTROL_FLOW)
                     .Concat(IDENTIFIERS)
-                    .ToArray();
+                    .ToHashSet();
             }
         }
 
@@ -189,7 +188,7 @@ namespace SbuBot
         public static class Emote
         {
             public const ulong SELF = 846789266041470977UL;
-            public const ulong OWNER = Bot.OWNER;
+            public const ulong OWNER = Member.ERXKK;
 
             public static class Misc
             {

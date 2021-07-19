@@ -8,6 +8,7 @@ using Qmmands;
 
 using SbuBot.Commands.Attributes;
 using SbuBot.Commands.Parsing;
+using SbuBot.Commands.Parsing.TypeParsers;
 using SbuBot.Models;
 
 namespace SbuBot.Commands
@@ -15,6 +16,15 @@ namespace SbuBot.Commands
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class CommandExtensions
     {
+        public static void AddTypeParserVariants<T>(this CommandService @this, TypeParser<T> normalParser)
+        {
+            @this.AddTypeParser(normalParser);
+            @this.AddTypeParserVariants<T>();
+        }
+
+        public static void AddTypeParserVariants<T>(this CommandService @this)
+            => @this.AddTypeParser(new OneOrAllTypeParser<T>());
+
         public static bool IsGroup(this Module @this) => @this.Name.EndsWith("Group");
 
         public static void AppendTo(
@@ -110,6 +120,9 @@ namespace SbuBot.Commands
                         { } value => value,
                     }
                 );
+
+                if (@this.Type.IsGenericType && @this.Type.GetGenericTypeDefinition() == typeof(OneOrAll<>))
+                    builder.Append(" | all");
             }
             else if (@this.Type.IsGenericType && @this.Type.GetGenericTypeDefinition() == typeof(OneOrAll<>))
             {
