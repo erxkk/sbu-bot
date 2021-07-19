@@ -30,7 +30,7 @@ namespace SbuBot.Commands.Modules
         [Usage("tag tagggg", "t whomstve")]
         public DiscordCommandResult Get([Description("The tag to invoke.")] SbuTag tag) => Response(tag.Content);
 
-        [Command("claim", "take")]
+        [Command("claim")]
         [Description("Claims the given tag if it has no owner.")]
         [Usage("tag claim tagggg", "t take whomstve")]
         public async Task<DiscordCommandResult> ClaimTagAsync(
@@ -45,7 +45,7 @@ namespace SbuBot.Commands.Modules
             return Reply("Tag claimed.");
         }
 
-        [Group("create", "make", "mk")]
+        [Group("create")]
         [Description("Creates a new tag with the given name and content.")]
         public sealed class CreateGroup : SbuModuleBase
         {
@@ -162,7 +162,7 @@ namespace SbuBot.Commands.Modules
             }
         }
 
-        [Group("list", "ls")]
+        [Group("list")]
         [Description("A group of commands for listing tags.")]
         public sealed class ListGroup : SbuModuleBase
         {
@@ -218,7 +218,7 @@ namespace SbuBot.Commands.Modules
             }
         }
 
-        [Group("edit", "change")]
+        [Group("edit")]
         [Description("Modifies the content of a given tag.")]
         public sealed class EditGroup : SbuModuleBase
         {
@@ -286,7 +286,7 @@ namespace SbuBot.Commands.Modules
             }
         }
 
-        [Command("delete", "remove", "rm")]
+        [Command("delete")]
         [Description("Removes a given tag.")]
         [Usage("tag remove da dog", "t delete h", "t rm all")]
         public async Task<DiscordCommandResult> RemoveAsync(
@@ -359,7 +359,7 @@ namespace SbuBot.Commands.Modules
             }
         }
 
-        [Command("transfer", "mv")]
+        [Command("transfer")]
         [Description("Transfers ownership of a given tag to the given member.")]
         [Usage("tag transfer @user da dog", "t transfer 352815253828141056 h", "t mv @user all")]
         public async Task<DiscordCommandResult> TransferAsync(
@@ -430,7 +430,7 @@ namespace SbuBot.Commands.Modules
         )]
         public DiscordCommandResult GetReservedKeywords() => Reply(
             "The following keywords are not allowed to be tags, but tags may contain them:\n"
-            + string.Join("\n", SbuGlobals.RESERVED_KEYWORDS.Select(rn => $"> `{rn}`"))
+            + string.Join("\n", SbuGlobals.Keywords.ALL_RESERVED.Select(rn => $"> `{rn}`"))
         );
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -142,6 +143,12 @@ namespace SbuBot
                             ?.GetValue(null)
                         is string remarks)
                         parameterBuilder.Remarks = remarks;
+                }
+
+                if (SbuGlobals.Keywords.COMMAND_ALIASES.GetValueOrDefault(commandBuilder.Name) is { } aliases)
+                {
+                    foreach (string alias in aliases)
+                        commandBuilder.AddAlias(alias);
                 }
             }
 

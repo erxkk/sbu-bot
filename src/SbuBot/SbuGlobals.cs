@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace SbuBot
 {
@@ -9,28 +11,39 @@ namespace SbuBot
         public const string DESCRIPTOR_SEPARATOR = "::";
         public const string DEFAULT_PREFIX = "sbu";
 
-        public static readonly Version VERSION = new(0, 9, 0);
+        public static readonly Version VERSION = new(0, 9, 1);
 
-        public static readonly string[] RESERVED_KEYWORDS =
+        public static class Keywords
         {
-            // default prefix
-            DEFAULT_PREFIX,
+            public static readonly IReadOnlyList<string> ALL_RESERVED;
 
-            // common command names
-            "help", "h", "?",
-            "claim", "take",
-            "create", "make", "mk",
-            "list", "ls",
-            "delete", "remove", "rm",
-            "transfer", "mv",
-            "cancel", "stop",
+            public static readonly IReadOnlyDictionary<string, string[]> COMMAND_ALIASES
+                = new Dictionary<string, string[]>
+                {
+                    ["help"] = new[] { "h", "?" },
+                    ["claim"] = new[] { "take" },
+                    ["create"] = new[] { "make", "mk" },
+                    ["edit"] = new[] { "change" },
+                    ["list"] = new[] { "ls" },
+                    ["delete"] = new[] { "remove", "rm" },
+                    ["transfer"] = new[] { "mv" },
+                };
 
-            // identifiers
-            "all", "none", "mine", "reserved",
+            public static readonly IReadOnlySet<string> IDENTIFIERS
+                = new HashSet<string> { "all", "none", "mine", "reserved" };
 
-            // control flow
-            "yes", "confirm", "no", "abort",
-        };
+            public static readonly IReadOnlySet<string> CONTROL_FLOW
+                = new HashSet<string> { "yes", "confirm", "no", "abort" };
+
+            static Keywords()
+            {
+                ALL_RESERVED = COMMAND_ALIASES.SelectMany(e => e.Value.Append(e.Key))
+                    .Append(DEFAULT_PREFIX)
+                    .Concat(CONTROL_FLOW)
+                    .Concat(IDENTIFIERS)
+                    .ToArray();
+            }
+        }
 
         public static class Github
         {

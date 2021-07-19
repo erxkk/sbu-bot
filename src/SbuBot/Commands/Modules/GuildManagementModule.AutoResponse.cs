@@ -28,7 +28,7 @@ namespace SbuBot.Commands.Modules
         [Description("A group of commands for creating and removing auto responses.")]
         public sealed class AutoResponseSubModule : SbuModuleBase
         {
-            [Group("create", "make", "mk")]
+            [Group("create")]
             [Description("Creates a new auto response.")]
             public sealed class CreateGroup : SbuModuleBase
             {
@@ -165,7 +165,7 @@ namespace SbuBot.Commands.Modules
             }
         }
 
-        [Command("list", "ls")]
+        [Command("list")]
         [Description("Lists the auto responses of this server.")]
         public DiscordCommandResult ListAsync()
         {
@@ -182,7 +182,7 @@ namespace SbuBot.Commands.Modules
             );
         }
 
-        [Command("delete", "remove", "rm")]
+        [Command("delete")]
         [Description("Removes a given auto response.")]
         [Usage("auto remove what da dog doin", "auto delete h", "auto rm all")]
         public async Task<DiscordCommandResult> RemoveAsync(

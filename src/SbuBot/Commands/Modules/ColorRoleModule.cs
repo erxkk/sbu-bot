@@ -39,7 +39,7 @@ namespace SbuBot.Commands.Modules
             )
             : Reply("You have no color role.");
 
-        [Group("claim", "take")]
+        [Group("claim")]
         [RequireColorRole(false)]
         [Description("Claims the given color role if it has no owner.")]
         public sealed class ClaimGroup : SbuModuleBase
@@ -79,7 +79,7 @@ namespace SbuBot.Commands.Modules
             }
         }
 
-        [Command("create", "make", "mk")]
+        [Command("create")]
         [RequireColorRole(false)]
         [Description("Creates a new color role.")]
         [Usage("role create #afafaf my gray role", "r make green dream role dream role")]
@@ -132,7 +132,7 @@ namespace SbuBot.Commands.Modules
             return Reply($"{role.Mention} is your new color role.");
         }
 
-        [Group("edit", "change")]
+        [Group("edit")]
         [RequireColorRole]
         [Description("A group of commands for editing color roles.")]
         public sealed class EditSubModule : SbuModuleBase
@@ -188,7 +188,7 @@ namespace SbuBot.Commands.Modules
             }
         }
 
-        [Command("delete", "remove", "rm")]
+        [Command("delete")]
         [RequireColorRole]
         [Description("Removes the authors color role.")]
         public async Task<DiscordCommandResult> RemoveAsync()
@@ -205,7 +205,7 @@ namespace SbuBot.Commands.Modules
             return Reply("Your color role has been removed.");
         }
 
-        [Command("transfer", "mv")]
+        [Command("transfer")]
         [RequireColorRole]
         [Description("Transfers the authors color role to the given member.")]
         [Usage("role transfer @user", "r transfer 352815253828141056", "r transfer Allah")]

@@ -96,7 +96,7 @@ namespace SbuBot.Commands.Modules
                 );
             }
 
-            [Command("list", "ls")]
+            [Command("list")]
             [Description("Lists all commands.")]
             public DiscordCommandResult List()
             {
@@ -111,7 +111,7 @@ namespace SbuBot.Commands.Modules
             }
         }
 
-        [Command("help", "h", "?")]
+        [Command("help")]
         [Description(
             "Interactively displays information about for a given command/module, or displays all modules if non is "
             + "given."

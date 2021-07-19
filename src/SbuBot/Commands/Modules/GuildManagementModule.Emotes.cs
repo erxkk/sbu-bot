@@ -89,7 +89,7 @@ namespace SbuBot.Commands.Modules
                 return Reply("Added all emotes.");
             }
 
-            [Command("delete", "remove", "rm")]
+            [Command("delete")]
             [Description("Removes the given emote(s) from the server.")]
             [Usage("emote remove emote", "emote remove emote1 emote2 emote3", "emote remove 855415802139901962")]
             public async Task<DiscordCommandResult> RemoveAsync(

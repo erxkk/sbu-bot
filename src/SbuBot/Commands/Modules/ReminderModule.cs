@@ -26,7 +26,7 @@ namespace SbuBot.Commands.Modules
     [Remarks("Reminder timestamps may be given as human readable timespans or strictly colon `:` separated integers.")]
     public sealed class ReminderModule : SbuModuleBase
     {
-        [Group("create", "make", "mk", "me")]
+        [Group("create", "me")]
         [Description("Creates a new reminder with the given timestamp and optional message.")]
         public sealed class CreateGroup : SbuModuleBase
         {
@@ -112,7 +112,7 @@ namespace SbuBot.Commands.Modules
             }
         }
 
-        [Command("list", "ls")]
+        [Command("list")]
         [Description("Lists the given reminder or all if non is given.")]
         [Usage("reminder list", "reminder list last", "reminder list 936DA01F-9ABD-4d 9d-80C7-02AF85C822A8")]
         public async Task<DiscordCommandResult> ListAsync(
@@ -148,7 +148,7 @@ namespace SbuBot.Commands.Modules
             );
         }
 
-        [Command("edit", "change")]
+        [Command("edit")]
         [Description("Reschedules the given reminder.")]
         [Usage("reminder edit last in 2 days", "reminder change 936DA01F in 5 seconds")]
         public async Task<DiscordCommandResult> RescheduleAsync(
@@ -170,7 +170,7 @@ namespace SbuBot.Commands.Modules
             );
         }
 
-        [Command("delete", "remove", "rm", "cancel", "stop")]
+        [Command("delete")]
         [Description("Cancels the given reminder.")]
         [Usage("reminder remove last", "reminder delete 936DA01F", "reminder cancel all")]
         public async Task<DiscordCommandResult> CancelAsync(
