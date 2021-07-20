@@ -30,7 +30,7 @@ namespace SbuBot.Commands.Views.Help
             {
                 command.AppendTo(description.Append(SbuGlobals.BULLET).Append(' ').Append('`'));
                 description.Append('`').Append('\n');
-                selection.Options.Add(new(command.FormatParameters(false).TrimOrSelf(25), id.ToString()));
+                selection.Options.Add(new(command.Format(false).TrimOrSelf(25), id.ToString()));
             }
 
             description.Append('\n').AppendLine("**Description:**").AppendLine(group.Description).Append('\n');
