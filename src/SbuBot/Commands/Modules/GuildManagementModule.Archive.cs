@@ -8,6 +8,7 @@ using Disqord.Bot;
 using Disqord.Rest;
 
 using Kkommon;
+using Kkommon.Exceptions;
 
 using Qmmands;
 
@@ -82,9 +83,8 @@ namespace SbuBot.Commands.Modules
                         break;
                     }
 
-                    // unreachable
                     default:
-                        throw new();
+                        throw new UnreachableException();
                 }
             }
 
@@ -109,9 +109,8 @@ namespace SbuBot.Commands.Modules
                     case Result<LocalMessage, string>.Error error:
                         return new Result<Unit, string>.Error(error.Value);
 
-                    // unreachable
                     default:
-                        throw new();
+                        throw new UnreachableException();
                 }
             }
         }

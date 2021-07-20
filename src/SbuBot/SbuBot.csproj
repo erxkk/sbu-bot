@@ -70,6 +70,51 @@
       <Compile Update="Commands\Modules\GuildManagementModule.AutoResponse.cs">
         <DependentUpon>GuildManagementModule.cs</DependentUpon>
       </Compile>
+      <Compile Update="Commands\Modules\TagModule.Create.cs">
+        <DependentUpon>TagModule.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Commands\Modules\TagModule.Edit.cs">
+        <DependentUpon>TagModule.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Commands\Modules\TagModule.Delete.cs">
+        <DependentUpon>TagModule.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Commands\Modules\TagModule.Transfer.cs">
+        <DependentUpon>TagModule.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Commands\Modules\TagModule.Claim.cs">
+        <DependentUpon>TagModule.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Commands\Modules\ReminderModule.Create.cs">
+        <DependentUpon>ReminderModule.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Commands\Modules\ReminderModule.Delete.cs">
+        <DependentUpon>ReminderModule.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Commands\Modules\ReminderModule.Edit.cs">
+        <DependentUpon>ReminderModule.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Commands\Modules\GuildManagementModule.AutoResponse.Create.cs">
+        <DependentUpon>GuildManagementModule.AutoResponse.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Commands\Modules\GuildManagementModule.AutoResponse.Delete.cs">
+        <DependentUpon>GuildManagementModule.AutoResponse.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Commands\Modules\ColorRoleModule.Create.cs">
+        <DependentUpon>ColorRoleModule.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Commands\Modules\ColorRoleModule.Claim.cs">
+        <DependentUpon>ColorRoleModule.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Commands\Modules\ColorRoleModule.Edit.cs">
+        <DependentUpon>ColorRoleModule.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Commands\Modules\ColorRoleModule.Delete.cs">
+        <DependentUpon>ColorRoleModule.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Commands\Modules\ColorRoleModule.Transfer.cs">
+        <DependentUpon>ColorRoleModule.cs</DependentUpon>
+      </Compile>
     </ItemGroup>
 
 </Project>

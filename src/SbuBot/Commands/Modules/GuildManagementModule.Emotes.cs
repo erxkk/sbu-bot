@@ -93,7 +93,7 @@ namespace SbuBot.Commands.Modules
             [Command("delete")]
             [Description("Removes the given emote(s) from the server.")]
             [Usage("emote remove emote", "emote remove emote1 emote2 emote3", "emote remove 855415802139901962")]
-            public async Task<DiscordCommandResult> RemoveAsync(
+            public async Task<DiscordCommandResult> DeleteAsync(
                 [Description("The emote to remove.")] IGuildEmoji emote,
                 [Description("Optional additional emotes to remove.")]
                 params IGuildEmoji[] additionalEmotes

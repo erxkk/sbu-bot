@@ -37,12 +37,13 @@ namespace SbuBot.Commands.Parsing.TypeParsers
                     : Failure("Could not find reminder.");
             }
 
-            TypeParser<Snowflake> guidParser = context.Bot.Commands.GetTypeParser<Snowflake>();
+            TypeParser<Snowflake> snowflakeParser = context.Bot.Commands.GetTypeParser<Snowflake>();
 
-            if (await guidParser.ParseAsync(parameter, value, context) is not { IsSuccessful: true } guidParseResult)
+            if (await snowflakeParser.ParseAsync(parameter, value, context)
+                is not { IsSuccessful: true } snowflakeParseResult)
                 return Failure("Could not parse reminder.");
 
-            return reminders.TryGetValue(guidParseResult.Value, out var indexedReminder)
+            return reminders.TryGetValue(snowflakeParseResult.Value, out var indexedReminder)
                 ? Success(indexedReminder)
                 : Failure("Could not find reminder.");
         }

@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 
+using Kkommon.Exceptions;
+
 namespace SbuBot.Inspection
 {
     public static partial class Inspect
@@ -66,9 +68,8 @@ namespace SbuBot.Inspection
                         type = obj.GetType();
                         break;
 
-                    // unreachable
                     default:
-                        throw new();
+                        throw new UnreachableException();
                 }
             }
 

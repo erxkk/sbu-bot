@@ -1,8 +1,9 @@
 using System;
-using System.Reflection;
 using System.Threading.Tasks;
 
 using Disqord.Bot;
+
+using Kkommon.Exceptions;
 
 using Qmmands;
 
@@ -41,12 +42,39 @@ namespace SbuBot.Commands.Attributes.Checks.Parameters
                     );
             }
 
-            // this check makes no sense, when all are specified it's queried in the command anyway
-            if (argument.GetType().GetGenericTypeDefinition() == typeof(OneOrAll<>))
-                return Success();
+            if (argument is IOneOrAll oneOrAll)
+            {
+                switch (oneOrAll)
+                {
+                    case IOneOrAll.IAll:
+                        return Success();
 
-            // unreachable
-            throw new();
+                    case IOneOrAll.ISpecific specific:
+                        bool authorDoesOwn = (specific.Value as ISbuOwnedEntity)!.OwnerId
+                            == (await context.GetAuthorAsync()).Id;
+
+                        return authorDoesOwn == AuthorMustOwn
+                            ? Success()
+                            : Failure(
+                                string.Format(
+                                    "You must {0}to be the owner of the given {1}.",
+                                    AuthorMustOwn ? "" : "not ",
+                                    specific.Value switch
+                                    {
+                                        SbuColorRole => "role",
+                                        SbuTag => "tag",
+                                        SbuReminder => "reminder",
+                                        _ => "entity",
+                                    }
+                                )
+                            );
+
+                    default:
+                        throw new UnreachableException();
+                }
+            }
+
+            throw new UnreachableException("The given argument was neither IOneOrAll or ISbuOwnedEntity.", argument);
         }
 
         public override bool CheckType(Type type) => type.IsAssignableTo(typeof(ISbuOwnedEntity))

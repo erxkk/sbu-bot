@@ -2,6 +2,8 @@ using System.Threading.Tasks;
 
 using Disqord.Bot;
 
+using Kkommon.Exceptions;
+
 using Qmmands;
 
 using SbuBot.Commands.Parsing.Descriptors;
@@ -33,9 +35,8 @@ namespace SbuBot.Commands.Parsing.TypeParsers
                 case SbuAutoResponse.ValidTriggerType.Valid:
                     break;
 
-                // unreachable
                 default:
-                    throw new();
+                    throw new UnreachableException();
             }
 
             switch (SbuAutoResponse.IsValidResponse(values[1]))
@@ -48,9 +49,8 @@ namespace SbuBot.Commands.Parsing.TypeParsers
                 case SbuAutoResponse.ValidResponseType.Valid:
                     break;
 
-                // unreachable
                 default:
-                    throw new();
+                    throw new UnreachableException();
             }
 
             return Success(new() { Trigger = values[0], Response = values[1] });
