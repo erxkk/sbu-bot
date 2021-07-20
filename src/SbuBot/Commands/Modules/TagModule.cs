@@ -15,6 +15,7 @@ using SbuBot.Commands.Attributes;
 using SbuBot.Commands.Attributes.Checks.Parameters;
 using SbuBot.Commands.Parsing;
 using SbuBot.Commands.Parsing.Descriptors;
+using SbuBot.Commands.Views;
 using SbuBot.Extensions;
 using SbuBot.Models;
 
@@ -166,6 +167,7 @@ namespace SbuBot.Commands.Modules
         [Description("A group of commands for listing tags.")]
         public sealed class ListGroup : SbuModuleBase
         {
+            // TODO: make a parsable type like MeOrOther?
             [Command]
             [Description("Lists the tags of a given member, or of the command author if no member is specified.")]
             [Usage("tag list me", "t list @user", "tag list 352815253828141056", "tag list Allah")]
@@ -189,7 +191,7 @@ namespace SbuBot.Commands.Modules
                 }
 
                 return DistributedPages(
-                    tags.Select(t => $"**Name:** {t.Name}\n**Content:** {t.Content}"),
+                    tags.Select(t => $"{SbuGlobals.BULLET} {t.Name}\n`{t.Content}`\n"),
                     embedFactory: embed => embed.WithTitle(
                         $"{(notAuthor ? $"{Mention.User(owner.Id)}'s" : "Your")} Tags"
                     )
@@ -208,9 +210,10 @@ namespace SbuBot.Commands.Modules
                 return DistributedPages(
                     tags.Select(
                         t => string.Format(
-                            "**Name:** {0}\n**Owner:** {1}",
+                            "{0}: {1}\n`{2}`\n",
+                            t.OwnerId is { } ? Mention.User(t.Owner!.Id) : "No owner",
                             t.Name,
-                            t.OwnerId is { } ? Mention.User(t.Owner!.Id) : "None"
+                            t.Content
                         )
                     ),
                     embedFactory: embed => embed.WithTitle("Tags")
@@ -298,17 +301,18 @@ namespace SbuBot.Commands.Modules
             {
                 case OneOrAll<SbuTag>.All:
                 {
-                    ConfirmationResult result = await Context.WaitForConfirmationAsync(
-                        "Are you sure you want to remove all your tags? Respond `yes` to confirm."
+                    ConfirmationState result = await ConfirmationAsync(
+                        "Tag Removal",
+                        "Are you sure you want to remove all your tags?"
                     );
 
                     switch (result)
                     {
-                        case ConfirmationResult.Timeout:
-                        case ConfirmationResult.Aborted:
+                        case ConfirmationState.None:
+                        case ConfirmationState.Aborted:
                             return Reply("Aborted.");
 
-                        case ConfirmationResult.Confirmed:
+                        case ConfirmationState.Confirmed:
                             break;
 
                         // unreachable
@@ -329,17 +333,18 @@ namespace SbuBot.Commands.Modules
 
                 case OneOrAll<SbuTag>.Specific specific:
                 {
-                    ConfirmationResult result = await Context.WaitForConfirmationAsync(
-                        "Are you sure you want to remove this tag? Respond `yes` to confirm."
+                    ConfirmationState result = await ConfirmationAsync(
+                        "Tag Removal",
+                        "Are you sure you want to remove this tag?"
                     );
 
                     switch (result)
                     {
-                        case ConfirmationResult.Timeout:
-                        case ConfirmationResult.Aborted:
+                        case ConfirmationState.None:
+                        case ConfirmationState.Aborted:
                             return Reply("Aborted.");
 
-                        case ConfirmationResult.Confirmed:
+                        case ConfirmationState.Confirmed:
                             break;
 
                         // unreachable
@@ -373,20 +378,21 @@ namespace SbuBot.Commands.Modules
             {
                 case OneOrAll<SbuTag>.All:
                 {
-                    ConfirmationResult result = await Context.WaitForConfirmationAsync(
+                    ConfirmationState result = await ConfirmationAsync(
+                        "Tag Transfer",
                         string.Format(
-                            "Are you sure you want to transfer all your tags to {0}? Respond `yes` to confirm.",
+                            "Are you sure you want to transfer all your tags to {0}?",
                             Mention.User(receiver.Id)
                         )
                     );
 
                     switch (result)
                     {
-                        case ConfirmationResult.Timeout:
-                        case ConfirmationResult.Aborted:
+                        case ConfirmationState.None:
+                        case ConfirmationState.Aborted:
                             return Reply("Aborted.");
 
-                        case ConfirmationResult.Confirmed:
+                        case ConfirmationState.Confirmed:
                             break;
 
                         // unreachable
@@ -410,6 +416,29 @@ namespace SbuBot.Commands.Modules
 
                 case OneOrAll<SbuTag>.Specific specific:
                 {
+                    ConfirmationState result = await ConfirmationAsync(
+                        "Tag Transfer",
+                        string.Format(
+                            "Are you sure you want to transfer `{0}` your tags to {1}?",
+                            specific.Value.Name,
+                            Mention.User(receiver.Id)
+                        )
+                    );
+
+                    switch (result)
+                    {
+                        case ConfirmationState.None:
+                        case ConfirmationState.Aborted:
+                            return Reply("Aborted.");
+
+                        case ConfirmationState.Confirmed:
+                            break;
+
+                        // unreachable
+                        default:
+                            throw new();
+                    }
+
                     specific.Value.OwnerId = receiver.Id;
                     Context.GetSbuDbContext().Tags.Update(specific.Value);
                     await Context.SaveChangesAsync();

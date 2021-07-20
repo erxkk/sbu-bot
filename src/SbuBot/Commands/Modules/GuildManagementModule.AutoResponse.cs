@@ -15,6 +15,7 @@ using SbuBot.Commands.Attributes;
 using SbuBot.Commands.Attributes.Checks;
 using SbuBot.Commands.Parsing;
 using SbuBot.Commands.Parsing.Descriptors;
+using SbuBot.Commands.Views;
 using SbuBot.Extensions;
 using SbuBot.Models;
 using SbuBot.Services;
@@ -176,7 +177,7 @@ namespace SbuBot.Commands.Modules
                     return Reply("This server has not auto responses.");
 
                 return DistributedPages(
-                    autoResponses.Select(ar => $"**Trigger:** {ar.Key}\n**Response:** {ar.Value}"),
+                    autoResponses.Select(ar => $"{ar.Key}\n`{ar.Value}`\n"),
                     embedFactory: embed => embed.WithTitle("Auto Responses")
                 );
             }
@@ -195,17 +196,18 @@ namespace SbuBot.Commands.Modules
                 {
                     case OneOrAll<SbuAutoResponse>.All:
                     {
-                        ConfirmationResult result = await Context.WaitForConfirmationAsync(
-                            "Are you sure you want to remove all auto responses? Respond `yes` to confirm."
+                        ConfirmationState result = await ConfirmationAsync(
+                            "Auto Response Removal",
+                            "Are you sure you want to remove all auto responses?"
                         );
 
                         switch (result)
                         {
-                            case ConfirmationResult.Timeout:
-                            case ConfirmationResult.Aborted:
+                            case ConfirmationState.None:
+                            case ConfirmationState.Aborted:
                                 return Reply("Aborted.");
 
-                            case ConfirmationResult.Confirmed:
+                            case ConfirmationState.Confirmed:
                                 break;
 
                             // unreachable
@@ -220,17 +222,18 @@ namespace SbuBot.Commands.Modules
 
                     case OneOrAll<SbuAutoResponse>.Specific specific:
                     {
-                        ConfirmationResult result = await Context.WaitForConfirmationAsync(
-                            "Are you sure you want to remove this tag? Respond `yes` to confirm."
+                        ConfirmationState result = await ConfirmationAsync(
+                            "Auto Response Removal",
+                            "Are you sure you want to remove this tag?"
                         );
 
                         switch (result)
                         {
-                            case ConfirmationResult.Timeout:
-                            case ConfirmationResult.Aborted:
+                            case ConfirmationState.None:
+                            case ConfirmationState.Aborted:
                                 return Reply("Aborted.");
 
-                            case ConfirmationResult.Confirmed:
+                            case ConfirmationState.Confirmed:
                                 break;
 
                             // unreachable

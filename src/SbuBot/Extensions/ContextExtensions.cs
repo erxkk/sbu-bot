@@ -76,31 +76,6 @@ namespace SbuBot.Extensions
         public static Task<int> SaveChangesAsync(this DiscordGuildCommandContext @this)
             => @this.GetSbuDbContext().SaveChangesAsync();
 
-        public static async Task<ConfirmationResult> WaitForConfirmationAsync(
-            this DiscordGuildCommandContext @this,
-            string prompt
-        )
-        {
-            await @this.Channel.SendMessageAsync(new LocalMessage().WithContent(prompt).WithReply(@this.Message));
-            MessageReceivedEventArgs? args;
-
-            await using (_ = @this.BeginYield())
-            {
-                args = await @this.WaitForMessageAsync(a => a.Member.Id == @this.Author.Id);
-            }
-
-            return args switch
-            {
-                { } received when received.Message.Content.Equals("no", StringComparison.OrdinalIgnoreCase)
-                    || received.Message.Content.Equals("abort", StringComparison.OrdinalIgnoreCase) =>
-                    ConfirmationResult.Aborted,
-                { } received when received.Message.Content.Equals("yes", StringComparison.OrdinalIgnoreCase)
-                    || received.Message.Content.Equals("confirm", StringComparison.OrdinalIgnoreCase) =>
-                    ConfirmationResult.Confirmed,
-                _ => ConfirmationResult.Timeout,
-            };
-        }
-
         public static async Task<Result<string, FollowUpError>> WaitFollowUpForAsync(
             this DiscordGuildCommandContext @this,
             string prompt
@@ -122,13 +97,6 @@ namespace SbuBot.Extensions
                 _ => new Result<string, FollowUpError>.Error(FollowUpError.Timeout),
             };
         }
-    }
-
-    public enum ConfirmationResult
-    {
-        Timeout,
-        Aborted,
-        Confirmed,
     }
 
     public enum FollowUpError

@@ -46,10 +46,10 @@ namespace SbuBot.Commands.Views
                 }
 
                 if ((maxElementsPerPage == -1 || elements <= maxElementsPerPage)
-                    && builder.Length + item.Length + 1 <= maxPageLength)
+                    && builder.Length + item.Length + 3 <= maxPageLength)
                 {
                     elements++;
-                    builder.AppendLine(item);
+                    builder.Append(SbuGlobals.BULLET).Append(' ').AppendLine(item);
 
                     continue;
                 }

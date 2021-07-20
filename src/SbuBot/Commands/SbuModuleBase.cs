@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 using Disqord;
 using Disqord.Bot;
+using Disqord.Extensions.Interactivity.Menus;
 using Disqord.Extensions.Interactivity.Menus.Paged;
 
 using Kkommon.Extensions.Enumerable;
@@ -26,8 +28,30 @@ namespace SbuBot.Commands
         protected override DiscordMenuCommandResult Pages(PageProvider pageProvider)
             => View(new CustomPagedView(pageProvider));
 
-        public DiscordMenuCommandResult Pages(params LocalEmbed[] embeds)
+        protected DiscordMenuCommandResult Pages(params LocalEmbed[] embeds)
             => Pages(new ListPageProvider(embeds.Select(e => new Page().WithEmbeds(e))));
+
+        protected async Task<ConfirmationState> ConfirmationAsync()
+        {
+            ConfirmationView confirmationView = new();
+            InteractiveMenu menu = new(Context.Author.Id, confirmationView);
+
+            await Context.Bot.StartMenuAsync(Context.ChannelId, menu, TimeSpan.FromMinutes(1));
+            await menu.Task;
+
+            return confirmationView.State;
+        }
+
+        protected async Task<ConfirmationState> ConfirmationAsync(string prompt, string? description = null)
+        {
+            ConfirmationView confirmationView = new(prompt, description);
+            InteractiveMenu menu = new(Context.Author.Id, confirmationView);
+
+            await Context.Bot.StartMenuAsync(Context.ChannelId, menu, TimeSpan.FromMinutes(1));
+            await menu.Task;
+
+            return confirmationView.State;
+        }
 
         protected DiscordMenuCommandResult HelpView()
             => View(new RootView(Context.Bot.Commands));

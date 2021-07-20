@@ -15,6 +15,7 @@ using SbuBot.Commands.Attributes;
 using SbuBot.Commands.Attributes.Checks.Parameters;
 using SbuBot.Commands.Parsing;
 using SbuBot.Commands.Parsing.Descriptors;
+using SbuBot.Commands.Views;
 using SbuBot.Extensions;
 using SbuBot.Models;
 using SbuBot.Services;
@@ -33,8 +34,8 @@ namespace SbuBot.Commands.Modules
             [Command]
             [Usage(
                 "reminder create in 3 days :: do the thing",
-                "reminder make in 3 days :: do the thing",
-                "remind me mk in 3 days :: do the thing"
+                "reminder make tomorrow at 15:00 :: do the thing",
+                "remind me in 3 days :: do the thing"
             )]
             public async Task<DiscordCommandResult> CreateAsync(
                 [Description("The reminder descriptor.")]
@@ -115,7 +116,7 @@ namespace SbuBot.Commands.Modules
         [Command("list")]
         [Description("Lists the given reminder or all if non is given.")]
         [Usage("reminder list", "reminder list last", "reminder list 936DA01F-9ABD-4d 9d-80C7-02AF85C822A8")]
-        public async Task<DiscordCommandResult> ListAsync(
+        public DiscordCommandResult List(
             [AuthorMustOwn]
             [Description("The reminder that should be listed.")]
             [Remarks("Lists all reminders if none is specified.")]
@@ -141,8 +142,13 @@ namespace SbuBot.Commands.Modules
                 reminders.Values
                     .Where(r => r.OwnerId == Context.Author.Id)
                     .Select(
-                        r => $"[`{r.MessageId}`]({r.JumpUrl})\nDue {Markdown.Timestamp(r.DueAt)}\n"
-                            + $"{(r.Message is { } ? $"\"{r.Message}\"" : "No Message")}\n"
+                        r => string.Format(
+                            "[`{0}`]({1}) {2}\n{3}\n",
+                            r.MessageId,
+                            r.JumpUrl,
+                            Markdown.Timestamp(r.DueAt),
+                            r.Message is { } ? $"`{r.Message}`" : "No Message"
+                        )
                     ),
                 embedFactory: embed => embed.WithTitle("Your Reminders")
             );
@@ -182,17 +188,18 @@ namespace SbuBot.Commands.Modules
             {
                 case OneOrAll<SbuReminder>.All:
                 {
-                    ConfirmationResult confirmationResult = await Context.WaitForConfirmationAsync(
-                        "Are you sure you want to cancel all your reminders? Respond `yes` to confirm."
+                    ConfirmationState confirmationResult = await ConfirmationAsync(
+                        "Reminder Removal",
+                        "Are you sure you want to cancel all your reminders?"
                     );
 
                     switch (confirmationResult)
                     {
-                        case ConfirmationResult.Timeout:
-                        case ConfirmationResult.Aborted:
+                        case ConfirmationState.None:
+                        case ConfirmationState.Aborted:
                             return Reply("Aborted.");
 
-                        case ConfirmationResult.Confirmed:
+                        case ConfirmationState.Confirmed:
                             break;
 
                         // unreachable
@@ -208,6 +215,25 @@ namespace SbuBot.Commands.Modules
 
                 case OneOrAll<SbuReminder>.Specific specific:
                 {
+                    ConfirmationState confirmationResult = await ConfirmationAsync(
+                        "Reminder Removal",
+                        $"Are you sure you want to cancel `{specific.Value.MessageId}`?"
+                    );
+
+                    switch (confirmationResult)
+                    {
+                        case ConfirmationState.None:
+                        case ConfirmationState.Aborted:
+                            return Reply("Aborted.");
+
+                        case ConfirmationState.Confirmed:
+                            break;
+
+                        // unreachable
+                        default:
+                            throw new();
+                    }
+
                     await Context.Services.GetRequiredService<ReminderService>().CancelAsync(specific.Value.MessageId);
 
                     return Reply(

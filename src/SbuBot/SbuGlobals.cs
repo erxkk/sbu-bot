@@ -11,7 +11,7 @@ namespace SbuBot
         public const string DESCRIPTOR_SEPARATOR = "::";
         public const string DEFAULT_PREFIX = "sbu";
 
-        public static readonly Version VERSION = new(0, 9, 5);
+        public static readonly Version VERSION = new(0, 9, 6);
 
         public static class Keywords
         {
@@ -23,7 +23,7 @@ namespace SbuBot
             static Keywords()
             {
                 IDENTIFIERS = new HashSet<string> { "all", "none", "mine", "reserved" };
-                CONTROL_FLOW = new HashSet<string> { "yes", "confirm", "no", "abort" };
+                CONTROL_FLOW = new HashSet<string> { "abort" };
 
                 COMMAND_ALIASES = new Dictionary<string, string[]>
                 {

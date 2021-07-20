@@ -15,6 +15,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Qmmands;
 
 using SbuBot.Commands.Attributes;
+using SbuBot.Commands.Views;
 using SbuBot.Extensions;
 
 namespace SbuBot.Commands.Modules
@@ -103,17 +104,18 @@ namespace SbuBot.Commands.Modules
 
                 if (emoteSet.Count > 1)
                 {
-                    ConfirmationResult result = await Context.WaitForConfirmationAsync(
-                        "Are you sure you want to remove all those emotes? Respond `yes` to confirm."
+                    ConfirmationState result = await ConfirmationAsync(
+                        "Emote Removal",
+                        "Are you sure you want to remove all those emotes?"
                     );
 
                     switch (result)
                     {
-                        case ConfirmationResult.Timeout:
-                        case ConfirmationResult.Aborted:
+                        case ConfirmationState.None:
+                        case ConfirmationState.Aborted:
                             return Reply("Aborted.");
 
-                        case ConfirmationResult.Confirmed:
+                        case ConfirmationState.Confirmed:
                             break;
 
                         default:

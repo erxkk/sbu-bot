@@ -6,6 +6,7 @@ using Disqord.Rest;
 
 namespace SbuBot.Commands.Views.Help
 {
+    // TODO: add permissions and checks
     public abstract class HelpView : ViewBase
     {
         protected HelpView(bool hasNoParent = false) : base(new LocalMessage().WithEmbeds(new LocalEmbed()))

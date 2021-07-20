@@ -23,7 +23,7 @@ namespace SbuBot.Extensions
             @this.Reference ??= new();
             @this.Reference.MessageId = message.Id;
             @this.Reference.ChannelId = message.ChannelId;
-            @this.Reference.GuildId = message.Reference.GuildId;
+            @this.Reference.GuildId = message.Reference?.GuildId;
             @this.Reference.FailOnInvalid = failOnInvalid;
             return @this;
         }
