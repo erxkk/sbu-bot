@@ -28,7 +28,7 @@ namespace SbuBot.Commands.Views
         private static IEnumerable<string> _fillPages(
             IEnumerable<string> source,
             int maxElementsPerPage = -1,
-            int maxPageLength = 4096
+            int maxPageLength = LocalEmbed.MaxDescriptionLength
         )
         {
             var builder = new StringBuilder();

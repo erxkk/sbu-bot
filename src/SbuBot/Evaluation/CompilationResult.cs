@@ -22,23 +22,6 @@ namespace SbuBot.Evaluation
             Diagnostics = diagnostics;
         }
 
-        public virtual LocalEmbed ToEmbed()
-        {
-            string description = string.Join(
-                "\n",
-                Diagnostics.Select(d => $"{SbuGlobals.BULLET} {d.Id}: {d.GetMessage()}")
-            );
-
-            return new LocalEmbed()
-                .WithFooter(@$"{CompilationTime:s\.ffff\s}")
-                .WithDescription(
-                    string.Format(
-                        "**Diagnostics:**\n{0}",
-                        string.IsNullOrWhiteSpace(description) ? "None" : Markdown.CodeBlock("yml", description)
-                    )
-                );
-        }
-
         public sealed class Completed : CompilationResult
         {
             private readonly Script<object> _script;
@@ -66,10 +49,6 @@ namespace SbuBot.Evaluation
 
                 return new ScriptResult.Failed(sw.Elapsed, res.Exception);
             }
-
-            public override LocalEmbed ToEmbed() => base.ToEmbed()
-                .WithTitle("Compilation completed")
-                .WithColor(Color.Green);
         }
 
         public sealed class Failed : CompilationResult
@@ -77,9 +56,23 @@ namespace SbuBot.Evaluation
             public Failed(IReadOnlyList<Diagnostic> diagnostics, TimeSpan compilationTime)
                 : base(compilationTime, diagnostics) { }
 
-            public override LocalEmbed ToEmbed() => base.ToEmbed()
-                .WithTitle("Compilation failed")
-                .WithColor(Color.Red);
+            public LocalEmbed GetDiagnosticEmbed()
+            {
+                string description = string.Join(
+                    "\n",
+                    Diagnostics.Select(d => $"{SbuGlobals.BULLET} {d.Id}: {d.GetMessage()}")
+                );
+
+                LocalEmbed embed = new();
+
+                if (!string.IsNullOrWhiteSpace(description))
+                    embed.WithDescription($"**Diagnostics:**\n{Markdown.CodeBlock("yml", description)}");
+
+                return embed
+                    .WithTitle("Compilation failed")
+                    .WithColor(Color.Red)
+                    .WithFooter(@$"{CompilationTime:s\.ffff\s}");
+            }
         }
     }
 }

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 
-namespace SbuBot.Inspection
+namespace SbuBot.Evaluation.Inspection
 {
     public static partial class Inspect
     {

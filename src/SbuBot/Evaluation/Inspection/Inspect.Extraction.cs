@@ -4,7 +4,7 @@ using System.Reflection;
 
 using Disqord;
 
-namespace SbuBot.Inspection
+namespace SbuBot.Evaluation.Inspection
 {
     public static partial class Inspect
     {

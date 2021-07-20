@@ -77,7 +77,7 @@ namespace SbuBot.Commands.Modules
         {
             [Command("modules")]
             [Description("Finds all commands that would match the given input.")]
-            public DiscordCommandResult Modules() => HelpView();
+            public DiscordCommandResult Modules() => Help();
 
             [Command("find")]
             [Description("Finds all commands that would match the given input.")]
@@ -120,7 +120,7 @@ namespace SbuBot.Commands.Modules
         public DiscordCommandResult Help(string? command = null)
         {
             if (command is null)
-                return HelpView();
+                return base.Help();
 
             IReadOnlyList<CommandMatch> matches = Context.Bot.Commands.FindCommands(command);
 
@@ -128,10 +128,10 @@ namespace SbuBot.Commands.Modules
             {
                 0 => Context.Bot.Commands.GetAllModules().FirstOrDefault(m => m.FullAliases.Contains(command))
                     is { } module
-                    ? HelpView(module)
-                    : HelpView(),
-                1 => HelpView(matches[0].Command),
-                _ => HelpView(matches.Select(c => c.Command)),
+                    ? Help(module)
+                    : base.Help(),
+                1 => Help(matches[0].Command),
+                _ => Help(matches.Select(c => c.Command)),
             };
         }
 

@@ -12,9 +12,6 @@ namespace SbuBot.Evaluation
 
         private ScriptResult(TimeSpan completionTime) => CompletionTime = completionTime;
 
-        public virtual LocalEmbed ToEmbed() => new LocalEmbed()
-            .WithFooter(@$"{CompletionTime:s\.ffff\s}");
-
         public sealed class Completed : ScriptResult
         {
             public object? ReturnValue { get; }
@@ -22,10 +19,11 @@ namespace SbuBot.Evaluation
             public Completed(TimeSpan completionTime, object? returnValue) : base(completionTime)
                 => ReturnValue = returnValue;
 
-            public override LocalEmbed ToEmbed() => base.ToEmbed()
+            public LocalEmbed GetResultEmbed() => new LocalEmbed()
                 .WithTitle("Result")
-                .WithDescription(Markdown.CodeBlock("yml", ReturnValue?.GetInspection() ?? "null"))
-                .WithColor(Color.Green);
+                .WithDescription(Markdown.CodeBlock("yml", ReturnValue ?? "null"))
+                .WithColor(Color.Red)
+                .WithFooter(@$"{CompletionTime:s\.ffff\s}");
         }
 
         public sealed class Failed : ScriptResult
@@ -34,10 +32,11 @@ namespace SbuBot.Evaluation
 
             public Failed(TimeSpan completionTime, Exception exception) : base(completionTime) => Exception = exception;
 
-            public override LocalEmbed ToEmbed() => base.ToEmbed()
+            public LocalEmbed GetDiagnosticEmbed() => new LocalEmbed()
                 .WithTitle(Exception.GetType().Name)
                 .WithDescription(Markdown.CodeBlock(Exception.StackTrace))
-                .WithColor(Color.Red);
+                .WithColor(Color.Red)
+                .WithFooter(@$"{CompletionTime:s\.ffff\s}");
         }
     }
 }

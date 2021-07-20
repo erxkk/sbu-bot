@@ -5,7 +5,7 @@ using System.Text;
 
 using Kkommon.Exceptions;
 
-namespace SbuBot.Inspection
+namespace SbuBot.Evaluation.Inspection
 {
     public static partial class Inspect
     {

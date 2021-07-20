@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace SbuBot.Inspection
+namespace SbuBot.Evaluation.Inspection
 {
     public partial class Inspect
     {

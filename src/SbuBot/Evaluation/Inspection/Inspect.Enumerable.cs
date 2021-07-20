@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 
-namespace SbuBot.Inspection
+namespace SbuBot.Evaluation.Inspection
 {
     public static partial class Inspect
     {
@@ -56,7 +56,7 @@ namespace SbuBot.Inspection
 
                 if (count >= itemCount)
                 {
-                    builder.Append(SbuGlobals.ELLIPSES);
+                    builder.Append(SbuGlobals.ELLIPSES).Append('\n');
                     break;
                 }
 
@@ -70,7 +70,7 @@ namespace SbuBot.Inspection
                     itemCount
                 );
 
-                builder.Append('\n');
+                builder.Append(',').Append('\n');
                 count++;
             }
 

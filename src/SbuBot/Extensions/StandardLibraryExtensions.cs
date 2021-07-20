@@ -5,7 +5,7 @@ using Disqord;
 
 using Kkommon;
 
-using SbuBot.Inspection;
+using SbuBot.Evaluation.Inspection;
 using SbuBot.Services;
 
 namespace SbuBot.Extensions

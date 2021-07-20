@@ -1,7 +1,7 @@
 using System;
 using System.Reflection;
 
-namespace SbuBot.Inspection
+namespace SbuBot.Evaluation.Inspection
 {
     public static class Reflect
     {
