@@ -42,7 +42,10 @@ namespace SbuBot.Commands.Modules
                             return;
 
                         default:
-                            await Context.Message.AddReactionAsync(LocalEmoji.Custom(SbuGlobals.Emote.Menu.CONFIRM));
+                            await Context.Message.AddReactionAsync(
+                                LocalEmoji.Custom(SbuGlobals.Guild.Emote.Menu.CONFIRM)
+                            );
+
                             return;
                     }
                 }

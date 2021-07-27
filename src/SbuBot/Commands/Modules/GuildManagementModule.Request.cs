@@ -27,17 +27,17 @@ namespace SbuBot.Commands.Modules
             public async Task VoteAsync()
             {
                 InteractivityExtension interactivity = Context.Bot.GetInteractivity();
-                await Context.Author.GrantRoleAsync(SbuGlobals.Role.Perm.SENATE);
+                await Context.Author.GrantRoleAsync(SbuGlobals.Guild.Sbu.Role.Perm.SENATE);
 
                 try
                 {
                     MessageReceivedEventArgs waitMessageResult;
-                    await Reply($"Send your message in {Mention.TextChannel(SbuGlobals.Channel.SENATE)}.");
+                    await Reply($"Send your message in {Mention.TextChannel(SbuGlobals.Guild.Sbu.Channel.SENATE)}.");
 
                     await using (_ = Context.BeginYield())
                     {
                         waitMessageResult = await interactivity.WaitForMessageAsync(
-                            SbuGlobals.Channel.SENATE,
+                            SbuGlobals.Guild.Sbu.Channel.SENATE,
                             e => e.Member.Id == Context.Author.Id,
                             TimeSpan.FromMinutes(3)
                         );
@@ -46,19 +46,30 @@ namespace SbuBot.Commands.Modules
                     if (waitMessageResult is null)
                     {
                         await Reply(
-                            $"You did not send a message in {Mention.TextChannel(SbuGlobals.Channel.SENATE)} in time."
+                            string.Format(
+                                "You did not send a message in {0} in time.",
+                                Mention.TextChannel(SbuGlobals.Guild.Sbu.Channel.SENATE)
+                            )
                         );
 
                         return;
                     }
 
-                    await waitMessageResult.Message.AddReactionAsync(new LocalCustomEmoji(SbuGlobals.Emote.Vote.UP));
-                    await waitMessageResult.Message.AddReactionAsync(new LocalCustomEmoji(SbuGlobals.Emote.Vote.DOWN));
-                    await waitMessageResult.Message.AddReactionAsync(new LocalCustomEmoji(SbuGlobals.Emote.Vote.NONE));
+                    await waitMessageResult.Message.AddReactionAsync(
+                        new LocalCustomEmoji(SbuGlobals.Guild.Emote.Vote.UP)
+                    );
+
+                    await waitMessageResult.Message.AddReactionAsync(
+                        new LocalCustomEmoji(SbuGlobals.Guild.Emote.Vote.DOWN)
+                    );
+
+                    await waitMessageResult.Message.AddReactionAsync(
+                        new LocalCustomEmoji(SbuGlobals.Guild.Emote.Vote.NONE)
+                    );
                 }
                 finally
                 {
-                    await Context.Author.RevokeRoleAsync(SbuGlobals.Role.Perm.SENATE);
+                    await Context.Author.RevokeRoleAsync(SbuGlobals.Guild.Sbu.Role.Perm.SENATE);
                 }
             }
 
@@ -68,17 +79,20 @@ namespace SbuBot.Commands.Modules
             public async Task QuoteAsync()
             {
                 InteractivityExtension interactivity = Context.Bot.GetInteractivity();
-                await Context.Author.GrantRoleAsync(SbuGlobals.Role.Perm.SHIT_SBU_SAYS);
+                await Context.Author.GrantRoleAsync(SbuGlobals.Guild.Sbu.Role.Perm.SHIT_SBU_SAYS);
 
                 try
                 {
-                    await Reply($"Send your message in {Mention.TextChannel(SbuGlobals.Channel.Based.SHIT_SBU_SAYS)}.");
+                    await Reply(
+                        $"Send your message in {Mention.TextChannel(SbuGlobals.Guild.Sbu.Channel.Based.SHIT_SBU_SAYS)}."
+                    );
+
                     MessageReceivedEventArgs waitMessageResult;
 
                     await using (_ = Context.BeginYield())
                     {
                         waitMessageResult = await interactivity.WaitForMessageAsync(
-                            SbuGlobals.Channel.Based.SHIT_SBU_SAYS,
+                            SbuGlobals.Guild.Sbu.Channel.Based.SHIT_SBU_SAYS,
                             e => e.Member.Id == Context.Author.Id,
                             TimeSpan.FromMinutes(3)
                         );
@@ -89,14 +103,14 @@ namespace SbuBot.Commands.Modules
                         await Reply(
                             string.Format(
                                 "You did not send a message in {0} in time.",
-                                Mention.TextChannel(SbuGlobals.Channel.Based.SHIT_SBU_SAYS)
+                                Mention.TextChannel(SbuGlobals.Guild.Sbu.Channel.Based.SHIT_SBU_SAYS)
                             )
                         );
                     }
                 }
                 finally
                 {
-                    await Context.Author.RevokeRoleAsync(SbuGlobals.Role.Perm.SHIT_SBU_SAYS);
+                    await Context.Author.RevokeRoleAsync(SbuGlobals.Guild.Sbu.Role.Perm.SHIT_SBU_SAYS);
                 }
             }
 
@@ -106,17 +120,20 @@ namespace SbuBot.Commands.Modules
             public async Task AnnounceAsync()
             {
                 InteractivityExtension interactivity = Context.Bot.GetInteractivity();
-                await Context.Author.GrantRoleAsync(SbuGlobals.Role.Perm.ANNOUNCEMENTS);
+                await Context.Author.GrantRoleAsync(SbuGlobals.Guild.Sbu.Role.Perm.ANNOUNCEMENTS);
 
                 try
                 {
                     MessageReceivedEventArgs waitMessageResult;
-                    await Reply($"Send your message in {Mention.TextChannel(SbuGlobals.Channel.ANNOUNCEMENTS)}.");
+
+                    await Reply(
+                        $"Send your message in {Mention.TextChannel(SbuGlobals.Guild.Sbu.Channel.ANNOUNCEMENTS)}."
+                    );
 
                     await using (_ = Context.BeginYield())
                     {
                         waitMessageResult = await interactivity.WaitForMessageAsync(
-                            SbuGlobals.Channel.ANNOUNCEMENTS,
+                            SbuGlobals.Guild.Sbu.Channel.ANNOUNCEMENTS,
                             e => e.Member.Id == Context.Author.Id,
                             TimeSpan.FromMinutes(3)
                         );
@@ -127,14 +144,14 @@ namespace SbuBot.Commands.Modules
                         await Reply(
                             string.Format(
                                 "You did not send a message in {0} in time.",
-                                Mention.TextChannel(SbuGlobals.Channel.ANNOUNCEMENTS)
+                                Mention.TextChannel(SbuGlobals.Guild.Sbu.Channel.ANNOUNCEMENTS)
                             )
                         );
                     }
                 }
                 finally
                 {
-                    await Context.Author.RevokeRoleAsync(SbuGlobals.Role.Perm.ANNOUNCEMENTS);
+                    await Context.Author.RevokeRoleAsync(SbuGlobals.Guild.Sbu.Role.Perm.ANNOUNCEMENTS);
                 }
             }
         }

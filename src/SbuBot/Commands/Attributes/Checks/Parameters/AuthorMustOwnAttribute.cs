@@ -8,6 +8,7 @@ using Kkommon.Exceptions;
 using Qmmands;
 
 using SbuBot.Commands.Parsing;
+using SbuBot.Evaluation.Inspection;
 using SbuBot.Extensions;
 using SbuBot.Models;
 
@@ -78,7 +79,7 @@ namespace SbuBot.Commands.Attributes.Checks.Parameters
         }
 
         public override bool CheckType(Type type) => type.IsAssignableTo(typeof(ISbuOwnedEntity))
-            || (type.GetGenericTypeDefinition() == typeof(OneOrAll<>)
-                && type.GetGenericArguments()[0].IsAssignableTo(typeof(ISbuOwnedEntity)));
+            || Reflect.IsGenericType(type, typeof(OneOrAll<>))
+                && type.GetGenericArguments()[0].IsAssignableTo(typeof(ISbuOwnedEntity));
     }
 }

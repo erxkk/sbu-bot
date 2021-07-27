@@ -9,6 +9,7 @@ using Qmmands;
 using SbuBot.Commands.Attributes;
 using SbuBot.Commands.Parsing;
 using SbuBot.Commands.Parsing.TypeParsers;
+using SbuBot.Evaluation.Inspection;
 using SbuBot.Models;
 
 namespace SbuBot.Commands
@@ -121,10 +122,10 @@ namespace SbuBot.Commands
                     }
                 );
 
-                if (@this.Type.IsGenericType && @this.Type.GetGenericTypeDefinition() == typeof(OneOrAll<>))
+                if (Reflect.IsGenericType(@this.Type, typeof(OneOrAll<>)))
                     builder.Append(" | all");
             }
-            else if (@this.Type.IsGenericType && @this.Type.GetGenericTypeDefinition() == typeof(OneOrAll<>))
+            else if (Reflect.IsGenericType(@this.Type, typeof(OneOrAll<>)))
             {
                 builder.Append(" | all");
             }

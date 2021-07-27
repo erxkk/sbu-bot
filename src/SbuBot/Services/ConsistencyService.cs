@@ -43,7 +43,7 @@ namespace SbuBot.Services
 
             if (e.GuildId == SbuGlobals.Guild.Sbu.SELF
                 || e.GuildId == SbuGlobals.Guild.LaFamilia.SELF
-                || e.GuildId == SbuGlobals.Guild.Lab.SELF)
+                || e.GuildId == SbuGlobals.Guild.TheLab.SELF)
                 await Bot.Chunker.ChunkAsync(e.Guild);
         }
 

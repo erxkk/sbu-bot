@@ -27,11 +27,12 @@ namespace SbuBot.Services
             switch (e.Message.Author.Id)
             {
                 case SbuGlobals.Bot.OWNER when e.Message.Content.Equals("ratio", StringComparison.OrdinalIgnoreCase):
-                    await e.Message.AddReactionAsync(LocalEmoji.Custom(SbuGlobals.Emote.Vote.UP));
+                    await e.Message.AddReactionAsync(LocalEmoji.Custom(SbuGlobals.Guild.Emote.Vote.UP));
                     return;
 
-                case SbuGlobals.Member.TOASTY when e.Message.Content.Equals("cum", StringComparison.OrdinalIgnoreCase):
-                    await e.Message.AddReactionAsync(LocalEmoji.Custom(SbuGlobals.Emote.Misc.CUM));
+                case SbuGlobals.Guild.Sbu.Member.TOASTY
+                    when e.Message.Content.Equals("cum", StringComparison.OrdinalIgnoreCase):
+                    await e.Message.AddReactionAsync(LocalEmoji.Custom(SbuGlobals.Guild.Emote.Misc.CUM));
                     return;
             }
         }

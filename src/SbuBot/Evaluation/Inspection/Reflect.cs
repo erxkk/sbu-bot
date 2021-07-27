@@ -33,5 +33,8 @@ namespace SbuBot.Evaluation.Inspection
                 || type == typeof(short?)
                 || type == typeof(byte?)
                 || type == typeof(sbyte?);
+
+        public static bool IsGenericType(Type type, Type genericTypeDefinition)
+            => type.IsGenericType && type.GetGenericTypeDefinition() == genericTypeDefinition;
     }
 }

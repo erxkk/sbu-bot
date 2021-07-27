@@ -53,7 +53,7 @@ namespace SbuBot.Commands.Views
             return default;
         }
 
-        [Button(Emoji = SbuGlobals.Emote.Menu.CONFIRM, Style = LocalButtonComponentStyle.Success)]
+        [Button(Emoji = SbuGlobals.Guild.Emote.Menu.CONFIRM, Style = LocalButtonComponentStyle.Success)]
         public ValueTask ConfirmAsync(ButtonEventArgs e)
         {
             _setConfirmation(true);
@@ -62,7 +62,7 @@ namespace SbuBot.Commands.Views
             return default;
         }
 
-        [Button(Emoji = SbuGlobals.Emote.Menu.STOP, Style = LocalButtonComponentStyle.Danger)]
+        [Button(Emoji = SbuGlobals.Guild.Emote.Menu.STOP, Style = LocalButtonComponentStyle.Danger)]
         public ValueTask AbortAsync(ButtonEventArgs e)
         {
             _setConfirmation(false);

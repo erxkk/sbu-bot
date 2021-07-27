@@ -14,7 +14,7 @@ namespace SbuBot.Commands.Views.Help
             AddComponent(
                 new ButtonViewComponent(GoToParent)
                 {
-                    Emoji = LocalEmoji.Custom(SbuGlobals.Emote.Menu.BACK),
+                    Emoji = LocalEmoji.Custom(SbuGlobals.Guild.Emote.Menu.BACK),
                     Style = LocalButtonComponentStyle.Secondary,
                     Row = 4,
                     Position = 0,
@@ -25,7 +25,12 @@ namespace SbuBot.Commands.Views.Help
 
         public virtual ValueTask GoToParent(ButtonEventArgs e) => default;
 
-        [Button(Emoji = SbuGlobals.Emote.Menu.STOP, Row = 4, Position = 1, Style = LocalButtonComponentStyle.Secondary)]
+        [Button(
+            Emoji = SbuGlobals.Guild.Emote.Menu.STOP,
+            Row = 4,
+            Position = 1,
+            Style = LocalButtonComponentStyle.Secondary
+        )]
         public ValueTask StopMenu(ButtonEventArgs e)
         {
             if (Menu is InteractiveMenu menu)
