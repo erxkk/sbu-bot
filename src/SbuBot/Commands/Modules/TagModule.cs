@@ -23,7 +23,8 @@ namespace SbuBot.Commands.Modules
         [Command]
         [Description("Responds with the given tag's content.")]
         [Usage("tag tagggg", "t whomstve")]
-        public DiscordCommandResult Get([Description("The tag to invoke.")] SbuTag tag) => Response(tag.Content);
+        public DiscordCommandResult Get([Description("The tag to invoke.")] SbuTag tag)
+            => Response(tag.Content);
 
         [Group("list")]
         [Description("A group of commands for listing tags.")]

@@ -13,11 +13,11 @@ using SbuBot.Extensions;
 
 namespace SbuBot.Commands.Views.Help
 {
-    public sealed class SearchMatchView : HelpView
+    public sealed class SearchMatchHelpView : HelpViewBase
     {
         private readonly Command[] _commands;
 
-        public SearchMatchView(IEnumerable<Command> commands)
+        public SearchMatchHelpView(IEnumerable<Command> commands)
         {
             _commands = commands.ToArray();
 
@@ -47,7 +47,7 @@ namespace SbuBot.Commands.Views.Help
                 return default;
 
             Command command = _commands[Convert.ToInt32(e.Interaction.SelectedValues[0])];
-            Menu.View = command.Module.IsGroup() ? new GroupView(command.Module) : new CommandView(command);
+            Menu.View = command.Module.IsGroup() ? new GroupHelpView(command.Module) : new CommandHelpView(command);
 
             return default;
         }

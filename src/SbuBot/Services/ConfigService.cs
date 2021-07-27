@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Disqord;
+using Disqord.Bot.Hosting;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,13 +12,14 @@ using SbuBot.Models;
 
 namespace SbuBot.Services
 {
-    public sealed class ConfigService : SbuBotServiceBase
+    public sealed class ConfigService : DiscordBotService
     {
         private Dictionary<Snowflake, SbuGuildConfig> _guildConfigs = new();
 
         public IReadOnlyDictionary<Snowflake, SbuGuildConfig> GuildConfigs => _guildConfigs;
+        public SbuConfiguration GlobalConfiguration { get; }
 
-        public ConfigService(SbuConfiguration configuration) : base(configuration) { }
+        public ConfigService(SbuConfiguration configuration) => GlobalConfiguration = configuration;
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {

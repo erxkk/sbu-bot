@@ -121,22 +121,22 @@ namespace SbuBot.Evaluation
             return Response(new LocalEmbed().WithDescription(Markdown.CodeBlock("yml", inspection)));
         }
 
-        public DiscordMenuCommandResult Help() => View(new RootView(Context.Bot.Commands));
+        public DiscordMenuCommandResult Help() => View(new RootHelpView(Context.Bot.Commands));
 
         public DiscordMenuCommandResult Help(Command command) => View(
-            command.Module.IsGroup() ? new GroupView(command.Module) : new CommandView(command)
+            command.Module.IsGroup() ? new GroupHelpView(command.Module) : new CommandHelpView(command)
         );
 
         public DiscordMenuCommandResult Help(IEnumerable<Command> commands)
         {
             return View(
                 !commands.GroupBy(o => o.Module).HasAtLeast(2)
-                    ? new SearchMatchView(commands)
-                    : new GroupView(commands.First().Module)
+                    ? new SearchMatchHelpView(commands)
+                    : new GroupHelpView(commands.First().Module)
             );
         }
 
         public DiscordMenuCommandResult Help(Module module)
-            => View(module.IsGroup() ? new GroupView(module) : new ModuleView(module));
+            => View(module.IsGroup() ? new GroupHelpView(module) : new ModuleHelpView(module));
     }
 }

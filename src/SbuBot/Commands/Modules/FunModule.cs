@@ -12,10 +12,22 @@ namespace SbuBot.Commands.Modules
     {
         [Command("ping")]
         [Description("Replies with `Pong!`.")]
-        public DiscordCommandResult Send() => Reply("Pong!");
+        public DiscordCommandResult Ping() => Reply("Pong!");
+
+        [Command("color")]
+        [Description("Replies with the given color as an embed or a random color if non is given.")]
+        public DiscordCommandResult ShowColor(
+            [Description("The color to reply with.")]
+            Color? color = null
+        )
+        {
+            color ??= Color.Random;
+            return Reply(new LocalEmbed().WithTitle(color.ToString()).WithColor(color));
+        }
 
         [Command("sex")]
-        [Description("SEX!!!!!")]
+        [RequireGuild(SbuGlobals.Guild.Sbu.SELF)]
+        [Description("SEX!!!!! (SECRET SBU ONLY COMMAND!!!!!!)")]
         public DiscordCommandResult Sex() => Reply(
             new LocalMessage()
                 .WithContent("sex!!!")

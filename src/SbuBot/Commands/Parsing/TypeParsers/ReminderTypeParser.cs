@@ -30,9 +30,7 @@ namespace SbuBot.Commands.Parsing.TypeParsers
             if (value.Equals("last", StringComparison.OrdinalIgnoreCase))
             {
                 return reminders
-                    .Values.FirstOrDefault(
-                        r => r.OwnerId == context.Author.Id && r.GuildId == context.GuildId
-                    ) is { } queriedReminder
+                    .Values.FirstOrDefault(r => r.OwnerId == context.Author.Id) is { } queriedReminder
                     ? Success(queriedReminder)
                     : Failure("Could not find reminder.");
             }

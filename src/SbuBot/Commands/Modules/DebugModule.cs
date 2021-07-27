@@ -95,9 +95,6 @@ namespace SbuBot.Commands.Modules
         {
             IReadOnlyList<CommandMatch> matches = Context.Bot.Commands.FindCommands(query);
 
-            bool wasDisabled = false;
-
-            // TODO: similar naming will always bring up the same submodule
             switch (matches.Count)
             {
                 case 0 when Context.Bot.Commands.GetAllModules().FirstOrDefault(m => m.FullAliases.Contains(query))
@@ -106,14 +103,11 @@ namespace SbuBot.Commands.Modules
                     if (module.IsEnabled)
                     {
                         module.Disable();
-                    }
-                    else
-                    {
-                        wasDisabled = true;
-                        module.Enable();
+                        return Reply("Disabled module.");
                     }
 
-                    return Reply($"{(wasDisabled ? "Enabled" : "Disabled")} module.");
+                    module.Enable();
+                    return Reply("Enabled module.");
                 }
 
                 case 0:
@@ -124,14 +118,11 @@ namespace SbuBot.Commands.Modules
                     if (matches[0].Command.IsEnabled)
                     {
                         matches[0].Command.Disable();
-                    }
-                    else
-                    {
-                        wasDisabled = true;
-                        matches[0].Command.Enable();
+                        return Reply("Disabled command.");
                     }
 
-                    return Reply($"{(wasDisabled ? "Enabled" : "Disabled")} command.");
+                    matches[0].Command.Enable();
+                    return Reply("Enabled command.");
                 }
 
                 default:
@@ -140,7 +131,7 @@ namespace SbuBot.Commands.Modules
         }
 
         [Command("chunk")]
-        [Description("Chunks the current guild.")]
+        [Description("Big Big, Chunkus, Big Chunkus, Big Chunkus.")]
         public async Task<DiscordCommandResult> Chunk()
         {
             await using (_ = Context.BeginYield())
@@ -148,7 +139,7 @@ namespace SbuBot.Commands.Modules
                 await Context.Bot.Chunker.ChunkAsync(Context.Guild);
             }
 
-            return Reply("Chunking finished.");
+            return Reply("Big Chunkus.");
         }
 
         [Command("kill")]
@@ -156,7 +147,7 @@ namespace SbuBot.Commands.Modules
         public async Task Kill()
         {
             await Reply("Gn kid.");
-            Environment.Exit(1);
+            Environment.Exit(0);
         }
 
         [Command("test")]

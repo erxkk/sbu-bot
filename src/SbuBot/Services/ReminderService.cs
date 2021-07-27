@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Disqord;
+using Disqord.Bot.Hosting;
 using Disqord.Rest;
 
 using Kkommon.Extensions.Semaphore;
@@ -18,11 +19,9 @@ using SbuBot.Models;
 
 namespace SbuBot.Services
 {
-    public sealed class ReminderService : SbuBotServiceBase
+    public sealed class ReminderService : DiscordBotService
     {
         private readonly ConcurrentDictionary<Snowflake, Entry> _scheduleEntries = new();
-
-        public ReminderService(SbuConfiguration configuration) : base(configuration) { }
 
         public IReadOnlyDictionary<Snowflake, SbuReminder> GetReminders()
             => _scheduleEntries.ToDictionary(k => k.Key, v => v.Value.Reminder);
@@ -196,6 +195,7 @@ namespace SbuBot.Services
 
             try
             {
+                // BUG: add guild id you dumbass
                 await Bot.SendMessageAsync(
                     reminder.ChannelId,
                     new LocalMessage()
