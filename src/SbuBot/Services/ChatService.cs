@@ -15,7 +15,7 @@ using SbuBot.Models;
 
 namespace SbuBot.Services
 {
-    public sealed class ChatService : SbuBotServiceBase
+    public sealed class ChatService : DiscordBotService
     {
         private readonly ConfigService _configService;
         private readonly ConcurrentDictionary<(Snowflake, string), string> _autoResponses = new();
@@ -23,7 +23,7 @@ namespace SbuBot.Services
         public IReadOnlyDictionary<(Snowflake, string), string> AutoResponses => _autoResponses;
         public override int Priority => int.MaxValue - 1;
 
-        public ChatService(SbuConfiguration configuration, ConfigService configService) : base(configuration)
+        public ChatService(ConfigService configService)
             => _configService = configService;
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)

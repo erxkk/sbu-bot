@@ -16,14 +16,12 @@ using SbuBot.Models;
 
 namespace SbuBot.Services
 {
-    public sealed class ConsistencyService : SbuBotServiceBase
+    public sealed class ConsistencyService : DiscordBotService
     {
         private readonly HashSet<Snowflake> _handledAddedRoles = new();
         private readonly HashSet<Snowflake> _handledRemovedRoles = new();
 
         public override int Priority => int.MaxValue;
-
-        public ConsistencyService(SbuConfiguration configuration) : base(configuration) { }
 
         public void IgnoreAddedRole(Snowflake roleId) => _handledAddedRoles.Add(roleId);
         public void IgnoreRemovedRole(Snowflake roleId) => _handledRemovedRoles.Add(roleId);

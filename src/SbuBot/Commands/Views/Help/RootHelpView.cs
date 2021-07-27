@@ -12,11 +12,11 @@ using SbuBot.Extensions;
 
 namespace SbuBot.Commands.Views.Help
 {
-    public sealed class RootView : HelpView
+    public sealed class RootHelpView : HelpViewBase
     {
         private readonly ImmutableDictionary<int, Module> _modules;
 
-        public RootView(CommandService service) : base(true)
+        public RootHelpView(CommandService service) : base(true)
         {
             _modules = service.TopLevelModules.ToImmutableDictionary(k => k.GetHashCode(), v => v);
 
@@ -41,7 +41,7 @@ namespace SbuBot.Commands.Views.Help
             if (e.Interaction.SelectedValues.Count != 1)
                 return default;
 
-            Menu.View = new ModuleView(_modules[Convert.ToInt32(e.Interaction.SelectedValues[0])]);
+            Menu.View = new ModuleHelpView(_modules[Convert.ToInt32(e.Interaction.SelectedValues[0])]);
             return default;
         }
     }

@@ -7,9 +7,9 @@ using Disqord.Rest;
 namespace SbuBot.Commands.Views.Help
 {
     // TODO: add permissions and checks
-    public abstract class HelpView : ViewBase
+    public abstract class HelpViewBase : ViewBase
     {
-        protected HelpView(bool hasNoParent = false) : base(new LocalMessage().WithEmbeds(new LocalEmbed()))
+        protected HelpViewBase(bool hasNoParent = false) : base(new LocalMessage().WithEmbeds(new LocalEmbed()))
         {
             AddComponent(
                 new ButtonViewComponent(GoToParent)

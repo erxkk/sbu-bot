@@ -13,7 +13,6 @@ using Kkommon.Exceptions;
 using Qmmands;
 
 using SbuBot.Commands.Attributes;
-using SbuBot.Commands.Attributes.Checks;
 using SbuBot.Commands.Parsing;
 using SbuBot.Exceptions;
 using SbuBot.Extensions;
@@ -23,7 +22,8 @@ namespace SbuBot.Commands.Modules
     public sealed partial class GuildManagementModule
     {
         [Command("archive")]
-        [RequirePinBrigade(Group = "AdminOrPinBrigade"), RequireAdmin(Group = "AdminOrPinBrigade"),
+        [RequireAuthorGuildPermissions(Permission.ManageMessages, Group = "AdminOrPinBrigade"),
+         RequireAuthorGuildPermissions(Permission.Administrator, Group = "AdminOrPinBrigade"),
          RequireGuild(SbuGlobals.Guild.Sbu.SELF)]
         [Description("Archives the given message or all pinned messages.")]
         [Remarks(
@@ -51,7 +51,7 @@ namespace SbuBot.Commands.Modules
                 if (!Context.Message.ReferencedMessage.HasValue)
                     return Reply("You need to provide a message or reply to one.");
 
-                await _pinSingleMessageAsync(Context.Message.ReferencedMessage.Value, pinArchive, unpinOriginal);
+                await pinSingleMessageAsync(Context.Message.ReferencedMessage.Value, pinArchive, unpinOriginal);
             }
             else
             {
@@ -59,7 +59,7 @@ namespace SbuBot.Commands.Modules
                 {
                     case OneOrAll<IUserMessage>.Specific specific:
                     {
-                        if (await _pinSingleMessageAsync(specific.Value, pinArchive, unpinOriginal)
+                        if (await pinSingleMessageAsync(specific.Value, pinArchive, unpinOriginal)
                             is Result<Unit, string>.Error error)
                             return Reply(error.Value);
 
@@ -75,7 +75,7 @@ namespace SbuBot.Commands.Modules
                             if (Context.Bot.StoppingToken.IsCancellationRequested)
                                 throw new OperationCanceledException();
 
-                            if (await _pinSingleMessageAsync(pinnedMessage, pinArchive, unpinOriginal)
+                            if (await pinSingleMessageAsync(pinnedMessage, pinArchive, unpinOriginal)
                                 is Result<Unit, string>.Error error)
                                 return Reply(error.Value);
                         }
@@ -90,7 +90,7 @@ namespace SbuBot.Commands.Modules
 
             return Reply("Done.");
 
-            static async Task<Result<Unit, string>> _pinSingleMessageAsync(
+            static async Task<Result<Unit, string>> pinSingleMessageAsync(
                 IUserMessage message,
                 ITextChannel channel,
                 bool unpinOriginal

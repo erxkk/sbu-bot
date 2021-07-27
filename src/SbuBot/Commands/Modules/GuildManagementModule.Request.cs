@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 
 using Disqord;
@@ -10,9 +11,11 @@ using Qmmands;
 
 namespace SbuBot.Commands.Modules
 {
+    // TODO: add abort
     public sealed partial class GuildManagementModule
     {
         [Group("request")]
+        [RequireGuild(SbuGlobals.Guild.Sbu.SELF)]
         [Description("A group of commands for requesting access to restricted channels or permissions.")]
         public sealed class RequestSubModule : SbuModuleBase
         {
@@ -35,7 +38,8 @@ namespace SbuBot.Commands.Modules
                     {
                         waitMessageResult = await interactivity.WaitForMessageAsync(
                             SbuGlobals.Channel.SENATE,
-                            e => e.Member.Id == Context.Author.Id
+                            e => e.Member.Id == Context.Author.Id,
+                            TimeSpan.FromMinutes(3)
                         );
                     }
 
@@ -75,7 +79,8 @@ namespace SbuBot.Commands.Modules
                     {
                         waitMessageResult = await interactivity.WaitForMessageAsync(
                             SbuGlobals.Channel.Based.SHIT_SBU_SAYS,
-                            e => e.Member.Id == Context.Author.Id
+                            e => e.Member.Id == Context.Author.Id,
+                            TimeSpan.FromMinutes(3)
                         );
                     }
 
@@ -112,7 +117,8 @@ namespace SbuBot.Commands.Modules
                     {
                         waitMessageResult = await interactivity.WaitForMessageAsync(
                             SbuGlobals.Channel.ANNOUNCEMENTS,
-                            e => e.Member.Id == Context.Author.Id
+                            e => e.Member.Id == Context.Author.Id,
+                            TimeSpan.FromMinutes(3)
                         );
                     }
 

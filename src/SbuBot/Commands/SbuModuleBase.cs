@@ -54,19 +54,19 @@ namespace SbuBot.Commands
         }
 
         protected DiscordMenuCommandResult Help()
-            => View(new RootView(Context.Bot.Commands));
+            => View(new RootHelpView(Context.Bot.Commands));
 
         protected DiscordMenuCommandResult Help(Command command) => View(
-            command.Module.IsGroup() ? new GroupView(command.Module) : new CommandView(command)
+            command.Module.IsGroup() ? new GroupHelpView(command.Module) : new CommandHelpView(command)
         );
 
         protected DiscordMenuCommandResult Help(IEnumerable<Command> commands) => View(
             !commands.GroupBy(o => o.Module).HasAtLeast(2)
-                ? new SearchMatchView(commands)
-                : new GroupView(commands.First().Module)
+                ? new SearchMatchHelpView(commands)
+                : new GroupHelpView(commands.First().Module)
         );
 
         protected DiscordMenuCommandResult Help(Module module)
-            => View(module.IsGroup() ? new GroupView(module) : new ModuleView(module));
+            => View(module.IsGroup() ? new GroupHelpView(module) : new ModuleHelpView(module));
     }
 }

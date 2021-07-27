@@ -13,13 +13,13 @@ using SbuBot.Extensions;
 
 namespace SbuBot.Commands.Views.Help
 {
-    public sealed class ModuleView : HelpView
+    public sealed class ModuleHelpView : HelpViewBase
     {
         private readonly Module _module;
         private readonly ImmutableDictionary<int, Module> _submodules;
         private readonly ImmutableDictionary<int, Command> _commands;
 
-        public ModuleView(Module module)
+        public ModuleHelpView(Module module)
         {
             _module = module;
             _submodules = module.Submodules.ToImmutableDictionary(k => k.GetHashCode(), v => v);
@@ -79,7 +79,7 @@ namespace SbuBot.Commands.Views.Help
                 return default;
 
             Module submodule = _submodules[Convert.ToInt32(e.Interaction.SelectedValues[0])];
-            Menu.View = submodule.IsGroup() ? new GroupView(submodule) : new ModuleView(submodule);
+            Menu.View = submodule.IsGroup() ? new GroupHelpView(submodule) : new ModuleHelpView(submodule);
             return default;
         }
 
@@ -88,15 +88,15 @@ namespace SbuBot.Commands.Views.Help
             if (e.Interaction.SelectedValues.Count != 1)
                 return default;
 
-            Menu.View = new CommandView(_commands[Convert.ToInt32(e.Interaction.SelectedValues[0])]);
+            Menu.View = new CommandHelpView(_commands[Convert.ToInt32(e.Interaction.SelectedValues[0])]);
             return default;
         }
 
         public override ValueTask GoToParent(ButtonEventArgs e)
         {
             Menu.View = _module.Parent is null
-                ? new RootView(_module.Service)
-                : new ModuleView(_module.Parent);
+                ? new RootHelpView(_module.Service)
+                : new ModuleHelpView(_module.Parent);
 
             return default;
         }

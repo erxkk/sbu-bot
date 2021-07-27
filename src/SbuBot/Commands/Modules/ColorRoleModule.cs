@@ -1,21 +1,9 @@
-using System.Threading.Tasks;
-
 using Disqord;
 using Disqord.Bot;
-using Disqord.Rest;
-
-using Kkommon;
-
-using Microsoft.Extensions.DependencyInjection;
 
 using Qmmands;
 
-using SbuBot.Commands.Attributes;
-using SbuBot.Commands.Attributes.Checks;
-using SbuBot.Commands.Attributes.Checks.Parameters;
 using SbuBot.Extensions;
-using SbuBot.Models;
-using SbuBot.Services;
 
 namespace SbuBot.Commands.Modules
 {

@@ -25,7 +25,7 @@ namespace SbuBot.Commands.Modules
     public sealed class DatabaseModule : SbuModuleBase
     {
         [Command("register")]
-        [RequireBotOwner]
+        [RequireAuthorGuildPermissions(Permission.Administrator)]
         [Description("Registers a member and their color role in the database.")]
         public async Task<DiscordCommandResult> RegisterAsync(
             [NotAuthor, MustExistInDb(false)][Description("The member to register in the database.")]
@@ -44,7 +44,7 @@ namespace SbuBot.Commands.Modules
         }
 
         [Command("init")]
-        [RequireBotOwner]
+        [RequireAuthorGuildPermissions(Permission.Administrator)]
         [Description("Initializes the database for this guild, loading members and color roles into it.")]
         public async Task<DiscordCommandResult> InitAsync()
         {
@@ -91,7 +91,7 @@ namespace SbuBot.Commands.Modules
         }
 
         [Command("transfer")]
-        [RequireAdmin]
+        [RequireAuthorGuildPermissions(Permission.Administrator)]
         [Description("Transfers a members database entries to another member.")]
         public async Task<DiscordCommandResult> TransferAllAsync(
             [Description("The member that owns the database entries.")]

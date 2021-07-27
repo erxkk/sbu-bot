@@ -12,11 +12,11 @@ using SbuBot.Extensions;
 
 namespace SbuBot.Commands.Views.Help
 {
-    public sealed class CommandView : HelpView
+    public sealed class CommandHelpView : HelpViewBase
     {
         private readonly Command _command;
 
-        public CommandView(Command command)
+        public CommandHelpView(Command command)
         {
             _command = command;
 
@@ -76,7 +76,7 @@ namespace SbuBot.Commands.Views.Help
 
         public override ValueTask GoToParent(ButtonEventArgs e)
         {
-            Menu.View = _command.Module.IsGroup() ? new GroupView(_command.Module) : new ModuleView(_command.Module);
+            Menu.View = _command.Module.IsGroup() ? new GroupHelpView(_command.Module) : new ModuleHelpView(_command.Module);
             return default;
         }
     }

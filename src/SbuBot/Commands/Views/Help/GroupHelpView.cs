@@ -13,12 +13,12 @@ using SbuBot.Extensions;
 
 namespace SbuBot.Commands.Views.Help
 {
-    public sealed class GroupView : HelpView
+    public sealed class GroupHelpView : HelpViewBase
     {
         private readonly Module _parent;
         private readonly ImmutableDictionary<int, Command> _commands;
 
-        public GroupView(Module group)
+        public GroupHelpView(Module group)
         {
             _parent = group.Parent;
             _commands = group.Commands.ToImmutableDictionary(k => k.GetHashCode(), v => v);
@@ -56,13 +56,13 @@ namespace SbuBot.Commands.Views.Help
             if (e.Interaction.SelectedValues.Count != 1)
                 return default;
 
-            Menu.View = new CommandView(_commands[Convert.ToInt32(e.Interaction.SelectedValues[0])]);
+            Menu.View = new CommandHelpView(_commands[Convert.ToInt32(e.Interaction.SelectedValues[0])]);
             return default;
         }
 
         public override ValueTask GoToParent(ButtonEventArgs e)
         {
-            Menu.View = new ModuleView(_parent);
+            Menu.View = new ModuleHelpView(_parent);
             return default;
         }
     }
