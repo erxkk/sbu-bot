@@ -14,6 +14,7 @@ using Kkommon.Exceptions;
 using Qmmands;
 
 using SbuBot.Commands.Attributes;
+using SbuBot.Commands.Attributes.Checks;
 using SbuBot.Commands.Parsing;
 using SbuBot.Exceptions;
 using SbuBot.Extensions;
@@ -24,6 +25,7 @@ namespace SbuBot.Commands.Modules
     public sealed partial class GuildManagementModule
     {
         [Group("archive")]
+        [RequireGuildConfig(SbuGuildConfig.Archive)]
         [Description("A group of commands for sending pinned messages to an archive channel.")]
         public sealed partial class ArchiveSubModule : SbuModuleBase
         {

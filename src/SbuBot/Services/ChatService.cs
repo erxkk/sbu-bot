@@ -97,7 +97,7 @@ namespace SbuBot.Services
             if (e.GuildId is null)
                 return;
 
-            if (e.Message.Author.Id == SbuGlobals.Bot.SELF)
+            if (e.Message.Author.IsBot)
                 return;
 
             if (!_configService.GetValue(e.GuildId.Value, SbuGuildConfig.Respond))

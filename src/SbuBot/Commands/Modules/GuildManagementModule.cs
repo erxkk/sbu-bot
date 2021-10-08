@@ -24,7 +24,7 @@ namespace SbuBot.Commands.Modules
             public ConfigSubModule(ConfigService configService) => _configService = configService;
 
             [Command]
-            [Description("Gets a config value.")]
+            [Description("Lists the the config values for this guild.")]
             public DiscordCommandResult View()
             {
                 SbuGuildConfig config = _configService.GetConfig(Context.GuildId);
@@ -40,7 +40,7 @@ namespace SbuBot.Commands.Modules
                         .Append(names[i])
                         .Append(':')
                         .Append(' ')
-                        .AppendLine(config.HasFlag(values[i]) ? "Enabled" : "Disabled");
+                        .AppendLine(config.HasFlag(values[i]) ? "enabled" : "disabled");
                 }
 
                 return Reply(new LocalEmbed().WithDescription(builder.ToString()));
@@ -51,7 +51,7 @@ namespace SbuBot.Commands.Modules
             public async Task<DiscordCommandResult> SetAsync(SbuGuildConfig value)
             {
                 await _configService.SetValueAsync(Context.GuildId, value);
-                return Reply("Set config value to true.");
+                return Reply($"Enabled {value}.");
             }
 
             [Command("unset")]
@@ -59,7 +59,7 @@ namespace SbuBot.Commands.Modules
             public async Task<DiscordCommandResult> UnsetAsync(SbuGuildConfig value)
             {
                 await _configService.SetValueAsync(Context.GuildId, value, false);
-                return Reply("Set config value to false.");
+                return Reply($"Disabled {value}.");
             }
         }
     }

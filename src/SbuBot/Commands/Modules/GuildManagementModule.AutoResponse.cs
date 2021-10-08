@@ -11,6 +11,8 @@ using Microsoft.Extensions.DependencyInjection;
 
 using Qmmands;
 
+using SbuBot.Commands.Attributes.Checks;
+using SbuBot.Models;
 using SbuBot.Services;
 
 namespace SbuBot.Commands.Modules
@@ -18,7 +20,8 @@ namespace SbuBot.Commands.Modules
     public sealed partial class GuildManagementModule
     {
         [Group("auto")]
-        [RequireAuthorGuildPermissions(Permission.Administrator), RequireGuild(SbuGlobals.Guild.Sbu.SELF)]
+        [RequireAuthorGuildPermissions(Permission.Administrator)]
+        [RequireGuildConfig(SbuGuildConfig.Respond)]
         [Description("A group of commands for creating and removing auto responses.")]
         public sealed partial class AutoResponseSubModule : SbuModuleBase
         {

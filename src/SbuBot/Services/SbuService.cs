@@ -9,19 +9,16 @@ using SbuBot.Models;
 
 namespace SbuBot.Services
 {
-    public sealed class FunService : DiscordBotService
+    public sealed class SbuService : DiscordBotService
     {
-        private readonly ConfigService _configService;
         public override int Priority => int.MaxValue - 2;
-
-        public FunService(ConfigService configService) => _configService = configService;
 
         protected override async ValueTask OnMessageReceived(BotMessageReceivedEventArgs e)
         {
             if (e.GuildId is null)
                 return;
 
-            if (!_configService.GetValue(e.GuildId.Value, SbuGuildConfig.Fun))
+            if (e.GuildId != SbuGlobals.Guild.Sbu.SELF)
                 return;
 
             switch (e.Message.Author.Id)

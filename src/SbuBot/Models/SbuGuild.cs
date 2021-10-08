@@ -92,7 +92,6 @@ namespace SbuBot.Models
     [Flags]
     public enum SbuGuildConfig : byte
     {
-        Fun,
         Respond,
         Archive,
     }
