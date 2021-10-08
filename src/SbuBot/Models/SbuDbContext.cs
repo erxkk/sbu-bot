@@ -80,7 +80,7 @@ namespace SbuBot.Models
 
         public SbuGuild AddGuild(IGuild guild)
         {
-            SbuGuild sbuGuild = new(guild);
+            SbuGuild sbuGuild = new(guild, null);
             Guilds.Add(sbuGuild);
             return sbuGuild;
         }

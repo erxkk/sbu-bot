@@ -13,6 +13,7 @@ namespace SbuBot.Models
     public sealed class SbuGuild : ISbuDiscordEntity
     {
         public Snowflake Id { get; }
+        public Snowflake? ArchiveId { get; set; }
         public SbuGuildConfig Config { get; set; }
 
         // nav properties
@@ -31,14 +32,15 @@ namespace SbuBot.Models
         [NotLogged]
         public List<SbuReminder> Reminders { get; } = new();
 
-        public SbuGuild(IGuild guild) : this(guild.Id, (SbuGuildConfig) 255) { }
+        public SbuGuild(IGuild guild, Snowflake? archiveId) : this(guild.Id, archiveId, (SbuGuildConfig)255) { }
 
 #region EFCore
 
-        internal SbuGuild(Snowflake id, SbuGuildConfig config)
+        internal SbuGuild(Snowflake id, Snowflake? archiveId, SbuGuildConfig config)
         {
             Id = id;
             Config = config;
+            ArchiveId = archiveId;
         }
 
 #nullable disable
@@ -49,6 +51,7 @@ namespace SbuBot.Models
             {
                 builder.HasKey(g => g.Id);
 
+                builder.Property(g => g.ArchiveId);
                 builder.Property(g => g.Config);
 
                 builder.HasMany(g => g.Members)
@@ -91,5 +94,6 @@ namespace SbuBot.Models
     {
         Fun,
         Respond,
+        Archive,
     }
 }
