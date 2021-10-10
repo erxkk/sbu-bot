@@ -42,13 +42,13 @@ try
                 .ByTransforming<SbuReminder>(reminder => new { Id = reminder.MessageId, Owner = reminder.OwnerId })
                 .WriteTo.File(
                     $"{ctx.Configuration["Log:Path"]}/log.txt",
-                    ctx.HostingEnvironment.IsProduction() ? LogEventLevel.Debug : LogEventLevel.Verbose,
+                    LogEventLevel.Verbose,
                     "[{Timestamp:HH:mm:ss:fff zzz} {Level:u3} : {SourceContext}] {Message:l}{NewLine}{Exception}",
                     rollingInterval:
                     RollingInterval.Day
                 )
                 .WriteTo.Console(
-                    ctx.HostingEnvironment.IsProduction() ? LogEventLevel.Information : LogEventLevel.Verbose,
+                    ctx.HostingEnvironment.IsProduction() ? LogEventLevel.Information : LogEventLevel.Debug,
                     "[{Timestamp:HH:mm:ss} {Level:u3} : {SourceContext}] {Message:l}{NewLine}{Exception}"
                 )
         )

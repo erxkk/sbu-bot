@@ -24,6 +24,7 @@ namespace SbuBot.Commands.Modules
 {
     public sealed partial class GuildManagementModule
     {
+        // TODO: add checks for channel access
         [Group("archive")]
         [RequireGuildConfig(SbuGuildConfig.Archive)]
         [Description("A group of commands for sending pinned messages to an archive channel.")]

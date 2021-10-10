@@ -26,20 +26,28 @@ namespace SbuBot.Services
         public void IgnoreAddedRole(Snowflake roleId) => _handledAddedRoles.Add(roleId);
         public void IgnoreRemovedRole(Snowflake roleId) => _handledRemovedRoles.Add(roleId);
 
-        protected override async ValueTask OnGuildAvailable(GuildAvailableEventArgs e)
+        // TODO: clean this up, idk why the guild wasn't added with the last build
+        private async ValueTask _TryAddGuild(IGuild guild)
         {
             using (IServiceScope scope = Bot.Services.CreateScope())
             {
                 SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
 
-                if (await context.GetGuildAsync(e.GuildId) is null)
+                if (await context.GetGuildAsync(guild.Id) is null)
                 {
-                    context.AddGuild(e.Guild);
+                    context.AddGuild(guild);
                     await context.SaveChangesAsync();
 
-                    Logger.LogDebug("Guild inserted: {@Guild}", new { Id = e.GuildId });
+                    Logger.LogDebug("Guild inserted: {@Guild}", new { guild.Id });
                 }
             }
+        }
+
+        protected override ValueTask OnJoinedGuild(JoinedGuildEventArgs e) => _TryAddGuild(e.Guild);
+
+        protected override async ValueTask OnGuildAvailable(GuildAvailableEventArgs e)
+        {
+            await _TryAddGuild(e.Guild);
 
             if (e.GuildId == SbuGlobals.Guild.Sbu.SELF
                 || e.GuildId == SbuGlobals.Guild.LaFamilia.SELF
