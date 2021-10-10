@@ -1,6 +1,6 @@
 # configuration
-migrations.json
 .env
+migrate-dev.sh
 
 # dotnet output
 bin/

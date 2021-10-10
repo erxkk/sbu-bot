@@ -9,6 +9,7 @@ using EFCoreSecondLevelCacheInterceptor;
 using HumanTimeParser.Core.TimeConstructs;
 using HumanTimeParser.English;
 
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -67,16 +68,21 @@ try
         .ConfigureDiscordBot<SbuBot.SbuBot>(
             (ctx, bot) =>
             {
-                bot.Token = ctx.HostingEnvironment.IsProduction()
-                    ? ctx.Configuration["Discord:Token"]
-                    : ctx.Configuration["Discord:DevToken"];
-
+                bot.Token = ctx.Configuration["Discord:Token"];
                 bot.Prefixes = new[] { ctx.HostingEnvironment.IsProduction() ? SbuGlobals.DEFAULT_PREFIX : "dev" };
             }
         );
 
-    using IHost host = hostBuilder.Build();
-    await host.RunAsync();
+    using (IHost host = hostBuilder.Build())
+    {
+        using (IServiceScope scope = host.Services.CreateScope())
+        {
+            SbuDbContext db = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
+            await db.Database.MigrateAsync();
+        }
+
+        await host.RunAsync();
+    }
 }
 catch (Exception ex)
 {

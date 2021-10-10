@@ -170,7 +170,6 @@ namespace SbuBot.Models
                     .SetBasePath(Directory.GetCurrentDirectory())
                     .AddEnvironmentVariables("DOTNET_")
                     .AddEnvironmentVariables("BOT_")
-                    .AddJsonFile("migrations.json")
                     .Build();
 
                 return new(null!, new(configuration));
