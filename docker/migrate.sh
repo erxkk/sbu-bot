@@ -45,7 +45,7 @@ if [[ -z "$(docker network ls | grep $_SBU_NETWORK)" ]]; then
     docker network connect $_SBU_NETWORK $_SBU_DATABASE || bail "Could not connect $_SBU_DATABASE to $_SBU_NETWORK"
 fi
 _POSTGRES_HOST_IP=$(docker network inspect -f '{{range.Containers}}{{.Name}} {{.IPv4Address}}{{end}}' $_SBU_NETWORK \
-    | awk -v db=$_SBU_DATABASE '{ if ( $1 == db ) print $2 }' | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}')
+    | grep $_SBU_DATABASE | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}')
 echo "==> Found postgres network ip '$_POSTGRES_HOST_IP'"
 
 # make tmp.env
