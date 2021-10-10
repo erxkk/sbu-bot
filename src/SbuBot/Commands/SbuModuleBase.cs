@@ -19,8 +19,8 @@ namespace SbuBot.Commands
 {
     public abstract class SbuModuleBase : DiscordGuildModuleBase
     {
-        protected override DiscordMenuCommandResult Pages(PageProvider pageProvider)
-            => View(new CustomPagedView(pageProvider));
+        protected override DiscordMenuCommandResult Pages(PageProvider pageProvider, TimeSpan timeout = default)
+            => View(new CustomPagedView(pageProvider), timeout);
 
         protected DiscordMenuCommandResult Pages(params LocalEmbed[] embeds)
             => Pages(new ListPageProvider(embeds.Select(e => new Page().WithEmbeds(e))));
@@ -34,7 +34,7 @@ namespace SbuBot.Commands
         protected async Task<ConfirmationState> ConfirmationAsync()
         {
             ConfirmationView confirmationView = new();
-            InteractiveMenu menu = new(Context.Author.Id, confirmationView);
+            DefaultMenu menu = new(confirmationView, Context.Author.Id);
 
             await Context.Bot.StartMenuAsync(Context.ChannelId, menu, TimeSpan.FromMinutes(1));
             await menu.Task;
@@ -45,7 +45,7 @@ namespace SbuBot.Commands
         protected async Task<ConfirmationState> ConfirmationAsync(string prompt, string? description = null)
         {
             ConfirmationView confirmationView = new(prompt, description);
-            InteractiveMenu menu = new(Context.Author.Id, confirmationView);
+            DefaultMenu menu = new(confirmationView, Context.Author.Id);
 
             await Context.Bot.StartMenuAsync(Context.ChannelId, menu, TimeSpan.FromMinutes(1));
             await menu.Task;

@@ -41,7 +41,7 @@ namespace SbuBot.Commands.Modules
                 return Reply(
                     guild.ArchiveId is null
                         ? "This guild doesn't have a pin archive channel set up. see `sbu help archive set`"
-                        : $"{Mention.TextChannel(guild.ArchiveId.Value)} is the pin archive."
+                        : $"{Mention.Channel(guild.ArchiveId.Value)} is the pin archive."
                 );
             }
         }

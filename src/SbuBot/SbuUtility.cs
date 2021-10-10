@@ -33,7 +33,7 @@ namespace SbuBot
 
             if (message.Embeds.Count != 0)
             {
-                Embed userEmbed = message.Embeds[0];
+                IEmbed userEmbed = message.Embeds[0];
 
                 // use image type comparison to make sure it's actually an image that is being set
                 // marked as deprecated by discord
@@ -44,7 +44,7 @@ namespace SbuBot
             }
             else if (message.Attachments.Count != 0)
             {
-                Attachment attachment = message.Attachments[0];
+                IAttachment attachment = message.Attachments[0];
 
                 if (IMAGE_FILE_REGEX.IsMatch(attachment.FileName))
                     embed.WithImageUrl(attachment.Url);

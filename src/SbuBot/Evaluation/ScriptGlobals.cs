@@ -58,16 +58,19 @@ namespace SbuBot.Evaluation
 
         public DiscordReactionCommandResult Reaction(LocalEmoji emoji) => new(Context, emoji);
 
-        public DiscordMenuCommandResult Pages(params Page[] pages) => Pages((IEnumerable<Page>) pages);
+        public DiscordMenuCommandResult Pages(params Page[] pages) => Pages((IEnumerable<Page>)pages);
 
-        public DiscordMenuCommandResult Pages(IEnumerable<Page> pages) => Pages(new ListPageProvider(pages));
+        public DiscordMenuCommandResult Pages(IEnumerable<Page> pages, TimeSpan timeSpan = default)
+            => Pages(new ListPageProvider(pages), timeSpan);
 
-        public DiscordMenuCommandResult Pages(PageProvider pageProvider) => View(new CustomPagedView(pageProvider));
+        public DiscordMenuCommandResult Pages(PageProvider pageProvider, TimeSpan timeSpan = default)
+            => View(new CustomPagedView(pageProvider), timeSpan);
 
-        public DiscordMenuCommandResult View(ViewBase view)
-            => new(Context, new InteractiveMenu(Context.Author.Id, view));
+        public DiscordMenuCommandResult View(ViewBase view, TimeSpan timeSpan = default)
+            => new(Context, new DefaultMenu(view, Context.Author.Id), timeSpan);
 
-        public DiscordMenuCommandResult Menu(MenuBase menu) => new(Context, menu);
+        public DiscordMenuCommandResult Menu(MenuBase menu, TimeSpan timeSpan = default)
+            => new(Context, menu, timeSpan);
 
         // SbuModuleBase
 
@@ -83,7 +86,7 @@ namespace SbuBot.Evaluation
         public async Task<ConfirmationState> ConfirmationAsync()
         {
             ConfirmationView confirmationView = new();
-            InteractiveMenu menu = new(Context.Author.Id, confirmationView);
+            DefaultMenu menu = new(confirmationView, Context.Author.Id);
 
             await Context.Bot.StartMenuAsync(Context.ChannelId, menu, TimeSpan.FromMinutes(1));
             await menu.Task;
@@ -94,7 +97,7 @@ namespace SbuBot.Evaluation
         public async Task<ConfirmationState> ConfirmationAsync(string prompt, string? description = null)
         {
             ConfirmationView confirmationView = new(prompt, description);
-            InteractiveMenu menu = new(Context.Author.Id, confirmationView);
+            DefaultMenu menu = new(confirmationView, Context.Author.Id);
 
             await Context.Bot.StartMenuAsync(Context.ChannelId, menu, TimeSpan.FromMinutes(1));
             await menu.Task;

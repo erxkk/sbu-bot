@@ -28,7 +28,7 @@ namespace SbuBot.Commands.Views.Help
         [Button(Emoji = SbuGlobals.Emote.Menu.STOP, Row = 4, Position = 1, Style = LocalButtonComponentStyle.Secondary)]
         public ValueTask StopMenu(ButtonEventArgs e)
         {
-            if (Menu is InteractiveMenu menu)
+            if (Menu is DefaultMenu menu)
                 menu.Message.DeleteAsync();
 
             Menu.Stop();

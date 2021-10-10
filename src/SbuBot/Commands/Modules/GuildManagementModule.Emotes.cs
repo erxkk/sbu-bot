@@ -23,7 +23,8 @@ namespace SbuBot.Commands.Modules
     public sealed partial class GuildManagementModule
     {
         [Group("emote")]
-        [RequireBotGuildPermissions(Permission.ManageEmojis), RequireAuthorGuildPermissions(Permission.ManageEmojis)]
+        [RequireBotGuildPermissions(Permission.ManageEmojisAndStickers),
+         RequireAuthorGuildPermissions(Permission.ManageEmojisAndStickers)]
         [Description("A group of commands for creating and removing emotes.")]
         public sealed class EmoteSubModule : SbuModuleBase
         {

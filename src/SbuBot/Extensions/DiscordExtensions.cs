@@ -14,7 +14,7 @@ namespace SbuBot.Extensions
         public static LocalMessage WithReply(
             this LocalMessage @this,
             IUserMessage message,
-            bool failOnInvalid = false
+            bool failOnUnknownMessage = false
         )
         {
             if (@this == null)
@@ -24,7 +24,7 @@ namespace SbuBot.Extensions
             @this.Reference.MessageId = message.Id;
             @this.Reference.ChannelId = message.ChannelId;
             @this.Reference.GuildId = message.Reference?.GuildId;
-            @this.Reference.FailOnInvalid = failOnInvalid;
+            @this.Reference.FailOnUnknownMessage = failOnUnknownMessage;
             return @this;
         }
 
@@ -75,10 +75,10 @@ namespace SbuBot.Extensions
 
             return @this.BoostTier switch
             {
-                BoostTier.None => 50,
-                BoostTier.First => 100,
-                BoostTier.Second => 150,
-                BoostTier.Third => 250,
+                GuildBoostTier.None => 50,
+                GuildBoostTier.First => 100,
+                GuildBoostTier.Second => 150,
+                GuildBoostTier.Third => 250,
                 _ => throw new ArgumentOutOfRangeException(nameof(@this), @this.BoostTier, null),
             };
         }

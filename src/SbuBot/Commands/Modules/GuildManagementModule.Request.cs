@@ -32,7 +32,7 @@ namespace SbuBot.Commands.Modules
                 try
                 {
                     MessageReceivedEventArgs waitMessageResult;
-                    await Reply($"Send your message in {Mention.TextChannel(SbuGlobals.Channel.SENATE)}.");
+                    await Reply($"Send your message in {Mention.Channel(SbuGlobals.Channel.SENATE)}.");
 
                     await using (_ = Context.BeginYield())
                     {
@@ -46,7 +46,7 @@ namespace SbuBot.Commands.Modules
                     if (waitMessageResult is null)
                     {
                         await Reply(
-                            $"You did not send a message in {Mention.TextChannel(SbuGlobals.Channel.SENATE)} in time."
+                            $"You did not send a message in {Mention.Channel(SbuGlobals.Channel.SENATE)} in time."
                         );
 
                         return;
@@ -72,7 +72,7 @@ namespace SbuBot.Commands.Modules
 
                 try
                 {
-                    await Reply($"Send your message in {Mention.TextChannel(SbuGlobals.Channel.Based.SHIT_SBU_SAYS)}.");
+                    await Reply($"Send your message in {Mention.Channel(SbuGlobals.Channel.Based.SHIT_SBU_SAYS)}.");
                     MessageReceivedEventArgs waitMessageResult;
 
                     await using (_ = Context.BeginYield())
@@ -89,7 +89,7 @@ namespace SbuBot.Commands.Modules
                         await Reply(
                             string.Format(
                                 "You did not send a message in {0} in time.",
-                                Mention.TextChannel(SbuGlobals.Channel.Based.SHIT_SBU_SAYS)
+                                Mention.Channel(SbuGlobals.Channel.Based.SHIT_SBU_SAYS)
                             )
                         );
                     }
@@ -111,7 +111,7 @@ namespace SbuBot.Commands.Modules
                 try
                 {
                     MessageReceivedEventArgs waitMessageResult;
-                    await Reply($"Send your message in {Mention.TextChannel(SbuGlobals.Channel.ANNOUNCEMENTS)}.");
+                    await Reply($"Send your message in {Mention.Channel(SbuGlobals.Channel.ANNOUNCEMENTS)}.");
 
                     await using (_ = Context.BeginYield())
                     {
@@ -127,7 +127,7 @@ namespace SbuBot.Commands.Modules
                         await Reply(
                             string.Format(
                                 "You did not send a message in {0} in time.",
-                                Mention.TextChannel(SbuGlobals.Channel.ANNOUNCEMENTS)
+                                Mention.Channel(SbuGlobals.Channel.ANNOUNCEMENTS)
                             )
                         );
                     }

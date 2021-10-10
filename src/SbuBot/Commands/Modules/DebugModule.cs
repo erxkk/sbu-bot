@@ -26,13 +26,13 @@ namespace SbuBot.Commands.Modules
         )]
         public async Task EchoAsync(
             [Description("The target channel in which to send the message in.")]
-            ITextChannel target,
+            IMessageGuildChannel channel,
             [Description("The message to reply with.")]
             string message = "echo!"
         )
         {
             await Context.Message.DeleteAsync();
-            await target.SendMessageAsync(new LocalMessage().WithContent(message));
+            await channel.SendMessageAsync(new LocalMessage().WithContent(message));
         }
 
         [Group("do")]
@@ -45,7 +45,7 @@ namespace SbuBot.Commands.Modules
             )]
             public void Do(
                 [Description("The proxy author.")] IMember member,
-                [Description("The proxy channel.")] ITextChannel channel,
+                [Description("The proxy channel.")] IMessageGuildChannel channel,
                 [Description("The proxy command.")] string command = "ping"
             ) => Context.Bot.Queue.Post(
                 new DiscordGuildCommandContext(
@@ -69,7 +69,7 @@ namespace SbuBot.Commands.Modules
             [Command("in")]
             [Description("Sends a given proxy command, or `ping` if not specified, in a given channel.")]
             public void DoInChannel(
-                [Description("The proxy channel.")] ITextChannel channel,
+                [Description("The proxy channel.")] IMessageGuildChannel channel,
                 [Description("The proxy command.")] string command = "ping"
             ) => Do(Context.Author, channel, command);
         }
