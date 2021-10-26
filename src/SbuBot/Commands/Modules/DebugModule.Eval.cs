@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 
 using Disqord;
 using Disqord.Bot;
-using Disqord.Rest;
 
 using Kkommon.Exceptions;
 
@@ -18,38 +17,29 @@ namespace SbuBot.Commands.Modules
         [Command("eval")]
         [Description("Compiles and runs a C#-Script.")]
         [Remarks("Code may be given as plain code or as a code block with `cs` or `csharp` language.")]
-        public async Task EvalAsync([Description("The code to run.")] string code)
+        public async Task<DiscordCommandResult> EvalAsync([Description("The code to run.")] string code)
         {
             code = evalCleanUp(code);
             CompilationResult compilationResult = Eval.Compile(code, Context);
 
-            switch (compilationResult)
+            return compilationResult switch
             {
-                case CompilationResult.Failed failed:
-                    await Reply(failed.GetDiagnosticEmbed());
-                    return;
-
-                case CompilationResult.Completed completed:
-                {
-                    switch (await completed.RunAsync())
+                CompilationResult.Failed failed
+                    => Reply(failed.GetDiagnosticEmbed()),
+                CompilationResult.Completed completed
+                    => await completed.RunAsync() switch
                     {
-                        case ScriptResult.Failed failedScript:
-                            await Reply(failedScript.GetDiagnosticEmbed());
-                            return;
+                        ScriptResult.Failed failedScript
+                            => Reply(failedScript.GetDiagnosticEmbed()),
 
-                        case ScriptResult.Completed { ReturnValue: { } } completedScript:
-                            await Reply(completedScript.GetResultEmbed());
-                            return;
+                        ScriptResult.Completed { ReturnValue: { } } completedScript
+                            => Reply(completedScript.GetResultEmbed()),
 
-                        default:
-                            await Context.Message.AddReactionAsync(LocalEmoji.Custom(SbuGlobals.Emote.Menu.CONFIRM));
-                            return;
-                    }
-                }
+                        _ => Reaction(LocalEmoji.Custom(SbuGlobals.Emote.Menu.CONFIRM)),
+                    },
 
-                default:
-                    throw new UnreachableException();
-            }
+                _ => throw new UnreachableException(),
+            };
 
             static string evalCleanUp(string expression)
             {
