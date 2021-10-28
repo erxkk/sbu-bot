@@ -8,15 +8,12 @@ using Disqord.Gateway;
 using Disqord.Rest;
 
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 
 using Qmmands;
 
-using SbuBot.Commands.Attributes.Checks;
 using SbuBot.Commands.Attributes.Checks.Parameters;
 using SbuBot.Extensions;
 using SbuBot.Models;
-using SbuBot.Services;
 
 namespace SbuBot.Commands.Modules
 {
@@ -121,9 +118,6 @@ namespace SbuBot.Commands.Modules
 
                 if (receiver.ColorRole is null)
                 {
-                    ConsistencyService service = Context.Services.GetRequiredService<ConsistencyService>();
-                    service.IgnoreAddedRole(role.Id);
-
                     await Context.Guild.GrantRoleAsync(receiver.Id, role.Id);
 
                     role.OwnerId = receiver.Id;

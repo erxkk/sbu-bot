@@ -6,15 +6,12 @@ using Disqord.Rest;
 
 using Kkommon;
 
-using Microsoft.Extensions.DependencyInjection;
-
 using Qmmands;
 
 using SbuBot.Commands.Attributes;
 using SbuBot.Commands.Attributes.Checks;
 using SbuBot.Extensions;
 using SbuBot.Models;
-using SbuBot.Services;
 
 namespace SbuBot.Commands.Modules
 {
@@ -62,9 +59,6 @@ namespace SbuBot.Commands.Modules
                     r.Name = name;
                 }
             );
-
-            ConsistencyService service = Context.Services.GetRequiredService<ConsistencyService>();
-            service.IgnoreAddedRole(role.Id);
 
             await Context.Author.GrantRoleAsync(role.Id);
             Context.GetSbuDbContext().AddColorRole(role, Context.Author.Id);

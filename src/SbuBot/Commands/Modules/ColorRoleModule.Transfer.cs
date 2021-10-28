@@ -4,8 +4,6 @@ using Disqord;
 using Disqord.Bot;
 using Disqord.Rest;
 
-using Microsoft.Extensions.DependencyInjection;
-
 using Qmmands;
 
 using SbuBot.Commands.Attributes;
@@ -13,7 +11,6 @@ using SbuBot.Commands.Attributes.Checks;
 using SbuBot.Commands.Attributes.Checks.Parameters;
 using SbuBot.Extensions;
 using SbuBot.Models;
-using SbuBot.Services;
 
 namespace SbuBot.Commands.Modules
 {
@@ -29,9 +26,6 @@ namespace SbuBot.Commands.Modules
         )
         {
             SbuColorRole role = (await Context.GetAuthorAsync()).ColorRole!;
-
-            ConsistencyService service = Context.Services.GetRequiredService<ConsistencyService>();
-            service.IgnoreAddedRole(role.Id);
 
             await Context.Guild.GrantRoleAsync(receiver.Id, role.Id);
             await Context.Author.RevokeRoleAsync(role.Id);

@@ -5,8 +5,6 @@ using Disqord;
 using Disqord.Bot.Hosting;
 using Disqord.Rest;
 
-using SbuBot.Models;
-
 namespace SbuBot.Services
 {
     public sealed class SbuService : DiscordBotService
@@ -16,8 +14,8 @@ namespace SbuBot.Services
         protected override async ValueTask OnMessageReceived(BotMessageReceivedEventArgs e)
         {
             if (e.GuildId != SbuGlobals.Guild.SBU
-                || e.Channel is not ICategorizableGuildChannel categorizble
-                || categorizble.CategoryId == SbuGlobals.Channel.CATEGORY_SERIOUS)
+                || e.Channel is not ICategorizableGuildChannel categorizable
+                || categorizable.CategoryId == SbuGlobals.Channel.CATEGORY_SERIOUS)
                 return;
 
             switch (e.Message.Author.Id)

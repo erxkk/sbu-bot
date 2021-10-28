@@ -9,8 +9,6 @@ using Disqord;
 using Disqord.Bot.Hosting;
 using Disqord.Rest;
 
-using Kkommon.Extensions.Semaphore;
-
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
