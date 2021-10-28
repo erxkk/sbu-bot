@@ -83,8 +83,8 @@ try
     {
         using (IServiceScope scope = host.Services.CreateScope())
         {
-            SbuDbContext db = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
-            await db.Database.MigrateAsync();
+            SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
+            await context.Database.MigrateAsync();
         }
 
         await host.RunAsync();
