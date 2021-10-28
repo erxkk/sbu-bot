@@ -69,7 +69,13 @@ try
             (ctx, bot) =>
             {
                 bot.Token = ctx.Configuration["Discord:Token"];
-                bot.Prefixes = new[] { ctx.HostingEnvironment.IsProduction() ? SbuGlobals.DEFAULT_PREFIX : "dev" };
+
+                bot.Prefixes = new[]
+                {
+                    ctx.HostingEnvironment.IsProduction()
+                        ? SbuGlobals.DEFAULT_PREFIX
+                        : SbuGlobals.DEV_PREFIX,
+                };
             }
         );
 

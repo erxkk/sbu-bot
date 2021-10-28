@@ -10,6 +10,7 @@ namespace SbuBot
         public const string ELLIPSES = "…";
         public const string DESCRIPTOR_SEPARATOR = "::";
         public const string DEFAULT_PREFIX = "sbu";
+        public const string DEV_PREFIX = "dev";
 
         public static readonly Version VERSION = new(0, 9, 10);
 
