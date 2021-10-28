@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 
 using Disqord.Bot;
@@ -72,7 +73,7 @@ namespace SbuBot.Commands.Modules
                             );
 
                         default:
-                            throw new UnreachableException();
+                            throw new ArgumentOutOfRangeException();
                     }
 
                     switch (SbuAutoResponse.IsValidTrigger(trigger))
@@ -94,7 +95,7 @@ namespace SbuBot.Commands.Modules
                             break;
 
                         default:
-                            throw new UnreachableException();
+                            throw new ArgumentOutOfRangeException();
                     }
 
                     if (await Context.GetAutoResponseAsync(trigger) is { })
@@ -123,7 +124,7 @@ namespace SbuBot.Commands.Modules
                                     break;
 
                                 default:
-                                    throw new UnreachableException();
+                                    throw new ArgumentOutOfRangeException();
                             }
 
                             break;
@@ -136,7 +137,7 @@ namespace SbuBot.Commands.Modules
                             );
 
                         default:
-                            throw new UnreachableException();
+                            throw new ArgumentOutOfRangeException();
                     }
 
                     ChatService service = Context.Services.GetRequiredService<ChatService>();

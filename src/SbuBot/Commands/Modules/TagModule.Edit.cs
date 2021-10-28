@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 
 using Disqord.Bot;
@@ -75,7 +76,7 @@ namespace SbuBot.Commands.Modules
                         );
 
                     default:
-                        throw new UnreachableException();
+                        throw new ArgumentOutOfRangeException();
                 }
 
                 var context = Context.GetSbuDbContext();

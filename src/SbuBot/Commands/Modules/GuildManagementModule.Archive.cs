@@ -103,7 +103,7 @@ namespace SbuBot.Commands.Modules
                         }
 
                         default:
-                            throw new UnreachableException();
+                            throw new ArgumentOutOfRangeException();
                     }
                 }
 
@@ -130,7 +130,7 @@ namespace SbuBot.Commands.Modules
                         return new Result<Unit, string>.Error(error.Value);
 
                     default:
-                        throw new UnreachableException();
+                        throw new ArgumentOutOfRangeException();
                 }
             }
         }

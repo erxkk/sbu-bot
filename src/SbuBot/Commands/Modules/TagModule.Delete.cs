@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -48,7 +49,7 @@ namespace SbuBot.Commands.Modules
                             break;
 
                         default:
-                            throw new UnreachableException();
+                            throw new ArgumentOutOfRangeException();
                     }
 
                     var context = Context.GetSbuDbContext();
@@ -80,7 +81,7 @@ namespace SbuBot.Commands.Modules
                             break;
 
                         default:
-                            throw new UnreachableException();
+                            throw new ArgumentOutOfRangeException();
                     }
 
                     var context = Context.GetSbuDbContext();
@@ -92,7 +93,7 @@ namespace SbuBot.Commands.Modules
                 }
 
                 default:
-                    throw new UnreachableException();
+                    throw new ArgumentOutOfRangeException();
             }
         }
     }

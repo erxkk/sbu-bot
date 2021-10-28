@@ -38,7 +38,7 @@ namespace SbuBot.Commands.Modules
                         _ => Reaction(LocalEmoji.Custom(SbuGlobals.Emote.Menu.CONFIRM)),
                     },
 
-                _ => throw new UnreachableException(),
+                _ => throw new ArgumentOutOfRangeException(),
             };
 
             static string evalCleanUp(string expression)

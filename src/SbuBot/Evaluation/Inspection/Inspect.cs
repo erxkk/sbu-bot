@@ -69,7 +69,7 @@ namespace SbuBot.Evaluation.Inspection
                         break;
 
                     default:
-                        throw new UnreachableException();
+                        throw new ArgumentOutOfRangeException();
                 }
             }
 

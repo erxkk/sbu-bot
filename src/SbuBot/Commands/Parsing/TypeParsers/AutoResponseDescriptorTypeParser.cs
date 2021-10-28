@@ -1,8 +1,7 @@
+using System;
 using System.Threading.Tasks;
 
 using Disqord.Bot;
-
-using Kkommon.Exceptions;
 
 using Qmmands;
 
@@ -36,7 +35,7 @@ namespace SbuBot.Commands.Parsing.TypeParsers
                     break;
 
                 default:
-                    throw new UnreachableException();
+                    throw new ArgumentOutOfRangeException();
             }
 
             switch (SbuAutoResponse.IsValidResponse(values[1]))
@@ -50,7 +49,7 @@ namespace SbuBot.Commands.Parsing.TypeParsers
                     break;
 
                 default:
-                    throw new UnreachableException();
+                    throw new ArgumentOutOfRangeException();
             }
 
             return Success(new() { Trigger = values[0], Response = values[1] });

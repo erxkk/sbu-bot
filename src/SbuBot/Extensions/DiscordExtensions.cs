@@ -50,7 +50,7 @@ namespace SbuBot.Extensions
                 GuildBoostTier.First => 100,
                 GuildBoostTier.Second => 150,
                 GuildBoostTier.Third => 250,
-                _ => throw new ArgumentOutOfRangeException(nameof(@this), @this.BoostTier, null),
+                _ => throw new ArgumentOutOfRangeException(),
             };
         }
 

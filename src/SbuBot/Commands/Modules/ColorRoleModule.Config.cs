@@ -44,7 +44,7 @@ namespace SbuBot.Commands.Modules
                         break;
 
                     default:
-                        throw new ArgumentOutOfRangeException(nameof(type), type, null);
+                        throw new ArgumentOutOfRangeException();
                 }
 
                 await context.SaveChangesAsync();
@@ -82,7 +82,7 @@ namespace SbuBot.Commands.Modules
                         break;
 
                     default:
-                        throw new ArgumentOutOfRangeException(nameof(type), type, null);
+                        throw new ArgumentOutOfRangeException();
                 }
 
                 await context.SaveChangesAsync();

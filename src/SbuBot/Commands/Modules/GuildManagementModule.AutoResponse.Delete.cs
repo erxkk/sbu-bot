@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 
 using Disqord.Bot;
@@ -49,7 +50,7 @@ namespace SbuBot.Commands.Modules
                                 break;
 
                             default:
-                                throw new UnreachableException();
+                                throw new ArgumentOutOfRangeException();
                         }
 
                         await service.RemoveAutoResponsesAsync(Context.GuildId);
@@ -74,7 +75,7 @@ namespace SbuBot.Commands.Modules
                                 break;
 
                             default:
-                                throw new UnreachableException();
+                                throw new ArgumentOutOfRangeException();
                         }
 
                         await service.RemoveAutoResponseAsync(Context.GuildId, specific.Value.Trigger);
@@ -83,7 +84,7 @@ namespace SbuBot.Commands.Modules
                     }
 
                     default:
-                        throw new UnreachableException();
+                        throw new ArgumentOutOfRangeException();
                 }
             }
         }

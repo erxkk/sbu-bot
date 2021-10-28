@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 
 using Disqord;
@@ -48,7 +49,7 @@ namespace SbuBot.Commands.Modules
                             break;
 
                         default:
-                            throw new UnreachableException();
+                            throw new ArgumentOutOfRangeException();
                     }
 
                     await Context.Services.GetRequiredService<ReminderService>()
@@ -74,7 +75,7 @@ namespace SbuBot.Commands.Modules
                             break;
 
                         default:
-                            throw new UnreachableException();
+                            throw new ArgumentOutOfRangeException();
                     }
 
                     await Context.Services.GetRequiredService<ReminderService>().CancelAsync(specific.Value.MessageId);
@@ -89,7 +90,7 @@ namespace SbuBot.Commands.Modules
                 }
 
                 default:
-                    throw new UnreachableException();
+                    throw new ArgumentOutOfRangeException();
             }
         }
     }

@@ -80,7 +80,7 @@ namespace SbuBot.Commands.Modules
                         );
 
                     default:
-                        throw new UnreachableException();
+                        throw new ArgumentOutOfRangeException();
                 }
 
                 TypeParserResult<DateTime>? parseResult = await parser.ParseAsync(
