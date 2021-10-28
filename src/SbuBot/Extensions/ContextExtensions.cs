@@ -79,7 +79,12 @@ namespace SbuBot.Extensions
             string prompt
         )
         {
-            await @this.Channel.SendMessageAsync(new LocalMessage().WithContent(prompt).WithReply(@this.Message));
+            await @this.Channel.SendMessageAsync(
+                new LocalMessage()
+                    .WithContent(prompt)
+                    .WithReference(new LocalMessageReference().WithMessageId(@this.Message.Id))
+            );
+
             MessageReceivedEventArgs? args;
 
             await using (_ = @this.BeginYield())
