@@ -39,10 +39,6 @@ namespace SbuBot.Services
         protected override async ValueTask OnGuildAvailable(GuildAvailableEventArgs e)
         {
             await TryAddGuild(e.Guild);
-
-            // TODO: remove after cache non reliance is safe
-            if (e.GuildId == SbuGlobals.Guild.SBU || e.GuildId == SbuGlobals.Guild.LA_FAMILIA)
-                await Bot.Chunker.ChunkAsync(e.Guild);
         }
 
         protected override async ValueTask OnLeftGuild(LeftGuildEventArgs e)
