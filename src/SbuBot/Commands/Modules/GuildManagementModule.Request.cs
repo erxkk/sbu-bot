@@ -34,20 +34,34 @@ namespace SbuBot.Commands.Modules
 
                     await using (_ = Context.BeginYield())
                     {
-                        waitMessageResult = await Context.Bot.WaitForMessageAsync(
-                            SbuGlobals.Channel.SENATE,
-                            e => e.Member.Id == Context.Author.Id,
-                            TimeSpan.FromMinutes(3)
+                        waitMessageResult = await await Task.WhenAny(
+                            new[]
+                            {
+                                Context.Bot.WaitForMessageAsync(
+                                    SbuGlobals.Channel.SENATE,
+                                    e => e.Member.Id == Context.Author.Id,
+                                    TimeSpan.FromMinutes(3)
+                                ),
+                                Context.WaitForMessageAsync(
+                                    e => e.Message.Content.Equals("abort", StringComparison.OrdinalIgnoreCase),
+                                    TimeSpan.FromMinutes(3)
+                                ),
+                            }
                         );
                     }
 
                     if (waitMessageResult is null)
                     {
                         await Reply(
-                            $"You did not send a message in {Mention.Channel(SbuGlobals.Channel.SENATE)} in time."
+                            string.Format(
+                                "You did not send a message in {0} in time.",
+                                Mention.Channel(SbuGlobals.Channel.SENATE)
+                            )
                         );
-
-                        return;
+                    }
+                    else if (waitMessageResult.Message.Content.Equals("abort", StringComparison.OrdinalIgnoreCase))
+                    {
+                        await Reply("Aborted.");
                     }
 
                     await waitMessageResult.Message.AddReactionAsync(new LocalCustomEmoji(SbuGlobals.Emote.Vote.UP));
@@ -74,10 +88,19 @@ namespace SbuBot.Commands.Modules
 
                     await using (_ = Context.BeginYield())
                     {
-                        waitMessageResult = await Context.Bot.WaitForMessageAsync(
-                            SbuGlobals.Channel.SHIT_SBU_SAYS,
-                            e => e.Member.Id == Context.Author.Id,
-                            TimeSpan.FromMinutes(3)
+                        waitMessageResult = await await Task.WhenAny(
+                            new[]
+                            {
+                                Context.Bot.WaitForMessageAsync(
+                                    SbuGlobals.Channel.SHIT_SBU_SAYS,
+                                    e => e.Member.Id == Context.Author.Id,
+                                    TimeSpan.FromMinutes(3)
+                                ),
+                                Context.WaitForMessageAsync(
+                                    e => e.Message.Content.Equals("abort", StringComparison.OrdinalIgnoreCase),
+                                    TimeSpan.FromMinutes(3)
+                                ),
+                            }
                         );
                     }
 
@@ -89,6 +112,10 @@ namespace SbuBot.Commands.Modules
                                 Mention.Channel(SbuGlobals.Channel.SHIT_SBU_SAYS)
                             )
                         );
+                    }
+                    else if (waitMessageResult.Message.Content.Equals("abort", StringComparison.OrdinalIgnoreCase))
+                    {
+                        await Reply("Aborted.");
                     }
                 }
                 finally
@@ -109,7 +136,6 @@ namespace SbuBot.Commands.Modules
                     MessageReceivedEventArgs waitMessageResult;
                     await Reply($"Send your message in {Mention.Channel(SbuGlobals.Channel.ANNOUNCEMENTS)}.");
 
-                    // TODO: test this + add it to the other commands
                     await using (_ = Context.BeginYield())
                     {
                         waitMessageResult = await await Task.WhenAny(
