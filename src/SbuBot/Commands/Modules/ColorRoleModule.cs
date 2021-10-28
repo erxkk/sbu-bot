@@ -7,6 +7,7 @@ using SbuBot.Extensions;
 
 namespace SbuBot.Commands.Modules
 {
+    // TODO: add cleanup method if a role was deleted + check for existence on other methods
     [Group("role", "r")]
     [RequireBotGuildPermissions(Permission.ManageRoles)]
     [Description("A collection of commands for creation, modification, removal and usage of color roles.")]

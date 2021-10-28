@@ -31,7 +31,7 @@ namespace SbuBot.Commands.Modules
                 string name
             )
             {
-                SbuMember member = await Context.GetAuthorAsync();
+                SbuMember member = await Context.GetDbAuthorAsync();
 
                 await Context.Guild.Roles[member.ColorRole!.Id]
                     .ModifyAsync(
@@ -55,7 +55,7 @@ namespace SbuBot.Commands.Modules
                 string name
             )
             {
-                SbuMember member = await Context.GetAuthorAsync();
+                SbuMember member = await Context.GetDbAuthorAsync();
                 await Context.Guild.Roles[member.ColorRole!.Id].ModifyAsync(r => r.Name = name);
                 return Reply("Your role has been modified.");
             }
@@ -65,7 +65,7 @@ namespace SbuBot.Commands.Modules
             [Usage("role edit color blue", "sbu r change color #afafaf")]
             public async Task<DiscordCommandResult> EditColorAsync([Description("The new color.")] Color color)
             {
-                SbuMember member = await Context.GetAuthorAsync();
+                SbuMember member = await Context.GetDbAuthorAsync();
                 await Context.Guild.Roles[member.ColorRole!.Id].ModifyAsync(r => r.Color = color);
                 return Reply("Your role has been modified.");
             }

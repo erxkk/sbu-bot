@@ -147,7 +147,9 @@ namespace SbuBot.Commands.Modules
                         response
                     );
 
-                    await Context.SaveChangesAsync();
+                    var context = Context.GetSbuDbContext();
+
+                    await context.SaveChangesAsync();
 
                     return Reply("Auto response created.");
                 }

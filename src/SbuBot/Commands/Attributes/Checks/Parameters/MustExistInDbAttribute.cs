@@ -24,7 +24,7 @@ namespace SbuBot.Commands.Attributes.Checks.Parameters
             {
                 case IMember member:
                 {
-                    var exists = await context.GetSbuDbContext().GetMemberAsync(member) is { };
+                    var exists = await context.GetDbMemberAsync(member) is { };
 
                     return exists == MustExistInDb
                         ? ParameterCheckAttribute.Success()
@@ -36,7 +36,7 @@ namespace SbuBot.Commands.Attributes.Checks.Parameters
 
                 case IRole role:
                 {
-                    var exists = await context.GetSbuDbContext().GetColorRoleAsync(role) is { };
+                    var exists = await context.GetDbColorRoleAsync(role) is { };
 
                     return exists == MustExistInDb
                         ? ParameterCheckAttribute.Success()

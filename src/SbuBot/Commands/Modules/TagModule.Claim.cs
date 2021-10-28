@@ -21,9 +21,11 @@ namespace SbuBot.Commands.Modules
             SbuTag tag
         )
         {
+            var context = Context.GetSbuDbContext();
+
             tag.OwnerId = Context.Author.Id;
-            Context.GetSbuDbContext().Tags.Update(tag);
-            await Context.SaveChangesAsync();
+            context.Tags.Update(tag);
+            await context.SaveChangesAsync();
 
             return Reply("Tag claimed.");
         }

@@ -24,9 +24,11 @@ namespace SbuBot.Commands.Modules
                 ITextChannel archive
             )
             {
-                SbuGuild guild = await Context.GetGuildAsync();
-                guild.ArchiveId = archive.Id;
-                await Context.SaveChangesAsync();
+                var context = Context.GetSbuDbContext();
+
+                SbuGuild? guild = await context.GetGuildAsync(Context.Guild);
+                guild!.ArchiveId = archive.Id;
+                await context.SaveChangesAsync();
 
                 return Reply($"{archive} is now the pin archive.");
             }
@@ -36,7 +38,7 @@ namespace SbuBot.Commands.Modules
             [Usage("archive get")]
             public async Task<DiscordCommandResult> GetArchiveAsync()
             {
-                SbuGuild guild = await Context.GetGuildAsync();
+                SbuGuild guild = await Context.GetDbGuildAsync();
 
                 return Reply(
                     guild.ArchiveId is null

@@ -32,9 +32,11 @@ namespace SbuBot.Commands.Modules
             {
                 await Context.Author.GrantRoleAsync(role.Id);
 
+                var context = Context.GetSbuDbContext();
+
                 role.OwnerId = Context.Author.Id;
-                Context.GetSbuDbContext().ColorRoles.Update(role);
-                await Context.SaveChangesAsync();
+                context.ColorRoles.Update(role);
+                await context.SaveChangesAsync();
 
                 return Reply("Color role claimed.");
             }
@@ -49,8 +51,11 @@ namespace SbuBot.Commands.Modules
             )
             {
                 await Context.Author.GrantRoleAsync(role.Id);
-                Context.GetSbuDbContext().AddColorRole(role, Context.Author.Id);
-                await Context.SaveChangesAsync();
+
+                SbuDbContext context = Context.GetSbuDbContext();
+
+                context.AddColorRole(role, Context.Author.Id);
+                await context.SaveChangesAsync();
 
                 return Reply("Color role claimed.");
             }

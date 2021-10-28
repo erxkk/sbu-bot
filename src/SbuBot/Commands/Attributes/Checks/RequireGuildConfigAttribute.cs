@@ -17,7 +17,7 @@ namespace SbuBot.Commands.Attributes.Checks
 
         public override async ValueTask<CheckResult> CheckAsync(DiscordGuildCommandContext context)
         {
-            SbuGuild guild = await context.GetGuildAsync();
+            SbuGuild guild = await context.GetDbGuildAsync();
 
             return guild.Config.HasFlag(Config)
                 ? CheckAttribute.Success()

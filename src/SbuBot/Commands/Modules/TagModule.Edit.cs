@@ -35,9 +35,11 @@ namespace SbuBot.Commands.Modules
                 if (tag.OwnerId != Context.Author.Id)
                     return Reply("You must be the owner of this tag.");
 
+                var context = Context.GetSbuDbContext();
+
                 tag.Content = tagDescriptor.Content;
-                Context.GetSbuDbContext().Tags.Update(tag);
-                await Context.SaveChangesAsync();
+                context.Tags.Update(tag);
+                await context.SaveChangesAsync();
 
                 return Reply("The tag has been updated.");
             }
@@ -76,9 +78,11 @@ namespace SbuBot.Commands.Modules
                         throw new UnreachableException();
                 }
 
+                var context = Context.GetSbuDbContext();
+
                 tag.Content = content.Trim();
-                Context.GetSbuDbContext().Tags.Update(tag);
-                await Context.SaveChangesAsync();
+                context.Tags.Update(tag);
+                await context.SaveChangesAsync();
 
                 return Reply("The tag has been updated.");
             }

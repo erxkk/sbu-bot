@@ -65,8 +65,10 @@ namespace SbuBot.Commands.Modules
                     foreach (SbuTag dbTag in tags)
                         dbTag.OwnerId = receiver.Id;
 
-                    Context.GetSbuDbContext().Tags.UpdateRange(tags);
-                    await Context.SaveChangesAsync();
+                    var context = Context.GetSbuDbContext();
+
+                    context.Tags.UpdateRange(tags);
+                    await context.SaveChangesAsync();
 
                     return Reply($"{Mention.User(receiver.Id)} now owns all of your tags.");
                 }
@@ -95,9 +97,11 @@ namespace SbuBot.Commands.Modules
                             throw new UnreachableException();
                     }
 
+                    var context = Context.GetSbuDbContext();
+
                     specific.Value.OwnerId = receiver.Id;
-                    Context.GetSbuDbContext().Tags.Update(specific.Value);
-                    await Context.SaveChangesAsync();
+                    context.Tags.Update(specific.Value);
+                    await context.SaveChangesAsync();
 
                     return Reply($"{Mention.User(receiver.Id)} now owns `{specific.Value.Name}`.");
                 }

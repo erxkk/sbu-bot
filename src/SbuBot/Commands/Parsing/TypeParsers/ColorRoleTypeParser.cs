@@ -22,7 +22,7 @@ namespace SbuBot.Commands.Parsing.TypeParsers
             TypeParser<IRole> roleParser = context.Bot.Commands.GetTypeParser<IRole>();
 
             if (await roleParser.ParseAsync(parameter, value, context) is { IsSuccessful: true } roleParseResult)
-                role = await context.GetColorRoleAsync(roleParseResult.Value);
+                role = await context.GetDbColorRoleAsync(roleParseResult.Value);
 
             return role is { }
                 ? Success(role)

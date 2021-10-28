@@ -51,7 +51,7 @@ namespace SbuBot.Commands.Modules
                 bool unpinOriginal = true
             )
             {
-                SbuGuild guild = await Context.GetGuildAsync();
+                SbuGuild guild = await Context.GetDbGuildAsync();
 
                 if (guild.ArchiveId is null)
                     return Reply("This guild doesn't have a pin archive channel set up. see `sbu help archive set`");

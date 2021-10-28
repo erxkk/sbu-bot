@@ -10,7 +10,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting.Internal;
 
 using SbuBot.Extensions;
 
@@ -37,16 +36,15 @@ namespace SbuBot.Models
         }
 
         public SbuColorRole AddColorRole(IRole role, Snowflake ownerId)
-        {
-            SbuColorRole sbuColorRole = new(role, ownerId);
-            ColorRoles.Add(sbuColorRole);
-            return sbuColorRole;
-        }
+            => ColorRoles.Add(new(role, ownerId)).Entity;
 
-        public Task<SbuColorRole> GetColorRoleAsync(
+        public Task<SbuColorRole?> GetColorRoleFullAsync(IRole role)
+            => GetColorRoleAsync(role, q => q.Include(r => r.Guild).Include(r => r.Owner));
+
+        public Task<SbuColorRole?> GetColorRoleAsync(
             IRole role,
-            Func<IQueryable<SbuColorRole>, IQueryable<SbuColorRole>>? query = null
-        ) => GetColorRoleAsync(role.Id, role.GuildId, query)!;
+            Func<IQueryable<SbuColorRole>, IQueryable<SbuColorRole>> query
+        ) => GetColorRoleAsync(role.Id, role.GuildId, query);
 
         public Task<SbuColorRole?> GetColorRoleAsync(
             Snowflake roleId,
@@ -57,6 +55,7 @@ namespace SbuBot.Models
             _sbuBot.StoppingToken
         )!;
 
+        // member
         public SbuMember AddMember(IMember member)
         {
             SbuMember sbuMember = new(member);
@@ -64,10 +63,11 @@ namespace SbuBot.Models
             return sbuMember;
         }
 
-        public Task<SbuMember> GetMemberAsync(
-            IMember member,
-            Func<IQueryable<SbuMember>, IQueryable<SbuMember>>? query = null
-        ) => GetMemberAsync(member.Id, member.GuildId, query)!;
+        public Task<SbuMember?> GetMemberFullAsync(IMember member)
+            => GetMemberAsync(member, q => q.Include(m => m.Guild).Include(m => m.ColorRole));
+
+        public Task<SbuMember?> GetMemberAsync(IMember member, Func<IQueryable<SbuMember>, IQueryable<SbuMember>> query)
+            => GetMemberAsync(member.Id, member.GuildId, query);
 
         public Task<SbuMember?> GetMemberAsync(
             Snowflake memberId,
@@ -78,17 +78,15 @@ namespace SbuBot.Models
             _sbuBot.StoppingToken
         )!;
 
+        // guild
         public SbuGuild AddGuild(IGuild guild)
-        {
-            SbuGuild sbuGuild = new(guild, null);
-            Guilds.Add(sbuGuild);
-            return sbuGuild;
-        }
+            => Guilds.Add(new(guild)).Entity;
 
-        public Task<SbuGuild> GetGuildAsync(
-            IGuild guild,
-            Func<IQueryable<SbuGuild>, IQueryable<SbuGuild>>? query = null
-        ) => GetGuildAsync(guild.Id, query)!;
+        public Task<SbuGuild?> GetGuildAsync(IGuild guild)
+            => GetGuildAsync(guild.Id);
+
+        public Task<SbuGuild?> GetGuildAsync(IGuild guild, Func<IQueryable<SbuGuild>, IQueryable<SbuGuild>> query)
+            => GetGuildAsync(guild.Id, query);
 
         public Task<SbuGuild?> GetGuildAsync(
             Snowflake guildId,
@@ -98,12 +96,14 @@ namespace SbuBot.Models
             _sbuBot.StoppingToken
         )!;
 
+        // tag
         public SbuTag AddTag(Snowflake ownerId, Snowflake guildId, string name, string content)
-        {
-            SbuTag sbuTag = new(ownerId, guildId, name, content);
-            Tags.Add(sbuTag);
-            return sbuTag;
-        }
+            => Tags.Add(new(ownerId, guildId, name, content)).Entity;
+
+        public Task<SbuTag?> GetTagFullAsync(
+            string name,
+            Snowflake guildId
+        ) => GetTagAsync(name, guildId, q => q.Include(t => t.Guild).Include(t => t.Owner));
 
         public Task<SbuTag?> GetTagAsync(
             string name,
@@ -114,19 +114,19 @@ namespace SbuBot.Models
             _sbuBot.StoppingToken
         )!;
 
+        // auto response
         public SbuAutoResponse AddAutoResponse(Snowflake guildId, string trigger, string response)
-        {
-            SbuAutoResponse sbuAutoResponse = new(guildId, trigger, response);
-            AutoResponses.Add(sbuAutoResponse);
-            return sbuAutoResponse;
-        }
+            => AutoResponses.Add(new(guildId, trigger, response)).Entity;
+
+        public Task<SbuAutoResponse?> GetAutoResponseFullAsync(string trigger, Snowflake guildId)
+            => GetAutoResponseAsync(trigger, guildId, q => q.Include(ar => ar.Guild));
 
         public Task<SbuAutoResponse?> GetAutoResponseAsync(
             string trigger,
             Snowflake guildId,
             Func<IQueryable<SbuAutoResponse>, IQueryable<SbuAutoResponse>>? query = null
         ) => (query is { } ? query(AutoResponses) : AutoResponses).FirstOrDefaultAsync(
-            t => t.Trigger == trigger && t.GuildId == guildId,
+            ar => ar.Trigger == trigger && ar.GuildId == guildId,
             _sbuBot.StoppingToken
         )!;
 
@@ -162,7 +162,7 @@ namespace SbuBot.Models
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(SbuDbContext).Assembly);
         }
 
-        internal sealed class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<SbuDbContext>
+        public sealed class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<SbuDbContext>
         {
             public SbuDbContext CreateDbContext(string[] args)
             {

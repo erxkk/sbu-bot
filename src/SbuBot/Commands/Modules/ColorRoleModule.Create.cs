@@ -60,9 +60,11 @@ namespace SbuBot.Commands.Modules
                 }
             );
 
+            var context = Context.GetSbuDbContext();
+
             await Context.Author.GrantRoleAsync(role.Id);
-            Context.GetSbuDbContext().AddColorRole(role, Context.Author.Id);
-            await Context.SaveChangesAsync();
+            context.AddColorRole(role, Context.Author.Id);
+            await context.SaveChangesAsync();
 
             return Reply($"{role.Mention} is your new color role.");
         }

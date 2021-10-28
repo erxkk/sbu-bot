@@ -23,6 +23,7 @@ namespace SbuBot.Extensions
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class ContextExtensions
     {
+        // TODO: see CommandMapping
         public static void RepostAsAlias(this DiscordGuildCommandContext @this, string alias) => @this.Bot.Queue.Post(
             new DiscordGuildCommandContext(
                 @this.Bot,
@@ -38,22 +39,22 @@ namespace SbuBot.Extensions
         public static SbuDbContext GetSbuDbContext(this DiscordCommandContext @this)
             => @this.Services.GetRequiredService<SbuDbContext>();
 
-        public static Task<SbuMember> GetMemberAsync(this DiscordGuildCommandContext @this, IMember member)
-            => @this.GetSbuDbContext()
-                .GetMemberAsync(member, m => m.Include(m => m.Guild).Include(m => m.ColorRole));
+        public static Task<SbuMember?> GetDbMemberAsync(this DiscordGuildCommandContext @this, IMember member)
+            => @this.GetSbuDbContext().GetMemberFullAsync(member);
 
-        public static Task<SbuMember> GetAuthorAsync(this DiscordGuildCommandContext @this)
-            => @this.GetMemberAsync(@this.Author);
+        // will not return null, consistency service runs before command
+        public static Task<SbuMember> GetDbAuthorAsync(this DiscordGuildCommandContext @this)
+            => @this.GetDbMemberAsync(@this.Author)!;
 
-        public static Task<SbuColorRole> GetColorRoleAsync(this DiscordGuildCommandContext @this, IRole role)
-            => @this.GetSbuDbContext().GetColorRoleAsync(role, r => r.Include(r => r.Guild).Include(r => r.Owner));
+        public static Task<SbuColorRole?> GetDbColorRoleAsync(this DiscordGuildCommandContext @this, IRole role)
+            => @this.GetSbuDbContext().GetColorRoleFullAsync(role);
 
-        public static Task<SbuGuild> GetGuildAsync(this DiscordGuildCommandContext @this)
-            => @this.GetSbuDbContext().GetGuildAsync(@this.Guild);
+        // will not return null, consistency service runs before command
+        public static Task<SbuGuild> GetDbGuildAsync(this DiscordGuildCommandContext @this)
+            => @this.GetSbuDbContext().GetGuildAsync(@this.Guild)!;
 
         public static Task<SbuTag?> GetTagAsync(this DiscordGuildCommandContext @this, string name)
-            => @this.GetSbuDbContext()
-                .GetTagAsync(name, @this.GuildId, t => t.Include(t => t.Guild).Include(t => t.Owner));
+            => @this.GetSbuDbContext().GetTagFullAsync(name, @this.GuildId);
 
         public static Task<List<SbuTag>> GetTagsAsync(this DiscordGuildCommandContext @this)
             => @this.GetSbuDbContext()
@@ -64,7 +65,7 @@ namespace SbuBot.Extensions
                 .ToListAsync(@this.Bot.StoppingToken);
 
         public static Task<SbuAutoResponse?> GetAutoResponseAsync(this DiscordGuildCommandContext @this, string trigger)
-            => @this.GetSbuDbContext().GetAutoResponseAsync(trigger, @this.GuildId, t => t.Include(t => t.Guild));
+            => @this.GetSbuDbContext().GetAutoResponseFullAsync(trigger, @this.GuildId);
 
         public static Task<List<SbuAutoResponse>> GetAutoResponsesAsync(this DiscordGuildCommandContext @this)
             => @this.GetSbuDbContext()
@@ -72,9 +73,6 @@ namespace SbuBot.Extensions
                 .Include(t => t.Guild)
                 .Where(t => t.GuildId == @this.GuildId)
                 .ToListAsync(@this.Bot.StoppingToken);
-
-        public static Task<int> SaveChangesAsync(this DiscordGuildCommandContext @this)
-            => @this.GetSbuDbContext().SaveChangesAsync();
 
         public static async Task<Result<string, FollowUpError>> WaitFollowUpForAsync(
             this DiscordGuildCommandContext @this,

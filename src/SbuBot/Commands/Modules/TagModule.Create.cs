@@ -29,15 +29,16 @@ namespace SbuBot.Commands.Modules
                 if (await Context.GetTagAsync(descriptor.Name) is { })
                     return Reply("A tag with same name already exists.");
 
-                Context.GetSbuDbContext()
-                    .AddTag(
-                        Context.Author.Id,
-                        Context.Guild.Id,
-                        descriptor.Name,
-                        descriptor.Content
-                    );
+                var context = Context.GetSbuDbContext();
 
-                await Context.SaveChangesAsync();
+                context.AddTag(
+                    Context.Author.Id,
+                    Context.Guild.Id,
+                    descriptor.Name,
+                    descriptor.Content
+                );
+
+                await context.SaveChangesAsync();
 
                 return Reply("Tag created.");
             }
@@ -116,15 +117,16 @@ namespace SbuBot.Commands.Modules
                         throw new UnreachableException();
                 }
 
-                Context.GetSbuDbContext()
-                    .AddTag(
-                        Context.Author.Id,
-                        Context.Guild.Id,
-                        name,
-                        content
-                    );
+                var context = Context.GetSbuDbContext();
 
-                await Context.SaveChangesAsync();
+                context.AddTag(
+                    Context.Author.Id,
+                    Context.Guild.Id,
+                    name,
+                    content
+                );
+
+                await context.SaveChangesAsync();
 
                 return Reply("Tag created.");
             }

@@ -23,7 +23,7 @@ namespace SbuBot.Commands.Attributes.Checks.Parameters
         {
             if (argument is ISbuOwnedEntity entity)
             {
-                bool authorDoesOwn = entity.OwnerId == (await context.GetAuthorAsync()).Id;
+                bool authorDoesOwn = entity.OwnerId == (await context.GetDbAuthorAsync()).Id;
 
                 return authorDoesOwn == AuthorMustOwn
                     ? Success()
@@ -51,7 +51,7 @@ namespace SbuBot.Commands.Attributes.Checks.Parameters
 
                     case IOneOrAll.ISpecific specific:
                         bool authorDoesOwn = (specific.Value as ISbuOwnedEntity)!.OwnerId
-                            == (await context.GetAuthorAsync()).Id;
+                            == (await context.GetDbAuthorAsync()).Id;
 
                         return authorDoesOwn == AuthorMustOwn
                             ? Success()

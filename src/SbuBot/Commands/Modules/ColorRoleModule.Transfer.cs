@@ -25,14 +25,15 @@ namespace SbuBot.Commands.Modules
             SbuMember receiver
         )
         {
-            SbuColorRole role = (await Context.GetAuthorAsync()).ColorRole!;
+            var context = Context.GetSbuDbContext();
+            SbuColorRole role = (await context.GetMemberFullAsync(Context.Author))!.ColorRole!;
 
             await Context.Guild.GrantRoleAsync(receiver.Id, role.Id);
             await Context.Author.RevokeRoleAsync(role.Id);
 
             role.OwnerId = receiver.Id;
-            Context.GetSbuDbContext().ColorRoles.Update(role);
-            await Context.SaveChangesAsync();
+            context.ColorRoles.Update(role);
+            await context.SaveChangesAsync();
 
             return Reply($"You transferred your color role to {Mention.User(receiver.Id)}.");
         }

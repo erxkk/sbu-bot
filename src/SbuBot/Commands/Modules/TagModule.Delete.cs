@@ -51,13 +51,14 @@ namespace SbuBot.Commands.Modules
                             throw new UnreachableException();
                     }
 
-                    List<SbuTag> tags = await Context.GetSbuDbContext()
-                        .Tags
+                    var context = Context.GetSbuDbContext();
+
+                    List<SbuTag> tags = await context.Tags
                         .Where(t => t.OwnerId == Context.Author.Id)
                         .ToListAsync(Context.Bot.StoppingToken);
 
-                    Context.GetSbuDbContext().Tags.RemoveRange(tags);
-                    await Context.SaveChangesAsync();
+                    context.Tags.RemoveRange(tags);
+                    await context.SaveChangesAsync();
 
                     return Reply("All tags removed.");
                 }
@@ -82,8 +83,10 @@ namespace SbuBot.Commands.Modules
                             throw new UnreachableException();
                     }
 
-                    Context.GetSbuDbContext().Tags.Remove(specific.Value);
-                    await Context.SaveChangesAsync();
+                    var context = Context.GetSbuDbContext();
+
+                    context.Tags.Remove(specific.Value);
+                    await context.SaveChangesAsync();
 
                     return Reply("Tag removed.");
                 }
