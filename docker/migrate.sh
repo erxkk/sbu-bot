@@ -6,7 +6,7 @@ bail() {
         echo "==> Removing 'tmp.env'"
         rm 'tmp.env'
     fi
-    echo $1
+    echo "###" $1
     exit 1;
 }
 
@@ -49,10 +49,8 @@ _POSTGRES_HOST_IP=$(docker network inspect -f '{{range.Containers}}{{.Name}} {{.
 echo "==> Found postgres network ip '$_POSTGRES_HOST_IP'"
 
 # make tmp.env
-if  [[ -e '.env' ]]; then
-    echo "===> Creating 'tmp.env'"
-    cp '.env' 'tmp.env'
-fi
+echo "===> Creating 'tmp.env'"
+cp '.env' 'tmp.env' || bail "Could not copy .env => tmp.env"
 
 # write ip for host to env file
 echo "BOT_POSTGRES__HOST=$_POSTGRES_HOST_IP" >> 'tmp.env'
