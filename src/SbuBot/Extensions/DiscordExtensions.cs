@@ -12,13 +12,6 @@ namespace SbuBot.Extensions
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class DiscordExtensions
     {
-        public static int GetHierarchy(this IMember @this)
-        {
-            Preconditions.NotNull(@this, nameof(@this));
-
-            return @this.GetRoles().Values.Max(r => r.Position);
-        }
-
         public static LocalEmbed WithCurrentTimestamp(this LocalEmbed @this)
         {
             Preconditions.NotNull(@this, nameof(@this));
