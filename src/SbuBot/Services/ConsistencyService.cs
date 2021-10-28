@@ -115,5 +115,21 @@ namespace SbuBot.Services
 
             Logger.LogDebug("Member inserted: {@Member}", new { e.Member.Id, Guild = e.GuildId });
         }
+
+        protected override async ValueTask OnRoleDeleted(RoleDeletedEventArgs e)
+        {
+            using (IServiceScope scope = Bot.Services.CreateScope())
+            {
+                SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
+
+                if (await context.GetColorRoleAsync(e.RoleId, e.GuildId) is { } role)
+                {
+                    context.ColorRoles.Remove(role);
+                    await context.SaveChangesAsync();
+                }
+            }
+
+            Logger.LogDebug("Role removed: {@ColorRole}", new { Id = e.RoleId, Guild = e.GuildId });
+        }
     }
 }
