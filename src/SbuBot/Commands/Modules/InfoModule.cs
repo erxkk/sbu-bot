@@ -77,7 +77,7 @@ namespace SbuBot.Commands.Modules
         {
             [Command("modules")]
             [Description("Finds all commands that would match the given input.")]
-            public DiscordCommandResult Modules() => Help();
+            public DiscordCommandResult Modules() => HelpView();
 
             [Command("find")]
             [Description("Finds all commands that would match the given input.")]
@@ -120,19 +120,44 @@ namespace SbuBot.Commands.Modules
         public DiscordCommandResult Help(string? command = null)
         {
             if (command is null)
-                return base.Help();
+                return HelpView();
 
             IReadOnlyList<CommandMatch> matches = Context.Bot.Commands.FindCommands(command);
 
-            return matches.Count switch
+            switch (matches.Count)
             {
-                0 => Context.Bot.Commands.GetAllModules().FirstOrDefault(m => m.FullAliases.Contains(command))
-                    is { } module
-                    ? Help(module)
-                    : base.Help(),
-                1 => Help(matches[0].Command),
-                _ => Help(matches.Select(c => c.Command)),
-            };
+                case 0:
+                {
+                    var moduleMatches = Context.Bot.Commands.GetAllModules()
+                        .Where(c => c.Aliases.Any(a => a.Equals(command, StringComparison.OrdinalIgnoreCase)))
+                        .ToArray();
+
+                    var commandMatches = Context.Bot.Commands.GetAllCommands()
+                        .Where(c => c.Aliases.Any(a => a.Equals(command, StringComparison.OrdinalIgnoreCase)))
+                        .ToArray();
+
+                    switch ((moduleMatches.Length, commandMatches.Length))
+                    {
+                        case (>= 1, >= 1):
+                            return HelpView(Enumerable.Empty<object>().Concat(moduleMatches).Concat(commandMatches));
+
+                        case (0, >= 1):
+                            return HelpView(commandMatches);
+
+                        case (>= 1, 0):
+                            return HelpView(moduleMatches);
+
+                        default:
+                            return HelpView();
+                    }
+                }
+
+                case 1:
+                    return HelpView(matches[0].Command);
+
+                default:
+                    return HelpView(matches.Select(c => c.Command));
+            }
         }
 
         private static class GuideStatic

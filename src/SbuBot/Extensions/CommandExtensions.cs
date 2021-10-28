@@ -27,6 +27,27 @@ namespace SbuBot.Commands
 
         public static bool IsGroup(this Module @this) => @this.Name.EndsWith("Group");
 
+        public static void AppendTo(this Module @this, StringBuilder builder)
+        {
+            if (@this is null)
+                throw new ArgumentNullException(nameof(@this));
+
+            if (builder is null)
+                throw new ArgumentNullException(nameof(builder));
+
+            builder.Append(@this.FullAliases[0]);
+        }
+
+        public static string Format(this Module @this)
+        {
+            if (@this is null)
+                throw new ArgumentNullException(nameof(@this));
+
+            StringBuilder builder = new(@this.FullAliases[0].Length);
+            @this.AppendTo(builder);
+            return builder.ToString();
+        }
+
         public static void AppendTo(
             this Command @this,
             StringBuilder builder,
