@@ -26,10 +26,7 @@ namespace SbuBot.Commands.Parsing.TypeParsers
                 && roleParseResult.Value.Color is { }
             )
             {
-                await using (context.BeginYield())
-                {
-                    role = await context.GetColorRoleAsync(roleParseResult.Value);
-                }
+                role = await context.GetColorRoleAsync(roleParseResult.Value);
             }
 
             return role is { }

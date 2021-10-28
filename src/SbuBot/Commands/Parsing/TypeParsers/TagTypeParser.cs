@@ -15,16 +15,8 @@ namespace SbuBot.Commands.Parsing.TypeParsers
             Parameter parameter,
             string value,
             DiscordGuildCommandContext context
-        )
-        {
-            SbuTag? tag;
-
-            await using (context.BeginYield())
-            {
-                tag = await context.GetTagAsync(value);
-            }
-
-            return tag is { } ? Success(tag) : Failure("Could not find tag.");
-        }
+        ) => await context.GetTagAsync(value) is { } tag
+            ? Success(tag)
+            : Failure("Could not find tag.");
     }
 }

@@ -18,28 +18,16 @@ namespace SbuBot.Commands.Parsing.TypeParsers
         {
             if (value.Length >= 15)
             {
-                IMessage? message;
-
                 if (value.Length < 21 && ulong.TryParse(value, out var id))
                 {
-                    await using (_ = context.BeginYield())
-                    {
-                        message = await context.Bot.FetchMessageAsync(context.ChannelId, id);
-                    }
-
-                    return message is { }
+                    return await context.Bot.FetchMessageAsync(context.ChannelId, id) is { } message
                         ? Success(message)
                         : Failure("Could not find message.");
                 }
 
                 if (SbuUtility.TryParseMessageLink(value, out var idPair))
                 {
-                    await using (_ = context.BeginYield())
-                    {
-                        message = await context.Bot.FetchMessageAsync(idPair.ChannelId, idPair.MessageId);
-                    }
-
-                    return message is { }
+                    return await context.Bot.FetchMessageAsync(idPair.ChannelId, idPair.MessageId) is { } message
                         ? Success(message)
                         : Failure("Could not find message.");
                 }
