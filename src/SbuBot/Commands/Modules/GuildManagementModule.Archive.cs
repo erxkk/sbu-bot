@@ -16,7 +16,6 @@ using Qmmands;
 using SbuBot.Commands.Attributes;
 using SbuBot.Commands.Attributes.Checks;
 using SbuBot.Commands.Parsing;
-using SbuBot.Exceptions;
 using SbuBot.Extensions;
 using SbuBot.Models;
 
@@ -56,8 +55,11 @@ namespace SbuBot.Commands.Modules
                 if (guild.ArchiveId is null)
                     return Reply("This guild doesn't have a pin archive channel set up. see `sbu help archive set`");
 
-                if (Context.Guild.GetChannel(guild.ArchiveId.Value) is not ITextChannel pinArchive)
-                    throw new NotCachedException("Could not find required pin archive channel.");
+                ITextChannel? pinArchive = Context.Guild.GetChannel(guild.ArchiveId.Value) as ITextChannel
+                    ?? await Context.Bot.FetchChannelAsync(guild.ArchiveId.Value) as ITextChannel;
+
+                if (pinArchive is null)
+                    return Reply($"Could not find required pin archive channel ({guild.ArchiveId.Value}).");
 
                 if (message is null)
                 {
