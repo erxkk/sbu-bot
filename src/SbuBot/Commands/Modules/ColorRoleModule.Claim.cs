@@ -16,6 +16,7 @@ namespace SbuBot.Commands.Modules
 {
     public sealed partial class ColorRoleModule
     {
+        // TODO: overhaul hierarchy check, pretty sure this will not work
         [Group("claim")]
         [RequireColorRole(false)]
         [Description("Claims the given color role if it has no owner.")]

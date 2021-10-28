@@ -1,7 +1,9 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using Disqord;
 using Disqord.Bot;
+using Disqord.Gateway;
 using Disqord.Rest;
 
 using Kkommon;
@@ -52,6 +54,10 @@ namespace SbuBot.Commands.Modules
                 }
             }
 
+            var context = Context.GetSbuDbContext();
+            var guild = await context.GetGuildAsync(Context.Guild);
+            var rolePos = Context.Guild.Roles.GetValueOrDefault(guild!.ColorRoleBottomId ?? 0)?.Position + 1;
+
             IRole role = await Context.Guild.CreateRoleAsync(
                 r =>
                 {
@@ -60,7 +66,13 @@ namespace SbuBot.Commands.Modules
                 }
             );
 
-            var context = Context.GetSbuDbContext();
+            if (rolePos is { })
+            {
+                if (Context.CurrentMember.GetHierarchy() > rolePos)
+                    await role.ModifyAsync(r => r.Position = rolePos.Value);
+                else
+                    await Reply("Could not move the role above the current lower role separator.");
+            }
 
             await Context.Author.GrantRoleAsync(role.Id);
             context.AddColorRole(role, Context.Author.Id);
