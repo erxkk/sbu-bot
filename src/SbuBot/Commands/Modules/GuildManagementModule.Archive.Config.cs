@@ -16,7 +16,7 @@ namespace SbuBot.Commands.Modules
         public sealed partial class ArchiveSubModule : SbuModuleBase
         {
             [Command("set")]
-            [RequireAuthorGuildPermissions(Permission.Administrator, Group = "AdminOrManageMessagePerm")]
+            [RequireAuthorGuildPermissions(Permission.Administrator)]
             [Description("Sets the current pin archive.")]
             [Usage("archive set #channel", "archive set 836993360274784297")]
             public async Task<DiscordCommandResult> SetArchiveAsync(
@@ -35,7 +35,7 @@ namespace SbuBot.Commands.Modules
 
             [Command("list")]
             [Description("Lists the current pin archive.")]
-            [Usage("archive get")]
+            [Usage("archive list")]
             public async Task<DiscordCommandResult> GetArchiveAsync()
             {
                 SbuGuild guild = await Context.GetDbGuildAsync();

@@ -23,15 +23,14 @@ namespace SbuBot.Commands.Modules
 {
     public sealed partial class GuildManagementModule
     {
-        // TODO: add checks for channel access
         [Group("archive")]
         [RequireGuildConfig(SbuGuildConfig.Archive)]
         [Description("A group of commands for sending pinned messages to an archive channel.")]
         public sealed partial class ArchiveSubModule : SbuModuleBase
         {
             [Command]
-            [RequireAuthorGuildPermissions(Permission.Administrator, Group = "AdminOrManageMessagePerm"),
-             RequireAuthorGuildPermissions(Permission.ManageMessages, Group = "AdminOrManageMessagePerm")]
+            [RequireBotChannelPermissions(Permission.ManageMessages),
+             RequireAuthorGuildPermissions(Permission.Administrator)]
             [Description("Archives the given message or all pinned messages in the current channel.")]
             [Remarks(
                 "The Message are unpinned unless specified otherwise, specifying otherwise cannot be done when "
@@ -60,6 +59,11 @@ namespace SbuBot.Commands.Modules
 
                 if (pinArchive is null)
                     return Reply($"Could not find required pin archive channel ({guild.ArchiveId.Value}).");
+
+                var archivePerms = Permission.SendMessages | Permission.SendEmbeds | Permission.SendAttachments;
+
+                if (!Context.CurrentMember.GetPermissions(pinArchive).Has(archivePerms))
+                    return Reply($"I don't have the necessary permissions in the archive channel ({archivePerms:F}).");
 
                 if (message is null)
                 {
