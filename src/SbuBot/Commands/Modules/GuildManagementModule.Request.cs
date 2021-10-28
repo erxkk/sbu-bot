@@ -26,7 +26,7 @@ namespace SbuBot.Commands.Modules
             )]
             public async Task VoteAsync()
             {
-                await Context.Author.GrantRoleAsync(SbuGlobals.Role.Perm.SENATE);
+                await Context.Author.GrantRoleAsync(SbuGlobals.Role.SENATE);
 
                 try
                 {
@@ -57,7 +57,7 @@ namespace SbuBot.Commands.Modules
                 }
                 finally
                 {
-                    await Context.Author.RevokeRoleAsync(SbuGlobals.Role.Perm.SENATE);
+                    await Context.Author.RevokeRoleAsync(SbuGlobals.Role.SENATE);
                 }
             }
 
@@ -66,17 +66,17 @@ namespace SbuBot.Commands.Modules
             [Description("Grants the shit-sbu-says submission role.")]
             public async Task QuoteAsync()
             {
-                await Context.Author.GrantRoleAsync(SbuGlobals.Role.Perm.SHIT_SBU_SAYS);
+                await Context.Author.GrantRoleAsync(SbuGlobals.Role.SHIT_SBU_SAYS);
 
                 try
                 {
-                    await Reply($"Send your message in {Mention.Channel(SbuGlobals.Channel.Based.SHIT_SBU_SAYS)}.");
+                    await Reply($"Send your message in {Mention.Channel(SbuGlobals.Channel.SHIT_SBU_SAYS)}.");
                     MessageReceivedEventArgs waitMessageResult;
 
                     await using (_ = Context.BeginYield())
                     {
                         waitMessageResult = await Context.Bot.WaitForMessageAsync(
-                            SbuGlobals.Channel.Based.SHIT_SBU_SAYS,
+                            SbuGlobals.Channel.SHIT_SBU_SAYS,
                             e => e.Member.Id == Context.Author.Id,
                             TimeSpan.FromMinutes(3)
                         );
@@ -87,14 +87,14 @@ namespace SbuBot.Commands.Modules
                         await Reply(
                             string.Format(
                                 "You did not send a message in {0} in time.",
-                                Mention.Channel(SbuGlobals.Channel.Based.SHIT_SBU_SAYS)
+                                Mention.Channel(SbuGlobals.Channel.SHIT_SBU_SAYS)
                             )
                         );
                     }
                 }
                 finally
                 {
-                    await Context.Author.RevokeRoleAsync(SbuGlobals.Role.Perm.SHIT_SBU_SAYS);
+                    await Context.Author.RevokeRoleAsync(SbuGlobals.Role.SHIT_SBU_SAYS);
                 }
             }
 
@@ -103,7 +103,7 @@ namespace SbuBot.Commands.Modules
             [Description("Grants the announcement submission role.")]
             public async Task AnnounceAsync()
             {
-                await Context.Author.GrantRoleAsync(SbuGlobals.Role.Perm.ANNOUNCEMENTS);
+                await Context.Author.GrantRoleAsync(SbuGlobals.Role.ANNOUNCEMENTS);
 
                 try
                 {
@@ -145,7 +145,7 @@ namespace SbuBot.Commands.Modules
                 }
                 finally
                 {
-                    await Context.Author.RevokeRoleAsync(SbuGlobals.Role.Perm.ANNOUNCEMENTS);
+                    await Context.Author.RevokeRoleAsync(SbuGlobals.Role.ANNOUNCEMENTS);
                 }
             }
         }
