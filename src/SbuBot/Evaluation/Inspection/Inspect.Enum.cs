@@ -6,7 +6,6 @@ using System.Text;
 
 namespace SbuBot.Evaluation.Inspection
 {
-    // TODO: improve
     public static partial class Inspect
     {
         public static void AppendEnumInspectionTo(
@@ -50,7 +49,7 @@ namespace SbuBot.Evaluation.Inspection
 
             for (int i = 0; i < names.Length; i++)
             {
-                if (!@enum.HasFlag((Enum) values.GetValue(i)!))
+                if (!@enum.HasFlag((Enum)values.GetValue(i)!))
                     continue;
 
                 if (count >= itemCount)

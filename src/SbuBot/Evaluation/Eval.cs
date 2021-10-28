@@ -37,9 +37,9 @@ namespace SbuBot.Evaluation
             .ToArray();
 
         public static readonly ScriptOptions SCRIPT_OPTIONS = ScriptOptions.Default
-            .WithImports(IMPORTS)
+            .WithImports(Eval.IMPORTS)
             .WithAllowUnsafe(true)
-            .WithReferences(REFERENCES);
+            .WithReferences(Eval.REFERENCES);
 
         public static CompilationResult Compile(string code, DiscordGuildCommandContext context)
         {

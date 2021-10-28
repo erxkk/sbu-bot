@@ -8,7 +8,7 @@ namespace SbuBot.Evaluation.Inspection
 
         public static void InlineShortExpansions(StringBuilder builder)
         {
-            // TODO
+            // TODO: implement this once inspection is based on runtime inspection/formatting objects
 
             // maybe append like this:
             // ActualProp: {

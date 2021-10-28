@@ -105,13 +105,12 @@ namespace SbuBot.Evaluation
             return confirmationView.State;
         }
 
-        // TODO: make interactive version + add to sbu module based
         public DiscordCommandResult Inspection(object? obj = null, int maxDepth = 2)
         {
             string inspection = obj?.GetInspection(maxDepth) ?? Context.GetInspection();
 
             // split earlier than max length to avoid huge embeds
-            // TODO: method that splits at previous line instead of exact chunk size
+            // TODO: context aware splitting
             if (inspection.Length > 2048)
             {
                 return Pages(

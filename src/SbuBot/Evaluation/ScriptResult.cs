@@ -2,8 +2,6 @@ using System;
 
 using Disqord;
 
-using SbuBot.Extensions;
-
 namespace SbuBot.Evaluation
 {
     public abstract class ScriptResult

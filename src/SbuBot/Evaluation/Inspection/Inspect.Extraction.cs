@@ -47,7 +47,7 @@ namespace SbuBot.Evaluation.Inspection
             },
         };
 
-        public static IReadOnlyDictionary<Type, Func<object, Extraction>> Extractors => EXTRACTORS;
+        public static IReadOnlyDictionary<Type, Func<object, Extraction>> Extractors => Inspect.EXTRACTORS;
 
         private static object? SafeGetProperty(PropertyInfo @this, object obj)
         {
