@@ -4,6 +4,9 @@ using System.Threading.Tasks;
 using Disqord;
 using Disqord.Bot;
 using Disqord.Gateway;
+using Disqord.Rest;
+
+using Kkommon.Exceptions;
 
 using Qmmands;
 
@@ -19,7 +22,7 @@ namespace SbuBot.Commands.Attributes.Checks.Parameters
 
         public MustHaveColorRoleAttribute(bool mustHaveColorRole = true) => MustHaveColorRole = mustHaveColorRole;
 
-        public override ValueTask<CheckResult> CheckAsync(object argument, DiscordGuildCommandContext context)
+        public override async ValueTask<CheckResult> CheckAsync(object argument, DiscordGuildCommandContext context)
         {
             IMember member;
 
@@ -30,14 +33,14 @@ namespace SbuBot.Commands.Attributes.Checks.Parameters
                     break;
 
                 case SbuMember sbuMember:
-                    if (context.Guild.GetMember(sbuMember.Id) is not { } cachedMember)
-                        throw new NotCachedException("Could not get required cached required.");
+                    member = context.Guild.GetMember(sbuMember.Id) is { } cachedMember
+                        ? cachedMember
+                        : await context.Guild.FetchMemberAsync(sbuMember.Id);
 
-                    member = cachedMember;
                     break;
 
                 default:
-                    throw new ArgumentNullException(nameof(argument));
+                    throw new UnreachableException($"Invalid argument type: {argument.GetType()}", argument);
             }
 
             return member.GetColorRole() is { } == MustHaveColorRole

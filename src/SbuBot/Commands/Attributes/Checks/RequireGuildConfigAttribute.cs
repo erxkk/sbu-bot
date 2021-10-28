@@ -16,10 +16,14 @@ namespace SbuBot.Commands.Attributes.Checks
         public RequireGuildConfigAttribute(SbuGuildConfig config) => Config = config;
 
         public override async ValueTask<CheckResult> CheckAsync(DiscordGuildCommandContext context)
-            => (await context.GetGuildAsync()).Config.HasFlag(Config)
-                ? Success()
-                : Failure(
-                    $"The guild doesn't have this feature ({Config}) enabled."
+        {
+            SbuGuild guild = await context.GetGuildAsync();
+
+            return guild.Config.HasFlag(Config)
+                ? CheckAttribute.Success()
+                : CheckAttribute.Failure(
+                    $"The guild doesn't have this feature ({Config:F}) enabled."
                 );
+        }
     }
 }

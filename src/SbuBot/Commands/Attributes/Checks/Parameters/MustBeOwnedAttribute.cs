@@ -1,7 +1,6 @@
 using System;
 using System.Threading.Tasks;
 
-using Disqord;
 using Disqord.Bot;
 
 using Qmmands;
@@ -23,27 +22,18 @@ namespace SbuBot.Commands.Attributes.Checks.Parameters
             return (ownedEntity.OwnerId is { }) == MustBeOwned
                 ? Success()
                 : Failure(
-                    MustBeOwned
-                        ? string.Format(
-                            "The {0} must be owned, but is not.",
-                            argument switch
-                            {
-                                SbuColorRole => "role",
-                                SbuTag => "tag",
-                                SbuReminder => "reminder",
-                                _ => "entity",
-                            }
-                        )
-                        : string.Format(
-                            "The {0} must not be owned, but is currently owned by somebody else.",
-                            argument switch
-                            {
-                                SbuColorRole => "role",
-                                SbuTag => "tag",
-                                SbuReminder => "reminder",
-                                _ => "entity",
-                            }
-                        )
+                    string.Format(
+                        MustBeOwned
+                            ? "The {0} must be owned, but is not."
+                            : "The {0} must not be owned, but is currently owned by somebody else.",
+                        argument switch
+                        {
+                            SbuColorRole => "role",
+                            SbuTag => "tag",
+                            SbuReminder => "reminder",
+                            _ => "entity",
+                        }
+                    )
                 );
         }
 

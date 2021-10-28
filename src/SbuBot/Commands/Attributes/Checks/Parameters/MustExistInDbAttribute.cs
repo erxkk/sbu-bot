@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 using Disqord;
 using Disqord.Bot;
 
+using Kkommon.Exceptions;
+
 using Qmmands;
 
 using SbuBot.Extensions;
@@ -17,24 +19,37 @@ namespace SbuBot.Commands.Attributes.Checks.Parameters
         public MustExistInDbAttribute(bool mustExistInDb = true) => MustExistInDb = mustExistInDb;
 
         public override async ValueTask<CheckResult> CheckAsync(object argument, DiscordGuildCommandContext context)
-            => argument switch
+        {
+            switch (argument)
             {
-                IMember member => (await context.GetSbuDbContext().GetMemberAsync(member) is { })
-                    == MustExistInDb
-                        ? Success()
-                        : Failure(
+                case IMember member:
+                {
+                    var exists = await context.GetSbuDbContext().GetMemberAsync(member) is { };
+
+                    return exists == MustExistInDb
+                        ? ParameterCheckAttribute.Success()
+                        : ParameterCheckAttribute.Failure(
                             $"The given member must {(MustExistInDb ? "" : "not ")}be in the database for "
                             + "this command."
-                        ),
-                IRole role => (await context.GetSbuDbContext().GetColorRoleAsync(role) is { })
-                    == MustExistInDb
-                        ? Success()
-                        : Failure(
+                        );
+                }
+
+                case IRole role:
+                {
+                    var exists = await context.GetSbuDbContext().GetColorRoleAsync(role) is { };
+
+                    return exists == MustExistInDb
+                        ? ParameterCheckAttribute.Success()
+                        : ParameterCheckAttribute.Failure(
                             $"The given role must {(MustExistInDb ? "" : "not ")}be in the database for "
                             + "this command."
-                        ),
-                _ => throw new ArgumentException($"Invalid argument type: {argument.GetType()}", nameof(argument)),
-            };
+                        );
+                }
+
+                default:
+                    throw new UnreachableException($"Invalid argument type: {argument.GetType()}", argument);
+            }
+        }
 
         public override bool CheckType(Type type)
             => type.IsAssignableTo(typeof(IMember)) || type.IsAssignableTo(typeof(IRole));

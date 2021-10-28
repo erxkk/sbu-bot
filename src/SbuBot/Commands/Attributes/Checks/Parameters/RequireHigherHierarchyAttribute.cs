@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 using Disqord;
 using Disqord.Bot;
 
+using Kkommon.Exceptions;
+
 using Qmmands;
 
 using SbuBot.Exceptions;
@@ -25,7 +27,7 @@ namespace SbuBot.Commands.Attributes.Checks.Parameters
                     context.Guild.Roles.TryGetValue(sbuRole.Id, out var discordRole)
                         ? discordRole.Position
                         : throw new NotCachedException("Could not find role in cache for hierarchy check."), "role"),
-                _ => throw new ArgumentOutOfRangeException(nameof(argument), argument, null),
+                _ => throw new UnreachableException($"Invalid argument type: {argument.GetType()}", argument),
             };
 
             return context.Author.GetHierarchy() > targetHierarchy

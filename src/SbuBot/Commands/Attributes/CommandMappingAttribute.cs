@@ -2,6 +2,7 @@ using System;
 
 namespace SbuBot.Commands.Attributes
 {
+    // TODO: remove or implement command mapping
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true)]
     public sealed class CommandMappingAttribute : Attribute
     {

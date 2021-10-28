@@ -3,6 +3,8 @@ using System.Threading.Tasks;
 
 using Disqord.Bot;
 
+using Kkommon.Exceptions;
+
 using Qmmands;
 
 namespace SbuBot.Commands.Attributes.Checks.Parameters
@@ -26,7 +28,7 @@ namespace SbuBot.Commands.Attributes.Checks.Parameters
                 DateTimeOffset dateTimeOffset => dateTimeOffset <= now
                     ? Failure(MustBeFutureAttribute.FAILURE_REASON)
                     : Success(),
-                _ => throw new ArgumentException(null, nameof(argument)),
+                _ => throw new UnreachableException($"Invalid argument type: {argument.GetType()}", argument),
             };
         }
 

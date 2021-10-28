@@ -70,15 +70,16 @@ namespace SbuBot.Commands.Attributes.Checks.Parameters
                             );
 
                     default:
-                        throw new UnreachableException();
+                        throw new UnreachableException($"Invalid argument type: {argument.GetType()}", argument);
                 }
             }
 
-            throw new UnreachableException("The given argument was neither IOneOrAll or ISbuOwnedEntity.", argument);
+            throw new UnreachableException($"Invalid argument type: {argument.GetType()}", argument);
         }
 
-        public override bool CheckType(Type type) => type.IsAssignableTo(typeof(ISbuOwnedEntity))
-            || (type.GetGenericTypeDefinition() == typeof(OneOrAll<>)
-                && type.GetGenericArguments()[0].IsAssignableTo(typeof(ISbuOwnedEntity)));
+        public override bool CheckType(Type type)
+            => type.IsAssignableTo(typeof(ISbuOwnedEntity))
+                || (type.GetGenericTypeDefinition() == typeof(OneOrAll<>)
+                    && type.GetGenericArguments()[0].IsAssignableTo(typeof(ISbuOwnedEntity)));
     }
 }
