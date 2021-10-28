@@ -128,8 +128,6 @@ namespace SbuBot.Evaluation.Inspection
                     break;
                 }
             }
-
-            // TODO: reformat?
         }
     }
 }

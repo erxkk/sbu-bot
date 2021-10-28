@@ -11,7 +11,6 @@ using Qmmands;
 
 namespace SbuBot.Commands.Modules
 {
-    // TODO: add abort
     public sealed partial class GuildManagementModule
     {
         [Group("request")]
@@ -110,7 +109,7 @@ namespace SbuBot.Commands.Modules
                     MessageReceivedEventArgs waitMessageResult;
                     await Reply($"Send your message in {Mention.Channel(SbuGlobals.Channel.ANNOUNCEMENTS)}.");
 
-                    // TODO: test this
+                    // TODO: test this + add it to the other commands
                     await using (_ = Context.BeginYield())
                     {
                         waitMessageResult = await await Task.WhenAny(

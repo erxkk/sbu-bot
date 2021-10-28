@@ -30,7 +30,6 @@ namespace SbuBot.Commands.Modules
         [Description("A group of commands for listing tags.")]
         public sealed class ListGroup : SbuModuleBase
         {
-            // TODO: make a parsable type like MeOrOther?
             [Command]
             [Description("Lists the tags of a given member, or of the command author if no member is specified.")]
             [Usage("tag list me", "t list @user", "tag list 352815253828141056", "tag list Allah")]
