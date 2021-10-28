@@ -37,7 +37,7 @@ namespace SbuBot.Models
 
 #region EFCore
 
-        internal SbuTag(Snowflake? ownerId, Snowflake guildId, string name, string content)
+        public SbuTag(Snowflake? ownerId, Snowflake guildId, string name, string content)
         {
             OwnerId = ownerId;
             GuildId = guildId;

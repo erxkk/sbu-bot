@@ -25,7 +25,7 @@ namespace SbuBot.Models
 
 #region EFCore
 
-        internal SbuColorRole(Snowflake id, Snowflake? ownerId, Snowflake guildId)
+        public SbuColorRole(Snowflake id, Snowflake? ownerId, Snowflake guildId)
         {
             Id = id;
             OwnerId = ownerId;

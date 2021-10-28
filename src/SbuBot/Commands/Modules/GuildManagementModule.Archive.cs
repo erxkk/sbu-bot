@@ -64,7 +64,7 @@ namespace SbuBot.Commands.Modules
                     if (!Context.Message.ReferencedMessage.HasValue)
                         return Reply("You need to provide a message or reply to one.");
 
-                    await pinSingleMessageAsync(Context.Message.ReferencedMessage.Value, pinArchive, unpinOriginal);
+                    await PinSingleMessageAsync(Context.Message.ReferencedMessage.Value, pinArchive, unpinOriginal);
                 }
                 else
                 {
@@ -72,7 +72,7 @@ namespace SbuBot.Commands.Modules
                     {
                         case OneOrAll<IUserMessage>.Specific specific:
                         {
-                            if (await pinSingleMessageAsync(specific.Value, pinArchive, unpinOriginal)
+                            if (await PinSingleMessageAsync(specific.Value, pinArchive, unpinOriginal)
                                 is Result<Unit, string>.Error error)
                                 return Reply(error.Value);
 
@@ -88,7 +88,7 @@ namespace SbuBot.Commands.Modules
                                 if (Context.Bot.StoppingToken.IsCancellationRequested)
                                     throw new OperationCanceledException();
 
-                                if (await pinSingleMessageAsync(pinnedMessage, pinArchive, unpinOriginal)
+                                if (await PinSingleMessageAsync(pinnedMessage, pinArchive, unpinOriginal)
                                     is Result<Unit, string>.Error error)
                                     return Reply(error.Value);
                             }
@@ -102,29 +102,29 @@ namespace SbuBot.Commands.Modules
                 }
 
                 return Reply("Done.");
+            }
 
-                static async Task<Result<Unit, string>> pinSingleMessageAsync(
-                    IUserMessage message,
-                    ITextChannel channel,
-                    bool unpinOriginal
-                )
+            private async Task<Result<Unit, string>> PinSingleMessageAsync(
+                IUserMessage message,
+                ITextChannel channel,
+                bool unpinOriginal
+            )
+            {
+                switch (SbuUtility.TryCreatePinMessage(Context.GuildId, message))
                 {
-                    switch (SbuUtility.TryCreatePinMessage(message))
-                    {
-                        case Result<LocalMessage, string>.Success pinMessage:
-                            await channel.SendMessageAsync(pinMessage);
+                    case Result<LocalMessage, string>.Success pinMessage:
+                        await channel.SendMessageAsync(pinMessage);
 
-                            if (unpinOriginal && message.IsPinned)
-                                await message.UnpinAsync();
+                        if (unpinOriginal && message.IsPinned)
+                            await message.UnpinAsync();
 
-                            return new Result<Unit, string>.Success(new());
+                        return new Result<Unit, string>.Success(new());
 
-                        case Result<LocalMessage, string>.Error error:
-                            return new Result<Unit, string>.Error(error.Value);
+                    case Result<LocalMessage, string>.Error error:
+                        return new Result<Unit, string>.Error(error.Value);
 
-                        default:
-                            throw new UnreachableException();
-                    }
+                    default:
+                        throw new UnreachableException();
                 }
             }
         }

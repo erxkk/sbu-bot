@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Text.RegularExpressions;
 
 using Disqord;
@@ -13,7 +10,7 @@ namespace SbuBot
     {
         public static readonly Regex IMAGE_FILE_REGEX = new(@"\.(gif|jpeg|jpg|png)$", RegexOptions.Compiled);
 
-        public static Result<LocalMessage, string> TryCreatePinMessage(IUserMessage message)
+        public static Result<LocalMessage, string> TryCreatePinMessage(Snowflake guildId, IUserMessage message)
         {
             LocalEmbed embed = new LocalEmbed()
                 .WithAuthor(message.Author)
@@ -24,7 +21,7 @@ namespace SbuBot
                     "Link to Original",
                     Markdown.Link(
                         "Click here!",
-                        Discord.MessageJumpLink(SbuGlobals.Guild.Sbu.SELF, message.ChannelId, message.Id)
+                        Discord.MessageJumpLink(guildId, message.ChannelId, message.Id)
                     ),
                     true
                 );

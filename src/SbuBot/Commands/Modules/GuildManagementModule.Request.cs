@@ -15,7 +15,7 @@ namespace SbuBot.Commands.Modules
     public sealed partial class GuildManagementModule
     {
         [Group("request")]
-        [RequireGuild(SbuGlobals.Guild.Sbu.SELF)]
+        [RequireGuild(SbuGlobals.Guild.SBU)]
         [Description("A group of commands for requesting access to restricted channels or permissions.")]
         public sealed class RequestSubModule : SbuModuleBase
         {
@@ -26,7 +26,6 @@ namespace SbuBot.Commands.Modules
             )]
             public async Task VoteAsync()
             {
-                InteractivityExtension interactivity = Context.Bot.GetInteractivity();
                 await Context.Author.GrantRoleAsync(SbuGlobals.Role.Perm.SENATE);
 
                 try
@@ -36,7 +35,7 @@ namespace SbuBot.Commands.Modules
 
                     await using (_ = Context.BeginYield())
                     {
-                        waitMessageResult = await interactivity.WaitForMessageAsync(
+                        waitMessageResult = await Context.Bot.WaitForMessageAsync(
                             SbuGlobals.Channel.SENATE,
                             e => e.Member.Id == Context.Author.Id,
                             TimeSpan.FromMinutes(3)
@@ -67,7 +66,6 @@ namespace SbuBot.Commands.Modules
             [Description("Grants the shit-sbu-says submission role.")]
             public async Task QuoteAsync()
             {
-                InteractivityExtension interactivity = Context.Bot.GetInteractivity();
                 await Context.Author.GrantRoleAsync(SbuGlobals.Role.Perm.SHIT_SBU_SAYS);
 
                 try
@@ -77,7 +75,7 @@ namespace SbuBot.Commands.Modules
 
                     await using (_ = Context.BeginYield())
                     {
-                        waitMessageResult = await interactivity.WaitForMessageAsync(
+                        waitMessageResult = await Context.Bot.WaitForMessageAsync(
                             SbuGlobals.Channel.Based.SHIT_SBU_SAYS,
                             e => e.Member.Id == Context.Author.Id,
                             TimeSpan.FromMinutes(3)
@@ -105,7 +103,6 @@ namespace SbuBot.Commands.Modules
             [Description("Grants the announcement submission role.")]
             public async Task AnnounceAsync()
             {
-                InteractivityExtension interactivity = Context.Bot.GetInteractivity();
                 await Context.Author.GrantRoleAsync(SbuGlobals.Role.Perm.ANNOUNCEMENTS);
 
                 try
@@ -113,12 +110,22 @@ namespace SbuBot.Commands.Modules
                     MessageReceivedEventArgs waitMessageResult;
                     await Reply($"Send your message in {Mention.Channel(SbuGlobals.Channel.ANNOUNCEMENTS)}.");
 
+                    // TODO: test this
                     await using (_ = Context.BeginYield())
                     {
-                        waitMessageResult = await interactivity.WaitForMessageAsync(
-                            SbuGlobals.Channel.ANNOUNCEMENTS,
-                            e => e.Member.Id == Context.Author.Id,
-                            TimeSpan.FromMinutes(3)
+                        waitMessageResult = await await Task.WhenAny(
+                            new[]
+                            {
+                                Context.Bot.WaitForMessageAsync(
+                                    SbuGlobals.Channel.ANNOUNCEMENTS,
+                                    e => e.Member.Id == Context.Author.Id,
+                                    TimeSpan.FromMinutes(3)
+                                ),
+                                Context.WaitForMessageAsync(
+                                    e => e.Message.Content.Equals("abort", StringComparison.OrdinalIgnoreCase),
+                                    TimeSpan.FromMinutes(3)
+                                ),
+                            }
                         );
                     }
 
@@ -130,6 +137,10 @@ namespace SbuBot.Commands.Modules
                                 Mention.Channel(SbuGlobals.Channel.ANNOUNCEMENTS)
                             )
                         );
+                    }
+                    else if (waitMessageResult.Message.Content.Equals("abort", StringComparison.OrdinalIgnoreCase))
+                    {
+                        await Reply("Aborted.");
                     }
                 }
                 finally

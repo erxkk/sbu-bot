@@ -14,6 +14,8 @@ namespace SbuBot.Models
     {
         public Snowflake Id { get; }
         public Snowflake? ArchiveId { get; set; }
+        public Snowflake? ColorRoleTopId { get; set; }
+        public Snowflake? ColorRoleBottomId { get; set; }
         public SbuGuildConfig Config { get; set; }
 
         // nav properties
@@ -32,15 +34,28 @@ namespace SbuBot.Models
         [NotLogged]
         public List<SbuReminder> Reminders { get; } = new();
 
-        public SbuGuild(IGuild guild, Snowflake? archiveId) : this(guild.Id, archiveId, (SbuGuildConfig)255) { }
+        public SbuGuild(
+            IGuild guild,
+            Snowflake? archiveId = null,
+            Snowflake? colorRoleTopId = null,
+            Snowflake? colorRoleBottomId = null
+        ) : this(guild.Id, archiveId, colorRoleTopId, colorRoleBottomId, (SbuGuildConfig)255) { }
 
 #region EFCore
 
-        internal SbuGuild(Snowflake id, Snowflake? archiveId, SbuGuildConfig config)
+        public SbuGuild(
+            Snowflake id,
+            Snowflake? archiveId,
+            Snowflake? colorRoleTopId,
+            Snowflake? colorRoleBottomId,
+            SbuGuildConfig config
+        )
         {
             Id = id;
             Config = config;
             ArchiveId = archiveId;
+            ColorRoleTopId = colorRoleTopId;
+            ColorRoleBottomId = colorRoleBottomId;
         }
 
 #nullable disable
@@ -52,6 +67,8 @@ namespace SbuBot.Models
                 builder.HasKey(g => g.Id);
 
                 builder.Property(g => g.ArchiveId);
+                builder.Property(g => g.ColorRoleTopId);
+                builder.Property(g => g.ColorRoleBottomId);
                 builder.Property(g => g.Config);
 
                 builder.HasMany(g => g.Members)

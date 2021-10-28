@@ -61,7 +61,7 @@ namespace SbuBot
 
         protected override ValueTask<bool> CheckMessageAsync(IGatewayUserMessage message)
         {
-            if (message.Author.Id == SbuGlobals.Bot.OWNER)
+            if (message.Author.Id == SbuGlobals.Users.ERXKK)
                 return new(true);
 
             if (IsLocked)
@@ -120,7 +120,7 @@ namespace SbuBot
             return new LocalMessage().WithEmbeds(embed);
         }
 
-        public override ValueTask<bool> IsOwnerAsync(Snowflake userId) => new(userId == SbuGlobals.Bot.OWNER);
+        public override ValueTask<bool> IsOwnerAsync(Snowflake userId) => new(userId == SbuGlobals.Users.ERXKK);
 
         protected override void MutateModule(ModuleBuilder moduleBuilder)
         {

@@ -31,7 +31,7 @@ namespace SbuBot.Models
 
 #region EFCore
 
-        internal SbuMember(Snowflake id, Snowflake guildId)
+        public SbuMember(Snowflake id, Snowflake guildId)
         {
             Id = id;
             GuildId = guildId;

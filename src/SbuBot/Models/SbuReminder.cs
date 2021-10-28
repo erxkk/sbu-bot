@@ -58,7 +58,7 @@ namespace SbuBot.Models
 
 #region EFCore
 
-        internal SbuReminder(
+        public SbuReminder(
             Snowflake? ownerId,
             Snowflake guildId,
             Snowflake channelId,

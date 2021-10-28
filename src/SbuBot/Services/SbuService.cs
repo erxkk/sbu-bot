@@ -15,20 +15,19 @@ namespace SbuBot.Services
 
         protected override async ValueTask OnMessageReceived(BotMessageReceivedEventArgs e)
         {
-            if (e.GuildId is null)
-                return;
-
-            if (e.GuildId != SbuGlobals.Guild.Sbu.SELF)
+            if (e.GuildId != SbuGlobals.Guild.SBU
+                || e.Channel is not ICategorizableGuildChannel categorizble
+                || categorizble.CategoryId == SbuGlobals.Channel.CATEGORY_SERIOUS)
                 return;
 
             switch (e.Message.Author.Id)
             {
-                case SbuGlobals.Bot.OWNER when e.Message.Content.Equals("ratio", StringComparison.OrdinalIgnoreCase):
+                case SbuGlobals.Users.ERXKK when e.Message.Content.Equals("ratio", StringComparison.OrdinalIgnoreCase):
                     await e.Message.AddReactionAsync(LocalEmoji.Custom(SbuGlobals.Emote.Vote.UP));
                     return;
 
-                case SbuGlobals.Member.TOASTY when e.Message.Content.Equals("cum", StringComparison.OrdinalIgnoreCase):
-                    await e.Message.AddReactionAsync(LocalEmoji.Custom(SbuGlobals.Emote.Misc.CUM));
+                case SbuGlobals.Users.TOASTY when e.Message.Content.Equals("cum", StringComparison.OrdinalIgnoreCase):
+                    await e.Message.AddReactionAsync(LocalEmoji.Custom(SbuGlobals.Emote.CUM));
                     return;
             }
         }

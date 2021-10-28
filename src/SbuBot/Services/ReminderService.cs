@@ -179,7 +179,7 @@ namespace SbuBot.Services
 
         private void _timerCallback(object? sender)
         {
-            _ = _timerCallbackAsync((Snowflake) sender!);
+            _ = _timerCallbackAsync((Snowflake)sender!);
         }
 
         private async Task _timerCallbackAsync(Snowflake identifier)
@@ -195,11 +195,10 @@ namespace SbuBot.Services
 
             try
             {
-                // BUG: add guild id you dumbass
                 await Bot.SendMessageAsync(
                     reminder.ChannelId,
                     new LocalMessage()
-                        .WithReply(reminder.MessageId, reminder.ChannelId, SbuGlobals.Guild.Sbu.SELF)
+                        .WithReply(reminder.MessageId, reminder.ChannelId, reminder.GuildId)
                         .WithEmbeds(
                             new LocalEmbed()
                                 .WithTitle("Reminder")

@@ -47,153 +47,59 @@ namespace SbuBot
             }
         }
 
-        public static class Github
+        public static class Links
         {
-            public const string SELF = "https://github.com/erxkk/sbu-bot";
-            public const string DISQORD = "https://github.com/quahu/disqord";
-        }
-
-        public static class Bot
-        {
-            public const ulong SELF = Member.SELF;
-            public const ulong OWNER = Member.ERXKK;
-            public const string NAME = "Allah 2";
-            public const ushort DISCRIMINATOR = 1552;
-        }
-
-        public static class DevBot
-        {
-            public const ulong SELF = 710538840728928327UL;
-            public const ulong OWNER = Member.ERXKK;
-            public const string NAME = "retard";
-            public const ushort DISCRIMINATOR = 8283;
+            public const string GH_SELF = "https://github.com/erxkk/sbu-bot";
+            public const string GH_DISQORD = "https://github.com/quahu/disqord";
         }
 
         public static class Guild
         {
-            public static class Sbu
-            {
-                public const ulong SELF = 732210852849123418UL;
-                public const ulong OWNER = Member.ERXKK;
-                public const string NAME = "Siege Bad Uninstall";
-            }
-
-            public static class Lab
-            {
-                public const ulong SELF = 416256456505950215UL;
-                public const ulong OWNER = 183319356489465856UL;
-                public const string NAME = "Siege Bad Uninstall";
-            }
-
-            public static class LaFamilia
-            {
-                public const ulong SELF = 681285811945340959UL;
-                public const ulong OWNER = Member.ERXKK;
-                public const string NAME = "La Familia";
-            }
+            public const ulong SBU = 732210852849123418UL;
+            public const ulong LA_FAMILIA = 681285811945340959UL;
+            public const ulong EMOTES = 846789266041470977UL;
         }
 
         public static class Role
         {
+            // top roles
             public const ulong ADMIN = 741033629613948961UL;
             public const ulong SBU_BOT = 851039575476273193UL;
             public const ulong BOTS = 732228987366932551UL;
 
-            public static class Perm
-            {
-                public const ulong SELF = 776790664436383794UL;
-                public const ulong MUTED = 772062437490294784UL;
-                public const ulong NO_SERIOUS = 776789839793618984UL;
-                public const ulong SENATE = 775428028771598346UL;
-                public const ulong SHIT_SBU_SAYS = 759189942730883083UL;
-                public const ulong ANNOUNCEMENTS = 773225941551153182UL;
-                public const ulong BOOSTER = 732232124714713229UL;
-                public const ulong PIN = 817448908095488000UL;
-            }
+            // separators
+            public const ulong COLOR_SEPARATOR = 753986150724534404UL;
 
-            public static class Mention
-            {
-                public const ulong SELF = 732238126998880267UL;
-                public const ulong BABANER = 824407962218135584UL;
-                public const ulong MEME_KING = 812605553494720533UL;
-            }
-
-            public static class Color
-            {
-                public const ulong SELF = 753986150724534404UL;
-            }
+            // notable permission roles
+            public const ulong MUTED = 772062437490294784UL;
+            public const ulong NO_SERIOUS = 776789839793618984UL;
+            public const ulong SENATE = 775428028771598346UL;
+            public const ulong SHIT_SBU_SAYS = 759189942730883083UL;
+            public const ulong ANNOUNCEMENTS = 773225941551153182UL;
+            public const ulong BOOSTER = 732232124714713229UL;
+            public const ulong PIN = 817448908095488000UL;
         }
 
         public static class Channel
         {
+            // top level
             public const ulong HELP = 732210852849123421UL;
             public const ulong ANNOUNCEMENTS = 732231139233759324UL;
             public const ulong SENATE = 775427903206457365UL;
-            public const ulong ADMIN_FURRY_STASH = 837447382441656320UL;
 
-            public static class Normal
-            {
-                public const ulong SELF = 732210852849123419UL;
-                public const ulong GENERAL = 732211844315349005UL;
-                public const ulong GAMING = 732211184043819041UL;
-                public const ulong MEME = 732212585910370374UL;
-                public const ulong WHOLESOME = 732213515909070889UL;
-                public const ulong BOT_SPAM = 732229179889942539UL;
-            }
+            // categories
+            public const ulong CATEGORY_SERIOUS = 775427903206457365UL;
 
-            public static class Based
-            {
-                public const ulong SELF = 760469720741969950UL;
-                public const ulong PIN_ARCHIVE = 775826206410407937UL;
-                public const ulong SHIT_SBU_SAYS = 759153822806310912UL;
-                public const ulong CRUMPET_SERVER = 790542075346944020UL;
-                public const ulong DUDE_ZONE = 808295761841225739UL;
-                public const ulong SOCIETY = 732212629476737095UL;
-            }
-
-            public static class Serious
-            {
-                public const ulong SELF = 732215815537164309UL;
-                public const ulong ART = 732211271075889243UL;
-                public const ulong MUSIC = 732212660258472027UL;
-                public const ulong FILM = 764183510357245983UL;
-                public const ulong FINANCE = 785518480086007819UL;
-                public const ulong TECH = 786871336764571679UL;
-                public const ulong VENTING = 732215756556730431UL;
-            }
-
-            public static class Voice
-            {
-                public const ulong SELF = 732210852849123420UL;
-                public const ulong TEXT = 798227185059627009UL;
-                public const ulong GENERAL = 732210852849123422UL;
-                public const ulong GAMING = 732210939402649660UL;
-                public const ulong GAMING_2 = 732211068256125008UL;
-            }
-
-            public static class Deleted
-            {
-                public const ulong SELF = 784093487150399508UL;
-                public const ulong CHESS = 818919984470294578UL;
-                public const ulong GAMING_SALES = 758612906778165288UL;
-                public const ulong INVERSE_CUM_ROOM = 760468275750240266UL;
-                public const ulong CUM_ROOM = 760468335439380521UL;
-                public const ulong CYBERPUNK = 786519547225833482UL;
-                public const ulong DEGENERATE = 732211770613170246UL;
-                public const ulong WHEN_THE = 843720840139112449UL;
-            }
+            // notable channels
+            public const ulong PIN_ARCHIVE = 775826206410407937UL;
+            public const ulong SHIT_SBU_SAYS = 759153822806310912UL;
+            public const ulong CRUMPET_SERVER = 790542075346944020UL;
         }
 
         // saved on different guild to make sure they exist when used
         public static class Emote
         {
-            public const ulong SELF = 846789266041470977UL;
-            public const ulong OWNER = Member.ERXKK;
-
-            public static class Misc
-            {
-                public const ulong CUM = 863031236985356319UL;
-            }
+            public const ulong CUM = 863031236985356319UL;
 
             public static class Vote
             {
@@ -213,9 +119,10 @@ namespace SbuBot
             }
         }
 
-        public static class Member
+        public static class Users
         {
-            public const ulong SELF = 849571821930283018UL;
+            public const ulong BOT = 849571821930283018UL;
+            public const ulong DEV_BOT = 710538840728928327UL;
             public const ulong ERXKK = 356017256481685506UL;
             public const ulong DM = 675056356717232169UL;
             public const ulong TOASTY = 145652148548403200UL;

@@ -49,9 +49,7 @@ namespace SbuBot.Services
         {
             await _TryAddGuild(e.Guild);
 
-            if (e.GuildId == SbuGlobals.Guild.Sbu.SELF
-                || e.GuildId == SbuGlobals.Guild.LaFamilia.SELF
-                || e.GuildId == SbuGlobals.Guild.Lab.SELF)
+            if (e.GuildId == SbuGlobals.Guild.SBU || e.GuildId == SbuGlobals.Guild.LA_FAMILIA)
                 await Bot.Chunker.ChunkAsync(e.Guild);
         }
 
