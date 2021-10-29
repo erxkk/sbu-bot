@@ -35,7 +35,7 @@ namespace SbuBot.Commands.Modules
                 if (tag.OwnerId != Context.Author.Id)
                     return Reply("You must be the owner of this tag.");
 
-                var context = Context.GetSbuDbContext();
+                SbuDbContext context = Context.GetSbuDbContext();
 
                 tag.Content = tagDescriptor.Content;
                 context.Tags.Update(tag);
@@ -78,7 +78,7 @@ namespace SbuBot.Commands.Modules
                         throw new ArgumentOutOfRangeException();
                 }
 
-                var context = Context.GetSbuDbContext();
+                SbuDbContext context = Context.GetSbuDbContext();
 
                 tag.Content = content.Trim();
                 context.Tags.Update(tag);

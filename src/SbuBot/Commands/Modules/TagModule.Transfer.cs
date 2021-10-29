@@ -64,7 +64,7 @@ namespace SbuBot.Commands.Modules
                     foreach (SbuTag dbTag in tags)
                         dbTag.OwnerId = receiver.Id;
 
-                    var context = Context.GetSbuDbContext();
+                    SbuDbContext context = Context.GetSbuDbContext();
 
                     context.Tags.UpdateRange(tags);
                     await context.SaveChangesAsync();
@@ -96,7 +96,7 @@ namespace SbuBot.Commands.Modules
                             throw new ArgumentOutOfRangeException();
                     }
 
-                    var context = Context.GetSbuDbContext();
+                    SbuDbContext context = Context.GetSbuDbContext();
 
                     specific.Value.OwnerId = receiver.Id;
                     context.Tags.Update(specific.Value);

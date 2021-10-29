@@ -29,7 +29,7 @@ namespace SbuBot.Commands.Modules
                 if (await Context.GetTagAsync(descriptor.Name) is { })
                     return Reply("A tag with same name already exists.");
 
-                var context = Context.GetSbuDbContext();
+                SbuDbContext context = Context.GetSbuDbContext();
 
                 context.AddTag(
                     Context.Author.Id,
@@ -117,7 +117,7 @@ namespace SbuBot.Commands.Modules
                         throw new ArgumentOutOfRangeException();
                 }
 
-                var context = Context.GetSbuDbContext();
+                SbuDbContext context = Context.GetSbuDbContext();
 
                 context.AddTag(
                     Context.Author.Id,

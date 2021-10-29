@@ -54,7 +54,7 @@ namespace SbuBot.Commands.Modules
                 }
             }
 
-            var context = Context.GetSbuDbContext();
+            SbuDbContext context = Context.GetSbuDbContext();
             var guild = await context.GetGuildAsync(Context.Guild);
             var rolePos = Context.Guild.Roles.GetValueOrDefault(guild!.ColorRoleBottomId ?? 0)?.Position + 1;
 

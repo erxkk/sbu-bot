@@ -147,7 +147,7 @@ namespace SbuBot.Commands.Modules
                         response
                     );
 
-                    var context = Context.GetSbuDbContext();
+                    SbuDbContext context = Context.GetSbuDbContext();
 
                     await context.SaveChangesAsync();
 

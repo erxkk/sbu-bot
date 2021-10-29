@@ -24,7 +24,7 @@ namespace SbuBot.Commands.Modules
                 ITextChannel archive
             )
             {
-                var context = Context.GetSbuDbContext();
+                SbuDbContext context = Context.GetSbuDbContext();
 
                 SbuGuild? guild = await context.GetGuildAsync(Context.Guild);
                 guild!.ArchiveId = archive.Id;

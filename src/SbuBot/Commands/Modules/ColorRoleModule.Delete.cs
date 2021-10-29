@@ -18,7 +18,7 @@ namespace SbuBot.Commands.Modules
         [Description("Removes the authors color role.")]
         public async Task<DiscordCommandResult> DeleteAsync()
         {
-            var context = Context.GetSbuDbContext();
+            SbuDbContext context = Context.GetSbuDbContext();
             SbuMember? member = await context.GetMemberFullAsync(Context.Author);
 
             await Context.Guild.Roles[member!.ColorRole!.Id].DeleteAsync();

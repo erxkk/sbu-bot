@@ -21,7 +21,7 @@ namespace SbuBot.Commands.Modules
             SbuTag tag
         )
         {
-            var context = Context.GetSbuDbContext();
+            SbuDbContext context = Context.GetSbuDbContext();
 
             tag.OwnerId = Context.Author.Id;
             context.Tags.Update(tag);

@@ -25,7 +25,7 @@ namespace SbuBot.Commands.Modules
             SbuMember receiver
         )
         {
-            var context = Context.GetSbuDbContext();
+            SbuDbContext context = Context.GetSbuDbContext();
             SbuColorRole role = (await context.GetMemberFullAsync(Context.Author))!.ColorRole!;
 
             await Context.Guild.GrantRoleAsync(receiver.Id, role.Id);
