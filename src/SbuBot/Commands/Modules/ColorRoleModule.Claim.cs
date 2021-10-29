@@ -36,7 +36,7 @@ namespace SbuBot.Commands.Modules
 
                 await Context.Author.GrantRoleAsync(role.Id);
 
-                var context = Context.GetSbuDbContext();
+                SbuDbContext context = Context.GetSbuDbContext();
 
                 role.OwnerId = Context.Author.Id;
                 context.ColorRoles.Update(role);

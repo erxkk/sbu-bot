@@ -3,8 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 
-using Kkommon.Exceptions;
-
 namespace SbuBot.Evaluation.Inspection
 {
     public static partial class Inspect

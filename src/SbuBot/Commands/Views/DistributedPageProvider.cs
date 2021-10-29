@@ -20,12 +20,12 @@ namespace SbuBot.Commands.Views
             Func<LocalEmbed, LocalEmbed>? embedFactory = null
         )
         {
-            Pages = _fillPages(content, maxItemsPerPage)
+            Pages = DistributedPageProvider.FillPages(content, maxItemsPerPage)
                 .Select(str => new Page().WithEmbeds((embedFactory?.Invoke(new()) ?? new()).WithDescription(str)))
                 .ToList();
         }
 
-        private static IEnumerable<string> _fillPages(
+        private static IEnumerable<string> FillPages(
             IEnumerable<string> source,
             int maxElementsPerPage = -1,
             int maxPageLength = LocalEmbed.MaxDescriptionLength

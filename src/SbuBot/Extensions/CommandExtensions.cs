@@ -1,8 +1,8 @@
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
+
+using Kkommon;
 
 using Qmmands;
 
@@ -29,19 +29,15 @@ namespace SbuBot.Commands
 
         public static void AppendTo(this Module @this, StringBuilder builder)
         {
-            if (@this is null)
-                throw new ArgumentNullException(nameof(@this));
-
-            if (builder is null)
-                throw new ArgumentNullException(nameof(builder));
+            Preconditions.NotNull(@this, nameof(@this));
+            Preconditions.NotNull(builder, nameof(builder));
 
             builder.Append(@this.FullAliases[0]);
         }
 
         public static string Format(this Module @this)
         {
-            if (@this is null)
-                throw new ArgumentNullException(nameof(@this));
+            Preconditions.NotNull(@this, nameof(@this));
 
             StringBuilder builder = new(@this.FullAliases[0].Length);
             @this.AppendTo(builder);
@@ -54,11 +50,8 @@ namespace SbuBot.Commands
             bool withDefaults = true
         )
         {
-            if (@this is null)
-                throw new ArgumentNullException(nameof(@this));
-
-            if (builder is null)
-                throw new ArgumentNullException(nameof(builder));
+            Preconditions.NotNull(@this, nameof(@this));
+            Preconditions.NotNull(builder, nameof(builder));
 
             builder.Append(@this.FullAliases[0]);
 
@@ -71,8 +64,7 @@ namespace SbuBot.Commands
 
         public static string Format(this Command @this, bool withDefaults = true)
         {
-            if (@this is null)
-                throw new ArgumentNullException(nameof(@this));
+            Preconditions.NotNull(@this, nameof(@this));
 
             StringBuilder builder = new(@this.FullAliases[0].Length + 16 * @this.Parameters.Count);
             @this.AppendTo(builder, withDefaults);
@@ -81,11 +73,8 @@ namespace SbuBot.Commands
 
         public static void AppendParametersTo(this Command @this, StringBuilder builder, bool withDefaults = true)
         {
-            if (@this is null)
-                throw new ArgumentNullException(nameof(@this));
-
-            if (builder is null)
-                throw new ArgumentNullException(nameof(builder));
+            Preconditions.NotNull(@this, nameof(@this));
+            Preconditions.NotNull(builder, nameof(builder));
 
             foreach (Parameter parameter in @this.Parameters)
             {
@@ -99,8 +88,7 @@ namespace SbuBot.Commands
 
         public static string FormatParameters(this Command @this, bool withDefaults = true)
         {
-            if (@this is null)
-                throw new ArgumentNullException(nameof(@this));
+            Preconditions.NotNull(@this, nameof(@this));
 
             StringBuilder builder = new(16 * @this.Parameters.Count);
             @this.AppendParametersTo(builder, withDefaults);
@@ -109,11 +97,8 @@ namespace SbuBot.Commands
 
         public static void AppendTo(this Parameter @this, StringBuilder builder, bool withDefault = true)
         {
-            if (@this is null)
-                throw new ArgumentNullException(nameof(@this));
-
-            if (builder is null)
-                throw new ArgumentNullException(nameof(builder));
+            Preconditions.NotNull(@this, nameof(@this));
+            Preconditions.NotNull(builder, nameof(builder));
 
             builder.Append(@this.IsOptional ? '[' : '<').Append(@this.Name);
 
@@ -160,8 +145,7 @@ namespace SbuBot.Commands
 
         public static string Format(this Parameter @this, bool withDefault = true)
         {
-            if (@this is null)
-                throw new ArgumentNullException(nameof(@this));
+            Preconditions.NotNull(@this, nameof(@this));
 
             StringBuilder builder = new(2 + @this.Name.Length + (withDefault && @this.IsOptional ? 8 : 0));
             @this.AppendTo(builder);

@@ -56,6 +56,7 @@ namespace SbuBot.Commands.Modules
                         {
                             ColorRoleSeparatorType.Top => "top",
                             ColorRoleSeparatorType.Bottom => "bottom",
+                            _ => throw new ArgumentOutOfRangeException(),
                         }
                     )
                 );
@@ -94,6 +95,7 @@ namespace SbuBot.Commands.Modules
                         {
                             ColorRoleSeparatorType.Top => "top",
                             ColorRoleSeparatorType.Bottom => "bottom",
+                            _ => throw new ArgumentOutOfRangeException(),
                         }
                     )
                 );

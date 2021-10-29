@@ -3,8 +3,6 @@ using System.Threading.Tasks;
 
 using Disqord.Bot;
 
-using Kkommon.Exceptions;
-
 using Microsoft.Extensions.DependencyInjection;
 
 using Qmmands;

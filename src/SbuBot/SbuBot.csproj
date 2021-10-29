@@ -103,6 +103,9 @@
       <Compile Update="Commands\Modules\GuildManagementModule.Archive.Config.cs">
         <DependentUpon>GuildManagementModule.Archive.cs</DependentUpon>
       </Compile>
+      <Compile Update="Commands\Modules\ColorRoleModule.Config.cs">
+        <DependentUpon>ColorRoleModule.cs</DependentUpon>
+      </Compile>
     </ItemGroup>
 
 </Project>

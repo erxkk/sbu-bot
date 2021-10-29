@@ -21,9 +21,7 @@ namespace SbuBot.Commands.Attributes.Checks
 
             return guild.Config.HasFlag(Config)
                 ? CheckAttribute.Success()
-                : CheckAttribute.Failure(
-                    $"The guild doesn't have this feature ({Config:F}) enabled."
-                );
+                : CheckAttribute.Failure($"The guild doesn't have this feature ({Config:F}) enabled.");
         }
     }
 }

@@ -10,7 +10,6 @@ using Kkommon.Exceptions;
 
 using Qmmands;
 
-using SbuBot.Exceptions;
 using SbuBot.Extensions;
 using SbuBot.Models;
 

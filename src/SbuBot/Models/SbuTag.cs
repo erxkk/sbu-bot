@@ -29,7 +29,7 @@ namespace SbuBot.Models
         public SbuGuild? Guild { get; }
 
         public SbuTag(Snowflake ownerId, Snowflake guildId, string name, string content) : this(
-            (Snowflake?) ownerId,
+            (Snowflake?)ownerId,
             guildId,
             name,
             content
@@ -57,8 +57,8 @@ namespace SbuBot.Models
 
                 builder.Property(t => t.OwnerId);
                 builder.Property(t => t.GuildId);
-                builder.Property(t => t.Name).HasMaxLength(MAX_NAME_LENGTH).IsRequired();
-                builder.Property(t => t.Content).HasMaxLength(MAX_CONTENT_LENGTH).IsRequired();
+                builder.Property(t => t.Name).HasMaxLength(SbuTag.MAX_NAME_LENGTH).IsRequired();
+                builder.Property(t => t.Content).HasMaxLength(SbuTag.MAX_CONTENT_LENGTH).IsRequired();
 
                 builder.HasOne(t => t.Owner)
                     .WithMany(m => m.Tags)
@@ -90,8 +90,8 @@ namespace SbuBot.Models
         {
             return name.Length switch
             {
-                < MIN_NAME_LENGTH => ValidNameType.TooShort,
-                > MAX_NAME_LENGTH => ValidNameType.TooLong,
+                < SbuTag.MIN_NAME_LENGTH => ValidNameType.TooShort,
+                > SbuTag.MAX_NAME_LENGTH => ValidNameType.TooLong,
                 _ => SbuGlobals.Keywords.ALL_RESERVED.Any(rn => rn.Equals(name, StringComparison.OrdinalIgnoreCase))
                     ? ValidNameType.Reserved
                     : ValidNameType.Valid,

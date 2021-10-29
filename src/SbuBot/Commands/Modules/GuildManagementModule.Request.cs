@@ -58,10 +58,13 @@ namespace SbuBot.Commands.Modules
                                 Mention.Channel(SbuGlobals.Channel.SENATE)
                             )
                         );
+
+                        return;
                     }
                     else if (waitMessageResult.Message.Content.Equals("abort", StringComparison.OrdinalIgnoreCase))
                     {
                         await Reply("Aborted.");
+                        return;
                     }
 
                     await waitMessageResult.Message.AddReactionAsync(new LocalCustomEmoji(SbuGlobals.Emote.Vote.UP));

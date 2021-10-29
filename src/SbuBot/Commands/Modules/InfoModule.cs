@@ -175,11 +175,11 @@ namespace SbuBot.Commands.Modules
                 + "• `[param = default]` an optional parameter, if left out the default value will be used\n"
                 + "• `[params…]` a collection of values, if left out none will be passed\n"
                 + "• `{object}` non-string-literals\n"
-                + $"{INDENT}- `{{-cmd}}` invokes `sbu cmd` instead\n"
-                + $"{INDENT}- `{{!state}}` negation of state\n"
-                + $"{INDENT}- `{{@user}}` user-mention\n"
-                + $"{INDENT}- `{{@reply}}` inline-reply\n"
-                + $"{INDENT}- `{{#channel}}` channel-mention\n"
+                + $"{GuideStatic.INDENT}- `{{-cmd}}` invokes `sbu cmd` instead\n"
+                + $"{GuideStatic.INDENT}- `{{!state}}` negation of state\n"
+                + $"{GuideStatic.INDENT}- `{{@user}}` user-mention\n"
+                + $"{GuideStatic.INDENT}- `{{@reply}}` inline-reply\n"
+                + $"{GuideStatic.INDENT}- `{{#channel}}` channel-mention\n"
                 + "\n"
                 + "Arguments are separated by spaces, wrap an argument in quotes `\"\"` if it contains spaces, this is "
                 + "not necessary for the last non-collection parameter.";
@@ -196,35 +196,35 @@ namespace SbuBot.Commands.Modules
 
             public static readonly string PARSING_EXAMPLES
                 = "• **Optional argument**\n"
-                + $"{INDENT}- command `ban <user> [reason = \"beaned\"]`\n"
-                + $"{INDENT}- used like `sbu ban @joemama`\n"
-                + $"{INDENT}- bans `@joemama` with `beaned` as the reason\n"
+                + $"{GuideStatic.INDENT}- command `ban <user> [reason = \"beaned\"]`\n"
+                + $"{GuideStatic.INDENT}- used like `sbu ban @joemama`\n"
+                + $"{GuideStatic.INDENT}- bans `@joemama` with `beaned` as the reason\n"
                 + "\n"
                 + "• **Optional argument not omitted**\n"
-                + $"{INDENT}- command `ban <user> [reason = \"beaned\"]`\n"
-                + $"{INDENT}- used like `sbu ban @joemama you're a retard`\n"
-                + $"{INDENT}- bans `@joemama` with `you're a retard` as the reason\n"
+                + $"{GuideStatic.INDENT}- command `ban <user> [reason = \"beaned\"]`\n"
+                + $"{GuideStatic.INDENT}- used like `sbu ban @joemama you're a retard`\n"
+                + $"{GuideStatic.INDENT}- bans `@joemama` with `you're a retard` as the reason\n"
                 + "\n"
                 + "• **Additional argument omitted**\n"
-                + $"{INDENT}- command `gift <user> <tag> [additional tags…]`\n"
-                + $"{INDENT}- used like `sbu gift @joemama tag1`\n"
-                + $"{INDENT}- gifts `@joemama` `tag1`\n"
+                + $"{GuideStatic.INDENT}- command `gift <user> <tag> [additional tags…]`\n"
+                + $"{GuideStatic.INDENT}- used like `sbu gift @joemama tag1`\n"
+                + $"{GuideStatic.INDENT}- gifts `@joemama` `tag1`\n"
                 + "\n"
                 + "• **Additional argument not omitted**\n"
-                + $"{INDENT}- command `gift <user> <tag> [additional tags…]`\n"
-                + $"{INDENT}- used like `sbu gift @joemama tag1 \"tag2 with spaces\" tag3`\n"
-                + $"{INDENT}- gifts `@joemama` `tag1`, `tag2 with spaces and tag3`";
+                + $"{GuideStatic.INDENT}- command `gift <user> <tag> [additional tags…]`\n"
+                + $"{GuideStatic.INDENT}- used like `sbu gift @joemama tag1 \"tag2 with spaces\" tag3`\n"
+                + $"{GuideStatic.INDENT}- gifts `@joemama` `tag1`, `tag2 with spaces and tag3`";
 
             public static readonly string ESCAPING_EXAMPLES
                 = "• **Escaping a quote to include it in the argument**\n"
-                + $"{INDENT}- command `tag <name> <conent>`\n"
-                + $"{INDENT}- used like `sbu tag \\\"\\\"\\\"them\\\"\\\"\\\" ||da juice||`\n"
-                + $"{INDENT}- creates a tag with `\"\"\"them\"\"\"` as name and `||da juice||` as content\n"
+                + $"{GuideStatic.INDENT}- command `tag <name> <conent>`\n"
+                + $"{GuideStatic.INDENT}- used like `sbu tag \\\"\\\"\\\"them\\\"\\\"\\\" ||da juice||`\n"
+                + $"{GuideStatic.INDENT}- creates a tag with `\"\"\"them\"\"\"` as name and `||da juice||` as content\n"
                 + "\n"
                 + "• **Using a descriptor for the same tag**\n"
-                + $"{INDENT}- command `tag <tagDescriptor>`\n"
-                + $"{INDENT}- used like `sbu tag \"\"\"them\"\"\" :: ||da juice||`\n"
-                + $"{INDENT}- creates a tag with `\"\"\"them\"\"\"` as name and `||da juice||` as content";
+                + $"{GuideStatic.INDENT}- command `tag <tagDescriptor>`\n"
+                + $"{GuideStatic.INDENT}- used like `sbu tag \"\"\"them\"\"\" :: ||da juice||`\n"
+                + $"{GuideStatic.INDENT}- creates a tag with `\"\"\"them\"\"\"` as name and `||da juice||` as content";
         }
     }
 }

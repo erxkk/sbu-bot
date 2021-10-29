@@ -5,7 +5,6 @@ using Disqord;
 using Disqord.Bot;
 
 using Kkommon;
-using Kkommon.Exceptions;
 
 using Microsoft.Extensions.DependencyInjection;
 

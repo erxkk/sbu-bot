@@ -6,8 +6,6 @@ using System.Threading.Tasks;
 using Disqord;
 using Disqord.Bot;
 
-using Kkommon.Exceptions;
-
 using Microsoft.EntityFrameworkCore;
 
 using Qmmands;

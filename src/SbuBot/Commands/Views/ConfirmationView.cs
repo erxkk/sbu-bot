@@ -31,7 +31,7 @@ namespace SbuBot.Commands.Views
 
         public ConfirmationView(LocalMessage templateMessage) : base(templateMessage) { }
 
-        private void _setConfirmation(bool confirmationState)
+        private void SetConfirmation(bool confirmationState)
         {
             if (State != ConfirmationState.None)
                 throw new InvalidOperationException("Cannot set state, it has already been set.");
@@ -56,7 +56,7 @@ namespace SbuBot.Commands.Views
         [Button(Emoji = SbuGlobals.Emote.Menu.CONFIRM, Style = LocalButtonComponentStyle.Success)]
         public ValueTask ConfirmAsync(ButtonEventArgs e)
         {
-            _setConfirmation(true);
+            SetConfirmation(true);
             TemplateMessage.Embeds[0].Color = Color.Green;
 
             return default;
@@ -65,7 +65,7 @@ namespace SbuBot.Commands.Views
         [Button(Emoji = SbuGlobals.Emote.Menu.STOP, Style = LocalButtonComponentStyle.Danger)]
         public ValueTask AbortAsync(ButtonEventArgs e)
         {
-            _setConfirmation(false);
+            SetConfirmation(false);
             TemplateMessage.Embeds[0].Color = Color.Red;
 
             return default;

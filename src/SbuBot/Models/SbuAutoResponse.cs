@@ -47,8 +47,8 @@ namespace SbuBot.Models
                 builder.HasIndex(ar => ar.GuildId);
 
                 builder.Property(ar => ar.GuildId);
-                builder.Property(ar => ar.Trigger).HasMaxLength(MAX_LENGTH).IsRequired();
-                builder.Property(ar => ar.Response).HasMaxLength(MAX_LENGTH).IsRequired();
+                builder.Property(ar => ar.Trigger).HasMaxLength(SbuAutoResponse.MAX_LENGTH).IsRequired();
+                builder.Property(ar => ar.Response).HasMaxLength(SbuAutoResponse.MAX_LENGTH).IsRequired();
 
                 builder.HasOne(ar => ar.Guild)
                     .WithMany(g => g.AutoResponses)
@@ -73,7 +73,7 @@ namespace SbuBot.Models
         {
             return trigger.Length switch
             {
-                > MAX_LENGTH => ValidTriggerType.TooLong,
+                > SbuAutoResponse.MAX_LENGTH => ValidTriggerType.TooLong,
                 _ => SbuGlobals.Keywords.ALL_RESERVED.Any(rn => rn.Equals(trigger, StringComparison.OrdinalIgnoreCase))
                     ? ValidTriggerType.Reserved
                     : ValidTriggerType.Valid,

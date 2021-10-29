@@ -9,7 +9,6 @@ using Disqord.Gateway;
 using Disqord.Rest;
 
 using Kkommon;
-using Kkommon.Exceptions;
 
 using Qmmands;
 

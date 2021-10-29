@@ -24,9 +24,11 @@ namespace SbuBot.Commands.Parsing.TypeParsers
             switch (SbuAutoResponse.IsValidTrigger(values[0]))
             {
                 case SbuAutoResponse.ValidTriggerType.TooLong:
+                {
                     return Failure(
                         $"The auto response trigger can be at most {SbuTag.MAX_NAME_LENGTH} characters long."
                     );
+                }
 
                 case SbuAutoResponse.ValidTriggerType.Reserved:
                     return Failure("The auto response trigger cannot be a reserved keyword.");

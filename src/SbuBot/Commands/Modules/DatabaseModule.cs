@@ -143,6 +143,7 @@ namespace SbuBot.Commands.Modules
             );
         }
 
+        // TODO: add depth and guild inspector
         [Group("inspect")]
         [RequireBotOwner]
         [Description("Inspects a given entity's database entry.")]

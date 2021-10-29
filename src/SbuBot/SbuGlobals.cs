@@ -23,10 +23,10 @@ namespace SbuBot
 
             static Keywords()
             {
-                IDENTIFIERS = new HashSet<string> { "all", "none", "mine", "reserved" };
-                CONTROL_FLOW = new HashSet<string> { "abort" };
+                SbuGlobals.Keywords.IDENTIFIERS = new HashSet<string> { "all", "none", "mine", "reserved" };
+                SbuGlobals.Keywords.CONTROL_FLOW = new HashSet<string> { "abort" };
 
-                COMMAND_ALIASES = new Dictionary<string, string[]>
+                SbuGlobals.Keywords.COMMAND_ALIASES = new Dictionary<string, string[]>
                 {
                     ["help"] = new[] { "h", "?" },
                     ["claim"] = new[] { "take" },
@@ -37,13 +37,14 @@ namespace SbuBot
                     ["transfer"] = new[] { "mv" },
                 };
 
-                ALL_RESERVED = COMMAND_ALIASES.SelectMany(e => e.Value.Append(e.Key))
-                    .Append(BULLET)
-                    .Append(ELLIPSES)
-                    .Append(DESCRIPTOR_SEPARATOR)
-                    .Append(DEFAULT_PREFIX)
-                    .Concat(CONTROL_FLOW)
-                    .Concat(IDENTIFIERS)
+                SbuGlobals.Keywords.ALL_RESERVED = SbuGlobals.Keywords.COMMAND_ALIASES
+                    .SelectMany(e => e.Value.Append(e.Key))
+                    .Append(SbuGlobals.BULLET)
+                    .Append(SbuGlobals.ELLIPSES)
+                    .Append(SbuGlobals.DESCRIPTOR_SEPARATOR)
+                    .Append(SbuGlobals.DEFAULT_PREFIX)
+                    .Concat(SbuGlobals.Keywords.CONTROL_FLOW)
+                    .Concat(SbuGlobals.Keywords.IDENTIFIERS)
                     .ToHashSet();
             }
         }

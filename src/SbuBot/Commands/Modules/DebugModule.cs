@@ -12,7 +12,6 @@ using Qmmands;
 
 using SbuBot.Commands.Attributes;
 using SbuBot.Commands.Views;
-using SbuBot.Extensions;
 
 namespace SbuBot.Commands.Modules
 {
@@ -154,23 +153,8 @@ namespace SbuBot.Commands.Modules
         [Description("A test command.")]
         public async Task<DiscordCommandResult> TestAsync()
         {
-            // return FilledPages(Enumerable.Range(1, 9).Select(i => i.ToString()), 3);
-            // return HelpView(Context.Bot.Commands.GetAllCommands().First(c => c.Aliases.Contains("as")));
-            // return Reply(new LocalEmbed().WithDescription(Markdown.CodeBlock("yml", tag.GetInspection(3))));
-
-            // const SomeEnum enu = SomeEnum.Value1 | SomeEnum.Value2 | SomeEnum.Value3;
-            // return Reply(enu.GetInspection(3));
             ConfirmationState a = await ConfirmationAsync();
             return Response($"some response, result: {a}");
         }
-
-        // [Flags]
-        // private enum SomeEnum
-        // {
-        //     Value1,
-        //     Value2,
-        //     Value3,
-        //     Value4,
-        // }
     }
 }

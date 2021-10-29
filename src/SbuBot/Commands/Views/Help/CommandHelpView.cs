@@ -76,7 +76,10 @@ namespace SbuBot.Commands.Views.Help
 
         public override ValueTask GoToParent(ButtonEventArgs e)
         {
-            Menu.View = _command.Module.IsGroup() ? new GroupHelpView(_command.Module) : new ModuleHelpView(_command.Module);
+            Menu.View = _command.Module.IsGroup()
+                ? new GroupHelpView(_command.Module)
+                : new ModuleHelpView(_command.Module);
+
             return default;
         }
     }

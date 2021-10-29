@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Disqord.Bot;
 
 using Kkommon;
-using Kkommon.Exceptions;
 
 using Qmmands;
 
