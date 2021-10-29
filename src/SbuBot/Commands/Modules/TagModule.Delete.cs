@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
+using Disqord;
 using Disqord.Bot;
 
 using Microsoft.EntityFrameworkCore;
@@ -50,7 +51,7 @@ namespace SbuBot.Commands.Modules
                             throw new ArgumentOutOfRangeException();
                     }
 
-                    var context = Context.GetSbuDbContext();
+                    SbuDbContext context = Context.GetSbuDbContext();
 
                     List<SbuTag> tags = await context.Tags
                         .Where(t => t.OwnerId == Context.Author.Id)
@@ -82,7 +83,7 @@ namespace SbuBot.Commands.Modules
                             throw new ArgumentOutOfRangeException();
                     }
 
-                    var context = Context.GetSbuDbContext();
+                    SbuDbContext context = Context.GetSbuDbContext();
 
                     context.Tags.Remove(specific.Value);
                     await context.SaveChangesAsync();
@@ -93,6 +94,42 @@ namespace SbuBot.Commands.Modules
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+        }
+
+        [Command("delete")]
+        [RequireAuthorChannelPermissions(Permission.Administrator)]
+        [Description("Removes a given tag.")]
+        [Remarks("Requires Administrator Permission.")]
+        [Usage("tag remove da dog", "t delete h", "t rm all")]
+        public async Task<DiscordCommandResult> RemoveAsync(
+            [Description("The tag that should be removed.")]
+            SbuTag tag
+        )
+        {
+            ConfirmationState result = await ConfirmationAsync(
+                "Tag Removal",
+                "Are you sure you want to remove this tag?"
+            );
+
+            switch (result)
+            {
+                case ConfirmationState.None:
+                case ConfirmationState.Aborted:
+                    return Reply("Aborted.");
+
+                case ConfirmationState.Confirmed:
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            SbuDbContext context = Context.GetSbuDbContext();
+
+            context.Tags.Remove(tag);
+            await context.SaveChangesAsync();
+
+            return Reply("Tag removed.");
         }
     }
 }
