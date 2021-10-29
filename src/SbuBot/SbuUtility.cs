@@ -10,6 +10,7 @@ namespace SbuBot
     {
         public static readonly Regex IMAGE_FILE_REGEX = new(@"\.(gif|jpeg|jpg|png)$", RegexOptions.Compiled);
 
+        // TODO: handout 2 messages in case of videos  so those are easily viewable
         public static Result<LocalMessage, string> TryCreatePinMessage(Snowflake guildId, IUserMessage message)
         {
             LocalEmbed embed = new LocalEmbed()

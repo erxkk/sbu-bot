@@ -110,7 +110,7 @@ namespace SbuBot.Evaluation
             string inspection = obj?.GetInspection(maxDepth) ?? Context.GetInspection();
 
             // split earlier than max length to avoid huge embeds
-            // TODO: context aware splitting
+            // TODO: context aware splitting, see inspection wrapper
             if (inspection.Length > 2048)
             {
                 return Pages(
