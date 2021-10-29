@@ -143,30 +143,44 @@ namespace SbuBot.Commands.Modules
             );
         }
 
-        // TODO: add depth and guild inspector
         [Group("inspect")]
         [RequireBotOwner]
-        [Description("Inspects a given entity's database entry.")]
+        [Description("Inspects a given entity's database entry, or the current guild if none is given.")]
         public sealed class InspectGroup : SbuModuleBase
         {
             [Command]
+            public async Task<DiscordCommandResult> InspectMember(
+                [Minimum(1)][Description("The depth of the inspection.")]
+                int depth = 1
+            ) => Reply(
+                new LocalEmbed()
+                    .WithDescription(Markdown.CodeBlock("yml", (await Context.GetDbGuildAsync()).GetInspection(depth)))
+            );
+
+            [Command]
             public DiscordCommandResult InspectMember(
                 [Description("The member to inspect.")]
-                SbuMember member
+                SbuMember member,
+                [Minimum(1)][Description("The depth of the inspection.")]
+                int depth = 1
             ) => Reply(
                 new LocalEmbed()
                     .WithAuthor(Context.Guild.GetMember(member.Id))
-                    .WithDescription(Markdown.CodeBlock("yml", member.GetInspection()))
+                    .WithDescription(Markdown.CodeBlock("yml", member.GetInspection(depth)))
                     .AddInlineField("Self", Mention.User(member.Id))
                     .AddInlineField("ColorRole", member.ColorRole is { } ? Mention.Role(member.ColorRole.Id) : "None")
             );
 
             [Command]
-            public DiscordCommandResult InspectRole([Description("The role to inspect.")] SbuColorRole role)
+            public DiscordCommandResult InspectRole(
+                [Description("The role to inspect.")] SbuColorRole role,
+                [Minimum(1)][Description("The depth of the inspection.")]
+                int depth = 1
+            )
             {
                 LocalEmbed embed = new LocalEmbed()
                     .WithTitle("Role")
-                    .WithDescription(Markdown.CodeBlock("yml", role.GetInspection()))
+                    .WithDescription(Markdown.CodeBlock("yml", role.GetInspection(depth)))
                     .AddInlineField("Self", Mention.Role(role.Id))
                     .AddInlineField("Owner", role.OwnerId is { } ? Mention.User(role.OwnerId.Value) : "None");
 
@@ -178,12 +192,14 @@ namespace SbuBot.Commands.Modules
 
             [Command]
             public DiscordCommandResult InspectTag(
-                [Description("The tag to inspect.")] SbuTag tag
+                [Description("The tag to inspect.")] SbuTag tag,
+                [Minimum(1)][Description("The depth of the inspection.")]
+                int depth = 1
             )
             {
                 LocalEmbed embed = new LocalEmbed()
                     .WithTitle("Tag")
-                    .WithDescription(Markdown.CodeBlock("yml", tag.GetInspection(3)))
+                    .WithDescription(Markdown.CodeBlock("yml", tag.GetInspection(depth)))
                     .AddInlineField("Owner", tag.OwnerId is { } ? Mention.User(tag.OwnerId.Value) : "None");
 
                 if (tag.OwnerId is { })
@@ -195,22 +211,26 @@ namespace SbuBot.Commands.Modules
             [Command]
             public DiscordCommandResult InspectAutoResponse(
                 [Description("The auto response to inspect.")]
-                SbuAutoResponse autoResponse
+                SbuAutoResponse autoResponse,
+                [Minimum(1)][Description("The depth of the inspection.")]
+                int depth = 1
             ) => Reply(
                 new LocalEmbed()
                     .WithTitle("AutoResponse")
-                    .WithDescription(Markdown.CodeBlock("yml", autoResponse.GetInspection(3)))
+                    .WithDescription(Markdown.CodeBlock("yml", autoResponse.GetInspection(depth)))
             );
 
             [Command]
             public DiscordCommandResult InspectReminder(
                 [Description("The reminder to inspect.")]
-                SbuReminder reminder
+                SbuReminder reminder,
+                [Minimum(1)][Description("The depth of the inspection.")]
+                int depth = 1
             ) => Reply(
                 new LocalEmbed()
                     .WithAuthor(Context.Guild.GetMember(reminder.OwnerId.Value))
                     .WithTitle("Reminder")
-                    .WithDescription(Markdown.CodeBlock("yml", reminder.GetInspection()))
+                    .WithDescription(Markdown.CodeBlock("yml", reminder.GetInspection(depth)))
                     .AddInlineField("Owner", Mention.User(reminder.OwnerId.Value))
                     .AddInlineField("CreatedAt", reminder.CreatedAt)
                     .AddInlineField("DueAt", reminder.DueAt)
