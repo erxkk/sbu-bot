@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 using Disqord;
@@ -13,7 +15,16 @@ namespace SbuBot.Services
 {
     public sealed class ConsistencyService : DiscordBotService
     {
+        private readonly HashSet<Snowflake> _ignoreRoleRemoved = new();
+        private readonly SemaphoreSlim _semaphore = new(1, 1);
         public override int Priority => int.MaxValue;
+
+        public async Task IgnoreRoleRemovedAsync(Snowflake roleId)
+        {
+            await _semaphore.WaitAsync();
+            _ignoreRoleRemoved.Add(roleId);
+            _semaphore.Release();
+        }
 
         private async Task TryAddGuild(IGuild guild)
         {
@@ -118,6 +129,13 @@ namespace SbuBot.Services
 
         protected override async ValueTask OnRoleDeleted(RoleDeletedEventArgs e)
         {
+            await _semaphore.WaitAsync();
+
+            if (_ignoreRoleRemoved.Remove(e.RoleId))
+                return;
+
+            _semaphore.Release();
+
             using (IServiceScope scope = Bot.Services.CreateScope())
             {
                 SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();

@@ -70,6 +70,8 @@ namespace SbuBot.Commands.Modules
             {
                 if (Context.CurrentMember.GetHierarchy() <= rolePos)
                 {
+                    // the role is not yet added to the db so we can ignore the deletion to safe us a db call
+                    await ConsistencyService.IgnoreRoleRemovedAsync(role.Id);
                     await role.DeleteAsync();
                     return Reply(string.Format(ColorRoleModule.ROLE_HAS_HIGHER_HIERARCHY_FORMAT, "move"));
                 }

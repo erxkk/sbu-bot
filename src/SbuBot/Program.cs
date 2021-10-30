@@ -26,7 +26,8 @@ try
 {
     IHostBuilder hostBuilder = Host.CreateDefaultBuilder()
         .ConfigureAppConfiguration(
-            (_, config) => config.SetBasePath(Directory.GetCurrentDirectory())
+            (_, config) => config
+                .SetBasePath(Directory.GetCurrentDirectory())
                 .AddEnvironmentVariables("DOTNET_")
                 .AddEnvironmentVariables("BOT_")
                 .Build()

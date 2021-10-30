@@ -15,6 +15,7 @@ namespace SbuBot.Commands.Modules
 {
     public sealed partial class ColorRoleModule
     {
+
         [Command("delete")]
         [RequireColorRole]
         [Description("Removes the authors color role.")]
@@ -24,11 +25,18 @@ namespace SbuBot.Commands.Modules
             SbuMember? member = await context.GetMemberFullAsync(Context.Author);
 
             if (Context.Guild.Roles.GetValueOrDefault(member!.ColorRole!.Id) is not { } role)
+            {
                 await Reply(ColorRoleModule.ROLE_DOES_NOT_EXIST);
+            }
             else if (Context.CurrentMember.GetHierarchy() <= role.Position)
+            {
                 await Reply(string.Format(ColorRoleModule.ROLE_HAS_HIGHER_HIERARCHY_FORMAT, "delete"));
+            }
             else
+            {
+                await ConsistencyService.IgnoreRoleRemovedAsync(role.Id);
                 await role.DeleteAsync();
+            }
 
             context.ColorRoles.Remove(member.ColorRole);
             await context.SaveChangesAsync();

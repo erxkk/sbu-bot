@@ -4,6 +4,7 @@ using Disqord.Bot;
 using Qmmands;
 
 using SbuBot.Extensions;
+using SbuBot.Services;
 
 namespace SbuBot.Commands.Modules
 {
@@ -22,6 +23,8 @@ namespace SbuBot.Commands.Modules
 
         private const string ROLE_HAS_HIGHER_HIERARCHY_FORMAT
             = "I cant {0} the role, its above mine.";
+
+        public ConsistencyService ConsistencyService { get; set; } = null!;
 
         [Command]
         [Description("Displays information about your current color role.")]
