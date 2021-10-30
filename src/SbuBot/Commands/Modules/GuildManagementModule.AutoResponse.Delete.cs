@@ -29,60 +29,53 @@ namespace SbuBot.Commands.Modules
             {
                 ChatService service = Context.Services.GetRequiredService<ChatService>();
 
-                switch (autoResponse)
+                if (autoResponse.IsAll)
                 {
-                    case OneOrAll<SbuAutoResponse>.All:
+                    ConfirmationState result = await ConfirmationAsync(
+                        "Auto Response Removal",
+                        "Are you sure you want to remove all auto responses?"
+                    );
+
+                    switch (result)
                     {
-                        ConfirmationState result = await ConfirmationAsync(
-                            "Auto Response Removal",
-                            "Are you sure you want to remove all auto responses?"
-                        );
+                        case ConfirmationState.None:
+                        case ConfirmationState.Aborted:
+                            return Reply("Aborted.");
 
-                        switch (result)
-                        {
-                            case ConfirmationState.None:
-                            case ConfirmationState.Aborted:
-                                return Reply("Aborted.");
+                        case ConfirmationState.Confirmed:
+                            break;
 
-                            case ConfirmationState.Confirmed:
-                                break;
-
-                            default:
-                                throw new ArgumentOutOfRangeException();
-                        }
-
-                        await service.RemoveAutoResponsesAsync(Context.GuildId);
-
-                        return Reply("All auto responses removed.");
+                        default:
+                            throw new ArgumentOutOfRangeException();
                     }
 
-                    case OneOrAll<SbuAutoResponse>.Specific specific:
+                    await service.RemoveAutoResponsesAsync(Context.GuildId);
+
+                    return Reply("All auto responses removed.");
+                }
+                else
+                {
+                    ConfirmationState result = await ConfirmationAsync(
+                        "Auto Response Removal",
+                        "Are you sure you want to remove this tag?"
+                    );
+
+                    switch (result)
                     {
-                        ConfirmationState result = await ConfirmationAsync(
-                            "Auto Response Removal",
-                            "Are you sure you want to remove this tag?"
-                        );
+                        case ConfirmationState.None:
+                        case ConfirmationState.Aborted:
+                            return Reply("Aborted.");
 
-                        switch (result)
-                        {
-                            case ConfirmationState.None:
-                            case ConfirmationState.Aborted:
-                                return Reply("Aborted.");
+                        case ConfirmationState.Confirmed:
+                            break;
 
-                            case ConfirmationState.Confirmed:
-                                break;
-
-                            default:
-                                throw new ArgumentOutOfRangeException();
-                        }
-
-                        await service.RemoveAutoResponseAsync(Context.GuildId, specific.Value.Trigger);
-
-                        return Reply("Auto response removed.");
+                        default:
+                            throw new ArgumentOutOfRangeException();
                     }
 
-                    default:
-                        throw new ArgumentOutOfRangeException();
+                    await service.RemoveAutoResponseAsync(Context.GuildId, autoResponse.Value.Trigger);
+
+                    return Reply("Auto response removed.");
                 }
             }
         }

@@ -31,82 +31,75 @@ namespace SbuBot.Commands.Modules
             OneOrAll<SbuTag> tag
         )
         {
-            switch (tag)
+            if (tag.IsAll)
             {
-                case OneOrAll<SbuTag>.All:
+                ConfirmationState result = await ConfirmationAsync(
+                    "Tag Transfer",
+                    string.Format(
+                        "Are you sure you want to transfer all your tags to {0}?",
+                        Mention.User(receiver.Id)
+                    )
+                );
+
+                switch (result)
                 {
-                    ConfirmationState result = await ConfirmationAsync(
-                        "Tag Transfer",
-                        string.Format(
-                            "Are you sure you want to transfer all your tags to {0}?",
-                            Mention.User(receiver.Id)
-                        )
-                    );
+                    case ConfirmationState.None:
+                    case ConfirmationState.Aborted:
+                        return Reply("Aborted.");
 
-                    switch (result)
-                    {
-                        case ConfirmationState.None:
-                        case ConfirmationState.Aborted:
-                            return Reply("Aborted.");
+                    case ConfirmationState.Confirmed:
+                        break;
 
-                        case ConfirmationState.Confirmed:
-                            break;
-
-                        default:
-                            throw new ArgumentOutOfRangeException();
-                    }
-
-                    List<SbuTag> tags = await Context.GetSbuDbContext()
-                        .Tags
-                        .Where(t => t.OwnerId == Context.Author.Id)
-                        .ToListAsync(Context.Bot.StoppingToken);
-
-                    foreach (SbuTag dbTag in tags)
-                        dbTag.OwnerId = receiver.Id;
-
-                    SbuDbContext context = Context.GetSbuDbContext();
-
-                    context.Tags.UpdateRange(tags);
-                    await context.SaveChangesAsync();
-
-                    return Reply($"{Mention.User(receiver.Id)} now owns all of your tags.");
+                    default:
+                        throw new ArgumentOutOfRangeException();
                 }
 
-                case OneOrAll<SbuTag>.Specific specific:
+                List<SbuTag> tags = await Context.GetSbuDbContext()
+                    .Tags
+                    .Where(t => t.OwnerId == Context.Author.Id)
+                    .ToListAsync(Context.Bot.StoppingToken);
+
+                foreach (SbuTag dbTag in tags)
+                    dbTag.OwnerId = receiver.Id;
+
+                SbuDbContext context = Context.GetSbuDbContext();
+
+                context.Tags.UpdateRange(tags);
+                await context.SaveChangesAsync();
+
+                return Reply($"{Mention.User(receiver.Id)} now owns all of your tags.");
+            }
+            else
+            {
+                ConfirmationState result = await ConfirmationAsync(
+                    "Tag Transfer",
+                    string.Format(
+                        "Are you sure you want to transfer `{0}` your tags to {1}?",
+                        tag.Value.Name,
+                        Mention.User(receiver.Id)
+                    )
+                );
+
+                switch (result)
                 {
-                    ConfirmationState result = await ConfirmationAsync(
-                        "Tag Transfer",
-                        string.Format(
-                            "Are you sure you want to transfer `{0}` your tags to {1}?",
-                            specific.Value.Name,
-                            Mention.User(receiver.Id)
-                        )
-                    );
+                    case ConfirmationState.None:
+                    case ConfirmationState.Aborted:
+                        return Reply("Aborted.");
 
-                    switch (result)
-                    {
-                        case ConfirmationState.None:
-                        case ConfirmationState.Aborted:
-                            return Reply("Aborted.");
+                    case ConfirmationState.Confirmed:
+                        break;
 
-                        case ConfirmationState.Confirmed:
-                            break;
-
-                        default:
-                            throw new ArgumentOutOfRangeException();
-                    }
-
-                    SbuDbContext context = Context.GetSbuDbContext();
-
-                    specific.Value.OwnerId = receiver.Id;
-                    context.Tags.Update(specific.Value);
-                    await context.SaveChangesAsync();
-
-                    return Reply($"{Mention.User(receiver.Id)} now owns `{specific.Value.Name}`.");
+                    default:
+                        throw new ArgumentOutOfRangeException();
                 }
 
-                default:
-                    throw new ArgumentOutOfRangeException();
+                SbuDbContext context = Context.GetSbuDbContext();
+
+                tag.Value.OwnerId = receiver.Id;
+                context.Tags.Update(tag.Value);
+                await context.SaveChangesAsync();
+
+                return Reply($"{Mention.User(receiver.Id)} now owns `{tag.Value.Name}`.");
             }
         }
     }

@@ -73,36 +73,23 @@ namespace SbuBot.Commands.Modules
                 }
                 else
                 {
-                    switch (message)
+                    if (message.IsAll)
                     {
-                        case OneOrAll<IUserMessage>.Specific specific:
+                        if (await PinSingleMessageAsync(message.Value, pinArchive, unpinOriginal)
+                            is Result<Unit, string>.Error error)
+                            return Reply(error.Value);
+
+                        IReadOnlyList<IUserMessage> pins = await Context.Channel.FetchPinnedMessagesAsync();
+
+                        foreach (IUserMessage pinnedMessage in pins.OrderBy(m => m.CreatedAt()))
                         {
-                            if (await PinSingleMessageAsync(specific.Value, pinArchive, unpinOriginal)
-                                is Result<Unit, string>.Error error)
-                                return Reply(error.Value);
+                            if (Context.Bot.StoppingToken.IsCancellationRequested)
+                                throw new OperationCanceledException();
 
-                            break;
+                            if (await PinSingleMessageAsync(pinnedMessage, pinArchive, unpinOriginal)
+                                is Result<Unit, string>.Error singleError)
+                                return Reply(singleError.Value);
                         }
-
-                        case OneOrAll<IUserMessage>.All:
-                        {
-                            IReadOnlyList<IUserMessage> pins = await Context.Channel.FetchPinnedMessagesAsync();
-
-                            foreach (IUserMessage pinnedMessage in pins.OrderBy(m => m.CreatedAt()))
-                            {
-                                if (Context.Bot.StoppingToken.IsCancellationRequested)
-                                    throw new OperationCanceledException();
-
-                                if (await PinSingleMessageAsync(pinnedMessage, pinArchive, unpinOriginal)
-                                    is Result<Unit, string>.Error error)
-                                    return Reply(error.Value);
-                            }
-
-                            break;
-                        }
-
-                        default:
-                            throw new ArgumentOutOfRangeException();
                     }
                 }
 

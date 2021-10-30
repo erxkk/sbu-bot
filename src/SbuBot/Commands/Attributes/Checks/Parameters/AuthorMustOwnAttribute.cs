@@ -44,34 +44,27 @@ namespace SbuBot.Commands.Attributes.Checks.Parameters
 
             if (argument is IOneOrAll oneOrAll)
             {
-                switch (oneOrAll)
-                {
-                    case IOneOrAll.IAll:
-                        return Success();
+                if (oneOrAll.IsAll)
+                    return Success();
 
-                    case IOneOrAll.ISpecific specific:
-                        bool authorDoesOwn = (specific.Value as ISbuOwnedEntity)!.OwnerId
-                            == (await context.GetDbAuthorAsync()).Id;
+                bool authorDoesOwn = (oneOrAll.Value as ISbuOwnedEntity)!.OwnerId
+                    == (await context.GetDbAuthorAsync()).Id;
 
-                        return authorDoesOwn == AuthorMustOwn
-                            ? Success()
-                            : Failure(
-                                string.Format(
-                                    "You must {0}to be the owner of the given {1}.",
-                                    AuthorMustOwn ? "" : "not ",
-                                    specific.Value switch
-                                    {
-                                        SbuColorRole => "role",
-                                        SbuTag => "tag",
-                                        SbuReminder => "reminder",
-                                        _ => "entity",
-                                    }
-                                )
-                            );
-
-                    default:
-                        throw new UnreachableException($"Invalid argument type: {argument.GetType()}", argument);
-                }
+                return authorDoesOwn == AuthorMustOwn
+                    ? Success()
+                    : Failure(
+                        string.Format(
+                            "You must {0}to be the owner of the given {1}.",
+                            AuthorMustOwn ? "" : "not ",
+                            oneOrAll.Value switch
+                            {
+                                SbuColorRole => "role",
+                                SbuTag => "tag",
+                                SbuReminder => "reminder",
+                                _ => "entity",
+                            }
+                        )
+                    );
             }
 
             throw new UnreachableException($"Invalid argument type: {argument.GetType()}", argument);

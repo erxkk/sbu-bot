@@ -28,67 +28,60 @@ namespace SbuBot.Commands.Modules
             OneOrAll<SbuReminder> reminder
         )
         {
-            switch (reminder)
+            if (reminder.IsAll)
             {
-                case OneOrAll<SbuReminder>.All:
+                ConfirmationState confirmationResult = await ConfirmationAsync(
+                    "Reminder Removal",
+                    "Are you sure you want to cancel all your reminders?"
+                );
+
+                switch (confirmationResult)
                 {
-                    ConfirmationState confirmationResult = await ConfirmationAsync(
-                        "Reminder Removal",
-                        "Are you sure you want to cancel all your reminders?"
-                    );
+                    case ConfirmationState.None:
+                    case ConfirmationState.Aborted:
+                        return Reply("Aborted.");
 
-                    switch (confirmationResult)
-                    {
-                        case ConfirmationState.None:
-                        case ConfirmationState.Aborted:
-                            return Reply("Aborted.");
+                    case ConfirmationState.Confirmed:
+                        break;
 
-                        case ConfirmationState.Confirmed:
-                            break;
-
-                        default:
-                            throw new ArgumentOutOfRangeException();
-                    }
-
-                    await Context.Services.GetRequiredService<ReminderService>()
-                        .CancelAsync(r => r.OwnerId == Context.Author.Id);
-
-                    return Reply("Cancelled all reminders.");
+                    default:
+                        throw new ArgumentOutOfRangeException();
                 }
 
-                case OneOrAll<SbuReminder>.Specific specific:
+                await Context.Services.GetRequiredService<ReminderService>()
+                    .CancelAsync(r => r.OwnerId == Context.Author.Id);
+
+                return Reply("Cancelled all reminders.");
+            }
+            else
+            {
+                ConfirmationState confirmationResult = await ConfirmationAsync(
+                    "Reminder Removal",
+                    $"Are you sure you want to cancel `{reminder.Value.MessageId}`?"
+                );
+
+                switch (confirmationResult)
                 {
-                    ConfirmationState confirmationResult = await ConfirmationAsync(
-                        "Reminder Removal",
-                        $"Are you sure you want to cancel `{specific.Value.MessageId}`?"
-                    );
+                    case ConfirmationState.None:
+                    case ConfirmationState.Aborted:
+                        return Reply("Aborted.");
 
-                    switch (confirmationResult)
-                    {
-                        case ConfirmationState.None:
-                        case ConfirmationState.Aborted:
-                            return Reply("Aborted.");
+                    case ConfirmationState.Confirmed:
+                        break;
 
-                        case ConfirmationState.Confirmed:
-                            break;
-
-                        default:
-                            throw new ArgumentOutOfRangeException();
-                    }
-
-                    await Context.Services.GetRequiredService<ReminderService>().CancelAsync(specific.Value.MessageId);
-
-                    return Reply(
-                        new LocalEmbed()
-                            .WithTitle("Reminder Cancelled")
-                            .WithDescription(specific.Value.Message)
-                            .WithFooter("Cancelled")
-                            .WithCurrentTimestamp()
-                    );
+                    default:
+                        throw new ArgumentOutOfRangeException();
                 }
 
-                default:
-                    throw new ArgumentOutOfRangeException();
+                await Context.Services.GetRequiredService<ReminderService>().CancelAsync(reminder.Value.MessageId);
+
+                return Reply(
+                    new LocalEmbed()
+                        .WithTitle("Reminder Cancelled")
+                        .WithDescription(reminder.Value.Message)
+                        .WithFooter("Cancelled")
+                        .WithCurrentTimestamp()
+                );
             }
         }
     }

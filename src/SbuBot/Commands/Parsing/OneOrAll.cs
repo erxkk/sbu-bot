@@ -1,29 +1,30 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace SbuBot.Commands.Parsing
 {
     // this is for non-generic pattern matching
     internal interface IOneOrAll
     {
-        public interface ISpecific : IOneOrAll
-        {
-            public object? Value { get; }
-        }
+        [MemberNotNullWhen(true, nameof(Value))]
+        public bool IsAll { get; }
 
-        public interface IAll : IOneOrAll { }
+        public object? Value { get; }
     }
 
     // never assign default value
-    public abstract class OneOrAll<TSpecific> : IOneOrAll
+    public sealed class OneOrAll<T> : IOneOrAll
     {
-        private OneOrAll() { }
+        [MemberNotNullWhen(true, nameof(Value))]
+        public bool IsAll { get; }
 
-        public sealed class Specific : OneOrAll<TSpecific>, IOneOrAll.ISpecific
-        {
-            public TSpecific Value { get; }
-            public Specific(TSpecific value) => Value = value;
+        public T Value { get; }
 
-            object? IOneOrAll.ISpecific.Value => Value;
-        }
+        private OneOrAll() => IsAll = true;
+        private OneOrAll(T value) => Value = value;
 
-        public sealed class All : OneOrAll<TSpecific>, IOneOrAll.IAll { }
+        public static OneOrAll<T> One(T value) => new(value);
+        public static OneOrAll<T> All() => new();
+
+        object? IOneOrAll.Value => Value;
     }
 }

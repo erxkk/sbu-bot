@@ -16,7 +16,7 @@ namespace SbuBot.Commands.Parsing.TypeParsers
         )
         {
             if (value.Equals("all", StringComparison.OrdinalIgnoreCase))
-                return Success(new OneOrAll<T>.All());
+                return Success(OneOrAll<T>.All());
 
             if (context.Bot.Commands.GetTypeParser<T>() is not { } innerParser)
                 throw new InvalidOperationException($"No inner type parser registered for {typeof(T).Name}.");
@@ -24,7 +24,7 @@ namespace SbuBot.Commands.Parsing.TypeParsers
             TypeParserResult<T> innerResult = await innerParser.ParseAsync(parameter, value, context);
 
             return innerResult.IsSuccessful
-                ? Success(new OneOrAll<T>.Specific(innerResult.Value))
+                ? Success(OneOrAll<T>.One(innerResult.Value))
                 : Failure(innerResult.FailureReason);
         }
     }

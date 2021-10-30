@@ -29,70 +29,63 @@ namespace SbuBot.Commands.Modules
             OneOrAll<SbuTag> tag
         )
         {
-            switch (tag)
+            if (tag.IsAll)
             {
-                case OneOrAll<SbuTag>.All:
+                ConfirmationState result = await ConfirmationAsync(
+                    "Tag Removal",
+                    "Are you sure you want to remove all your tags?"
+                );
+
+                switch (result)
                 {
-                    ConfirmationState result = await ConfirmationAsync(
-                        "Tag Removal",
-                        "Are you sure you want to remove all your tags?"
-                    );
+                    case ConfirmationState.None:
+                    case ConfirmationState.Aborted:
+                        return Reply("Aborted.");
 
-                    switch (result)
-                    {
-                        case ConfirmationState.None:
-                        case ConfirmationState.Aborted:
-                            return Reply("Aborted.");
+                    case ConfirmationState.Confirmed:
+                        break;
 
-                        case ConfirmationState.Confirmed:
-                            break;
-
-                        default:
-                            throw new ArgumentOutOfRangeException();
-                    }
-
-                    SbuDbContext context = Context.GetSbuDbContext();
-
-                    List<SbuTag> tags = await context.Tags
-                        .Where(t => t.OwnerId == Context.Author.Id)
-                        .ToListAsync(Context.Bot.StoppingToken);
-
-                    context.Tags.RemoveRange(tags);
-                    await context.SaveChangesAsync();
-
-                    return Reply("All tags removed.");
+                    default:
+                        throw new ArgumentOutOfRangeException();
                 }
 
-                case OneOrAll<SbuTag>.Specific specific:
+                SbuDbContext context = Context.GetSbuDbContext();
+
+                List<SbuTag> tags = await context.Tags
+                    .Where(t => t.OwnerId == Context.Author.Id)
+                    .ToListAsync(Context.Bot.StoppingToken);
+
+                context.Tags.RemoveRange(tags);
+                await context.SaveChangesAsync();
+
+                return Reply("All tags removed.");
+            }
+            else
+            {
+                ConfirmationState result = await ConfirmationAsync(
+                    "Tag Removal",
+                    "Are you sure you want to remove this tag?"
+                );
+
+                switch (result)
                 {
-                    ConfirmationState result = await ConfirmationAsync(
-                        "Tag Removal",
-                        "Are you sure you want to remove this tag?"
-                    );
+                    case ConfirmationState.None:
+                    case ConfirmationState.Aborted:
+                        return Reply("Aborted.");
 
-                    switch (result)
-                    {
-                        case ConfirmationState.None:
-                        case ConfirmationState.Aborted:
-                            return Reply("Aborted.");
+                    case ConfirmationState.Confirmed:
+                        break;
 
-                        case ConfirmationState.Confirmed:
-                            break;
-
-                        default:
-                            throw new ArgumentOutOfRangeException();
-                    }
-
-                    SbuDbContext context = Context.GetSbuDbContext();
-
-                    context.Tags.Remove(specific.Value);
-                    await context.SaveChangesAsync();
-
-                    return Reply("Tag removed.");
+                    default:
+                        throw new ArgumentOutOfRangeException();
                 }
 
-                default:
-                    throw new ArgumentOutOfRangeException();
+                SbuDbContext context = Context.GetSbuDbContext();
+
+                context.Tags.Remove(tag.Value);
+                await context.SaveChangesAsync();
+
+                return Reply("Tag removed.");
             }
         }
 
@@ -125,10 +118,9 @@ namespace SbuBot.Commands.Modules
             }
 
             SbuDbContext context = Context.GetSbuDbContext();
-
             context.Tags.Remove(tag);
-            await context.SaveChangesAsync();
 
+            await context.SaveChangesAsync();
             return Reply("Tag removed.");
         }
     }
