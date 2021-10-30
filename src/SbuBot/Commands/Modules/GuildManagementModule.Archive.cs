@@ -117,15 +117,18 @@ namespace SbuBot.Commands.Modules
             {
                 switch (SbuUtility.TryCreatePinMessage(Context.GuildId, message))
                 {
-                    case Result<LocalMessage, string>.Success pinMessage:
-                        await channel.SendMessageAsync(pinMessage);
+                    case Result<(LocalMessage?, LocalMessage), string>.Success pinMessage:
+                        if (pinMessage.Value.Item1 is { })
+                            await channel.SendMessageAsync(pinMessage.Value.Item1);
+
+                        await channel.SendMessageAsync(pinMessage.Value.Item2);
 
                         if (unpinOriginal && message.IsPinned)
                             await message.UnpinAsync();
 
                         return new Result<Unit, string>.Success(new());
 
-                    case Result<LocalMessage, string>.Error error:
+                    case Result<(LocalMessage?, LocalMessage), string>.Error error:
                         return new Result<Unit, string>.Error(error.Value);
 
                     default:

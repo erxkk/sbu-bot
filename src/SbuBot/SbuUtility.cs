@@ -10,8 +10,10 @@ namespace SbuBot
     {
         public static readonly Regex IMAGE_FILE_REGEX = new(@"\.(gif|jpeg|jpg|png)$", RegexOptions.Compiled);
 
-        // TODO: handout 2 messages in case of videos  so those are easily viewable
-        public static Result<LocalMessage, string> TryCreatePinMessage(Snowflake guildId, IUserMessage message)
+        public static Result<(LocalMessage?, LocalMessage), string> TryCreatePinMessage(
+            Snowflake guildId,
+            IUserMessage message
+        )
         {
             LocalEmbed embed = new LocalEmbed()
                 .WithAuthor(message.Author)
@@ -27,30 +29,33 @@ namespace SbuBot
                     true
                 );
 
+            LocalMessage? videoMessage = null;
             LocalMessage pinMessage = new LocalMessage().WithEmbeds(embed);
 
-            if (message.Embeds.Count != 0)
-            {
-                IEmbed userEmbed = message.Embeds[0];
-
-                // use image type comparison to make sure it's actually an image that is being set
-                // marked as deprecated by discord
-                if (userEmbed.Type == "image" && (userEmbed.Url ?? userEmbed.Image?.Url) is { } url)
-                    embed.WithImageUrl(url);
-                else if (userEmbed.Video is { } video)
-                    embed.AddField("Video-Url", Markdown.Link("Click here!", video.Url), true);
-            }
-            else if (message.Attachments.Count != 0)
+            if (message.Attachments.Count != 0)
             {
                 IAttachment attachment = message.Attachments[0];
 
                 if (IMAGE_FILE_REGEX.IsMatch(attachment.FileName))
                     embed.WithImageUrl(attachment.Url);
                 else
-                    embed.AddField("Unknown-Media-Url", Markdown.Link("Click here!", attachment.Url), true);
+                    videoMessage = new LocalMessage().WithContent(attachment.Url);
+            }
+            else if (message.Embeds.Count != 0)
+            {
+                IEmbed userEmbed = message.Embeds[0];
+
+                // Discord is really making it hard to get proper media info about a message
+                if (userEmbed.Type == "image" | userEmbed.Type == "gifv"
+                    && (userEmbed.Url ?? userEmbed.Image?.Url) is { } url)
+                    embed.WithImageUrl(url);
+                else if (userEmbed.Image is { } image)
+                    embed.WithImageUrl(image.Url);
+                else if (userEmbed.Video is { })
+                    videoMessage = new LocalMessage().WithContent(userEmbed.Url);
             }
 
-            return new Result<LocalMessage, string>.Success(pinMessage);
+            return new Result<(LocalMessage?, LocalMessage), string>.Success((videoMessage, pinMessage));
         }
 
         public static bool TryParseMessageLink(string value, out (Snowflake ChannelId, Snowflake MessageId) idPair)
