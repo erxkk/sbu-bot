@@ -16,12 +16,6 @@ namespace SbuBot.Evaluation
 
             public Completed(TimeSpan completionTime, object? returnValue) : base(completionTime)
                 => ReturnValue = returnValue;
-
-            public LocalEmbed GetResultEmbed() => new LocalEmbed()
-                .WithTitle("Result")
-                .WithDescription(Markdown.CodeBlock("yml", ReturnValue ?? "null"))
-                .WithColor(Color.Red)
-                .WithFooter(@$"{CompletionTime:s\.ffff\s}");
         }
 
         public sealed class Failed : ScriptResult

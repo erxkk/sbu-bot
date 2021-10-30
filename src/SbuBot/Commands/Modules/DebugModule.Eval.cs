@@ -1,12 +1,17 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 using Disqord;
 using Disqord.Bot;
+using Disqord.Extensions.Interactivity.Menus.Paged;
+
+using Kkommon.Extensions.Enumerable;
 
 using Qmmands;
 
 using SbuBot.Evaluation;
+using SbuBot.Extensions;
 
 namespace SbuBot.Commands.Modules
 {
@@ -31,7 +36,7 @@ namespace SbuBot.Commands.Modules
                             => Reply(failedScript.GetDiagnosticEmbed()),
 
                         ScriptResult.Completed { ReturnValue: { } } completedScript
-                            => Reply(completedScript.GetResultEmbed()),
+                            => Inspection(completedScript),
 
                         _ => Reaction(LocalEmoji.Custom(SbuGlobals.Emote.Menu.CONFIRM)),
                     },
@@ -61,6 +66,29 @@ namespace SbuBot.Commands.Modules
 
                 return span.ToString();
             }
+        }
+
+        private DiscordCommandResult Inspection(ScriptResult.Completed result, int maxDepth = 2)
+        {
+            // doesn't throw on null no check needed
+            string inspection = result.ReturnValue.GetInspection(maxDepth);
+
+            if (inspection.Length > 2048 + 1024)
+            {
+                return Pages(
+                    new ListPageProvider(
+                        inspection.Chunk(2048)
+                            .Select(
+                                chunk => new Page().WithEmbeds(
+                                    new LocalEmbed().WithDescription(Markdown.CodeBlock("yml", new(chunk)))
+                                        .WithFooter(@$"{result.CompletionTime:s\.ffff\s}")
+                                )
+                            )
+                    )
+                );
+            }
+
+            return Response(new LocalEmbed().WithDescription(Markdown.CodeBlock("yml", inspection)));
         }
     }
 }

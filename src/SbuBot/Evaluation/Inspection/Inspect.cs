@@ -9,7 +9,7 @@ namespace SbuBot.Evaluation.Inspection
     {
         public static void AppendInspectionTo(
             StringBuilder builder,
-            object obj,
+            object? obj,
             int maxDepth,
             int indentationDelta = 2,
             int itemCount = 5

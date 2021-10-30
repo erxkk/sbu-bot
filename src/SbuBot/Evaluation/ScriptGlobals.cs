@@ -111,11 +111,16 @@ namespace SbuBot.Evaluation
 
             // split earlier than max length to avoid huge embeds
             // TODO: context aware splitting, see inspection wrapper
-            if (inspection.Length > 2048)
+            if (inspection.Length > 2048 + 1024)
             {
                 return Pages(
                     new ListPageProvider(
-                        inspection.Chunk(2048).Select(c => new Page().WithEmbeds(new LocalEmbed().WithDescription(c)))
+                        inspection.Chunk(2048)
+                            .Select(
+                                c => new Page().WithEmbeds(
+                                    new LocalEmbed().WithDescription(Markdown.CodeBlock("yml", c))
+                                )
+                            )
                     )
                 );
             }

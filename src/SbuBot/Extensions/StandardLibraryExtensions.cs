@@ -6,7 +6,6 @@ using Disqord;
 using Kkommon;
 
 using SbuBot.Evaluation.Inspection;
-using SbuBot.Services;
 
 namespace SbuBot.Extensions
 {
@@ -24,9 +23,9 @@ namespace SbuBot.Extensions
             return @this[..(length - 1)] + SbuGlobals.ELLIPSES;
         }
 
-        public static string GetInspection(this object @object, int maxDepth = 1)
+        public static string GetInspection(this object? @object, int maxDepth = 1)
         {
-            StringBuilder builder = new(LocalEmbed.MaxDescriptionLength / 2, LocalEmbed.MaxDescriptionLength);
+            StringBuilder builder = new(LocalEmbed.MaxDescriptionLength);
             Inspect.AppendInspectionTo(builder, @object, maxDepth);
             return builder.ToString();
         }
