@@ -9,14 +9,12 @@ using Disqord.Extensions.Interactivity.Menus;
 using Disqord.Extensions.Interactivity.Menus.Paged;
 
 using Kkommon.Extensions.Enumerable;
-using Kkommon.Extensions.String;
 
 using Qmmands;
 
 using SbuBot.Commands;
 using SbuBot.Commands.Views;
 using SbuBot.Commands.Views.Help;
-using SbuBot.Extensions;
 
 namespace SbuBot.Evaluation
 {
@@ -103,29 +101,6 @@ namespace SbuBot.Evaluation
             await menu.Task;
 
             return confirmationView.State;
-        }
-
-        public DiscordCommandResult Inspection(object? obj = null, int maxDepth = 2)
-        {
-            string inspection = obj?.GetInspection(maxDepth) ?? Context.GetInspection();
-
-            // split earlier than max length to avoid huge embeds
-            // TODO: context aware splitting, see inspection wrapper
-            if (inspection.Length > 2048 + 1024)
-            {
-                return Pages(
-                    new ListPageProvider(
-                        inspection.Chunk(2048)
-                            .Select(
-                                c => new Page().WithEmbeds(
-                                    new LocalEmbed().WithDescription(Markdown.CodeBlock("yml", c))
-                                )
-                            )
-                    )
-                );
-            }
-
-            return Response(new LocalEmbed().WithDescription(Markdown.CodeBlock("yml", inspection)));
         }
 
         public DiscordMenuCommandResult Help() => View(new RootHelpView(Context.Bot.Commands));
