@@ -30,9 +30,11 @@ namespace SbuBot.Commands.Modules
                 SbuColorRole role
             )
             {
-                // we ignore possible null values and just say it's higher lol
-                if (Context.CurrentMember.GetHierarchy() <= Context.Guild.Roles.GetValueOrDefault(role.Id)?.Position)
-                    await Reply("The role is higher than mine I can't assign it.");
+                if (Context.Guild.Roles.GetValueOrDefault(role.Id) is not { } discordRole)
+                    return Reply(ColorRoleModule.ROLE_DOES_NOT_EXIST);
+
+                if (Context.CurrentMember.GetHierarchy() <= discordRole.Position)
+                    await Reply(string.Format(ColorRoleModule.ROLE_HAS_HIGHER_HIERARCHY_FORMAT, "assign"));
 
                 await Context.Author.GrantRoleAsync(role.Id);
 
@@ -55,7 +57,7 @@ namespace SbuBot.Commands.Modules
             )
             {
                 if (Context.CurrentMember.GetHierarchy() <= role.Position)
-                    await Reply("The role is higher than mine I can't assign it.");
+                    await Reply(string.Format(ColorRoleModule.ROLE_HAS_HIGHER_HIERARCHY_FORMAT, "assign"));
 
                 await Context.Author.GrantRoleAsync(role.Id);
 

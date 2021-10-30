@@ -1,7 +1,9 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using Disqord;
 using Disqord.Bot;
+using Disqord.Gateway;
 using Disqord.Rest;
 
 using Qmmands;
@@ -33,14 +35,19 @@ namespace SbuBot.Commands.Modules
             {
                 SbuMember member = await Context.GetDbAuthorAsync();
 
-                await Context.Guild.Roles[member.ColorRole!.Id]
-                    .ModifyAsync(
-                        r =>
-                        {
-                            r.Color = color;
-                            r.Name = name;
-                        }
-                    );
+                if (Context.Guild.Roles.GetValueOrDefault(member.ColorRole!.Id) is not { } role)
+                    return Reply(ColorRoleModule.ROLE_DOES_NOT_EXIST);
+
+                if (Context.CurrentMember.GetHierarchy() <= role.Position)
+                    return Reply(string.Format(ColorRoleModule.ROLE_HAS_HIGHER_HIERARCHY_FORMAT, "modify"));
+
+                await role.ModifyAsync(
+                    r =>
+                    {
+                        r.Color = color;
+                        r.Name = name;
+                    }
+                );
 
                 return Reply("Your role has been modified.");
             }
@@ -56,7 +63,14 @@ namespace SbuBot.Commands.Modules
             )
             {
                 SbuMember member = await Context.GetDbAuthorAsync();
-                await Context.Guild.Roles[member.ColorRole!.Id].ModifyAsync(r => r.Name = name);
+
+                if (Context.Guild.Roles.GetValueOrDefault(member.ColorRole!.Id) is not { } role)
+                    return Reply(ColorRoleModule.ROLE_DOES_NOT_EXIST);
+
+                if (Context.CurrentMember.GetHierarchy() <= role.Position)
+                    return Reply(string.Format(ColorRoleModule.ROLE_HAS_HIGHER_HIERARCHY_FORMAT, "modify"));
+
+                await role.ModifyAsync(r => r.Name = name);
                 return Reply("Your role has been modified.");
             }
 
@@ -66,7 +80,14 @@ namespace SbuBot.Commands.Modules
             public async Task<DiscordCommandResult> EditColorAsync([Description("The new color.")] Color color)
             {
                 SbuMember member = await Context.GetDbAuthorAsync();
-                await Context.Guild.Roles[member.ColorRole!.Id].ModifyAsync(r => r.Color = color);
+
+                if (Context.Guild.Roles.GetValueOrDefault(member.ColorRole!.Id) is not { } role)
+                    return Reply(ColorRoleModule.ROLE_DOES_NOT_EXIST);
+
+                if (Context.CurrentMember.GetHierarchy() <= role.Position)
+                    return Reply(string.Format(ColorRoleModule.ROLE_HAS_HIGHER_HIERARCHY_FORMAT, "modify"));
+
+                await role.ModifyAsync(r => r.Color = color);
                 return Reply("Your role has been modified.");
             }
         }

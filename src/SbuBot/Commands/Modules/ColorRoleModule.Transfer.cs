@@ -1,7 +1,9 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using Disqord;
 using Disqord.Bot;
+using Disqord.Gateway;
 using Disqord.Rest;
 
 using Qmmands;
@@ -26,13 +28,19 @@ namespace SbuBot.Commands.Modules
         )
         {
             SbuDbContext context = Context.GetSbuDbContext();
-            SbuColorRole role = (await context.GetMemberFullAsync(Context.Author))!.ColorRole!;
+            SbuColorRole sbuRole = (await context.GetMemberFullAsync(Context.Author))!.ColorRole!;
 
-            await Context.Guild.GrantRoleAsync(receiver.Id, role.Id);
-            await Context.Author.RevokeRoleAsync(role.Id);
+            if (Context.Guild.Roles.GetValueOrDefault(sbuRole.Id) is not { } role)
+                return Reply(ColorRoleModule.ROLE_DOES_NOT_EXIST);
 
-            role.OwnerId = receiver.Id;
-            context.ColorRoles.Update(role);
+            if (Context.CurrentMember.GetHierarchy() <= role.Position)
+                return Reply(string.Format(ColorRoleModule.ROLE_HAS_HIGHER_HIERARCHY_FORMAT, "modify"));
+
+            await Context.Guild.GrantRoleAsync(receiver.Id, sbuRole.Id);
+            await Context.Author.RevokeRoleAsync(sbuRole.Id);
+
+            sbuRole.OwnerId = receiver.Id;
+            context.ColorRoles.Update(sbuRole);
             await context.SaveChangesAsync();
 
             return Reply($"You transferred your color role to {Mention.User(receiver.Id)}.");

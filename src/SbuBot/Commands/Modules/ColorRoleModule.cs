@@ -7,7 +7,6 @@ using SbuBot.Extensions;
 
 namespace SbuBot.Commands.Modules
 {
-    // TODO: add cleanup method if a role was deleted + check for existence on other methods
     [Group("role", "r")]
     [RequireBotGuildPermissions(Permission.ManageRoles)]
     [Description("A collection of commands for creation, modification, removal and usage of color roles.")]
@@ -17,6 +16,13 @@ namespace SbuBot.Commands.Modules
     )]
     public sealed partial class ColorRoleModule : SbuModuleBase
     {
+        private const string ROLE_DOES_NOT_EXIST
+            = "The role doesn't exist, was it deleted? Make sure to remove it before creating a new role with `sbu role"
+            + " delete`";
+
+        private const string ROLE_HAS_HIGHER_HIERARCHY_FORMAT
+            = "I cant {0} the role, its above mine.";
+
         [Command]
         [Description("Displays information about your current color role.")]
         public DiscordCommandResult Role() => Context.Author.GetColorRole() is { } role

@@ -68,10 +68,13 @@ namespace SbuBot.Commands.Modules
 
             if (rolePos is { })
             {
-                if (Context.CurrentMember.GetHierarchy() > rolePos)
-                    await role.ModifyAsync(r => r.Position = rolePos.Value);
-                else
-                    await Reply("Could not move the role above the current lower role separator.");
+                if (Context.CurrentMember.GetHierarchy() <= rolePos)
+                {
+                    await role.DeleteAsync();
+                    return Reply(string.Format(ColorRoleModule.ROLE_HAS_HIGHER_HIERARCHY_FORMAT, "move"));
+                }
+
+                await role.ModifyAsync(r => r.Position = rolePos.Value);
             }
 
             await Context.Author.GrantRoleAsync(role.Id);
