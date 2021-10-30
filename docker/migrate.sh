@@ -35,7 +35,7 @@ echo "===> Found volume mount '$_VOLUME_MOUNT'"
 
 # check if db is running
 if [[ -z "$(docker ps | grep $_SBU_DATABASE)" ]]; then
-    bail "===> Could not find db $_SBU_DATABASE"
+    bail "===> Could not find db '$_SBU_DATABASE'"
 fi
 
 # check if network exists
@@ -63,7 +63,7 @@ if [[ ! -z "$(docker ps -a | grep $_SBU_CONTAINER)" ]]; then
 fi
 
 # restart container
-echo "===> Starting $SBU_BOT_CONTAINER"
+echo "===> Starting '$SBU_BOT_CONTAINER'"
 docker run -d \
     --name $_SBU_CONTAINER \
     --env-file $_ENV \
