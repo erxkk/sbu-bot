@@ -31,26 +31,24 @@ namespace SbuBot.Commands
             Func<LocalEmbed, LocalEmbed>? embedFactory = null
         ) => Pages(new DistributedPageProvider(contents, itemsPerPage, embedFactory));
 
-        protected async Task<ConfirmationState> ConfirmationAsync()
-        {
-            ConfirmationView confirmationView = new();
-            DefaultMenu menu = new(confirmationView, Context.Author.Id);
-
-            await Context.Bot.StartMenuAsync(Context.ChannelId, menu, TimeSpan.FromMinutes(1));
-            await menu.Task;
-
-            return confirmationView.State;
-        }
-
-        protected async Task<ConfirmationState> ConfirmationAsync(string prompt, string? description = null)
+        protected async Task<ConfirmationState> ConfirmationAsync(
+            string prompt,
+            string? description = null,
+            TimeSpan timeout = default
+        )
         {
             ConfirmationView confirmationView = new(prompt, description);
-            DefaultMenu menu = new(confirmationView, Context.Author.Id);
 
-            await Context.Bot.StartMenuAsync(Context.ChannelId, menu, TimeSpan.FromMinutes(1));
-            await menu.Task;
+            try
+            {
+                await View(confirmationView, timeout != default ? timeout : TimeSpan.FromSeconds(30));
+            }
+            catch (OperationCanceledException)
+            {
+                return ConfirmationState.TimedOut;
+            }
 
-            return confirmationView.State;
+            return confirmationView.Result ? ConfirmationState.Confirmed : ConfirmationState.Aborted;
         }
 
         protected DiscordMenuCommandResult HelpView()

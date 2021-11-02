@@ -1,17 +1,16 @@
-using System;
-using System.Linq;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using Disqord;
 using Disqord.Extensions.Interactivity.Menus;
+using Disqord.Extensions.Interactivity.Menus.Prompt;
+using Disqord.Rest;
 
 namespace SbuBot.Commands.Views
 {
-    public sealed class ConfirmationView : ViewBase
+    public sealed class ConfirmationView : PromptView
     {
-        public ConfirmationState State { get; private set; }
-
-        public ConfirmationView(string prompt, string? description = null) : this(
+        public ConfirmationView(string prompt, string? description = null) : base(
             new LocalMessage().WithEmbeds(
                 new LocalEmbed()
                     .WithTitle(prompt)
@@ -29,46 +28,45 @@ namespace SbuBot.Commands.Views
             )
         ) { }
 
-        public ConfirmationView(LocalMessage templateMessage) : base(templateMessage) { }
-
-        private void SetConfirmation(bool confirmationState)
+        public ConfirmationView(LocalMessage templateMessage) : base(templateMessage)
         {
-            if (State != ConfirmationState.None)
-                throw new InvalidOperationException("Cannot set state, it has already been set.");
+            ConfirmButton.Label = null;
+            DenyButton.Label = null;
 
-            State = confirmationState ? ConfirmationState.Confirmed : ConfirmationState.Aborted;
-            ReportChanges();
+            ConfirmButton.Emoji = LocalEmoji.Custom(SbuGlobals.Emote.Menu.CONFIRM);
+            DenyButton.Emoji = LocalEmoji.Custom(SbuGlobals.Emote.Menu.STOP);
         }
 
-        public override ValueTask UpdateAsync()
+        protected override async ValueTask CompleteAsync(bool result, ButtonEventArgs e)
         {
-            if (State == ConfirmationState.None)
-                return default;
+            Result = result;
 
-            foreach (ButtonViewComponent component in EnumerateComponents().OfType<ButtonViewComponent>())
-                component.IsDisabled = true;
+            try
+            {
+                ConfirmButton.IsDisabled = true;
+                ConfirmButton.Style = Result ? ConfirmButton.Style : LocalButtonComponentStyle.Secondary;
 
-            Menu.Stop();
+                DenyButton.IsDisabled = true;
+                DenyButton.Style = Result ? LocalButtonComponentStyle.Secondary : DenyButton.Style;
 
-            return default;
-        }
+                var message = ToLocalMessage();
 
-        [Button(Emoji = SbuGlobals.Emote.Menu.CONFIRM, Style = LocalButtonComponentStyle.Success)]
-        public ValueTask ConfirmAsync(ButtonEventArgs e)
-        {
-            SetConfirmation(true);
-            TemplateMessage.Embeds[0].Color = Color.Green;
-
-            return default;
-        }
-
-        [Button(Emoji = SbuGlobals.Emote.Menu.STOP, Style = LocalButtonComponentStyle.Danger)]
-        public ValueTask AbortAsync(ButtonEventArgs e)
-        {
-            SetConfirmation(false);
-            TemplateMessage.Embeds[0].Color = Color.Red;
-
-            return default;
+                await e.Interaction.Response()
+                    .ModifyMessageAsync(
+                        new()
+                        {
+                            Components = message.Components,
+                            Embeds = new List<LocalEmbed>
+                            {
+                                message.Embeds[0].WithColor(result ? Color.Green : Color.Red),
+                            },
+                        }
+                    );
+            }
+            finally
+            {
+                Menu.Stop();
+            }
         }
     }
 }

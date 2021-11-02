@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 
 using Disqord;
 using Disqord.Bot;
+using Disqord.Extensions.Interactivity.Menus.Prompt;
 using Disqord.Gateway;
 using Disqord.Rest;
 
@@ -153,8 +154,8 @@ namespace SbuBot.Commands.Modules
         [Description("A test command.")]
         public async Task<DiscordCommandResult> TestAsync()
         {
-            ConfirmationState a = await ConfirmationAsync();
-            return Response($"some response, result: {a}");
+            await Task.Yield();
+            return Reply("test");
         }
     }
 }

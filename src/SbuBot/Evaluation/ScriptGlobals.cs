@@ -81,26 +81,24 @@ namespace SbuBot.Evaluation
             Func<LocalEmbed, LocalEmbed>? embedFactory = null
         ) => Pages(new DistributedPageProvider(contents, itemsPerPage, embedFactory));
 
-        public async Task<ConfirmationState> ConfirmationAsync()
-        {
-            ConfirmationView confirmationView = new();
-            DefaultMenu menu = new(confirmationView, Context.Author.Id);
-
-            await Context.Bot.StartMenuAsync(Context.ChannelId, menu, TimeSpan.FromMinutes(1));
-            await menu.Task;
-
-            return confirmationView.State;
-        }
-
-        public async Task<ConfirmationState> ConfirmationAsync(string prompt, string? description = null)
+        public async Task<ConfirmationState> ConfirmationAsync(
+            string prompt,
+            string? description = null,
+            TimeSpan timeout = default
+        )
         {
             ConfirmationView confirmationView = new(prompt, description);
-            DefaultMenu menu = new(confirmationView, Context.Author.Id);
 
-            await Context.Bot.StartMenuAsync(Context.ChannelId, menu, TimeSpan.FromMinutes(1));
-            await menu.Task;
+            try
+            {
+                await View(confirmationView, timeout != default ? timeout : TimeSpan.FromSeconds(30));
+            }
+            catch (OperationCanceledException)
+            {
+                return ConfirmationState.TimedOut;
+            }
 
-            return confirmationView.State;
+            return confirmationView.Result ? ConfirmationState.Confirmed : ConfirmationState.Aborted;
         }
 
         public DiscordMenuCommandResult Help() => View(new RootHelpView(Context.Bot.Commands));
