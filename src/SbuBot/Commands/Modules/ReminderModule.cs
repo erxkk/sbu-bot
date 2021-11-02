@@ -49,8 +49,9 @@ namespace SbuBot.Commands.Modules
                     .Where(r => r.OwnerId == Context.Author.Id)
                     .Select(
                         r => string.Format(
-                            "[`{0}`]({1}) {2}\n{3}\n",
-                            r.MessageId,
+                            "{0} [`{1:X}`]({2}) {3}\n{4}\n",
+                            SbuGlobals.BULLET,
+                            r.MessageId.RawValue,
                             r.JumpUrl,
                             Markdown.Timestamp(r.DueAt),
                             r.Message is { } ? $"`{r.Message}`" : "No Message"

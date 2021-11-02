@@ -72,7 +72,8 @@ namespace SbuBot.Commands.Modules
                 return DistributedPages(
                     tags.Select(
                         t => string.Format(
-                            "{0}: {1}\n`{2}`\n",
+                            "{0} {1}: {2}\n`{3}`\n",
+                            SbuGlobals.BULLET,
                             t.OwnerId is { } ? Mention.User(t.Owner!.Id) : "No owner",
                             t.Name,
                             t.Content

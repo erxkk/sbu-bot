@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -23,14 +24,12 @@ namespace SbuBot.Commands.Parsing.TypeParsers
             DiscordGuildCommandContext context
         )
         {
-            // TODO: parsing via hex number + display via hex number
             ReminderService service = context.Services.GetRequiredService<ReminderService>();
             IReadOnlyDictionary<Snowflake, SbuReminder> reminders = service.GetReminders();
 
             if (value.Equals("last", StringComparison.OrdinalIgnoreCase))
             {
-                return reminders
-                    .Values.FirstOrDefault(r => r.OwnerId == context.Author.Id) is { } queriedReminder
+                return reminders.Values.FirstOrDefault(r => r.OwnerId == context.Author.Id) is { } queriedReminder
                     ? Success(queriedReminder)
                     : Failure("Could not find reminder.");
             }
@@ -38,12 +37,21 @@ namespace SbuBot.Commands.Parsing.TypeParsers
             TypeParser<Snowflake> snowflakeParser = context.Bot.Commands.GetTypeParser<Snowflake>();
 
             if (await snowflakeParser.ParseAsync(parameter, value, context)
-                is not { IsSuccessful: true } snowflakeParseResult)
-                return Failure("Could not parse reminder.");
+                is { IsSuccessful: true } snowflakeParseResult)
+            {
+                return reminders.TryGetValue(snowflakeParseResult.Value, out var reminder)
+                    ? Success(reminder)
+                    : Failure("Could not find reminder.");
+            }
 
-            return reminders.TryGetValue(snowflakeParseResult.Value, out var indexedReminder)
-                ? Success(indexedReminder)
-                : Failure("Could not find reminder.");
+            if (ulong.TryParse(value, NumberStyles.HexNumber, NumberFormatInfo.CurrentInfo, out ulong ulongId))
+            {
+                return reminders.TryGetValue(ulongId, out var reminder)
+                    ? Success(reminder)
+                    : Failure("Could not find reminder.");
+            }
+
+            return Failure("Could not parse reminder.");
         }
     }
 }

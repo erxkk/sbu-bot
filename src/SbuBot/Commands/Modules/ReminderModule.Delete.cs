@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 using Disqord;
@@ -49,16 +51,24 @@ namespace SbuBot.Commands.Modules
                         throw new ArgumentOutOfRangeException();
                 }
 
-                await Context.Services.GetRequiredService<ReminderService>()
+                IReadOnlyList<SbuReminder> cancelled = await Context.Services.GetRequiredService<ReminderService>()
                     .CancelAsync(r => r.OwnerId == Context.Author.Id);
 
-                return Reply("Cancelled all reminders.");
+                return Reply(
+                    new LocalEmbed()
+                        .WithTitle("Cancelled all reminders.")
+                        .WithDescription(
+                            cancelled.Select(r => $"{SbuGlobals.BULLET} `{r.MessageId.RawValue:X}`").ToNewLines()
+                        )
+                        .WithFooter("Cancelled")
+                        .WithCurrentTimestamp()
+                );
             }
             else
             {
                 ConfirmationState confirmationResult = await ConfirmationAsync(
                     "Reminder Removal",
-                    $"Are you sure you want to cancel `{reminder.Value.MessageId}`?"
+                    $"Are you sure you want to cancel `{reminder.Value.MessageId.RawValue:X}`?"
                 );
 
                 switch (confirmationResult)
@@ -80,7 +90,7 @@ namespace SbuBot.Commands.Modules
                 return Reply(
                     new LocalEmbed()
                         .WithTitle("Reminder Cancelled")
-                        .WithDescription(reminder.Value.Message)
+                        .WithDescription($"`{reminder.Value.MessageId.RawValue:X}`\n{reminder.Value.Message}")
                         .WithFooter("Cancelled")
                         .WithCurrentTimestamp()
                 );

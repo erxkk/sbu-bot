@@ -33,7 +33,7 @@ namespace SbuBot.Commands.Modules
             return Reply(
                 new LocalEmbed()
                     .WithTitle("Reminder Rescheduled")
-                    .WithDescription(reminder.Message)
+                    .WithDescription($"`{reminder.MessageId.RawValue:X}`\n{reminder.Message}")
                     .WithFooter("Due")
                     .WithTimestamp(newTimestamp)
             );

@@ -49,7 +49,7 @@ namespace SbuBot.Commands.Modules
                     new LocalEmbed()
                         .WithTitle("Reminder Scheduled")
                         .WithDescription(descriptor.Message)
-                        .WithFooter("Due")
+                        .WithFooter($"{Context.Message.Id.RawValue:X} | Due")
                         .WithTimestamp(newReminder.DueAt)
                 );
             }
@@ -98,7 +98,7 @@ namespace SbuBot.Commands.Modules
                 return Reply(
                     new LocalEmbed()
                         .WithTitle("Reminder Scheduled")
-                        .WithDescription(message)
+                        .WithDescription($"`{Context.Message.Id.RawValue:X}`\n{message}")
                         .WithFooter("Due")
                         .WithTimestamp(newReminder.DueAt)
                 );

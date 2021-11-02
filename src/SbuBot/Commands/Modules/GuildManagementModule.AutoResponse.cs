@@ -34,7 +34,7 @@ namespace SbuBot.Commands.Modules
                     return Reply("This server has not auto responses.");
 
                 return DistributedPages(
-                    autoResponses.Select(ar => $"{ar.Key}\n`{ar.Value}`\n"),
+                    autoResponses.Select(ar => $"{SbuGlobals.BULLET} {ar.Key}\n`{ar.Value}`\n"),
                     embedFactory: embed => embed.WithTitle("Auto Responses")
                 );
             }

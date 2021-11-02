@@ -49,7 +49,7 @@ namespace SbuBot.Commands.Views
                     && builder.Length + item.Length + 3 <= maxPageLength)
                 {
                     elements++;
-                    builder.Append(SbuGlobals.BULLET).Append(' ').AppendLine(item);
+                    builder.AppendLine(item);
 
                     continue;
                 }
