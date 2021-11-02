@@ -41,32 +41,47 @@ namespace SbuBot.Commands.Modules
             [Description(
                 "Sends a given proxy command, or `ping` if not specified, as a given author in a given channel."
             )]
-            public void Do(
+            public async Task Do(
                 [Description("The proxy author.")] IMember member,
                 [Description("The proxy channel.")] IMessageGuildChannel channel,
                 [Description("The proxy command.")] string command = "ping"
-            ) => Context.Bot.Queue.Post(
-                new DiscordGuildCommandContext(
-                    Context.Bot,
-                    Context.Prefix,
-                    command,
-                    new ProxyMessage(Context.Message, command, member, channel.Id),
-                    (channel as CachedTextChannel) ?? Context.Channel,
-                    Context.Services
-                ),
-                context => context.Bot.ExecuteAsync(context)
-            );
+            )
+            {
+                // avoid disposal of the current context by waiting until the command completed
+                var tcs = new TaskCompletionSource();
+
+                Context.Bot.Queue.Post(
+                    new DiscordGuildCommandContext(
+                        Context.Bot,
+                        Context.Prefix,
+                        command,
+                        new ProxyMessage(Context.Message, command, member, channel.Id),
+                        (channel as CachedTextChannel) ?? Context.Channel,
+                        Context.Services
+                    ),
+                    async context =>
+                    {
+                        await context.Bot.ExecuteAsync(context);
+                        tcs.SetResult();
+                    }
+                );
+
+                await using (Context.BeginYield())
+                {
+                    await tcs.Task;
+                }
+            }
 
             [Command("as")]
             [Description("Sends a given proxy command, or `ping` if not specified, as a given author.")]
-            public void DoAsUser(
+            public Task DoAsUser(
                 [Description("The proxy author.")] IMember member,
                 [Description("The proxy command.")] string command = "ping"
             ) => Do(member, Context.Channel, command);
 
             [Command("in")]
             [Description("Sends a given proxy command, or `ping` if not specified, in a given channel.")]
-            public void DoInChannel(
+            public Task DoInChannel(
                 [Description("The proxy channel.")] IMessageGuildChannel channel,
                 [Description("The proxy command.")] string command = "ping"
             ) => Do(Context.Author, channel, command);
@@ -132,7 +147,7 @@ namespace SbuBot.Commands.Modules
         [Description("Big Big, Chunkus, Big Chunkus, Big Chunkus.")]
         public async Task<DiscordCommandResult> Chunk()
         {
-            await using (_ = Context.BeginYield())
+            await using (Context.BeginYield())
             {
                 await Context.Bot.Chunker.ChunkAsync(Context.Guild);
             }

@@ -32,7 +32,7 @@ namespace SbuBot.Commands.Modules
                     MessageReceivedEventArgs waitMessageResult;
                     await Reply($"Send your message in {Mention.Channel(SbuGlobals.Channel.SENATE)}.");
 
-                    await using (_ = Context.BeginYield())
+                    await using (Context.BeginYield())
                     {
                         waitMessageResult = await await Task.WhenAny(
                             new[]
@@ -89,7 +89,7 @@ namespace SbuBot.Commands.Modules
                     await Reply($"Send your message in {Mention.Channel(SbuGlobals.Channel.SHIT_SBU_SAYS)}.");
                     MessageReceivedEventArgs waitMessageResult;
 
-                    await using (_ = Context.BeginYield())
+                    await using (Context.BeginYield())
                     {
                         waitMessageResult = await await Task.WhenAny(
                             new[]
@@ -139,7 +139,7 @@ namespace SbuBot.Commands.Modules
                     MessageReceivedEventArgs waitMessageResult;
                     await Reply($"Send your message in {Mention.Channel(SbuGlobals.Channel.ANNOUNCEMENTS)}.");
 
-                    await using (_ = Context.BeginYield())
+                    await using (Context.BeginYield())
                     {
                         waitMessageResult = await await Task.WhenAny(
                             new[]
