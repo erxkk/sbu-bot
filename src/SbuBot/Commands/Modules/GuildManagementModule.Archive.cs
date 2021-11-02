@@ -29,7 +29,7 @@ namespace SbuBot.Commands.Modules
         {
             [Command]
             [RequireBotChannelPermissions(Permission.ManageMessages),
-             RequireAuthorGuildPermissions(Permission.Administrator)]
+             RequireAuthorGuildPermissions(Permission.ManageMessages)]
             [Description("Archives the given message or all pinned messages in the current channel.")]
             [Remarks(
                 "The Message are unpinned unless specified otherwise, specifying otherwise cannot be done when "
