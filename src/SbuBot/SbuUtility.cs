@@ -1,8 +1,15 @@
+using System.Linq;
 using System.Text.RegularExpressions;
 
 using Disqord;
+using Disqord.Bot;
 
 using Kkommon;
+
+using Qmmands;
+
+using SbuBot.Commands;
+using SbuBot.Extensions;
 
 namespace SbuBot
 {
@@ -71,6 +78,56 @@ namespace SbuBot
 
             idPair = default;
             return false;
+        }
+
+        public static string? FormatFailureReason(DiscordCommandContext context, FailedResult result)
+        {
+            return result switch
+            {
+                CommandNotFoundResult => null,
+                TypeParseFailedResult parseFailedResult => string.Format(
+                    "Type parse failed for parameter `{0}`:\n• {1}",
+                    parseFailedResult.Parameter.Format(false),
+                    parseFailedResult.FailureReason
+                ),
+                ChecksFailedResult checksFailed => string.Format(
+                    "Checks failed:\n{0}",
+                    checksFailed.FailedChecks.Select((c => $"• {c.Result.FailureReason}")).ToNewLines()
+                ),
+                ParameterChecksFailedResult parameterChecksFailed => string.Format(
+                    "Checks failed for parameter `{0}`:\n{1}",
+                    parameterChecksFailed.Parameter.Format(false),
+                    parameterChecksFailed.FailedChecks.Select((c => $"• {c.Result.FailureReason}")).ToNewLines()
+                ),
+                _ => result.FailureReason,
+            };
+        }
+
+        public static LocalMessage? FormatFailureMessage(DiscordCommandContext context, FailedResult result)
+        {
+            string? description = FormatFailureReason(context, result);
+
+            if (description is null)
+                return null;
+
+            LocalEmbed embed = new LocalEmbed().WithDescription(description).WithColor(3092790);
+
+            if (result is OverloadsFailedResult overloadsFailed)
+            {
+                foreach ((Command overload, FailedResult overloadResult) in overloadsFailed.FailedOverloads)
+                {
+                    string? reason = FormatFailureReason(context, overloadResult);
+
+                    if (reason is { })
+                        embed.AddField(string.Format("Overload: {0}", overload.FullAliases[0]), reason);
+                }
+            }
+            else if (context.Command is { })
+            {
+                embed.WithTitle(string.Format("Command: {0}", context.Command.FullAliases[0]));
+            }
+
+            return new LocalMessage().WithEmbeds(embed);
         }
     }
 }

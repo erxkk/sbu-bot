@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Disqord;
+using Disqord.Bot;
 using Disqord.Extensions.Interactivity.Menus;
 
 using Qmmands;
@@ -19,17 +20,54 @@ namespace SbuBot.Commands.Views.Help
         private readonly ImmutableDictionary<int, Module> _submodules;
         private readonly ImmutableDictionary<int, Command> _commands;
 
-        public ModuleHelpView(Module module)
+        public ModuleHelpView(DiscordGuildCommandContext context, Module module) : base(context)
         {
             _module = module;
             _submodules = module.Submodules.ToImmutableDictionary(k => k.GetHashCode(), v => v);
             _commands = module.Commands.ToImmutableDictionary(k => k.GetHashCode(), v => v);
+        }
 
+        private ValueTask _selectModule(SelectionEventArgs e)
+        {
+            if (e.Interaction.SelectedValues.Count != 1)
+                return default;
+
+            Module submodule = _submodules[Convert.ToInt32(e.Interaction.SelectedValues[0])];
+
+            Menu.View = submodule.IsGroup()
+                ? new GroupHelpView(Context, submodule)
+                : new ModuleHelpView(Context, submodule);
+
+            return default;
+        }
+
+        private ValueTask _selectCommand(SelectionEventArgs e)
+        {
+            if (e.Interaction.SelectedValues.Count != 1)
+                return default;
+
+            Menu.View = new CommandHelpView(
+                Context,
+                _commands[Convert.ToInt32(e.Interaction.SelectedValues[0])]
+            );
+
+            return default;
+        }
+
+        public override async ValueTask GoToParentAsync(ButtonEventArgs e)
+        {
+            Menu.View = _module.Parent is null
+                ? new RootHelpView(Context, _module.Service)
+                : new ModuleHelpView(Context, _module.Parent);
+        }
+
+        public override async ValueTask UpdateAsync()
+        {
             StringBuilder description = new StringBuilder("**Description:**\n", 512)
-                .AppendLine(module.Description);
+                .AppendLine(_module.Description);
 
-            if (module.Remarks is { })
-                description.AppendLine("**Remarks:**").AppendLine(module.Remarks);
+            if (_module.Remarks is { })
+                description.AppendLine("**Remarks:**").AppendLine(_module.Remarks);
 
             SelectionViewComponent moduleSelection = new(_selectModule);
             SelectionViewComponent commandSelection = new(_selectCommand);
@@ -62,43 +100,30 @@ namespace SbuBot.Commands.Views.Help
                 AddComponent(commandSelection);
             }
 
-            TemplateMessage.Embeds[0]
-                .WithTitle(module.Name)
-                .WithDescription(description.ToString());
+            var result = await _module.RunChecksAsync(Context);
 
-            if (module.Aliases.Count != 0)
+            if (result is ChecksFailedResult failedResult)
             {
-                TemplateMessage.Embeds[0]
-                    .AddInlineField("Aliases", string.Join(", ", module.Aliases.Select(Markdown.Code)));
+                description.AppendLine("**Checks:**")
+                    .AppendLine(failedResult.FailedChecks.Select((c => $"• {c.Result.FailureReason}")).ToNewLines());
             }
-        }
+            else
+            {
+                description.AppendLine("**You can execute commands in this module.**");
+            }
 
-        private ValueTask _selectModule(SelectionEventArgs e)
-        {
-            if (e.Interaction.SelectedValues.Count != 1)
-                return default;
+            description.Append('\n');
 
-            Module submodule = _submodules[Convert.ToInt32(e.Interaction.SelectedValues[0])];
-            Menu.View = submodule.IsGroup() ? new GroupHelpView(submodule) : new ModuleHelpView(submodule);
-            return default;
-        }
+            if (_module.Aliases.Count != 0)
+            {
+                description
+                    .AppendLine("Aliases:")
+                    .AppendLine(string.Join(", ", _module.Aliases.Select(Markdown.Code)));
+            }
 
-        private ValueTask _selectCommand(SelectionEventArgs e)
-        {
-            if (e.Interaction.SelectedValues.Count != 1)
-                return default;
-
-            Menu.View = new CommandHelpView(_commands[Convert.ToInt32(e.Interaction.SelectedValues[0])]);
-            return default;
-        }
-
-        public override ValueTask GoToParent(ButtonEventArgs e)
-        {
-            Menu.View = _module.Parent is null
-                ? new RootHelpView(_module.Service)
-                : new ModuleHelpView(_module.Parent);
-
-            return default;
+            TemplateMessage.Embeds[0]
+                .WithTitle(_module.Name)
+                .WithDescription(description.ToString());
         }
     }
 }

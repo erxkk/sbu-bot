@@ -102,37 +102,46 @@ namespace SbuBot.Evaluation
         }
 
         public DiscordMenuCommandResult HelpView()
-            => View(new RootHelpView(Context.Bot.Commands));
+            => View(new RootHelpView(Context, Context.Bot.Commands));
 
         public DiscordMenuCommandResult HelpView(Command? command) => command is { }
-            ? View(command.Module.IsGroup() ? new GroupHelpView(command.Module) : new CommandHelpView(command))
+            ? View(
+                command.Module.IsGroup()
+                    ? new GroupHelpView(Context, command.Module)
+                    : new CommandHelpView(Context, command)
+            )
             : HelpView();
 
         public DiscordMenuCommandResult HelpView(Module? module) => module is { }
-            ? View(module.IsGroup() ? new GroupHelpView(module) : new ModuleHelpView(module))
+            ? View(
+                module.IsGroup()
+                    ? new GroupHelpView(Context, module)
+                    : new ModuleHelpView(Context, module)
+            )
             : HelpView();
 
-        public DiscordMenuCommandResult HelpView(object? commandOrModule) => commandOrModule is Command c
-            ? HelpView(c)
-            : commandOrModule is Module m
-                ? HelpView(m)
-                : HelpView();
+        public DiscordMenuCommandResult HelpView(object? commandOrModule) => commandOrModule switch
+        {
+            Command c => HelpView(c),
+            Module m => HelpView(m),
+            _ => HelpView(),
+        };
 
         public DiscordMenuCommandResult HelpView(IEnumerable<Module> modules)
             => modules.HasAtLeast(2)
-                ? View(new SearchMatchHelpView(modules))
+                ? View(new SearchMatchHelpView(Context, modules))
                 : HelpView(modules.FirstOrDefault());
 
         public DiscordMenuCommandResult HelpView(IEnumerable<Command> commands)
             => commands.HasAtLeast(2)
                 ? commands.GroupBy(o => o.Module).HasAtLeast(2)
-                    ? View(new SearchMatchHelpView(commands))
+                    ? View(new SearchMatchHelpView(Context, commands))
                     : HelpView(commands.First().Module)
                 : HelpView(commands.FirstOrDefault());
 
         public DiscordMenuCommandResult HelpView(IEnumerable<object> commandsOrModules)
             => commandsOrModules.HasAtLeast(2)
-                ? View(new SearchMatchHelpView(commandsOrModules, true))
+                ? View(new SearchMatchHelpView(Context, commandsOrModules, true))
                 : HelpView(commandsOrModules.FirstOrDefault());
     }
 }

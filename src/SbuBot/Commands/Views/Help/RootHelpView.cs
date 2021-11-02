@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Disqord;
+using Disqord.Bot;
 using Disqord.Extensions.Interactivity.Menus;
 
 using Qmmands;
@@ -16,7 +17,7 @@ namespace SbuBot.Commands.Views.Help
     {
         private readonly ImmutableDictionary<int, Module> _modules;
 
-        public RootHelpView(CommandService service) : base(true)
+        public RootHelpView(DiscordGuildCommandContext context, CommandService service) : base(context, true)
         {
             _modules = service.TopLevelModules.ToImmutableDictionary(k => k.GetHashCode(), v => v);
 
@@ -41,7 +42,10 @@ namespace SbuBot.Commands.Views.Help
             if (e.Interaction.SelectedValues.Count != 1)
                 return default;
 
-            Menu.View = new ModuleHelpView(_modules[Convert.ToInt32(e.Interaction.SelectedValues[0])]);
+            Menu.View = new ModuleHelpView(
+                Context,
+                _modules[Convert.ToInt32(e.Interaction.SelectedValues[0])]
+            );
             return default;
         }
     }

@@ -17,7 +17,6 @@ using Qmmands;
 using SbuBot.Commands;
 using SbuBot.Commands.Parsing.Descriptors;
 using SbuBot.Commands.Parsing.TypeParsers;
-using SbuBot.Extensions;
 
 namespace SbuBot
 {
@@ -72,54 +71,10 @@ namespace SbuBot
         }
 
         protected override string? FormatFailureReason(DiscordCommandContext context, FailedResult result)
-        {
-            return result switch
-            {
-                CommandNotFoundResult => null,
-                TypeParseFailedResult parseFailedResult => string.Format(
-                    "Type parse failed for parameter `{0}`:\n• {1}",
-                    parseFailedResult.Parameter.Format(false),
-                    parseFailedResult.FailureReason
-                ),
-                ChecksFailedResult checksFailed => string.Format(
-                    "Checks failed:\n{0}",
-                    checksFailed.FailedChecks.Select((c => $"• {c.Result.FailureReason}")).ToNewLines()
-                ),
-                ParameterChecksFailedResult parameterChecksFailed => string.Format(
-                    "Checks failed for parameter `{0}`:\n{1}",
-                    parameterChecksFailed.Parameter.Format(false),
-                    parameterChecksFailed.FailedChecks.Select((c => $"• {c.Result.FailureReason}")).ToNewLines()
-                ),
-                _ => result.FailureReason,
-            };
-        }
+            => SbuUtility.FormatFailureReason(context, result);
 
         protected override LocalMessage? FormatFailureMessage(DiscordCommandContext context, FailedResult result)
-        {
-            string? description = FormatFailureReason(context, result);
-
-            if (description is null)
-                return null;
-
-            LocalEmbed embed = new LocalEmbed().WithDescription(description).WithColor(3092790);
-
-            if (result is OverloadsFailedResult overloadsFailed)
-            {
-                foreach ((Command overload, FailedResult overloadResult) in overloadsFailed.FailedOverloads)
-                {
-                    string? reason = FormatFailureReason(context, overloadResult);
-
-                    if (reason is { })
-                        embed.AddField(string.Format("Overload: {0}", overload.FullAliases[0]), reason);
-                }
-            }
-            else if (context.Command is { })
-            {
-                embed.WithTitle(string.Format("Command: {0}", context.Command.FullAliases[0]));
-            }
-
-            return new LocalMessage().WithEmbeds(embed);
-        }
+            => SbuUtility.FormatFailureMessage(context, result);
 
         public override ValueTask<bool> IsOwnerAsync(Snowflake userId) => new(userId == SbuGlobals.Users.ERXKK);
 

@@ -1,18 +1,23 @@
 using System.Threading.Tasks;
 
 using Disqord;
+using Disqord.Bot;
 using Disqord.Extensions.Interactivity.Menus;
 using Disqord.Rest;
 
 namespace SbuBot.Commands.Views.Help
 {
-    // TODO: add permissions and checks
     public abstract class HelpViewBase : ViewBase
     {
-        protected HelpViewBase(bool hasNoParent = false) : base(new LocalMessage().WithEmbeds(new LocalEmbed()))
+        protected DiscordGuildCommandContext Context { get; }
+
+        protected HelpViewBase(DiscordGuildCommandContext context, bool hasNoParent = false)
+            : base(new LocalMessage().WithEmbeds(new LocalEmbed()))
         {
+            Context = context;
+
             AddComponent(
-                new ButtonViewComponent(GoToParent)
+                new ButtonViewComponent(GoToParentAsync)
                 {
                     Emoji = LocalEmoji.Custom(SbuGlobals.Emote.Menu.BACK),
                     Style = LocalButtonComponentStyle.Secondary,
@@ -23,10 +28,10 @@ namespace SbuBot.Commands.Views.Help
             );
         }
 
-        public virtual ValueTask GoToParent(ButtonEventArgs e) => default;
+        public virtual ValueTask GoToParentAsync(ButtonEventArgs e) => default;
 
         [Button(Emoji = SbuGlobals.Emote.Menu.STOP, Row = 4, Position = 1, Style = LocalButtonComponentStyle.Secondary)]
-        public ValueTask StopMenu(ButtonEventArgs e)
+        public ValueTask StopMenuAsync(ButtonEventArgs e)
         {
             if (Menu is DefaultMenu menu)
                 menu.Message.DeleteAsync();

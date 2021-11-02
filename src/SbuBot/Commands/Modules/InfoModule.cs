@@ -90,7 +90,9 @@ namespace SbuBot.Commands.Modules
 
                 return DistributedPages(
                     matches.Select(m => m.Command)
-                        .Select(cmd => cmd.IsEnabled ? $"{SbuGlobals.BULLET} `{cmd.Format()}`" : $"~~`{cmd.Format()}`~~"),
+                        .Select(
+                            cmd => cmd.IsEnabled ? $"{SbuGlobals.BULLET} `{cmd.Format()}`" : $"~~`{cmd.Format()}`~~"
+                        ),
                     embedFactory: embed => embed.WithTitle("Matched commands")
                 );
             }

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Disqord;
+using Disqord.Bot;
 using Disqord.Extensions.Interactivity.Menus;
 
 using Qmmands;
@@ -17,10 +18,23 @@ namespace SbuBot.Commands.Views.Help
     {
         private readonly object[] _commands;
 
-        public SearchMatchHelpView(IEnumerable<Module> modules) : this(modules, true) { }
-        public SearchMatchHelpView(IEnumerable<Command> commands) : this(commands, true) { }
+        public SearchMatchHelpView(DiscordGuildCommandContext context, IEnumerable<Module> modules) : this(
+            context,
+            modules,
+            true
+        ) { }
 
-        public SearchMatchHelpView(IEnumerable<object> commandsOrModules, bool _marker)
+        public SearchMatchHelpView(DiscordGuildCommandContext context, IEnumerable<Command> commands) : this(
+            context,
+            commands,
+            true
+        ) { }
+
+        public SearchMatchHelpView(
+            DiscordGuildCommandContext context,
+            IEnumerable<object> commandsOrModules,
+            bool _marker
+        ) : base(context)
         {
             _commands = commandsOrModules.ToArray();
 
@@ -71,8 +85,10 @@ namespace SbuBot.Commands.Views.Help
             object commandOrModule = _commands[Convert.ToInt32(e.Interaction.SelectedValues[0])];
 
             Menu.View = commandOrModule is Command c
-                ? c.Module.IsGroup() ? new GroupHelpView(c.Module) : new CommandHelpView(c)
-                : new ModuleHelpView((commandOrModule as Module)!);
+                ? c.Module.IsGroup()
+                    ? new GroupHelpView(Context, c.Module)
+                    : new CommandHelpView(Context, c)
+                : new ModuleHelpView(Context, (commandOrModule as Module)!);
 
             return default;
         }

@@ -3,6 +3,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Disqord;
+using Disqord.Bot;
 using Disqord.Extensions.Interactivity.Menus;
 
 using Qmmands;
@@ -16,22 +17,46 @@ namespace SbuBot.Commands.Views.Help
     {
         private readonly Command _command;
 
-        public CommandHelpView(Command command)
-        {
-            _command = command;
+        public CommandHelpView(DiscordGuildCommandContext context, Command command) : base(context)
+            => _command = command;
 
+        public override ValueTask GoToParentAsync(ButtonEventArgs e)
+        {
+            Menu.View = _command.Module.IsGroup()
+                ? new GroupHelpView(Context, _command.Module)
+                : new ModuleHelpView(Context, _command.Module);
+
+            return default;
+        }
+
+        public override async ValueTask UpdateAsync()
+        {
             StringBuilder description = new("**Signature:**\n", 512);
-            command.AppendTo(description.Append('`'));
+            _command.AppendTo(description.Append('`'));
             description.Append('`').Append('\n').Append('\n');
 
             description.AppendLine("**Description:**")
-                .AppendLine(command.Description ?? command.Module.Description)
+                .AppendLine(_command.Description ?? _command.Module.Description)
                 .Append('\n');
 
-            if ((command.Remarks ?? command.Module.Remarks) is { } remarks)
+            if ((_command.Remarks ?? _command.Module.Remarks) is { } remarks)
                 description.AppendLine("**Remarks:**").AppendLine(remarks).Append('\n');
 
-            if (command.Attributes.OfType<UsageAttribute>().FirstOrDefault() is { } usage)
+            var result = await _command.RunChecksAsync(Context);
+
+            if (result is ChecksFailedResult failedResult)
+            {
+                description.AppendLine("**Checks:**")
+                    .AppendLine(failedResult.FailedChecks.Select((c => $"• {c.Result.FailureReason}")).ToNewLines());
+            }
+            else
+            {
+                description.AppendLine("**You can execute this command.**");
+            }
+
+            description.Append('\n');
+
+            if (_command.Attributes.OfType<UsageAttribute>().FirstOrDefault() is { } usage)
             {
                 description.AppendLine("**Examples:**");
 
@@ -48,19 +73,18 @@ namespace SbuBot.Commands.Views.Help
                 }
             }
 
-            TemplateMessage.Embeds[0]
-                .WithTitle(command.Name)
-                .WithDescription(description.ToString());
-
-            if (command.Aliases.Count != 0)
+            if (_command.Aliases.Count != 0)
             {
-                TemplateMessage.Embeds[0]
-                    .AddInlineField("Aliases", string.Join(", ", command.Aliases.Select(Markdown.Code)))
-                    .AddBlankInlineField()
-                    .AddBlankInlineField();
+                description
+                    .AppendLine("Aliases:")
+                    .AppendLine(string.Join(", ", _command.Aliases.Select(Markdown.Code)));
             }
 
-            foreach (Parameter parameter in command.Parameters)
+            TemplateMessage.Embeds[0]
+                .WithTitle(_command.Name)
+                .WithDescription(description.ToString());
+
+            foreach (Parameter parameter in _command.Parameters)
             {
                 TemplateMessage.Embeds[0]
                     .AddInlineField(
@@ -72,15 +96,6 @@ namespace SbuBot.Commands.Views.Help
                         )
                     );
             }
-        }
-
-        public override ValueTask GoToParent(ButtonEventArgs e)
-        {
-            Menu.View = _command.Module.IsGroup()
-                ? new GroupHelpView(_command.Module)
-                : new ModuleHelpView(_command.Module);
-
-            return default;
         }
     }
 }

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Disqord;
+using Disqord.Bot;
 using Disqord.Extensions.Interactivity.Menus;
 
 using Qmmands;
@@ -15,14 +16,36 @@ namespace SbuBot.Commands.Views.Help
 {
     public sealed class GroupHelpView : HelpViewBase
     {
-        private readonly Module _parent;
+        private readonly Module _group;
         private readonly ImmutableDictionary<int, Command> _commands;
 
-        public GroupHelpView(Module group)
+        public GroupHelpView(DiscordGuildCommandContext context, Module group) : base(context)
         {
-            _parent = group.Parent;
+            _group = group;
             _commands = group.Commands.ToImmutableDictionary(k => k.GetHashCode(), v => v);
+        }
 
+        private ValueTask _selectOverload(SelectionEventArgs e)
+        {
+            if (e.Interaction.SelectedValues.Count != 1)
+                return default;
+
+            Menu.View = new CommandHelpView(
+                Context,
+                _commands[Convert.ToInt32(e.Interaction.SelectedValues[0])]
+            );
+
+            return default;
+        }
+
+        public override ValueTask GoToParentAsync(ButtonEventArgs e)
+        {
+            Menu.View = new ModuleHelpView(Context, _group.Parent);
+            return default;
+        }
+
+        public override async ValueTask UpdateAsync()
+        {
             StringBuilder description = new("**Signatures:**\n", 512);
             SelectionViewComponent selection = new(_selectOverload);
 
@@ -33,37 +56,37 @@ namespace SbuBot.Commands.Views.Help
                 selection.Options.Add(new(command.Format(false).TrimOrSelf(25), id.ToString()));
             }
 
-            description.Append('\n').AppendLine("**Description:**").AppendLine(group.Description).Append('\n');
+            description.Append('\n').AppendLine("**Description:**").AppendLine(_group.Description).Append('\n');
 
-            if (group.Remarks is { })
-                description.AppendLine("**Remarks:**").AppendLine(group.Remarks);
+            if (_group.Remarks is { })
+                description.AppendLine("**Remarks:**").AppendLine(_group.Remarks);
 
-            AddComponent(selection);
+            var result = await _group.RunChecksAsync(Context);
+
+            if (result is ChecksFailedResult failedResult)
+            {
+                description.AppendLine("**Checks:**")
+                    .AppendLine(failedResult.FailedChecks.Select((c => $"• {c.Result.FailureReason}")).ToNewLines());
+            }
+            else
+            {
+                description.AppendLine("**You can execute these commands.**");
+            }
+
+            description.Append('\n');
+
+            if (_group.Aliases.Count != 0)
+            {
+                description
+                    .AppendLine("Aliases:")
+                    .AppendLine(string.Join(", ", _group.Aliases.Select(Markdown.Code)));
+            }
 
             TemplateMessage.Embeds[0]
-                .WithTitle(group.FullAliases[0])
+                .WithTitle(_group.FullAliases[0])
                 .WithDescription(description.ToString());
 
-            if (group.Aliases.Count != 0)
-            {
-                TemplateMessage.Embeds[0]
-                    .AddInlineField("Aliases", string.Join(", ", group.Aliases.Select(Markdown.Code)));
-            }
-        }
-
-        private ValueTask _selectOverload(SelectionEventArgs e)
-        {
-            if (e.Interaction.SelectedValues.Count != 1)
-                return default;
-
-            Menu.View = new CommandHelpView(_commands[Convert.ToInt32(e.Interaction.SelectedValues[0])]);
-            return default;
-        }
-
-        public override ValueTask GoToParent(ButtonEventArgs e)
-        {
-            Menu.View = new ModuleHelpView(_parent);
-            return default;
+            AddComponent(selection);
         }
     }
 }
