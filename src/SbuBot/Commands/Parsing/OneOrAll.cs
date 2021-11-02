@@ -5,7 +5,7 @@ namespace SbuBot.Commands.Parsing
     // this is for non-generic pattern matching
     public interface IOneOrAll
     {
-        [MemberNotNullWhen(true, nameof(IOneOrAll.Value))]
+        [MemberNotNullWhen(false, nameof(IOneOrAll.Value))]
         public bool IsAll { get; }
 
         public object? Value { get; }
@@ -14,10 +14,10 @@ namespace SbuBot.Commands.Parsing
     // never assign default value
     public sealed class OneOrAll<T> : IOneOrAll
     {
-        [MemberNotNullWhen(true, nameof(OneOrAll<T>.Value))]
+        [MemberNotNullWhen(false, nameof(OneOrAll<T>.Value))]
         public bool IsAll { get; }
 
-        public T Value { get; }
+        public T? Value { get; }
 
         private OneOrAll() => IsAll = true;
         private OneOrAll(T value) => Value = value;

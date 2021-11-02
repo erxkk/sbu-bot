@@ -38,7 +38,8 @@ namespace SbuBot.Commands.Modules
             [Usage(
                 "archive (with {@reply})",
                 "archive 836993360274784297",
-                "archive https://discord.com/channels/732210852849123418/732231139233759324/836993360274784297",
+
+                // "archive https://discord.com/channels/732210852849123418/732231139233759324/836993360274784297",
                 "archive all"
             )]
             public async Task<DiscordCommandResult> ArchiveMessageAsync(
@@ -77,10 +78,6 @@ namespace SbuBot.Commands.Modules
                 {
                     if (message.IsAll)
                     {
-                        if (await PinSingleMessageAsync(message.Value, pinArchive, unpinOriginal)
-                            is Result<Unit, string>.Error error)
-                            return Reply(error.Value);
-
                         IReadOnlyList<IUserMessage> pins = await Context.Channel.FetchPinnedMessagesAsync();
 
                         foreach (IUserMessage pinnedMessage in pins.OrderBy(m => m.CreatedAt()))
@@ -92,6 +89,12 @@ namespace SbuBot.Commands.Modules
                                 is Result<Unit, string>.Error singleError)
                                 return Reply(singleError.Value);
                         }
+                    }
+                    else
+                    {
+                        if (await PinSingleMessageAsync(message.Value, pinArchive, unpinOriginal)
+                            is Result<Unit, string>.Error error)
+                            return Reply(error.Value);
                     }
                 }
 
