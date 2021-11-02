@@ -46,12 +46,13 @@ namespace SbuBot.Commands.Views.Help
 
             if (result is ChecksFailedResult failedResult)
             {
-                description.AppendLine("**Checks:**")
+                description.Append('\n')
+                    .AppendLine("**Checks:**")
                     .AppendLine(failedResult.FailedChecks.Select((c => $"• {c.Result.FailureReason}")).ToNewLines());
             }
             else
             {
-                description.AppendLine("**You can execute this command.**");
+                description.Append('\n').AppendLine("**You can execute this command.**");
             }
 
             description.Append('\n');
