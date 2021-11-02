@@ -9,6 +9,8 @@ using Disqord;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Scripting;
 
+using SbuBot.Extensions;
+
 namespace SbuBot.Evaluation
 {
     public abstract class CompilationResult
@@ -58,10 +60,9 @@ namespace SbuBot.Evaluation
 
             public LocalEmbed GetDiagnosticEmbed()
             {
-                string description = string.Join(
-                    "\n",
-                    Diagnostics.Select(d => $"{SbuGlobals.BULLET} {d.Id}: {d.GetMessage()}")
-                );
+                string description = Diagnostics
+                    .Select(d => $"{SbuGlobals.BULLET} {d.Id}: {d.GetMessage()}")
+                    .ToNewLines();
 
                 LocalEmbed embed = new();
 

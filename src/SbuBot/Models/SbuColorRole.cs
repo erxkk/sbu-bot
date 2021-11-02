@@ -34,7 +34,7 @@ namespace SbuBot.Models
 
 #nullable disable
 
-        internal sealed class EntityTypeConfiguration : IEntityTypeConfiguration<SbuColorRole>
+        public sealed class EntityTypeConfiguration : IEntityTypeConfiguration<SbuColorRole>
         {
             public void Configure(EntityTypeBuilder<SbuColorRole> builder)
             {
@@ -56,6 +56,7 @@ namespace SbuBot.Models
                     .OnDelete(DeleteBehavior.Cascade);
             }
         }
+#nullable enable
 
 #endregion
     }

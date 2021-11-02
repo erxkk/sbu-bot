@@ -59,7 +59,9 @@ namespace SbuBot.Commands.Modules
                 if (pinArchive is null)
                     return Reply($"Could not find required pin archive channel ({guild.ArchiveId.Value}).");
 
-                var archivePerms = Permission.SendMessages | Permission.SendEmbeds | Permission.SendAttachments;
+                const Permission archivePerms = Permission.SendMessages
+                    | Permission.SendEmbeds
+                    | Permission.SendAttachments;
 
                 if (!Context.CurrentMember.GetPermissions(pinArchive).Has(archivePerms))
                     return Reply($"I don't have the necessary permissions in the archive channel ({archivePerms:F}).");
@@ -105,6 +107,7 @@ namespace SbuBot.Commands.Modules
                 switch (SbuUtility.TryCreatePinMessage(Context.GuildId, message))
                 {
                     case Result<(LocalMessage?, LocalMessage), string>.Success pinMessage:
+                    {
                         if (pinMessage.Value.Item1 is { })
                             await channel.SendMessageAsync(pinMessage.Value.Item1);
 
@@ -114,6 +117,7 @@ namespace SbuBot.Commands.Modules
                             await message.UnpinAsync();
 
                         return new Result<Unit, string>.Success(new());
+                    }
 
                     case Result<(LocalMessage?, LocalMessage), string>.Error error:
                         return new Result<Unit, string>.Error(error.Value);

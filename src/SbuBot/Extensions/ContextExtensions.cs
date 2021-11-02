@@ -23,19 +23,6 @@ namespace SbuBot.Extensions
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class ContextExtensions
     {
-        // TODO: see CommandMapping
-        public static void RepostAsAlias(this DiscordGuildCommandContext @this, string alias) => @this.Bot.Queue.Post(
-            new DiscordGuildCommandContext(
-                @this.Bot,
-                @this.Prefix,
-                alias,
-                new ProxyMessage(@this.Message, $"{@this.Prefix} {alias}", @this.Author, @this.ChannelId),
-                @this.Channel,
-                @this.Services
-            ),
-            context => context.Bot.ExecuteAsync(context)
-        );
-
         public static SbuDbContext GetSbuDbContext(this DiscordCommandContext @this)
             => @this.Services.GetRequiredService<SbuDbContext>();
 
@@ -59,15 +46,35 @@ namespace SbuBot.Extensions
         public static Task<List<SbuTag>> GetTagsAsync(this DiscordGuildCommandContext @this)
             => @this.GetSbuDbContext()
                 .Tags
+                .Where(t => t.GuildId == @this.GuildId)
+                .ToListAsync(@this.Bot.StoppingToken);
+
+        public static Task<List<SbuTag>> GetTagsFullAsync(this DiscordGuildCommandContext @this)
+            => @this.GetSbuDbContext()
+                .Tags
                 .Include(t => t.Guild)
                 .Include(t => t.Owner)
                 .Where(t => t.GuildId == @this.GuildId)
                 .ToListAsync(@this.Bot.StoppingToken);
 
-        public static Task<SbuAutoResponse?> GetAutoResponseAsync(this DiscordGuildCommandContext @this, string trigger)
-            => @this.GetSbuDbContext().GetAutoResponseFullAsync(trigger, @this.GuildId);
+        public static Task<SbuAutoResponse?> GetAutoResponseAsync(
+            this DiscordGuildCommandContext @this,
+            string trigger
+        ) => @this.GetSbuDbContext().GetAutoResponseAsync(trigger, @this.GuildId);
+
+        public static Task<SbuAutoResponse?> GetAutoResponseFullAsync(
+            this DiscordGuildCommandContext @this,
+            string trigger
+        ) => @this.GetSbuDbContext().GetAutoResponseFullAsync(trigger, @this.GuildId);
 
         public static Task<List<SbuAutoResponse>> GetAutoResponsesAsync(this DiscordGuildCommandContext @this)
+            => @this.GetSbuDbContext()
+                .AutoResponses
+                .Include(t => t.Guild)
+                .Where(t => t.GuildId == @this.GuildId)
+                .ToListAsync(@this.Bot.StoppingToken);
+
+        public static Task<List<SbuAutoResponse>> GetAutoResponsesFullAsync(this DiscordGuildCommandContext @this)
             => @this.GetSbuDbContext()
                 .AutoResponses
                 .Include(t => t.Guild)
@@ -100,11 +107,5 @@ namespace SbuBot.Extensions
                 _ => new Result<string, FollowUpError>.Error(FollowUpError.Timeout),
             };
         }
-    }
-
-    public enum FollowUpError
-    {
-        Timeout,
-        Aborted,
     }
 }

@@ -3,9 +3,9 @@ using System.Diagnostics.CodeAnalysis;
 namespace SbuBot.Commands.Parsing
 {
     // this is for non-generic pattern matching
-    internal interface IOneOrAll
+    public interface IOneOrAll
     {
-        [MemberNotNullWhen(true, nameof(Value))]
+        [MemberNotNullWhen(true, nameof(IOneOrAll.Value))]
         public bool IsAll { get; }
 
         public object? Value { get; }
@@ -14,7 +14,7 @@ namespace SbuBot.Commands.Parsing
     // never assign default value
     public sealed class OneOrAll<T> : IOneOrAll
     {
-        [MemberNotNullWhen(true, nameof(Value))]
+        [MemberNotNullWhen(true, nameof(OneOrAll<T>.Value))]
         public bool IsAll { get; }
 
         public T Value { get; }

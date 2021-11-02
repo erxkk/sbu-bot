@@ -46,9 +46,11 @@ namespace SbuBot.Services
         }
 
         public bool GetValue(Snowflake guildId, SbuGuildConfig value)
-            => _guildConfigs.GetValueOrDefault(guildId).HasFlag(value);
+            => !_guildConfigs.TryGetValue(guildId, out SbuGuildConfig config) || config.HasFlag(value);
 
         public SbuGuildConfig GetConfig(Snowflake guildId)
-            => _guildConfigs.GetValueOrDefault(guildId);
+            => _guildConfigs.TryGetValue(guildId, out SbuGuildConfig config)
+                ? config
+                : (SbuGuildConfig)255;
     }
 }

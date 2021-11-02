@@ -36,14 +36,17 @@ namespace SbuBot.Commands.Modules
                 switch (await Context.WaitFollowUpForAsync("What do you want the role name to be?"))
                 {
                     case Result<string, FollowUpError>.Success followUp:
+                    {
                         name = followUp.Value;
 
                         if (name.Length > SbuColorRole.MAX_NAME_LENGTH)
                             return Reply("The role name must be shorter than 100 characters.");
 
                         break;
+                    }
 
                     case Result<string, FollowUpError>.Error error:
+                    {
                         if (error.Value == FollowUpError.Aborted)
                             return Reply("Aborted");
 
@@ -51,12 +54,13 @@ namespace SbuBot.Commands.Modules
 
                         name = Context.Author.Nick ?? Context.Author.Name;
                         break;
+                    }
                 }
             }
 
             SbuDbContext context = Context.GetSbuDbContext();
-            var guild = await context.GetGuildAsync(Context.Guild);
-            var rolePos = Context.Guild.Roles.GetValueOrDefault(guild!.ColorRoleBottomId ?? 0)?.Position + 1;
+            SbuGuild? guild = await context.GetGuildAsync(Context.Guild);
+            int? rolePos = Context.Guild.Roles.GetValueOrDefault(guild!.ColorRoleBottomId ?? 0)?.Position + 1;
 
             IRole role = await Context.Guild.CreateRoleAsync(
                 r =>

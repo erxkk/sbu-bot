@@ -18,9 +18,9 @@ namespace SbuBot.Services
     public sealed class ChatService : DiscordBotService
     {
         private readonly ConfigService _configService;
-        private readonly ConcurrentDictionary<(Snowflake, string), string> _autoResponses = new();
+        private readonly ConcurrentDictionary<(Snowflake GuildId, string Trigger), string> _autoResponses = new();
 
-        public IReadOnlyDictionary<(Snowflake, string), string> AutoResponses => _autoResponses;
+        public IReadOnlyDictionary<(Snowflake GuildId, string Trigger), string> AutoResponses => _autoResponses;
         public override int Priority => int.MaxValue - 1;
 
         public ChatService(ConfigService configService)
@@ -55,7 +55,7 @@ namespace SbuBot.Services
         }
 
         public IReadOnlyDictionary<string, string> GetAutoResponses(Snowflake guildId)
-            => _autoResponses.Where(k => k.Key.Item1 == guildId).ToDictionary(k => k.Key.Item2, v => v.Value);
+            => _autoResponses.Where(k => k.Key.GuildId == guildId).ToDictionary(k => k.Key.Trigger, v => v.Value);
 
         public string? GetAutoResponse(Snowflake guildId, string trigger)
             => _autoResponses.GetValueOrDefault((guildId, trigger));

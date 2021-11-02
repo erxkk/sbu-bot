@@ -38,7 +38,7 @@ namespace SbuBot.Models
         }
 
 #nullable disable
-        internal sealed class EntityTypeConfiguration : IEntityTypeConfiguration<SbuAutoResponse>
+        public sealed class EntityTypeConfiguration : IEntityTypeConfiguration<SbuAutoResponse>
         {
             public void Configure(EntityTypeBuilder<SbuAutoResponse> builder)
             {
@@ -57,6 +57,7 @@ namespace SbuBot.Models
                     .OnDelete(DeleteBehavior.Cascade);
             }
         }
+#nullable enable
 
 #endregion
 

@@ -24,8 +24,8 @@ namespace SbuBot.Commands.Attributes.Checks
                 .GetMemberAsync(context.Author, m => m.Include(m => m.ColorRole));
 
             return member.ColorRole is { } == RequireColorRole
-                ? CheckAttribute.Success()
-                : CheckAttribute.Failure(
+                ? Success()
+                : Failure(
                     $"You must to have {(RequireColorRole ? "a" : "no")} color role to use this command."
                 );
         }

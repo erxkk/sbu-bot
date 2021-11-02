@@ -20,23 +20,28 @@ namespace SbuBot
             _configuration = configuration;
             IsProduction = hostEnvironment.IsProduction();
 
+            string? host = configuration["Postgres:Host"];
             string? db = configuration["Postgres:Database"];
             string? user = configuration["Postgres:Username"];
+            string detailedErrors = configuration["Postgres:DetailedErrors"] ?? (!IsProduction).ToString();
 
             DbConnectionString = string.Format(
                 "Host={0};Port={1};Database={2};Username={3};Password={4};Include Error Detail={5};",
-                configuration["Postgres:Host"],
+                host,
                 configuration["Postgres:Port"],
                 db,
                 user,
                 configuration["Postgres:Password"],
-                configuration["Postgres:DetailedErrors"] ?? (!IsProduction).ToString()
+                detailedErrors
             );
 
-            logger.LogInformation("Using Database: {@Database}", new { Db = db, User = user });
+            logger.LogInformation(
+                "Using Database: {@Database}",
+                new { Host = host, Db = db, User = user, DetailedErrors = detailedErrors }
+            );
         }
 
-        internal SbuConfiguration(IConfiguration configuration)
+        public SbuConfiguration(IConfiguration configuration)
         {
             _configuration = configuration;
             IsProduction = false;

@@ -20,8 +20,8 @@ namespace SbuBot.Commands.Attributes.Checks
             SbuGuild guild = await context.GetDbGuildAsync();
 
             return guild.Config.HasFlag(Config)
-                ? CheckAttribute.Success()
-                : CheckAttribute.Failure($"The guild doesn't have this feature ({Config:F}) enabled.");
+                ? Success()
+                : Failure($"The guild doesn't have this feature ({Config:F}) enabled.");
         }
     }
 }

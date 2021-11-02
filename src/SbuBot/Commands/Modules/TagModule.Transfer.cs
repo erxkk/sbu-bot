@@ -45,6 +45,7 @@ namespace SbuBot.Commands.Modules
                 {
                     case ConfirmationState.None:
                     case ConfirmationState.Aborted:
+                    case ConfirmationState.TimedOut:
                         return Reply("Aborted.");
 
                     case ConfirmationState.Confirmed:
@@ -54,15 +55,15 @@ namespace SbuBot.Commands.Modules
                         throw new ArgumentOutOfRangeException();
                 }
 
-                List<SbuTag> tags = await Context.GetSbuDbContext()
+                SbuDbContext context = Context.GetSbuDbContext();
+
+                List<SbuTag> tags = await context
                     .Tags
                     .Where(t => t.OwnerId == Context.Author.Id)
                     .ToListAsync(Context.Bot.StoppingToken);
 
                 foreach (SbuTag dbTag in tags)
                     dbTag.OwnerId = receiver.Id;
-
-                SbuDbContext context = Context.GetSbuDbContext();
 
                 context.Tags.UpdateRange(tags);
                 await context.SaveChangesAsync();
@@ -84,6 +85,7 @@ namespace SbuBot.Commands.Modules
                 {
                     case ConfirmationState.None:
                     case ConfirmationState.Aborted:
+                    case ConfirmationState.TimedOut:
                         return Reply("Aborted.");
 
                     case ConfirmationState.Confirmed:

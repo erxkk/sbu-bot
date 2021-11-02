@@ -15,7 +15,7 @@ namespace SbuBot.Commands.Parsing.TypeParsers
             Parameter parameter,
             string value,
             DiscordGuildCommandContext context
-        ) => await context.GetAutoResponseAsync(value) is { } autoResponse
+        ) => await context.GetAutoResponseFullAsync(value) is { } autoResponse
             ? Success(autoResponse)
             : Failure("Could not find auto response.");
     }

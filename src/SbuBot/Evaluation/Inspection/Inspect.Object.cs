@@ -14,7 +14,7 @@ namespace SbuBot.Evaluation.Inspection
             int maxDepth,
             int indentationDelta = 2,
             int itemCount = 5
-        ) => AppendObjectInspectionTo(
+        ) => Inspect.AppendObjectInspectionTo(
             builder,
             obj,
             new HashSet<object>(),
@@ -71,7 +71,7 @@ namespace SbuBot.Evaluation.Inspection
                     appendMember(fieldInfo.GetValue(obj), fieldInfo.Name);
 
                 foreach (PropertyInfo propertyInfo in properties)
-                    appendMember(SafeGetProperty(propertyInfo, obj), propertyInfo.Name);
+                    appendMember(Inspect.SafeGetProperty(propertyInfo, obj), propertyInfo.Name);
 
                 for (int i = 0; i < indentation; i++)
                     builder.Append(' ');

@@ -36,7 +36,7 @@ namespace SbuBot
             {
                 IAttachment attachment = message.Attachments[0];
 
-                if (IMAGE_FILE_REGEX.IsMatch(attachment.FileName))
+                if (SbuUtility.IMAGE_FILE_REGEX.IsMatch(attachment.FileName))
                     embed.WithImageUrl(attachment.Url);
                 else
                     videoMessage = new LocalMessage().WithContent(attachment.Url);
@@ -46,8 +46,7 @@ namespace SbuBot
                 IEmbed userEmbed = message.Embeds[0];
 
                 // Discord is really making it hard to get proper media info about a message
-                if (userEmbed.Type == "image" | userEmbed.Type == "gifv"
-                    && (userEmbed.Url ?? userEmbed.Image?.Url) is { } url)
+                if ((userEmbed.Type is "image" or "gifv") && (userEmbed.Url ?? userEmbed.Image?.Url) is { } url)
                     embed.WithImageUrl(url);
                 else if (userEmbed.Image is { } image)
                     embed.WithImageUrl(image.Url);

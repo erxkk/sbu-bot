@@ -21,12 +21,16 @@ namespace SbuBot.Commands.Attributes.Checks.Parameters
                 IMember member => member.Id,
                 Snowflake snowflake => snowflake,
                 SbuMember sbuMember => sbuMember.Id,
-                _ => throw new UnreachableException($"Invalid argument type: {argument.GetType()}", argument),
+                _ => throw new ArgumentOutOfRangeException(
+                    nameof(argument),
+                    argument,
+                    $"Invalid argument type: {argument.GetType()}"
+                ),
             };
 
             return id != context.Author.Id
-                ? ParameterCheckAttribute.Success()
-                : ParameterCheckAttribute.Failure("This parameter cannot be the same as the command author.");
+                ? Success()
+                : Failure("This parameter cannot be the same as the command author.");
         }
 
         public override bool CheckType(Type type) => type.IsAssignableTo(typeof(IMember))

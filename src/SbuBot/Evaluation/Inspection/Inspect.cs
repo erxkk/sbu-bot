@@ -13,7 +13,7 @@ namespace SbuBot.Evaluation.Inspection
             int maxDepth,
             int indentationDelta = 2,
             int itemCount = 5
-        ) => AppendInspectionTo(
+        ) => Inspect.AppendInspectionTo(
             builder,
             obj,
             new HashSet<object>(),
@@ -41,7 +41,7 @@ namespace SbuBot.Evaluation.Inspection
 
             Type type = obj.GetType();
 
-            while (EXTRACTORS.TryGetValue(
+            while (Inspect.EXTRACTORS.TryGetValue(
                 type.IsGenericType ? type.GetGenericTypeDefinition() : type,
                 out var extractor
             ))
@@ -83,7 +83,7 @@ namespace SbuBot.Evaluation.Inspection
             {
                 case Enum @enum:
                 {
-                    AppendEnumInspectionTo(
+                    Inspect.AppendEnumInspectionTo(
                         builder,
                         @enum,
                         traversedObjects,
@@ -98,7 +98,7 @@ namespace SbuBot.Evaluation.Inspection
 
                 case IEnumerable enumerable:
                 {
-                    AppendEnumerableInspectionTo(
+                    Inspect.AppendEnumerableInspectionTo(
                         builder,
                         enumerable,
                         traversedObjects,
@@ -113,7 +113,7 @@ namespace SbuBot.Evaluation.Inspection
 
                 default:
                 {
-                    AppendObjectInspectionTo(
+                    Inspect.AppendObjectInspectionTo(
                         builder,
                         obj,
                         traversedObjects,

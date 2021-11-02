@@ -64,7 +64,7 @@ namespace SbuBot.Commands.Modules
             [Description("Lists all tags.")]
             public async Task<DiscordCommandResult> ListAllAsync()
             {
-                List<SbuTag> tags = await Context.GetTagsAsync();
+                List<SbuTag> tags = await Context.GetTagsFullAsync();
 
                 if (tags.Count == 0)
                     return Reply("No tags found.");
@@ -89,8 +89,10 @@ namespace SbuBot.Commands.Modules
             + "with or contain them."
         )]
         public DiscordCommandResult GetReservedKeywords() => Reply(
-            "The following keywords are not allowed to be tags, but tags may contain them:\n"
-            + string.Join("\n", SbuGlobals.Keywords.ALL_RESERVED.Select(rn => $"> `{rn}`"))
+            string.Format(
+                "The following keywords are not allowed to be tags, but tags may contain them:\n{0}",
+                SbuGlobals.Keywords.ALL_RESERVED.Select(rn => $"> `{rn}`").ToNewLines()
+            )
         );
     }
 }

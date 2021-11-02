@@ -43,9 +43,11 @@ namespace SbuBot.Commands.Parsing.TypeParsers
             switch (SbuAutoResponse.IsValidResponse(values[1]))
             {
                 case SbuAutoResponse.ValidResponseType.TooLong:
+                {
                     return Failure(
                         $"The auto response can be at most {SbuTag.MAX_NAME_LENGTH} characters long."
                     );
+                }
 
                 case SbuAutoResponse.ValidResponseType.Valid:
                     break;

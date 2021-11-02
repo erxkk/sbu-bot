@@ -39,7 +39,11 @@ namespace SbuBot.Commands.Attributes.Checks.Parameters
                     break;
 
                 default:
-                    throw new UnreachableException($"Invalid argument type: {argument.GetType()}", argument);
+                    throw new ArgumentOutOfRangeException(
+                        nameof(argument),
+                        argument,
+                        $"Invalid argument type: {argument.GetType()}"
+                    );
             }
 
             return member.GetColorRole() is { } == MustHaveColorRole

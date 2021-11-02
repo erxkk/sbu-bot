@@ -17,6 +17,7 @@ using Qmmands;
 using SbuBot.Commands;
 using SbuBot.Commands.Parsing.Descriptors;
 using SbuBot.Commands.Parsing.TypeParsers;
+using SbuBot.Extensions;
 
 namespace SbuBot
 {
@@ -82,12 +83,12 @@ namespace SbuBot
                 ),
                 ChecksFailedResult checksFailed => string.Format(
                     "Checks failed:\n{0}",
-                    string.Join('\n', checksFailed.FailedChecks.Select((c => $"• {c.Result.FailureReason}")))
+                    checksFailed.FailedChecks.Select((c => $"• {c.Result.FailureReason}")).ToNewLines()
                 ),
                 ParameterChecksFailedResult parameterChecksFailed => string.Format(
                     "Checks failed for parameter `{0}`:\n{1}",
                     parameterChecksFailed.Parameter.Format(false),
-                    string.Join('\n', parameterChecksFailed.FailedChecks.Select((c => $"• {c.Result.FailureReason}")))
+                    parameterChecksFailed.FailedChecks.Select((c => $"• {c.Result.FailureReason}")).ToNewLines()
                 ),
                 _ => result.FailureReason,
             };

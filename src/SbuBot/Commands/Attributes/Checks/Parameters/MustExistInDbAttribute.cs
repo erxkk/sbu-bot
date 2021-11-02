@@ -27,8 +27,8 @@ namespace SbuBot.Commands.Attributes.Checks.Parameters
                     var exists = await context.GetDbMemberAsync(member) is { };
 
                     return exists == MustExistInDb
-                        ? ParameterCheckAttribute.Success()
-                        : ParameterCheckAttribute.Failure(
+                        ? Success()
+                        : Failure(
                             $"The given member must {(MustExistInDb ? "" : "not ")}be in the database for "
                             + "this command."
                         );
@@ -39,15 +39,19 @@ namespace SbuBot.Commands.Attributes.Checks.Parameters
                     var exists = await context.GetDbColorRoleAsync(role) is { };
 
                     return exists == MustExistInDb
-                        ? ParameterCheckAttribute.Success()
-                        : ParameterCheckAttribute.Failure(
+                        ? Success()
+                        : Failure(
                             $"The given role must {(MustExistInDb ? "" : "not ")}be in the database for "
                             + "this command."
                         );
                 }
 
                 default:
-                    throw new UnreachableException($"Invalid argument type: {argument.GetType()}", argument);
+                    throw new ArgumentOutOfRangeException(
+                        nameof(argument),
+                        argument,
+                        $"Invalid argument type: {argument.GetType()}"
+                    );
             }
         }
 

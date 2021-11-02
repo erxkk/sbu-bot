@@ -78,7 +78,7 @@ namespace SbuBot.Models
         }
 
 #nullable disable
-        internal sealed class EntityTypeConfiguration : IEntityTypeConfiguration<SbuReminder>
+        public sealed class EntityTypeConfiguration : IEntityTypeConfiguration<SbuReminder>
         {
             public void Configure(EntityTypeBuilder<SbuReminder> builder)
             {
@@ -107,6 +107,7 @@ namespace SbuBot.Models
                     .OnDelete(DeleteBehavior.Cascade);
             }
         }
+#nullable enable
 
 #endregion
     }

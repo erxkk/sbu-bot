@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Text;
 
 using Disqord;
@@ -29,5 +31,7 @@ namespace SbuBot.Extensions
             Inspect.AppendInspectionTo(builder, @object, maxDepth);
             return builder.ToString();
         }
+
+        public static string ToNewLines(this IEnumerable<string> @this) => string.Join('\n', @this);
     }
 }

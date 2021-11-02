@@ -28,7 +28,11 @@ namespace SbuBot.Commands.Attributes.Checks.Parameters
                 DateTimeOffset dateTimeOffset => dateTimeOffset <= now
                     ? Failure(MustBeFutureAttribute.FAILURE_REASON)
                     : Success(),
-                _ => throw new UnreachableException($"Invalid argument type: {argument.GetType()}", argument),
+                _ => throw new ArgumentOutOfRangeException(
+                    nameof(argument),
+                    argument,
+                    $"Invalid argument type: {argument.GetType()}"
+                ),
             };
         }
 

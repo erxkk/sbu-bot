@@ -12,7 +12,7 @@ namespace SbuBot.Evaluation.Inspection
             int maxDepth,
             int indentationDelta = 2,
             int itemCount = 5
-        ) => AppendEnumerableInspectionTo(
+        ) => Inspect.AppendEnumerableInspectionTo(
             builder,
             enumerable,
             new HashSet<object>(),

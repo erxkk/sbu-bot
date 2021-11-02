@@ -38,7 +38,7 @@ namespace SbuBot.Models
         }
 
 #nullable disable
-        internal sealed class EntityTypeConfiguration : IEntityTypeConfiguration<SbuMember>
+        public sealed class EntityTypeConfiguration : IEntityTypeConfiguration<SbuMember>
         {
             public void Configure(EntityTypeBuilder<SbuMember> builder)
             {
@@ -71,6 +71,7 @@ namespace SbuBot.Models
                     .OnDelete(DeleteBehavior.Cascade);
             }
         }
+#nullable enable
 
 #endregion
     }

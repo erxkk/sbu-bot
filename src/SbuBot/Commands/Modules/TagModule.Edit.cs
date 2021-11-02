@@ -56,6 +56,7 @@ namespace SbuBot.Commands.Modules
                 switch (await Context.WaitFollowUpForAsync("What do you want the tag content to be?"))
                 {
                     case Result<string, FollowUpError>.Success followUp:
+                    {
                         content = followUp.Value.Trim();
 
                         if (content.Length > SbuTag.MAX_CONTENT_LENGTH)
@@ -66,13 +67,16 @@ namespace SbuBot.Commands.Modules
                         }
 
                         break;
+                    }
 
                     case Result<string, FollowUpError>.Error error:
+                    {
                         return Reply(
                             error.Value == FollowUpError.Aborted
                                 ? "Aborted."
                                 : "Aborted: You did not provide tag content."
                         );
+                    }
 
                     default:
                         throw new ArgumentOutOfRangeException();

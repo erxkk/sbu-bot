@@ -14,7 +14,7 @@ namespace SbuBot.Evaluation.Inspection
             int maxDepth,
             int indentationDelta = 2,
             int itemCount = 5
-        ) => AppendEnumInspectionTo(
+        ) => Inspect.AppendEnumInspectionTo(
             builder,
             @enum,
             new HashSet<object>(),

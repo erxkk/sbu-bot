@@ -46,7 +46,7 @@ namespace SbuBot.Models
         }
 
 #nullable disable
-        internal sealed class EntityTypeConfiguration : IEntityTypeConfiguration<SbuTag>
+        public sealed class EntityTypeConfiguration : IEntityTypeConfiguration<SbuTag>
         {
             public void Configure(EntityTypeBuilder<SbuTag> builder)
             {
@@ -73,6 +73,7 @@ namespace SbuBot.Models
                     .OnDelete(DeleteBehavior.Cascade);
             }
         }
+#nullable enable
 
 #endregion
 

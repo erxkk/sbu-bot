@@ -46,7 +46,7 @@ namespace SbuBot.Commands
         public Optional<IUserMessage> ReferencedMessage => _originalGatewayUserMessage.ReferencedMessage;
         public IReadOnlyList<IRowComponent> Components => _originalGatewayUserMessage.Components;
 
-        internal ProxyMessage(
+        public ProxyMessage(
             IGatewayUserMessage originalGatewayUserMessage,
             string? proxyContent = null,
             IUser? proxyAuthor = null,

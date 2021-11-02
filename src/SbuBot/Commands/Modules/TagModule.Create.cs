@@ -55,11 +55,13 @@ namespace SbuBot.Commands.Modules
                         break;
 
                     case Result<string, FollowUpError>.Error error:
+                    {
                         return Reply(
                             error.Value == FollowUpError.Aborted
                                 ? "Aborted."
                                 : "Aborted: You did not provide a tag name."
                         );
+                    }
 
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -68,14 +70,18 @@ namespace SbuBot.Commands.Modules
                 switch (SbuTag.IsValidTagName(name))
                 {
                     case SbuTag.ValidNameType.TooShort:
+                    {
                         return Reply(
                             $"Aborted: The tag name must be at least {SbuTag.MIN_NAME_LENGTH} characters long."
                         );
+                    }
 
                     case SbuTag.ValidNameType.TooLong:
+                    {
                         return Reply(
                             $"Aborted: The tag name can be at most {SbuTag.MAX_NAME_LENGTH} characters long."
                         );
+                    }
 
                     case SbuTag.ValidNameType.Reserved:
                         return Reply("The tag name cannot be a reserved keyword.");
@@ -95,6 +101,7 @@ namespace SbuBot.Commands.Modules
                 switch (await Context.WaitFollowUpForAsync("What do you want the tag content to be?"))
                 {
                     case Result<string, FollowUpError>.Success followUp:
+                    {
                         content = followUp.Value.Trim();
 
                         if (content.Length > SbuTag.MAX_CONTENT_LENGTH)
@@ -105,13 +112,16 @@ namespace SbuBot.Commands.Modules
                         }
 
                         break;
+                    }
 
                     case Result<string, FollowUpError>.Error error:
+                    {
                         return Reply(
                             error.Value == FollowUpError.Aborted
                                 ? "Aborted."
                                 : "Aborted: You did not provide tag content."
                         );
+                    }
 
                     default:
                         throw new ArgumentOutOfRangeException();

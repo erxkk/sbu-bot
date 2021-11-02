@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 
 using Destructurama.Attributed;
@@ -60,7 +59,7 @@ namespace SbuBot.Models
 
 #nullable disable
 
-        internal sealed class EntityTypeConfiguration : IEntityTypeConfiguration<SbuGuild>
+        public sealed class EntityTypeConfiguration : IEntityTypeConfiguration<SbuGuild>
         {
             public void Configure(EntityTypeBuilder<SbuGuild> builder)
             {
@@ -104,12 +103,5 @@ namespace SbuBot.Models
         }
 
 #endregion
-    }
-
-    [Flags]
-    public enum SbuGuildConfig : byte
-    {
-        Respond,
-        Archive,
     }
 }

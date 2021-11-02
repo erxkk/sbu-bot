@@ -65,11 +65,13 @@ namespace SbuBot.Commands.Modules
                             break;
 
                         case Result<string, FollowUpError>.Error error:
+                        {
                             return Reply(
                                 error.Value == FollowUpError.Aborted
                                     ? "Aborted."
                                     : "Aborted: You did not provide an auto response trigger."
                             );
+                        }
 
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -97,7 +99,7 @@ namespace SbuBot.Commands.Modules
                             throw new ArgumentOutOfRangeException();
                     }
 
-                    if (await Context.GetAutoResponseAsync(trigger) is { })
+                    if (await Context.GetAutoResponseFullAsync(trigger) is { })
                         return Reply("Auto response with same name already exists.");
 
                     string? response;
@@ -129,11 +131,13 @@ namespace SbuBot.Commands.Modules
                             break;
 
                         case Result<string, FollowUpError>.Error error:
+                        {
                             return Reply(
                                 error.Value == FollowUpError.Aborted
                                     ? "Aborted."
                                     : "Aborted: You did not provide an auto response."
                             );
+                        }
 
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -146,10 +150,6 @@ namespace SbuBot.Commands.Modules
                         trigger,
                         response
                     );
-
-                    SbuDbContext context = Context.GetSbuDbContext();
-
-                    await context.SaveChangesAsync();
 
                     return Reply("Auto response created.");
                 }

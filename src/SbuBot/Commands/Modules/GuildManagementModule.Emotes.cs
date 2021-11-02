@@ -114,6 +114,7 @@ namespace SbuBot.Commands.Modules
                     {
                         case ConfirmationState.None:
                         case ConfirmationState.Aborted:
+                        case ConfirmationState.TimedOut:
                             return Reply("Aborted.");
 
                         case ConfirmationState.Confirmed:
@@ -124,9 +125,7 @@ namespace SbuBot.Commands.Modules
                     }
                 }
 
-                foreach (IGuildEmoji customEmoji in emoteSet)
-                    await customEmoji.DeleteAsync();
-
+                await Task.WhenAll(emoteSet.Select(e => e.DeleteAsync()));
                 return Reply("Removed all emotes.");
             }
         }

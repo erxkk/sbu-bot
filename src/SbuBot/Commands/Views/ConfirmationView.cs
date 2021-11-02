@@ -49,7 +49,7 @@ namespace SbuBot.Commands.Views
                 DenyButton.IsDisabled = true;
                 DenyButton.Style = Result ? LocalButtonComponentStyle.Secondary : DenyButton.Style;
 
-                var message = ToLocalMessage();
+                LocalMessage message = ToLocalMessage();
 
                 await e.Interaction.Response()
                     .ModifyMessageAsync(

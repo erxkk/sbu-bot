@@ -31,7 +31,6 @@ namespace SbuBot.Commands.Modules
                     .AddInlineField("Prefix", Markdown.Code(SbuGlobals.DEFAULT_PREFIX))
                     .AddBlankInlineField()
                     .AddBlankInlineField()
-                    .AddInlineField("Version", SbuGlobals.VERSION)
                     .AddInlineField(
                         "Source",
                         Markdown.Link("Github:erxkk/sbu-bot", SbuGlobals.Links.GH_SELF)

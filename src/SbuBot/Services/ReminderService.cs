@@ -9,6 +9,8 @@ using Disqord;
 using Disqord.Bot.Hosting;
 using Disqord.Rest;
 
+using Kkommon;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -19,6 +21,8 @@ namespace SbuBot.Services
 {
     public sealed class ReminderService : DiscordBotService
     {
+        private record Entry(SbuReminder Reminder, Timer Timer);
+
         private readonly ConcurrentDictionary<Snowflake, Entry> _scheduleEntries = new();
 
         public IReadOnlyDictionary<Snowflake, SbuReminder> GetReminders()
@@ -81,7 +85,7 @@ namespace SbuBot.Services
             _scheduleEntries[reminder.MessageId] = new(
                 reminder,
                 new(
-                    _timerCallback,
+                    sender => _ = _timerCallbackAsync((Snowflake)sender!),
                     reminder.MessageId,
                     reminder.DueAt - now,
                     Timeout.InfiniteTimeSpan
@@ -91,12 +95,11 @@ namespace SbuBot.Services
             Logger.LogDebug("Scheduled {@Reminder}", reminder);
         }
 
-        public async Task RescheduleAsync(Snowflake id, DateTimeOffset newTimestamp)
+        public async Task<bool> RescheduleAsync(Snowflake id, DateTimeOffset newTimestamp)
         {
             DateTimeOffset now = DateTimeOffset.Now;
-            Entry entry;
 
-            if (!_scheduleEntries.TryGetValue(id, out entry!))
+            if (!_scheduleEntries.TryGetValue(id, out Entry? entry))
             {
                 Logger.LogWarning(
                     "Could not reschedule to {@NewTimestamp}, not found : {@Entry}",
@@ -104,7 +107,7 @@ namespace SbuBot.Services
                     id
                 );
 
-                return;
+                return false;
             }
 
             SbuReminder reminder = entry.Reminder;
@@ -127,12 +130,14 @@ namespace SbuBot.Services
                 newTimestamp,
                 reminder
             );
+
+            return true;
         }
 
-        public async Task CancelAsync(Snowflake id)
+        public async Task<bool> CancelAsync(Snowflake id)
         {
             if (!_scheduleEntries.TryRemove(id, out Entry? entry))
-                return;
+                return false;
 
             await entry.Timer.DisposeAsync();
             SbuReminder reminder = entry.Reminder;
@@ -146,22 +151,22 @@ namespace SbuBot.Services
             }
 
             Logger.LogDebug("Cancelled: {@Reminder}", reminder);
+            return true;
         }
 
-        public async Task CancelAsync(Func<SbuReminder, bool> query)
+        public async Task<IReadOnlyList<SbuReminder>> CancelAsync(Func<SbuReminder, bool> query)
         {
-            if (query == null)
-                throw new ArgumentNullException(nameof(query));
+            Preconditions.NotNull(query, nameof(query));
 
-            int count = 0;
+            List<SbuReminder> removed = new();
 
             IEnumerable<KeyValuePair<Snowflake, Entry>> filtered = _scheduleEntries.Where(e => query(e.Value.Reminder));
             IEnumerable<SbuReminder> reminders = filtered.Select(e => e.Value.Reminder);
 
-            foreach ((Snowflake _, Entry entry) in filtered)
+            foreach ((Snowflake _, (SbuReminder reminder, Timer timer)) in filtered)
             {
-                count++;
-                await entry.Timer.DisposeAsync();
+                removed.Add(reminder);
+                await timer.DisposeAsync();
             }
 
             using (IServiceScope scope = Bot.Services.CreateScope())
@@ -173,11 +178,7 @@ namespace SbuBot.Services
             }
 
             Logger.LogDebug("Cancelled: {@Reminders}", reminders);
-        }
-
-        private void _timerCallback(object? sender)
-        {
-            _ = _timerCallbackAsync((Snowflake)sender!);
+            return removed;
         }
 
         private async Task _timerCallbackAsync(Snowflake identifier)
@@ -225,18 +226,6 @@ namespace SbuBot.Services
                 }
 
                 Logger.LogTrace("Removed internally {@Reminder}", reminder);
-            }
-        }
-
-        private sealed class Entry
-        {
-            public SbuReminder Reminder { get; }
-            public Timer Timer { get; }
-
-            public Entry(SbuReminder reminder, Timer timer)
-            {
-                Reminder = reminder;
-                Timer = timer;
             }
         }
     }
