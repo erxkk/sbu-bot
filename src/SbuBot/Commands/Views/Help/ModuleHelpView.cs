@@ -69,6 +69,21 @@ namespace SbuBot.Commands.Views.Help
             if (_module.Remarks is { })
                 description.AppendLine("**Remarks:**").AppendLine(_module.Remarks);
 
+            var result = await _module.RunChecksAsync(Context);
+
+            if (result is ChecksFailedResult failedResult)
+            {
+                description.Append('\n')
+                    .AppendLine("**Checks:**")
+                    .AppendLine(failedResult.FailedChecks.Select((c => $"• {c.Result.FailureReason}")).ToNewLines());
+            }
+            else
+            {
+                description.Append('\n').AppendLine("**You can execute commands in this module.**");
+            }
+
+            description.Append('\n');
+
             SelectionViewComponent moduleSelection = new(_selectModule);
             SelectionViewComponent commandSelection = new(_selectCommand);
 
@@ -100,25 +115,10 @@ namespace SbuBot.Commands.Views.Help
                 AddComponent(commandSelection);
             }
 
-            var result = await _module.RunChecksAsync(Context);
-
-            if (result is ChecksFailedResult failedResult)
-            {
-                description.Append('\n')
-                    .AppendLine("**Checks:**")
-                    .AppendLine(failedResult.FailedChecks.Select((c => $"• {c.Result.FailureReason}")).ToNewLines());
-            }
-            else
-            {
-                description.Append('\n').AppendLine("**You can execute commands in this module.**");
-            }
-
-            description.Append('\n');
-
             if (_module.Aliases.Count != 0)
             {
                 description
-                    .AppendLine("Aliases:")
+                    .AppendLine("**Aliases:**")
                     .AppendLine(string.Join(", ", _module.Aliases.Select(Markdown.Code)));
             }
 

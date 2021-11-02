@@ -77,7 +77,7 @@ namespace SbuBot.Commands.Views.Help
             if (_command.Aliases.Count != 0)
             {
                 description
-                    .AppendLine("Aliases:")
+                    .AppendLine("**Aliases:**")
                     .AppendLine(string.Join(", ", _command.Aliases.Select(Markdown.Code)));
             }
 
