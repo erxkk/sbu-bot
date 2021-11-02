@@ -10,7 +10,7 @@ namespace SbuBot.Commands.Views
 {
     public sealed class ConfirmationView : PromptView
     {
-        public ConfirmationView(string prompt, string? description = null) : base(
+        public ConfirmationView(string prompt, string? description = null) : this(
             new LocalMessage().WithEmbeds(
                 new LocalEmbed()
                     .WithTitle(prompt)
