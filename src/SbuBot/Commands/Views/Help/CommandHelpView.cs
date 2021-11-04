@@ -57,7 +57,8 @@ namespace SbuBot.Commands.Views.Help
 
             description.Append('\n');
 
-            if (_command.Attributes.OfType<UsageAttribute>().FirstOrDefault() is { } usage)
+            if ((_command.Attributes.OfType<UsageAttribute>().FirstOrDefault()
+                ?? _command.Module.Attributes.OfType<UsageAttribute>().FirstOrDefault()) is { } usage)
             {
                 description.AppendLine("**Examples:**");
 

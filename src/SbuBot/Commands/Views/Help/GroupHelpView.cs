@@ -10,6 +10,7 @@ using Disqord.Extensions.Interactivity.Menus;
 
 using Qmmands;
 
+using SbuBot.Commands.Attributes;
 using SbuBot.Extensions;
 
 namespace SbuBot.Commands.Views.Help
@@ -75,6 +76,23 @@ namespace SbuBot.Commands.Views.Help
             }
 
             description.Append('\n');
+
+            if (_group.Attributes.OfType<UsageAttribute>().FirstOrDefault() is { } usage)
+            {
+                description.AppendLine("**Examples:**");
+
+                foreach (string example in usage.Values)
+                {
+                    description.Append(SbuGlobals.BULLET)
+                        .Append(' ')
+                        .Append('`')
+                        .Append(SbuGlobals.DEFAULT_PREFIX)
+                        .Append(' ')
+                        .Append(example)
+                        .Append('`')
+                        .Append('\n');
+                }
+            }
 
             if (_group.Aliases.Count != 0)
             {

@@ -2,7 +2,7 @@ using System;
 
 namespace SbuBot.Commands.Attributes
 {
-    [AttributeUsage(AttributeTargets.Method)]
+    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class)]
     public sealed class UsageAttribute : Attribute
     {
         public string[] Values { get; }
