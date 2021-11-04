@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using System.Text;
 
 using Disqord;
@@ -25,10 +24,15 @@ namespace SbuBot.Extensions
             return @this[..(length - 1)] + SbuGlobals.ELLIPSES;
         }
 
-        public static string GetInspection(this object? @object, int maxDepth = 1)
+        public static string GetInspection(
+            this object? @object,
+            int maxDepth = 1,
+            int indentationDelta = 2,
+            int itemCount = 5
+        )
         {
             StringBuilder builder = new(LocalEmbed.MaxDescriptionLength);
-            Inspect.AppendInspectionTo(builder, @object, maxDepth);
+            Inspect.AppendInspectionTo(builder, @object, maxDepth, indentationDelta, itemCount);
             return builder.ToString();
         }
 
