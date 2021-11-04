@@ -6,109 +6,109 @@
         <Nullable>enable</Nullable>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     </PropertyGroup>
-    
+
     <ItemGroup>
-      <ProjectReference Include="..\..\kkommon\src\Kkommon\Kkommon.csproj" />
+        <ProjectReference Include="..\..\kkommon\src\Kkommon\Kkommon.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Disqord.Bot" Version="1.0.0-10312021-144" />
-      <PackageReference Include="EFCoreSecondLevelCacheInterceptor" Version="3.1.0" />
-      <PackageReference Include="HumanTimeParser.English" Version="2.0.1-dev-835860444" />
-      <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="3.10.0-3.final" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.6">
-        <PrivateAssets>all</PrivateAssets>
-        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      </PackageReference>
-      <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
-      <PackageReference Include="Microsoft.Extensions.Http" Version="5.0.0" />
-      <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="5.0.6" />
-      <PackageReference Include="Serilog.Extensions.Hosting" Version="4.1.2" />
-      <PackageReference Include="Serilog.Extras.Attributed" Version="2.0.0" />
-      <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
-      <PackageReference Include="Serilog.Sinks.File" Version="4.1.0" />
+        <PackageReference Include="Disqord.Bot" Version="1.0.0-10312021-144" />
+        <PackageReference Include="EFCoreSecondLevelCacheInterceptor" Version="3.1.0" />
+        <PackageReference Include="HumanTimeParser.English" Version="2.0.1-dev-835860444" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="3.10.0-3.final" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.6">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Http" Version="5.0.0" />
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="5.0.6" />
+        <PackageReference Include="Serilog.Extensions.Hosting" Version="4.1.2" />
+        <PackageReference Include="Serilog.Extras.Attributed" Version="2.0.0" />
+        <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
+        <PackageReference Include="Serilog.Sinks.File" Version="4.1.0" />
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Migrations" />
+        <Folder Include="Migrations" />
     </ItemGroup>
 
     <ItemGroup>
-      <None Update="config.yaml">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
+        <None Update="config.yaml">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
 
     <ItemGroup>
-      <Compile Update="Commands\Modules\GuildManagementModule.Archive.cs">
-        <DependentUpon>GuildManagementModule.cs</DependentUpon>
-      </Compile>
-      <Compile Update="Commands\Modules\GuildManagementModule.Request.cs">
-        <DependentUpon>GuildManagementModule.cs</DependentUpon>
-      </Compile>
-      <Compile Update="Commands\Modules\DebugModule.Eval.cs">
-        <DependentUpon>DebugModule.cs</DependentUpon>
-      </Compile>
-      <Compile Update="Commands\Modules\GuildManagementModule.AutoResponse.cs">
-        <DependentUpon>GuildManagementModule.cs</DependentUpon>
-      </Compile>
-      <Compile Update="Commands\Modules\TagModule.Create.cs">
-        <DependentUpon>TagModule.cs</DependentUpon>
-      </Compile>
-      <Compile Update="Commands\Modules\TagModule.Edit.cs">
-        <DependentUpon>TagModule.cs</DependentUpon>
-      </Compile>
-      <Compile Update="Commands\Modules\TagModule.Delete.cs">
-        <DependentUpon>TagModule.cs</DependentUpon>
-      </Compile>
-      <Compile Update="Commands\Modules\TagModule.Transfer.cs">
-        <DependentUpon>TagModule.cs</DependentUpon>
-      </Compile>
-      <Compile Update="Commands\Modules\TagModule.Claim.cs">
-        <DependentUpon>TagModule.cs</DependentUpon>
-      </Compile>
-      <Compile Update="Commands\Modules\ReminderModule.Create.cs">
-        <DependentUpon>ReminderModule.cs</DependentUpon>
-      </Compile>
-      <Compile Update="Commands\Modules\ReminderModule.Delete.cs">
-        <DependentUpon>ReminderModule.cs</DependentUpon>
-      </Compile>
-      <Compile Update="Commands\Modules\ReminderModule.Edit.cs">
-        <DependentUpon>ReminderModule.cs</DependentUpon>
-      </Compile>
-      <Compile Update="Commands\Modules\GuildManagementModule.AutoResponse.Create.cs">
-        <DependentUpon>GuildManagementModule.AutoResponse.cs</DependentUpon>
-      </Compile>
-      <Compile Update="Commands\Modules\GuildManagementModule.AutoResponse.Delete.cs">
-        <DependentUpon>GuildManagementModule.AutoResponse.cs</DependentUpon>
-      </Compile>
-      <Compile Update="Commands\Modules\ColorRoleModule.Create.cs">
-        <DependentUpon>ColorRoleModule.cs</DependentUpon>
-      </Compile>
-      <Compile Update="Commands\Modules\ColorRoleModule.Claim.cs">
-        <DependentUpon>ColorRoleModule.cs</DependentUpon>
-      </Compile>
-      <Compile Update="Commands\Modules\ColorRoleModule.Edit.cs">
-        <DependentUpon>ColorRoleModule.cs</DependentUpon>
-      </Compile>
-      <Compile Update="Commands\Modules\ColorRoleModule.Delete.cs">
-        <DependentUpon>ColorRoleModule.cs</DependentUpon>
-      </Compile>
-      <Compile Update="Commands\Modules\ColorRoleModule.Transfer.cs">
-        <DependentUpon>ColorRoleModule.cs</DependentUpon>
-      </Compile>
-      <Compile Update="Commands\Modules\GuildManagementModule.Archive.Config.cs">
-        <DependentUpon>GuildManagementModule.Archive.cs</DependentUpon>
-      </Compile>
-      <Compile Update="Commands\Modules\ColorRoleModule.Config.cs">
-        <DependentUpon>ColorRoleModule.cs</DependentUpon>
-      </Compile>
-      <Compile Update="Commands\Modules\EmoteModule.Create.cs">
-        <DependentUpon>EmoteModule.cs</DependentUpon>
-      </Compile>
-      <Compile Update="Commands\Modules\EmoteModule.Delete.cs">
-        <DependentUpon>EmoteModule.cs</DependentUpon>
-      </Compile>
+        <Compile Update="Commands\Modules\GuildManagementModule.Archive.cs">
+            <DependentUpon>GuildManagementModule.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Commands\Modules\GuildManagementModule.Request.cs">
+            <DependentUpon>GuildManagementModule.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Commands\Modules\DebugModule.Eval.cs">
+            <DependentUpon>DebugModule.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Commands\Modules\GuildManagementModule.AutoResponse.cs">
+            <DependentUpon>GuildManagementModule.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Commands\Modules\TagModule.Create.cs">
+            <DependentUpon>TagModule.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Commands\Modules\TagModule.Edit.cs">
+            <DependentUpon>TagModule.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Commands\Modules\TagModule.Delete.cs">
+            <DependentUpon>TagModule.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Commands\Modules\TagModule.Transfer.cs">
+            <DependentUpon>TagModule.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Commands\Modules\TagModule.Claim.cs">
+            <DependentUpon>TagModule.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Commands\Modules\ReminderModule.Create.cs">
+            <DependentUpon>ReminderModule.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Commands\Modules\ReminderModule.Delete.cs">
+            <DependentUpon>ReminderModule.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Commands\Modules\ReminderModule.Edit.cs">
+            <DependentUpon>ReminderModule.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Commands\Modules\GuildManagementModule.AutoResponse.Create.cs">
+            <DependentUpon>GuildManagementModule.AutoResponse.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Commands\Modules\GuildManagementModule.AutoResponse.Delete.cs">
+            <DependentUpon>GuildManagementModule.AutoResponse.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Commands\Modules\ColorRoleModule.Create.cs">
+            <DependentUpon>ColorRoleModule.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Commands\Modules\ColorRoleModule.Claim.cs">
+            <DependentUpon>ColorRoleModule.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Commands\Modules\ColorRoleModule.Edit.cs">
+            <DependentUpon>ColorRoleModule.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Commands\Modules\ColorRoleModule.Delete.cs">
+            <DependentUpon>ColorRoleModule.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Commands\Modules\ColorRoleModule.Transfer.cs">
+            <DependentUpon>ColorRoleModule.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Commands\Modules\GuildManagementModule.Archive.Config.cs">
+            <DependentUpon>GuildManagementModule.Archive.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Commands\Modules\ColorRoleModule.Config.cs">
+            <DependentUpon>ColorRoleModule.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Commands\Modules\EmoteModule.Create.cs">
+            <DependentUpon>EmoteModule.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Commands\Modules\EmoteModule.Delete.cs">
+            <DependentUpon>EmoteModule.cs</DependentUpon>
+        </Compile>
     </ItemGroup>
 
 </Project>

@@ -5,6 +5,8 @@ using Disqord.Bot;
 
 using Qmmands;
 
+using SbuBot.Commands.Parsing.HelperTypes;
+
 namespace SbuBot.Commands.Parsing.TypeParsers
 {
     public sealed class OneOrAllTypeParser<T> : DiscordTypeParser<OneOrAll<T>>

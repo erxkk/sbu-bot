@@ -13,7 +13,7 @@ namespace SbuBot.Commands.Modules
 {
     public sealed partial class GuildManagementModule
     {
-        public sealed partial class ArchiveSubModule : SbuModuleBase
+        public sealed partial class ArchiveSubModule
         {
             [Command("set")]
             [RequireAuthorGuildPermissions(Permission.Administrator)]

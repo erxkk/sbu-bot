@@ -149,7 +149,7 @@ namespace SbuBot.Commands.Modules
         public sealed class InspectGroup : SbuModuleBase
         {
             [Command]
-            public async Task<DiscordCommandResult> InspectMember(
+            public async Task<DiscordCommandResult> InspectGuild(
                 [Minimum(1)][Description("The depth of the inspection.")]
                 int depth = 1
             ) => Reply(

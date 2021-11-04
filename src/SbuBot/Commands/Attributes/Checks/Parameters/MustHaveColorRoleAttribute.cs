@@ -6,8 +6,6 @@ using Disqord.Bot;
 using Disqord.Gateway;
 using Disqord.Rest;
 
-using Kkommon.Exceptions;
-
 using Qmmands;
 
 using SbuBot.Extensions;

@@ -19,7 +19,7 @@ namespace SbuBot.Models
         public string Response { get; }
 
         [NotLogged]
-        public SbuGuild? Guild { get; }
+        public SbuGuild? Guild { get; } = null!;
 
         public SbuAutoResponse(IGuild guild, string trigger, string response)
         {

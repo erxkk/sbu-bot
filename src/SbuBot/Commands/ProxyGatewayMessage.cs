@@ -21,7 +21,7 @@ namespace SbuBot.Commands
             => _originalGatewayUserMessage.Reactions;
 
         public IClient Client => _originalGatewayUserMessage.Client;
-        IGatewayClient IGatewayClientEntity.Client { get; }
+        IGatewayClient IGatewayClientEntity.Client => (Client as IGatewayClient)!;
         public Snowflake Id => _originalGatewayUserMessage.Id;
         public Snowflake? GuildId => _originalGatewayUserMessage.GuildId;
         public UserMessageType Type => _originalGatewayUserMessage.Type;

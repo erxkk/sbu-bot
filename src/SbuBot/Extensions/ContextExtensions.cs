@@ -15,7 +15,6 @@ using Kkommon;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
-using SbuBot.Commands;
 using SbuBot.Models;
 
 namespace SbuBot.Extensions

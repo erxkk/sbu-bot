@@ -46,7 +46,7 @@ namespace SbuBot.Evaluation.Inspection
                 out var extractor
             ))
             {
-                Extraction extraction = extractor(obj!);
+                Extraction extraction = extractor(obj);
 
                 switch (extraction.Type)
                 {

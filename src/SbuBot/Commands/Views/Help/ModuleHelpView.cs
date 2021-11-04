@@ -54,11 +54,13 @@ namespace SbuBot.Commands.Views.Help
             return default;
         }
 
-        public override async ValueTask GoToParentAsync(ButtonEventArgs e)
+        public override ValueTask GoToParentAsync(ButtonEventArgs e)
         {
             Menu.View = _module.Parent is null
                 ? new RootHelpView(Context, _module.Service)
                 : new ModuleHelpView(Context, _module.Parent);
+
+            return default;
         }
 
         public override async ValueTask UpdateAsync()

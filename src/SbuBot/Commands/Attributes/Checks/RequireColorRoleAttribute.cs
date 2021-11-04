@@ -2,8 +2,6 @@ using System.Threading.Tasks;
 
 using Disqord.Bot;
 
-using Microsoft.EntityFrameworkCore;
-
 using Qmmands;
 
 using SbuBot.Extensions;
@@ -19,9 +17,7 @@ namespace SbuBot.Commands.Attributes.Checks
 
         public override async ValueTask<CheckResult> CheckAsync(DiscordGuildCommandContext context)
         {
-            SbuMember member = await context
-                .GetSbuDbContext()
-                .GetMemberAsync(context.Author, m => m.Include(m => m.ColorRole));
+            SbuMember member = await context.GetDbAuthorAsync();
 
             return member.ColorRole is { } == RequireColorRole
                 ? Success()

@@ -16,10 +16,10 @@ namespace SbuBot.Models
 
         // nav properties
         [NotLogged]
-        public SbuGuild? Guild { get; }
+        public SbuGuild? Guild { get; } = null!;
 
         [NotLogged]
-        public SbuColorRole? ColorRole { get; set; }
+        public SbuColorRole? ColorRole { get; set; } = null!;
 
         [NotLogged]
         public List<SbuTag> Tags { get; } = new();

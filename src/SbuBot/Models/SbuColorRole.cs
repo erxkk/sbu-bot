@@ -16,10 +16,10 @@ namespace SbuBot.Models
 
         // nav properties
         [NotLogged]
-        public SbuMember? Owner { get; }
+        public SbuMember? Owner { get; } = null!;
 
         [NotLogged]
-        public SbuGuild? Guild { get; }
+        public SbuGuild? Guild { get; } = null!;
 
         public SbuColorRole(IRole role, Snowflake ownerId) : this(role.Id, ownerId, role.GuildId) { }
 

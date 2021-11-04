@@ -78,7 +78,8 @@ namespace SbuBot
             {
                 CommandNotFoundResult => null,
                 TypeParseFailedResult parseFailedResult => string.Format(
-                    "Type parse failed for parameter `{0}`:\n{SbuGlobals.BULLET} {1}",
+                    "Type parse failed for parameter `{0}`:\n{1} {2}",
+                    SbuGlobals.BULLET,
                     parseFailedResult.Parameter.Format(false),
                     parseFailedResult.FailureReason
                 ),

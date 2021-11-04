@@ -15,7 +15,6 @@ namespace SbuBot.Commands.Modules
 {
     public sealed partial class ColorRoleModule
     {
-
         [Command("delete")]
         [RequireColorRole]
         [Description("Removes the authors color role.")]

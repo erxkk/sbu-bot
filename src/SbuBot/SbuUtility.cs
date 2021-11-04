@@ -1,15 +1,8 @@
-using System.Linq;
 using System.Text.RegularExpressions;
 
 using Disqord;
-using Disqord.Bot;
 
 using Kkommon;
-
-using Qmmands;
-
-using SbuBot.Commands;
-using SbuBot.Extensions;
 
 namespace SbuBot
 {

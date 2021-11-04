@@ -15,7 +15,7 @@ namespace SbuBot.Commands.Modules
         [Command("color")]
         [Description("Replies with the given color as an embed or a random color if non is given.")]
         public DiscordCommandResult ShowColor(
-            [Description("The color to reply with.")]
+            [Description("The optional color to reply with.")]
             Color? color = null
         )
         {

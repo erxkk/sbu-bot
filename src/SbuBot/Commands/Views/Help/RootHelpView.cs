@@ -46,6 +46,7 @@ namespace SbuBot.Commands.Views.Help
                 Context,
                 _modules[Convert.ToInt32(e.Interaction.SelectedValues[0])]
             );
+
             return default;
         }
     }
