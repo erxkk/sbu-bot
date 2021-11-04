@@ -36,6 +36,7 @@ namespace SbuBot
         protected override ValueTask AddTypeParsersAsync(CancellationToken cancellationToken = default)
         {
             Commands.AddTypeParser(new GuidTypeParser());
+            Commands.AddTypeParser(new UriTypeParser());
 
             Commands.AddTypeParser(new ColorRoleTypeParser());
             Commands.AddTypeParser(new MemberTypeReader());

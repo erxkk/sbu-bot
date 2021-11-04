@@ -43,9 +43,6 @@
       <Compile Update="Commands\Modules\GuildManagementModule.Archive.cs">
         <DependentUpon>GuildManagementModule.cs</DependentUpon>
       </Compile>
-      <Compile Update="Commands\Modules\GuildManagementModule.Emotes.cs">
-        <DependentUpon>GuildManagementModule.cs</DependentUpon>
-      </Compile>
       <Compile Update="Commands\Modules\GuildManagementModule.Request.cs">
         <DependentUpon>GuildManagementModule.cs</DependentUpon>
       </Compile>
@@ -105,6 +102,12 @@
       </Compile>
       <Compile Update="Commands\Modules\ColorRoleModule.Config.cs">
         <DependentUpon>ColorRoleModule.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Commands\Modules\EmoteModule.Create.cs">
+        <DependentUpon>EmoteModule.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Commands\Modules\EmoteModule.Delete.cs">
+        <DependentUpon>EmoteModule.cs</DependentUpon>
       </Compile>
     </ItemGroup>
 
