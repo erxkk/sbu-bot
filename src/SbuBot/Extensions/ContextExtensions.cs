@@ -83,7 +83,8 @@ namespace SbuBot.Extensions
 
         public static async Task<Result<string, FollowUpError>> WaitFollowUpForAsync(
             this DiscordGuildCommandContext @this,
-            string prompt
+            string prompt,
+            bool yield = false
         )
         {
             await @this.Channel.SendMessageAsync(
@@ -94,9 +95,16 @@ namespace SbuBot.Extensions
 
             MessageReceivedEventArgs? args;
 
-            await using (_ = @this.BeginYield())
+            if (yield)
             {
-                args = await @this.WaitForMessageAsync(a => a.Member.Id == @this.Author.Id);
+                await using (@this.BeginYield())
+                {
+                    args = await @this.WaitForMessageAsync();
+                }
+            }
+            else
+            {
+                args = await @this.WaitForMessageAsync();
             }
 
             return args switch
