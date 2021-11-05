@@ -21,37 +21,61 @@ namespace SbuBot.Services
 {
     public sealed class ReminderService : DiscordBotService
     {
+        private static readonly TimeSpan MAX_UNSUSPENDED_TIMESPAN = TimeSpan.FromDays(7);
+
         private record Entry(SbuReminder Reminder, Timer Timer);
 
         private readonly ConcurrentDictionary<Snowflake, Entry> _scheduleEntries = new();
+        private readonly Timer _suspendedTimer;
+
+        public ReminderService()
+        {
+            _suspendedTimer = new(
+                _ => _ = _fetchSuspendedTimersAsync(),
+                null,
+                ReminderService.MAX_UNSUSPENDED_TIMESPAN,
+                ReminderService.MAX_UNSUSPENDED_TIMESPAN
+            );
+        }
 
         public IReadOnlyDictionary<Snowflake, SbuReminder> GetReminders()
             => _scheduleEntries.ToDictionary(k => k.Key, v => v.Value.Reminder);
 
         public override async Task StopAsync(CancellationToken cancellationToken)
         {
+            await _suspendedTimer.DisposeAsync();
+
             foreach ((Snowflake _, Entry entry) in _scheduleEntries)
                 await entry.Timer.DisposeAsync();
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            List<SbuReminder> reminders;
+            IReadOnlyList<SbuReminder> reminders = await FetchNextRemindersAsync();
+
+            await Client.WaitUntilReadyAsync(stoppingToken);
+
+            await Task.WhenAll(
+                reminders.Select(
+                    reminder =>
+                    {
+                        if (reminder.DueAt + TimeSpan.FromSeconds(1) <= DateTimeOffset.Now)
+                            reminder.DueAt = DateTimeOffset.Now + TimeSpan.FromSeconds(5);
+
+                        return ScheduleAsync(reminder, false);
+                    }
+                )
+            );
+        }
+
+        private async Task<IReadOnlyList<SbuReminder>> FetchNextRemindersAsync()
+        {
+            DateTimeOffset maxDueAt = DateTimeOffset.Now + ReminderService.MAX_UNSUSPENDED_TIMESPAN;
 
             using (IServiceScope scope = Bot.Services.CreateScope())
             {
                 SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
-                reminders = await context.Reminders.ToListAsync(stoppingToken);
-            }
-
-            await Client.WaitUntilReadyAsync(stoppingToken);
-
-            foreach (SbuReminder reminder in reminders)
-            {
-                if (reminder.DueAt + TimeSpan.FromSeconds(1) <= DateTimeOffset.Now)
-                    reminder.DueAt = DateTimeOffset.Now + TimeSpan.FromSeconds(5);
-
-                await ScheduleAsync(reminder, false);
+                return await context.Reminders.Where(r => r.DueAt <= maxDueAt).ToListAsync(Bot.StoppingToken);
             }
         }
 
@@ -79,6 +103,12 @@ namespace SbuBot.Services
 
                     context.Reminders.Add(reminder);
                     await context.SaveChangesAsync();
+                }
+
+                if (now + ReminderService.MAX_UNSUSPENDED_TIMESPAN <= reminder.DueAt)
+                {
+                    Logger.LogDebug("Scheduled Suspended {@Reminder}", reminder);
+                    return;
                 }
             }
 
@@ -227,6 +257,23 @@ namespace SbuBot.Services
 
                 Logger.LogTrace("Removed internally {@Reminder}", reminder);
             }
+        }
+
+        private async Task _fetchSuspendedTimersAsync()
+        {
+            IReadOnlyList<SbuReminder> reminders = await FetchNextRemindersAsync();
+
+            await Task.WhenAll(
+                reminders.Select(
+                    reminder =>
+                    {
+                        if (reminder.DueAt + TimeSpan.FromSeconds(1) <= DateTimeOffset.Now)
+                            reminder.DueAt = DateTimeOffset.Now + TimeSpan.FromSeconds(5);
+
+                        return ScheduleAsync(reminder, false);
+                    }
+                )
+            );
         }
     }
 }
