@@ -79,8 +79,8 @@ namespace SbuBot
                 CommandNotFoundResult => null,
                 TypeParseFailedResult parseFailedResult => string.Format(
                     "Type parse failed for parameter `{0}`:\n{1} {2}",
-                    SbuGlobals.BULLET,
                     parseFailedResult.Parameter.Format(false),
+                    SbuGlobals.BULLET,
                     parseFailedResult.FailureReason
                 ),
                 ChecksFailedResult checksFailed => string.Format(
@@ -135,9 +135,13 @@ namespace SbuBot
                 if (commandBuilder.Parameters.LastOrDefault() is { IsMultiple: false } remainderParameterBuilder)
                     remainderParameterBuilder.IsRemainder = true;
 
-                // avoid command shadowing
-                if (commandBuilder.Aliases.Count == 0 && commandBuilder.Parameters.Count == 1)
+                // avoid overload shadowing
+                if (commandBuilder.Parameters.Count == 1)
                     commandBuilder.Priority -= (commandBuilder.Parameters[0].Type == typeof(string) ? 2 : 1);
+
+                // avoid sub command shadowing
+                if (commandBuilder.Aliases.Count == 0)
+                    commandBuilder.Priority -= 1;
 
                 // assign remarks dynamically on descriptors to allow for constant integer stringification lmao
                 // [Remarks("literal" + constantNonString)] will not work unless the value is a const string
