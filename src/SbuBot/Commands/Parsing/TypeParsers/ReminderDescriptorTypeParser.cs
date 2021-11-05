@@ -35,12 +35,19 @@ namespace SbuBot.Commands.Parsing.TypeParsers
 
             EnglishTimeParser timeParser = context.Services.GetRequiredService<EnglishTimeParser>();
 
-            if (timeParser.Parse(values[0]) is not ISuccessfulTimeParsingResult<DateTime> result)
-                return Failure("Could not parse timestamp.");
+            try
+            {
+                if (timeParser.Parse(values[0]) is not ISuccessfulTimeParsingResult<DateTime> result)
+                    return Failure("Could not parse timestamp.");
 
-            return result.Value > DateTimeOffset.Now
-                ? Success(new() { Timestamp = result.Value, Message = values[1] })
-                : Failure("The given timestamp must be in the future.");
+                return result.Value > DateTimeOffset.Now
+                    ? Success(new() { Timestamp = result.Value, Message = values[1] })
+                    : Failure("The given timestamp must be in the future.");
+            }
+            catch (ArgumentOutOfRangeException ex)
+            {
+                return Failure($"The parsed timestamp was out of range: `{ex.Message}`.");
+            }
         }
     }
 }

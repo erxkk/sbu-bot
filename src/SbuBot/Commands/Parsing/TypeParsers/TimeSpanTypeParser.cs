@@ -22,8 +22,15 @@ namespace SbuBot.Commands.Parsing.TypeParsers
         {
             EnglishTimeParser timeParser = context.Services.GetRequiredService<EnglishTimeParser>();
 
-            if (timeParser.Parse(value) is ISuccessfulTimeParsingResult<DateTime> result)
-                return Success(result.Value - DateTime.Now);
+            try
+            {
+                if (timeParser.Parse(value) is ISuccessfulTimeParsingResult<DateTime> result)
+                    return Success(result.Value - DateTime.Now);
+            }
+            catch (ArgumentOutOfRangeException ex)
+            {
+                return Failure($"The parsed timespan was out of range: `{ex.Message}`.");
+            }
 
             return Failure("Could not parse timespan.");
         }
