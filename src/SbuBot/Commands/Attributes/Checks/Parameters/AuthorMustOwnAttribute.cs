@@ -5,7 +5,6 @@ using Disqord.Bot;
 
 using Qmmands;
 
-using SbuBot.Commands.Parsing;
 using SbuBot.Commands.Parsing.HelperTypes;
 using SbuBot.Extensions;
 using SbuBot.Models;
