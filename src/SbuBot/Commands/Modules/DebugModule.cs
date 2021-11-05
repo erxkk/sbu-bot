@@ -11,6 +11,7 @@ using Disqord.Rest;
 using Qmmands;
 
 using SbuBot.Commands.Attributes;
+using SbuBot.Evaluation;
 
 namespace SbuBot.Commands.Modules
 {
@@ -161,6 +162,72 @@ namespace SbuBot.Commands.Modules
         {
             await Reply("Gn kid.");
             Environment.Exit(0);
+        }
+
+        [Command("parse")]
+        [Description("Attempts to parse the given input.")]
+        public async Task<DiscordCommandResult> ParseAsync(
+            [Description("The type to try parsing the value into.")]
+            string type,
+            [Description("The value to parse.")] string value,
+            [Description("The optional format to apply when printing the results.")]
+            string? format = null
+        )
+        {
+            // we never parse strings, so using them as sentinels for failure is fine
+            string script = string.Format(
+                @"
+                    var parser = Context.Bot.Commands.GetTypeParser<{0}>();
+                    return parser is {{ }}
+                        ? await parser.ParseAsync(null, ""{1}"", Context) is {{ IsSuccessful: true }} result
+                            ? (object) result.Value
+                            : (object) ""no result""
+                        : (object) ""no parser found"";
+                ",
+                type,
+                value
+            );
+
+            CompilationResult result = Eval.Compile(script, Context);
+
+            switch (result)
+            {
+                case CompilationResult.Completed completed:
+                {
+                    ScriptResult scriptResult = await completed.RunAsync();
+
+                    switch (scriptResult)
+                    {
+                        case ScriptResult.Completed { ReturnValue: { } } completedScript:
+                        {
+                            if (completedScript.ReturnValue is string str)
+                                return Reply(str);
+
+                            return Reply(
+                                new LocalEmbed()
+                                    .WithTitle("Parsed Value")
+                                    .WithDescription(
+                                        string.Format(
+                                            $"{{0{(format is null ? "" : $":{format}")}}}",
+                                            completedScript.ReturnValue
+                                        )
+                                    )
+                            );
+                        }
+
+                        case ScriptResult.Failed failedScript:
+                            return Reply(failedScript.GetDiagnosticEmbed());
+
+                        default:
+                            throw new ArgumentOutOfRangeException(nameof(scriptResult));
+                    }
+                }
+
+                case CompilationResult.Failed failed:
+                    return Reply(failed.GetDiagnosticEmbed());
+
+                default: throw new ArgumentOutOfRangeException(nameof(result));
+            }
         }
 
         [Command("test")]
