@@ -1,17 +1,21 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
 using Disqord;
 using Disqord.Bot;
+using Disqord.Extensions.Interactivity.Menus.Prompt;
 using Disqord.Gateway;
 using Disqord.Rest;
 
 using Qmmands;
 
 using SbuBot.Commands.Attributes;
+using SbuBot.Commands.Views;
 using SbuBot.Evaluation;
+using SbuBot.Extensions;
 
 namespace SbuBot.Commands.Modules
 {
@@ -42,7 +46,7 @@ namespace SbuBot.Commands.Modules
             [Description(
                 "Sends a given proxy command, or `ping` if not specified, as a given author in a given channel."
             )]
-            public async Task Do(
+            public async Task DoAsync(
                 [Description("The proxy author.")] IMember member,
                 [Description("The proxy channel.")] IMessageGuildChannel channel,
                 [Description("The proxy command.")] string command = "ping"
@@ -75,17 +79,17 @@ namespace SbuBot.Commands.Modules
 
             [Command("as")]
             [Description("Sends a given proxy command, or `ping` if not specified, as a given author.")]
-            public Task DoAsUser(
+            public Task DoAsUserAsync(
                 [Description("The proxy author.")] IMember member,
                 [Description("The proxy command.")] string command = "ping"
-            ) => Do(member, Context.Channel, command);
+            ) => DoAsync(member, Context.Channel, command);
 
             [Command("in")]
             [Description("Sends a given proxy command, or `ping` if not specified, in a given channel.")]
-            public Task DoInChannel(
+            public Task DoInChannelAsync(
                 [Description("The proxy channel.")] IMessageGuildChannel channel,
                 [Description("The proxy command.")] string command = "ping"
-            ) => Do(Context.Author, channel, command);
+            ) => DoAsync(Context.Author, channel, command);
         }
 
         [Command("lock")]
@@ -102,51 +106,186 @@ namespace SbuBot.Commands.Modules
 
         [Command("toggle")]
         [Description("Disables/Enables a given command or module.")]
-        public DiscordCommandResult Toggle(
+        [Remarks(
+            "The query can be prefixed with `command:`/`module:` to further specify the query for ambiguous paths."
+        )]
+        public async Task<DiscordCommandResult> ToggleAsync(
             [Description("The command or module to disable/enable.")]
             string query
         )
         {
-            IReadOnlyList<CommandMatch> matches = Context.Bot.Commands.FindCommands(query);
+            string[] parts = query.Split(':');
 
-            switch (matches.Count)
+            (string? specification, string path) = parts.Length == 2
+                ? (parts[0].Trim(), parts[1].Trim())
+                : (null, query);
+
+            object commandOrModule;
+
+            switch (specification)
             {
-                case 0 when Context.Bot.Commands.GetAllModules().FirstOrDefault(m => m.FullAliases.Contains(query))
-                    is { } module:
+                case "command" or "c":
                 {
-                    if (module.IsEnabled)
+                    IReadOnlyList<CommandMatch> matches = Context.Bot.Commands.FindCommands(path);
+
+                    switch (matches.Count)
                     {
-                        module.Disable();
-                        return Reply("Disabled module.");
+                        case 0:
+                            return Reply($"No command path matches `{path}`.");
+
+                        case 1:
+                            commandOrModule = matches[0].Command;
+                            break;
+
+                        default:
+                        {
+                            return Reply(
+                                new LocalEmbed()
+                                    .WithTitle("Multiple command matches found")
+                                    .WithDescription(
+                                        string.Format(
+                                            "Path:\n{0}\nCommands:\n{1}",
+                                            path,
+                                            matches.Select(m => $"{SbuGlobals.BULLET} {m.Command.Format()}")
+                                                .ToNewLines()
+                                        )
+                                    )
+                            );
+                        }
                     }
 
-                    module.Enable();
-                    return Reply("Enabled module.");
+                    break;
                 }
 
-                case 0:
-                    return Reply("No matching command or module found.");
-
-                case 1:
+                case "module" or "m":
                 {
-                    if (matches[0].Command.IsEnabled)
+                    Module[] moduleMatches = Context.Bot.Commands.GetAllModules()
+                        .Where(c => c.FullAliases.Any(a => a.Equals(path, StringComparison.OrdinalIgnoreCase)))
+                        .ToArray();
+
+                    switch (moduleMatches.Length)
                     {
-                        matches[0].Command.Disable();
-                        return Reply("Disabled command.");
+                        case 0:
+                            return Reply($"No module path matches `{path}`.");
+
+                        case 1:
+                            commandOrModule = moduleMatches[0];
+                            break;
+
+                        default:
+                        {
+                            return Reply(
+                                new LocalEmbed()
+                                    .WithTitle("Multiple module matches found")
+                                    .WithDescription(
+                                        string.Format(
+                                            "Path:\n{0}\nModules:\n{1}",
+                                            path,
+                                            moduleMatches.Select(m => $"{SbuGlobals.BULLET} {m.Format()}")
+                                                .ToNewLines()
+                                        )
+                                    )
+                            );
+                        }
                     }
 
-                    matches[0].Command.Enable();
-                    return Reply("Enabled command.");
+                    break;
                 }
+
+                case null:
+                {
+                    IReadOnlyList<CommandMatch> matches = Context.Bot.Commands.FindCommands(query);
+
+                    Module[] moduleMatches = Context.Bot.Commands.GetAllModules()
+                        .Where(c => c.FullAliases.Any(a => a.Equals(path, StringComparison.OrdinalIgnoreCase)))
+                        .ToArray();
+
+                    switch ((matches.Count, moduleMatches.Length))
+                    {
+                        case (0, 0):
+                            return Reply("No command or module match found.");
+
+                        case (1, 0):
+                            commandOrModule = matches[0].Command;
+                            break;
+
+                        case (0, 1):
+                            commandOrModule = moduleMatches[0];
+                            break;
+
+                        default:
+                        {
+                            return Reply(
+                                new LocalEmbed()
+                                    .WithTitle("Multiple command and module matches found")
+                                    .WithDescription(
+                                        string.Format(
+                                            "Path:\n{0}\nCommands:\n{1}\nModules:\n{2}",
+                                            path,
+                                            matches.Select(m => $"{SbuGlobals.BULLET} {m.Command.Format()}")
+                                                .ToNewLines(),
+                                            moduleMatches.Select(m => $"{SbuGlobals.BULLET} {m.Format()}")
+                                                .ToNewLines()
+                                        )
+                                    )
+                            );
+                        }
+                    }
+
+                    break;
+                }
+
+                case var other:
+                    return Reply($"Unknown specifier `{other}`.");
+            }
+
+            (string type, bool isEnabled, string alias, Action action) = commandOrModule switch
+            {
+                Command command => ("command", command.IsEnabled, command.FullAliases[0],
+                    (Action)(() =>
+                    {
+                        if (command.IsEnabled)
+                            command.Disable();
+                        else
+                            command.Enable();
+                    })),
+
+                Module module => ("module", module.IsEnabled, module.FullAliases[0],
+                    (() =>
+                    {
+                        if (module.IsEnabled)
+                            module.Disable();
+                        else
+                            module.Enable();
+                    })),
+
+                _ => throw new ArgumentOutOfRangeException(),
+            };
+
+            ConfirmationState result = await ConfirmationAsync(
+                $"{(isEnabled ? "Disable" : "Enable")} this {type}?",
+                $"You're about to {(isEnabled ? "disable" : "enable")} `{alias}`, proceed?"
+            );
+
+            switch (result)
+            {
+                case ConfirmationState.None:
+                case ConfirmationState.TimedOut:
+                case ConfirmationState.Aborted:
+                    return Reply("Aborted.");
+
+                case ConfirmationState.Confirmed:
+                    action();
+                    return Reply($"{(isEnabled ? "Disabled" : "Enabled")} `{alias}`.");
 
                 default:
-                    return Reply("More than one matching command or module found.");
+                    throw new ArgumentOutOfRangeException();
             }
         }
 
         [Command("chunk")]
         [Description("Big Big, Chunkus, Big Chunkus, Big Chunkus.")]
-        public async Task<DiscordCommandResult> Chunk()
+        public async Task<DiscordCommandResult> ChunkAsync()
         {
             await using (Context.BeginYield())
             {
@@ -158,10 +297,63 @@ namespace SbuBot.Commands.Modules
 
         [Command("kill")]
         [Description("Fucking kills the bot oh my god...")]
-        public async Task Kill()
+        public async Task KillAsync()
         {
             await Reply("Gn kid.");
             Environment.Exit(0);
+        }
+
+        [Command("stat")]
+        [Description("Displays process statistics of the bot.")]
+        public DiscordCommandResult Stat()
+        {
+            Process process = Process.GetCurrentProcess();
+            GCMemoryInfo memoryInfo = GC.GetGCMemoryInfo();
+
+            return Reply(
+                new LocalEmbed()
+                    .WithTitle("Process Stats")
+                    .WithDescription(
+                        string.Format(
+                            @"```
+
+pmem  |      | {0,16:N1}  B
+vmem  |      | {1,16:N1}  B
+vmem  | peak | {2,16:N1}  B
+
+ws    |      | {3,16:N1}  B
+ws    | peak | {4,16:N1}  B
+
+heap  |      | {5,16:N1}  B
+
+ptime |      | {6,16:N1} ms
+ptime | priv | {7,16:N1} ms
+ptime | user | {8,16:N1} ms
+```",
+                            process.PrivateMemorySize64,
+                            process.VirtualMemorySize64,
+                            process.PeakVirtualMemorySize64,
+                            process.WorkingSet64,
+                            process.PeakWorkingSet64,
+                            memoryInfo.HeapSizeBytes,
+                            process.TotalProcessorTime.TotalMilliseconds,
+                            process.PrivilegedProcessorTime.TotalMilliseconds,
+                            process.UserProcessorTime.TotalMilliseconds
+                        )
+                    )
+                    .WithTimestamp(process.StartTime)
+            );
+        }
+
+        [Command("collect")]
+        [Description("Forces garbage collection.")]
+        public DiscordCommandResult Collect()
+        {
+            long preCollection = GC.GetTotalMemory(false);
+            GC.Collect();
+            long postCollection = GC.GetTotalMemory(false);
+
+            return Reply($"Collected around {preCollection - postCollection:N1} bytes.");
         }
 
         [Command("parse")]

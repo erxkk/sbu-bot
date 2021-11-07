@@ -129,11 +129,11 @@ namespace SbuBot.Commands.Modules
             {
                 case 0:
                 {
-                    var moduleMatches = Context.Bot.Commands.GetAllModules()
+                    Module[] moduleMatches = Context.Bot.Commands.GetAllModules()
                         .Where(c => c.Aliases.Any(a => a.Equals(command, StringComparison.OrdinalIgnoreCase)))
                         .ToArray();
 
-                    var commandMatches = Context.Bot.Commands.GetAllCommands()
+                    Command[] commandMatches = Context.Bot.Commands.GetAllCommands()
                         .Where(c => c.Aliases.Any(a => a.Equals(command, StringComparison.OrdinalIgnoreCase)))
                         .ToArray();
 

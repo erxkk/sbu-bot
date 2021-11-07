@@ -98,7 +98,8 @@ namespace SbuBot.Commands.Modules
             }
 
             return Reply(
-                new LocalEmbed().WithTitle($"Added {createdEmotes.Count} emotes.")
+                new LocalEmbed()
+                    .WithTitle($"Added {createdEmotes.Count} emotes.")
                     .WithDescription(string.Join("", createdEmotes.Select(e => e.Tag)))
             );
         }
