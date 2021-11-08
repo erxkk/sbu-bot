@@ -58,9 +58,15 @@ namespace SbuBot.Commands.Modules
                     new LocalEmbed()
                         .WithTitle("Cancelled all reminders.")
                         .WithDescription(
-                            cancelled.Select(r => $"{SbuGlobals.BULLET} `{r.MessageId.RawValue:X}`").ToNewLines()
+                            cancelled.Select(
+                                    r => string.Format(
+                                        "{0} `{1}`",
+                                        SbuGlobals.BULLET,
+                                        Markdown.Link(r.GetFormattedId(), r.GetJumpUrl())
+                                    )
+                                )
+                                .ToNewLines()
                         )
-                        .WithFooter("Cancelled")
                         .WithCurrentTimestamp()
                 );
             }
@@ -68,7 +74,7 @@ namespace SbuBot.Commands.Modules
             {
                 ConfirmationState confirmationResult = await ConfirmationAsync(
                     "Reminder Removal",
-                    $"Are you sure you want to cancel `{reminder.Value.MessageId.RawValue:X}`?"
+                    $"Are you sure you want to cancel `{reminder.Value.GetFormattedId()}`?"
                 );
 
                 switch (confirmationResult)
@@ -90,8 +96,14 @@ namespace SbuBot.Commands.Modules
                 return Reply(
                     new LocalEmbed()
                         .WithTitle("Reminder Cancelled")
-                        .WithDescription($"`{reminder.Value.MessageId.RawValue:X}`\n{reminder.Value.Message}")
-                        .WithFooter("Cancelled")
+                        .WithDescription(
+                            string.Format(
+                                "{0}\n\n{1}",
+                                reminder.Value.Message,
+                                Markdown.Link("Original Message", reminder.Value.GetJumpUrl())
+                            )
+                        )
+                        .WithFooter(reminder.Value.GetFormattedId())
                         .WithCurrentTimestamp()
                 );
             }

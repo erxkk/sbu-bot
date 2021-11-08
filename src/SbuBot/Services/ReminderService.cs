@@ -232,8 +232,8 @@ namespace SbuBot.Services
                             new LocalEmbed()
                                 .WithTitle("Reminder")
                                 .WithDescription(
-                                    (reminder.Message ?? "No message given")
-                                    + $"\n\n[Original Message]({reminder.JumpUrl})"
+                                    (reminder.Message ?? "`No Message`")
+                                    + $"\n\n{Markdown.Link("Original Message", reminder.GetJumpUrl())}"
                                 )
                                 .WithTimestamp(reminder.CreatedAt)
                         )

@@ -25,14 +25,6 @@ namespace SbuBot.Models
         public DateTimeOffset CreatedAt { get; }
         public DateTimeOffset DueAt { get; set; }
 
-        [NotLogged]
-        public string JumpUrl => string.Format(
-            "https://discord.com/channels/{0}/{1}/{2}",
-            GuildId,
-            ChannelId,
-            MessageId
-        );
-
         // nav properties
         [NotLogged]
         public SbuMember? Owner { get; } = null!;
@@ -55,6 +47,10 @@ namespace SbuBot.Models
             DateTimeOffset.Now,
             dueAt
         ) { }
+
+        public string GetJumpUrl() => Discord.MessageJumpLink(GuildId, ChannelId, MessageId);
+
+        public string GetFormattedId() => MessageId.RawValue.ToString("X");
 
 #region EFCore
 

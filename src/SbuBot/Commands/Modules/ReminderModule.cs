@@ -35,7 +35,7 @@ namespace SbuBot.Commands.Modules
                     new LocalEmbed()
                         .WithTitle("Reminder")
                         .WithDescription(reminder.Message)
-                        .WithFooter("Due")
+                        .WithFooter(reminder.GetFormattedId())
                         .WithTimestamp(reminder.DueAt)
                 );
             }
@@ -49,12 +49,11 @@ namespace SbuBot.Commands.Modules
                     .Where(r => r.OwnerId == Context.Author.Id)
                     .Select(
                         r => string.Format(
-                            "{0} [`{1:X}`]({2}) {3}\n{4}\n",
+                            "{0} {1} {2}\n{3}\n",
                             SbuGlobals.BULLET,
-                            r.MessageId.RawValue,
-                            r.JumpUrl,
+                            Markdown.Link(r.GetFormattedId(), r.GetJumpUrl()),
                             Markdown.Timestamp(r.DueAt),
-                            r.Message is { } ? $"`{r.Message}`" : "No Message"
+                            r.Message is { } ? $"{r.Message}" : "`No Message`"
                         )
                     ),
                 embedFactory: embed => embed.WithTitle("Your Reminders")

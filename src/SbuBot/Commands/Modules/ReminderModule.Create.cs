@@ -48,8 +48,10 @@ namespace SbuBot.Commands.Modules
                 return Reply(
                     new LocalEmbed()
                         .WithTitle("Reminder Scheduled")
-                        .WithDescription(descriptor.Message)
-                        .WithFooter($"{Context.Message.Id.RawValue:X} | Due")
+                        .WithDescription(
+                            $"{descriptor.Message}\n\n{Markdown.Link("Original Message", newReminder.GetJumpUrl())}"
+                        )
+                        .WithFooter(newReminder.GetFormattedId())
                         .WithTimestamp(newReminder.DueAt)
                 );
             }
@@ -98,8 +100,8 @@ namespace SbuBot.Commands.Modules
                 return Reply(
                     new LocalEmbed()
                         .WithTitle("Reminder Scheduled")
-                        .WithDescription($"`{Context.Message.Id.RawValue:X}`\n{message}")
-                        .WithFooter("Due")
+                        .WithDescription($"{message}\n\n{Markdown.Link("Original Message", newReminder.GetJumpUrl())}")
+                        .WithFooter(newReminder.GetFormattedId())
                         .WithTimestamp(newReminder.DueAt)
                 );
             }
