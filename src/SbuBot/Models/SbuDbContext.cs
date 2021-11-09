@@ -27,6 +27,7 @@ namespace SbuBot.Models
         public DbSet<SbuTag> Tags { get; set; }
         public DbSet<SbuAutoResponse> AutoResponses { get; set; }
         public DbSet<SbuReminder> Reminders { get; set; }
+        public DbSet<SbuRole> Roles { get; set; }
 #nullable enable
 
         public SbuDbContext(SbuBot sbuBot, SbuConfiguration configuration)
@@ -35,6 +36,28 @@ namespace SbuBot.Models
             _configuration = configuration;
         }
 
+        // role
+        public SbuRole AddRole(IRole role, string? description = null)
+            => Roles.Add(new(role, description)).Entity;
+
+        public Task<SbuRole?> GetRoleFullAsync(IRole role)
+            => GetRoleAsync(role, q => q.Include(r => r.Guild));
+
+        public Task<SbuRole?> GetRoleAsync(
+            IRole role,
+            Func<IQueryable<SbuRole>, IQueryable<SbuRole>> query
+        ) => GetRoleAsync(role.Id, role.GuildId, query);
+
+        public Task<SbuRole?> GetRoleAsync(
+            Snowflake roleId,
+            Snowflake guildId,
+            Func<IQueryable<SbuRole>, IQueryable<SbuRole>>? query = null
+        ) => (query is { } ? query(Roles) : Roles).FirstOrDefaultAsync(
+            m => m.Id == roleId && m.GuildId == guildId,
+            _sbuBot.StoppingToken
+        )!;
+
+        // color role
         public SbuColorRole AddColorRole(IRole role, Snowflake ownerId)
             => ColorRoles.Add(new(role, ownerId)).Entity;
 

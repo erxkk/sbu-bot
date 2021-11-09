@@ -33,6 +33,9 @@ namespace SbuBot.Models
         [NotLogged]
         public List<SbuReminder> Reminders { get; } = new();
 
+        [NotLogged]
+        public List<SbuRole> Roles { get; } = new();
+
         public SbuGuild(
             IGuild guild,
             Snowflake? archiveId = null,
@@ -95,6 +98,12 @@ namespace SbuBot.Models
                     .OnDelete(DeleteBehavior.Cascade);
 
                 builder.HasMany(g => g.Reminders)
+                    .WithOne(r => r.Guild)
+                    .HasForeignKey(r => r.GuildId)
+                    .HasPrincipalKey(g => g.Id)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                builder.HasMany(g => g.Roles)
                     .WithOne(r => r.Guild)
                     .HasForeignKey(r => r.GuildId)
                     .HasPrincipalKey(g => g.Id)
