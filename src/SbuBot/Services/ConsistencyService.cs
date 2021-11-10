@@ -140,9 +140,14 @@ namespace SbuBot.Services
             {
                 SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
 
-                if (await context.GetColorRoleAsync(e.RoleId, e.GuildId) is { } role)
+                if (await context.GetColorRoleAsync(e.RoleId, e.GuildId) is { } colorRole)
                 {
-                    context.ColorRoles.Remove(role);
+                    context.ColorRoles.Remove(colorRole);
+                    await context.SaveChangesAsync();
+                }
+                else if (await context.GetRoleAsync(e.RoleId, e.GuildId) is { } role)
+                {
+                    context.Roles.Remove(role);
                     await context.SaveChangesAsync();
                 }
             }

@@ -9,7 +9,6 @@ using Disqord.Rest;
 using Qmmands;
 
 using SbuBot.Commands.Attributes;
-using SbuBot.Commands.Attributes.Checks;
 using SbuBot.Extensions;
 using SbuBot.Models;
 
@@ -18,7 +17,6 @@ namespace SbuBot.Commands.Modules
     public sealed partial class ColorRoleModule
     {
         [Group("edit")]
-        [RequireColorRole]
         [Description("A group of commands for editing color roles.")]
         public sealed class EditSubModule : SbuModuleBase
         {
@@ -34,6 +32,9 @@ namespace SbuBot.Commands.Modules
             )
             {
                 SbuMember member = await Context.GetDbAuthorAsync();
+
+                if (member.ColorRole is null)
+                    return Reply("You must to have a color role to edit it.");
 
                 if (Context.Guild.Roles.GetValueOrDefault(member.ColorRole!.Id) is not { } role)
                     return Reply(SbuUtility.Format.DoesNotExist("The role"));
@@ -64,6 +65,9 @@ namespace SbuBot.Commands.Modules
             {
                 SbuMember member = await Context.GetDbAuthorAsync();
 
+                if (member.ColorRole is null)
+                    return Reply("You must to have a color role to edit it.");
+
                 if (Context.Guild.Roles.GetValueOrDefault(member.ColorRole!.Id) is not { } role)
                     return Reply(SbuUtility.Format.DoesNotExist("The role"));
 
@@ -80,6 +84,9 @@ namespace SbuBot.Commands.Modules
             public async Task<DiscordCommandResult> EditColorAsync([Description("The new color.")] Color color)
             {
                 SbuMember member = await Context.GetDbAuthorAsync();
+
+                if (member.ColorRole is null)
+                    return Reply("You must to have a color role to edit it.");
 
                 if (Context.Guild.Roles.GetValueOrDefault(member.ColorRole!.Id) is not { } role)
                     return Reply(SbuUtility.Format.DoesNotExist("The role"));

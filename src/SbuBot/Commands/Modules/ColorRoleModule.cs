@@ -42,7 +42,6 @@ namespace SbuBot.Commands.Modules
             : Reply("You have no color role.");
 
         [Command("create")]
-        [RequireColorRole(false)]
         [Description("Creates a new color role.")]
         [Usage("role create #afafaf my gray role", "r make green dream role dream role")]
         public async Task<DiscordCommandResult> CreateAsync(
@@ -53,6 +52,12 @@ namespace SbuBot.Commands.Modules
             string? name = null
         )
         {
+            SbuDbContext context = Context.GetSbuDbContext();
+            SbuMember? member = await context.GetMemberFullAsync(Context.Author);
+
+            if (member!.ColorRole is { })
+                return Reply("You must to have no color role to create one.");
+
             if (name is null)
             {
                 switch (await Context.WaitFollowUpForAsync("What do you want the role name to be?"))
@@ -80,7 +85,6 @@ namespace SbuBot.Commands.Modules
                 }
             }
 
-            SbuDbContext context = Context.GetSbuDbContext();
             SbuGuild? guild = await context.GetGuildAsync(Context.Guild);
             int? rolePos = Context.Guild.Roles.GetValueOrDefault(guild!.ColorRoleBottomId ?? 0)?.Position + 1;
 
@@ -113,14 +117,16 @@ namespace SbuBot.Commands.Modules
         }
 
         [Command("delete")]
-        [RequireColorRole]
         [Description("Removes the authors color role.")]
         public async Task<DiscordCommandResult> DeleteAsync()
         {
             SbuDbContext context = Context.GetSbuDbContext();
             SbuMember? member = await context.GetMemberFullAsync(Context.Author);
 
-            if (Context.Guild.Roles.GetValueOrDefault(member!.ColorRole!.Id) is not { } role)
+            if (member!.ColorRole is null)
+                return Reply("You must to have a color role to delete it.");
+
+            if (Context.Guild.Roles.GetValueOrDefault(member.ColorRole!.Id) is not { } role)
             {
                 await Reply(SbuUtility.Format.DoesNotExist("The role"));
             }
@@ -141,7 +147,6 @@ namespace SbuBot.Commands.Modules
         }
 
         [Command("claim")]
-        [RequireColorRole(false)]
         [Description("Claims the given color role if it has no owner.")]
         [Usage("role claim some role name", "r take 732234804384366602", "r claim @SBU-Bot")]
         public async Task<DiscordCommandResult> ClaimAsync(
@@ -151,9 +156,13 @@ namespace SbuBot.Commands.Modules
             SbuColorRole role
         )
         {
-            await Context.Author.GrantRoleAsync(role.Id);
-
             SbuDbContext context = Context.GetSbuDbContext();
+            SbuMember? member = await context.GetMemberFullAsync(Context.Author);
+
+            if (member!.ColorRole is { })
+                return Reply("You must to have no color role to claim one.");
+
+            await Context.Author.GrantRoleAsync(role.Id);
 
             role.OwnerId = Context.Author.Id;
             context.ColorRoles.Update(role);
@@ -163,30 +172,34 @@ namespace SbuBot.Commands.Modules
         }
 
         [Command("transfer")]
-        [RequireColorRole]
         [Description("Transfers the authors color role to the given member.")]
         [Usage("role transfer @user", "r transfer 352815253828141056", "r transfer Allah")]
         public async Task<DiscordCommandResult> TransferAsync(
-            [NotAuthor, MustHaveColorRole(false),
-             RequireHierarchy(HierarchyComparison.Less, HierarchyComparisonContext.Bot)]
+            [NotAuthor, RequireHierarchy(HierarchyComparison.Less, HierarchyComparisonContext.Bot)]
             [Description("The member that should receive the color role.")]
             SbuMember receiver
         )
         {
             SbuDbContext context = Context.GetSbuDbContext();
-            SbuColorRole sbuRole = (await context.GetMemberFullAsync(Context.Author))!.ColorRole!;
+            SbuMember? member = await context.GetMemberFullAsync(Context.Author);
 
-            if (Context.Guild.Roles.GetValueOrDefault(sbuRole.Id) is not { } role)
+            if (member!.ColorRole is null)
+                return Reply("You must to have a color role to transfer it.");
+
+            if (receiver.ColorRole is { })
+                return Reply("The receiver must to have no color role for you to transfer it to them.");
+
+            if (Context.Guild.Roles.GetValueOrDefault(member.ColorRole!.Id) is not { } role)
                 return Reply(SbuUtility.Format.DoesNotExist("The role"));
 
             if (Context.CurrentMember.GetHierarchy() <= role.Position)
                 return Reply(SbuUtility.Format.HasHigherHierarchy("transfer the role"));
 
-            await Context.Guild.GrantRoleAsync(receiver.Id, sbuRole.Id);
-            await Context.Author.RevokeRoleAsync(sbuRole.Id);
+            await Context.Guild.GrantRoleAsync(receiver.Id, member.ColorRole.Id);
+            await Context.Author.RevokeRoleAsync(member.ColorRole.Id);
 
-            sbuRole.OwnerId = receiver.Id;
-            context.ColorRoles.Update(sbuRole);
+            member.ColorRole.OwnerId = receiver.Id;
+            context.ColorRoles.Update(member.ColorRole);
             await context.SaveChangesAsync();
 
             return Reply($"You transferred your color role to {Mention.User(receiver.Id)}.");

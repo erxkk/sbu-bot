@@ -45,7 +45,7 @@ namespace SbuBot.Models
 
         public Task<SbuRole?> GetRoleAsync(
             IRole role,
-            Func<IQueryable<SbuRole>, IQueryable<SbuRole>> query
+            Func<IQueryable<SbuRole>, IQueryable<SbuRole>>? query = null
         ) => GetRoleAsync(role.Id, role.GuildId, query);
 
         public Task<SbuRole?> GetRoleAsync(
@@ -66,7 +66,7 @@ namespace SbuBot.Models
 
         public Task<SbuColorRole?> GetColorRoleAsync(
             IRole role,
-            Func<IQueryable<SbuColorRole>, IQueryable<SbuColorRole>> query
+            Func<IQueryable<SbuColorRole>, IQueryable<SbuColorRole>>? query = null
         ) => GetColorRoleAsync(role.Id, role.GuildId, query);
 
         public Task<SbuColorRole?> GetColorRoleAsync(
@@ -89,8 +89,10 @@ namespace SbuBot.Models
         public Task<SbuMember?> GetMemberFullAsync(IMember member)
             => GetMemberAsync(member, q => q.Include(m => m.Guild).Include(m => m.ColorRole));
 
-        public Task<SbuMember?> GetMemberAsync(IMember member, Func<IQueryable<SbuMember>, IQueryable<SbuMember>> query)
-            => GetMemberAsync(member.Id, member.GuildId, query);
+        public Task<SbuMember?> GetMemberAsync(
+            IMember member,
+            Func<IQueryable<SbuMember>, IQueryable<SbuMember>>? query = null
+        ) => GetMemberAsync(member.Id, member.GuildId, query);
 
         public Task<SbuMember?> GetMemberAsync(
             Snowflake memberId,
@@ -105,11 +107,10 @@ namespace SbuBot.Models
         public SbuGuild AddGuild(IGuild guild)
             => Guilds.Add(new(guild)).Entity;
 
-        public Task<SbuGuild?> GetGuildAsync(IGuild guild)
-            => GetGuildAsync(guild.Id);
-
-        public Task<SbuGuild?> GetGuildAsync(IGuild guild, Func<IQueryable<SbuGuild>, IQueryable<SbuGuild>> query)
-            => GetGuildAsync(guild.Id, query);
+        public Task<SbuGuild?> GetGuildAsync(
+            IGuild guild,
+            Func<IQueryable<SbuGuild>, IQueryable<SbuGuild>>? query = null
+        ) => GetGuildAsync(guild.Id, query);
 
         public Task<SbuGuild?> GetGuildAsync(
             Snowflake guildId,

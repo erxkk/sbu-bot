@@ -16,7 +16,6 @@ using SbuBot.Models;
 
 namespace SbuBot.Commands.Modules
 {
-    // TODO: add persistent view multiple selection thing
     [Group("role", "r")]
     [RequireBotGuildPermissions(Permission.ManageRoles)]
     [Description("A group of commands for managing and requesting roles.")]
@@ -59,7 +58,7 @@ namespace SbuBot.Commands.Modules
 
             await Context.Author.GrantRoleAsync(role.Id);
 
-            return Reply($"You now have {role}.");
+            return Reply($"You now have {role.Mention}.");
         }
 
         [Command("leave")]
@@ -81,7 +80,7 @@ namespace SbuBot.Commands.Modules
 
             await Context.Author.RevokeRoleAsync(role.Id);
 
-            return Reply($"You no longer have {role}.");
+            return Reply($"You no longer have {role.Mention}.");
         }
     }
 }
