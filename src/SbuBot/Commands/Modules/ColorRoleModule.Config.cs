@@ -7,6 +7,8 @@ using Disqord.Bot;
 using Qmmands;
 
 using SbuBot.Commands.Attributes;
+using SbuBot.Commands.Attributes.Checks;
+using SbuBot.Commands.Attributes.Checks.Parameters;
 using SbuBot.Extensions;
 using SbuBot.Models;
 
@@ -14,7 +16,7 @@ namespace SbuBot.Commands.Modules
 {
     public sealed partial class ColorRoleModule
     {
-        [Group("separator")]
+        [Group("config")]
         [Description("A group of commands for configuring color role separators.")]
         public sealed class ConfigSubModule : SbuModuleBase
         {
@@ -27,6 +29,7 @@ namespace SbuBot.Commands.Modules
             public async Task<DiscordCommandResult> AddAsync(
                 ColorRoleSeparatorType type,
                 [Description("The role to use as a color separator.")]
+                [RequireHierarchy(HierarchyComparison.Less, HierarchyComparisonContext.Bot)]
                 IRole role
             )
             {

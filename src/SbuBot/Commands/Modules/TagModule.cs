@@ -92,7 +92,7 @@ namespace SbuBot.Commands.Modules
         public DiscordCommandResult GetReservedKeywords() => Reply(
             string.Format(
                 "The following keywords are not allowed to be tags, but tags may contain them:\n{0}",
-                SbuGlobals.Keywords.ALL_RESERVED.Select(rn => $"> `{rn}`").ToNewLines()
+                SbuGlobals.Keyword.ALL_RESERVED.Select(rn => $"> `{rn}`").ToNewLines()
             )
         );
     }

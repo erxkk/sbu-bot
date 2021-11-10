@@ -1,3 +1,4 @@
+using System;
 using System.Text.RegularExpressions;
 
 using Disqord;
@@ -71,6 +72,20 @@ namespace SbuBot
 
             idPair = default;
             return false;
+        }
+
+        public static class Format
+        {
+            public static string DoesNotExist(string value, string? suffix = null)
+                => string.Format("{0} doesn't exist{1}", value, suffix is null ? "." : $", {suffix}");
+
+            public static string HasHigherHierarchy(string action, string value = "it", string? suffix = null)
+                => string.Format(
+                    "Can't {0}, {1} has higher hierarchy{2}",
+                    action,
+                    value,
+                    suffix is null ? "." : $", {suffix}"
+                );
         }
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -11,42 +12,44 @@ namespace SbuBot
         public const string DEFAULT_PREFIX = "sbu";
         public const string DEV_PREFIX = "dev";
 
-        public static class Keywords
+        public static class Keyword
         {
             public static readonly IReadOnlySet<string> ALL_RESERVED;
             public static readonly IReadOnlySet<string> IDENTIFIERS;
             public static readonly IReadOnlySet<string> CONTROL_FLOW;
             public static readonly IReadOnlyDictionary<string, string[]> COMMAND_ALIASES;
 
-            static Keywords()
+            static Keyword()
             {
-                SbuGlobals.Keywords.IDENTIFIERS = new HashSet<string> { "all", "none", "mine", "reserved" };
-                SbuGlobals.Keywords.CONTROL_FLOW = new HashSet<string> { "abort" };
+                SbuGlobals.Keyword.IDENTIFIERS = new HashSet<string> { "all", "none", "mine", "reserved" };
+                SbuGlobals.Keyword.CONTROL_FLOW = new HashSet<string> { "abort" };
 
-                SbuGlobals.Keywords.COMMAND_ALIASES = new Dictionary<string, string[]>
+                SbuGlobals.Keyword.COMMAND_ALIASES = new Dictionary<string, string[]>
                 {
                     ["help"] = new[] { "h", "?" },
                     ["claim"] = new[] { "take" },
                     ["create"] = new[] { "make", "mk" },
+                    ["set"] = Array.Empty<string>(),
+                    ["get"] = Array.Empty<string>(),
                     ["edit"] = new[] { "change" },
                     ["list"] = new[] { "ls" },
                     ["delete"] = new[] { "remove", "rm" },
-                    ["transfer"] = new[] { "mv" },
+                    ["transfer"] = new[] { "move", "mv" },
                 };
 
-                SbuGlobals.Keywords.ALL_RESERVED = SbuGlobals.Keywords.COMMAND_ALIASES
+                SbuGlobals.Keyword.ALL_RESERVED = SbuGlobals.Keyword.COMMAND_ALIASES
                     .SelectMany(e => e.Value.Append(e.Key))
                     .Append(SbuGlobals.BULLET)
                     .Append(SbuGlobals.ELLIPSES)
                     .Append(SbuGlobals.DESCRIPTOR_SEPARATOR)
                     .Append(SbuGlobals.DEFAULT_PREFIX)
-                    .Concat(SbuGlobals.Keywords.CONTROL_FLOW)
-                    .Concat(SbuGlobals.Keywords.IDENTIFIERS)
+                    .Concat(SbuGlobals.Keyword.CONTROL_FLOW)
+                    .Concat(SbuGlobals.Keyword.IDENTIFIERS)
                     .ToHashSet();
             }
         }
 
-        public static class Links
+        public static class Link
         {
             public const string GH_SELF = "https://github.com/erxkk/sbu-bot";
             public const string GH_DISQORD = "https://github.com/quahu/disqord";

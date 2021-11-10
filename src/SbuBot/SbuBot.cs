@@ -157,7 +157,7 @@ namespace SbuBot
                 }
 
                 if (commandBuilder.Aliases.Count > 0
-                    && SbuGlobals.Keywords.COMMAND_ALIASES.GetValueOrDefault(commandBuilder.Aliases.First())
+                    && SbuGlobals.Keyword.COMMAND_ALIASES.GetValueOrDefault(commandBuilder.Aliases.First())
                         is { } aliases
                 )
                 {
@@ -169,7 +169,7 @@ namespace SbuBot
             foreach (ModuleBuilder subModuleBuilder in CommandUtilities.EnumerateAllSubmodules(moduleBuilder))
             {
                 if (subModuleBuilder.Aliases.Count > 0
-                    && SbuGlobals.Keywords.COMMAND_ALIASES.GetValueOrDefault(subModuleBuilder.Aliases.First())
+                    && SbuGlobals.Keyword.COMMAND_ALIASES.GetValueOrDefault(subModuleBuilder.Aliases.First())
                         is { } aliases
                 )
                 {

@@ -36,10 +36,10 @@ namespace SbuBot.Commands.Modules
                 SbuMember member = await Context.GetDbAuthorAsync();
 
                 if (Context.Guild.Roles.GetValueOrDefault(member.ColorRole!.Id) is not { } role)
-                    return Reply(ColorRoleModule.ROLE_DOES_NOT_EXIST);
+                    return Reply(SbuUtility.Format.DoesNotExist("The role"));
 
                 if (Context.CurrentMember.GetHierarchy() <= role.Position)
-                    return Reply(string.Format(ColorRoleModule.ROLE_HAS_HIGHER_HIERARCHY_FORMAT, "modify"));
+                    return Reply(SbuUtility.Format.HasHigherHierarchy("modify the role"));
 
                 await role.ModifyAsync(
                     r =>
@@ -65,10 +65,10 @@ namespace SbuBot.Commands.Modules
                 SbuMember member = await Context.GetDbAuthorAsync();
 
                 if (Context.Guild.Roles.GetValueOrDefault(member.ColorRole!.Id) is not { } role)
-                    return Reply(ColorRoleModule.ROLE_DOES_NOT_EXIST);
+                    return Reply(SbuUtility.Format.DoesNotExist("The role"));
 
                 if (Context.CurrentMember.GetHierarchy() <= role.Position)
-                    return Reply(string.Format(ColorRoleModule.ROLE_HAS_HIGHER_HIERARCHY_FORMAT, "modify"));
+                    return Reply(SbuUtility.Format.HasHigherHierarchy("modify the role"));
 
                 await role.ModifyAsync(r => r.Name = name);
                 return Reply("Your role has been modified.");
@@ -82,10 +82,10 @@ namespace SbuBot.Commands.Modules
                 SbuMember member = await Context.GetDbAuthorAsync();
 
                 if (Context.Guild.Roles.GetValueOrDefault(member.ColorRole!.Id) is not { } role)
-                    return Reply(ColorRoleModule.ROLE_DOES_NOT_EXIST);
+                    return Reply(SbuUtility.Format.DoesNotExist("The role"));
 
                 if (Context.CurrentMember.GetHierarchy() <= role.Position)
-                    return Reply(string.Format(ColorRoleModule.ROLE_HAS_HIGHER_HIERARCHY_FORMAT, "modify"));
+                    return Reply(SbuUtility.Format.HasHigherHierarchy("modify the role"));
 
                 await role.ModifyAsync(r => r.Color = color);
                 return Reply("Your role has been modified.");

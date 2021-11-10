@@ -93,7 +93,7 @@ namespace SbuBot.Models
             {
                 < SbuTag.MIN_NAME_LENGTH => ValidNameType.TooShort,
                 > SbuTag.MAX_NAME_LENGTH => ValidNameType.TooLong,
-                _ => SbuGlobals.Keywords.ALL_RESERVED.Any(rn => rn.Equals(name, StringComparison.OrdinalIgnoreCase))
+                _ => SbuGlobals.Keyword.ALL_RESERVED.Any(rn => rn.Equals(name, StringComparison.OrdinalIgnoreCase))
                     ? ValidNameType.Reserved
                     : ValidNameType.Valid,
             };

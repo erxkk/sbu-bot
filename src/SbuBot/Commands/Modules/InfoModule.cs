@@ -33,11 +33,11 @@ namespace SbuBot.Commands.Modules
                     .AddBlankInlineField()
                     .AddInlineField(
                         "Source",
-                        Markdown.Link("Github:erxkk/sbu-bot", SbuGlobals.Links.GH_SELF)
+                        Markdown.Link("Github:erxkk/sbu-bot", SbuGlobals.Link.GH_SELF)
                     )
                     .AddInlineField(
                         "Library",
-                        Markdown.Link("Github:quahu/disqord", SbuGlobals.Links.GH_DISQORD)
+                        Markdown.Link("Github:quahu/disqord", SbuGlobals.Link.GH_DISQORD)
                     )
                     .AddInlineField(
                         "CLR",

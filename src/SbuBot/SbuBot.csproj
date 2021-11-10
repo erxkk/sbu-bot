@@ -82,19 +82,7 @@
         <Compile Update="Commands\Modules\GuildManagementModule.AutoResponse.Delete.cs">
             <DependentUpon>GuildManagementModule.AutoResponse.cs</DependentUpon>
         </Compile>
-        <Compile Update="Commands\Modules\ColorRoleModule.Create.cs">
-            <DependentUpon>ColorRoleModule.cs</DependentUpon>
-        </Compile>
-        <Compile Update="Commands\Modules\ColorRoleModule.Claim.cs">
-            <DependentUpon>ColorRoleModule.cs</DependentUpon>
-        </Compile>
         <Compile Update="Commands\Modules\ColorRoleModule.Edit.cs">
-            <DependentUpon>ColorRoleModule.cs</DependentUpon>
-        </Compile>
-        <Compile Update="Commands\Modules\ColorRoleModule.Delete.cs">
-            <DependentUpon>ColorRoleModule.cs</DependentUpon>
-        </Compile>
-        <Compile Update="Commands\Modules\ColorRoleModule.Transfer.cs">
             <DependentUpon>ColorRoleModule.cs</DependentUpon>
         </Compile>
         <Compile Update="Commands\Modules\GuildManagementModule.Archive.Config.cs">
@@ -108,6 +96,9 @@
         </Compile>
         <Compile Update="Commands\Modules\EmoteModule.Delete.cs">
             <DependentUpon>EmoteModule.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Commands\Modules\RoleModule.Config.cs">
+          <DependentUpon>RoleModule.cs</DependentUpon>
         </Compile>
     </ItemGroup>
 

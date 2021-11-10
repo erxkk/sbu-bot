@@ -75,7 +75,7 @@ namespace SbuBot.Models
             return trigger.Length switch
             {
                 > SbuAutoResponse.MAX_LENGTH => ValidTriggerType.TooLong,
-                _ => SbuGlobals.Keywords.ALL_RESERVED.Any(rn => rn.Equals(trigger, StringComparison.OrdinalIgnoreCase))
+                _ => SbuGlobals.Keyword.ALL_RESERVED.Any(rn => rn.Equals(trigger, StringComparison.OrdinalIgnoreCase))
                     ? ValidTriggerType.Reserved
                     : ValidTriggerType.Valid,
             };
