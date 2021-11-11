@@ -35,6 +35,9 @@ namespace SbuBot.Commands.Modules
 
                 for (var i = 0; i < names.Length; i++)
                 {
+                    if (values[i] is SbuGuildConfig.None or SbuGuildConfig.All)
+                        continue;
+
                     builder.Append(SbuGlobals.BULLET)
                         .Append(' ')
                         .Append(names[i])
