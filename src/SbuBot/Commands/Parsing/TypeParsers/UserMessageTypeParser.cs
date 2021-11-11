@@ -16,25 +16,16 @@ namespace SbuBot.Commands.Parsing.TypeParsers
             DiscordCommandContext context
         )
         {
-            if (value.Length < 15)
-                return Failure("Could not parse message.");
+            TypeParser<IMessage> typeParser = context.Bot.Commands.GetTypeParser<IMessage>();
+            TypeParserResult<IMessage> result = await typeParser.ParseAsync(parameter, value, context);
 
-            if (value.Length < 21 && ulong.TryParse(value, out ulong id))
-            {
-                return await context.Bot.FetchMessageAsync(context.ChannelId, id) is IUserMessage message
-                    ? Success(message)
-                    : Failure("Could not find message.");
-            }
+            if (result.IsSuccessful)
+                return Failure(result.FailureReason);
 
-            if (SbuUtility.TryParseMessageLink(value, out (Snowflake ChannelId, Snowflake MessageId) idPair))
-            {
-                return await context.Bot.FetchMessageAsync(idPair.ChannelId, idPair.MessageId) is IUserMessage
-                    message
-                    ? Success(message)
-                    : Failure("Could not find message.");
-            }
+            if (result.Value is IUserMessage userMessage)
+                return Success(userMessage);
 
-            return Failure("Could not parse message.");
+            return Failure("The message was not a message sent by a user.");
         }
     }
 }
