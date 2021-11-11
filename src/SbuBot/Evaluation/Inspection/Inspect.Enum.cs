@@ -35,12 +35,14 @@ namespace SbuBot.Evaluation.Inspection
         )
         {
             Type type = @enum.GetType();
-            builder.Append(type.Name).Append(' ').Append(@enum.ToString("X"));
 
             if (!type.GetCustomAttributes().OfType<FlagsAttribute>().Any())
+            {
+                builder.Append(' ').Append(@enum);
                 return;
+            }
 
-            builder.Append('\n');
+            builder.Append(type.Name).Append(' ').AppendLine(@enum.ToString("X"));
 
             string[] names = Enum.GetNames(type);
             Array values = Enum.GetValues(type);
@@ -49,7 +51,11 @@ namespace SbuBot.Evaluation.Inspection
 
             for (int i = 0; i < names.Length; i++)
             {
-                if (!@enum.HasFlag((Enum)values.GetValue(i)!))
+                object value = values.GetValue(i)!;
+                ulong ulongValue = ((IConvertible)value).ToUInt64(null);
+
+                // discard all values that are not powers of 2
+                if ((ulongValue) == 0 || (ulongValue & (ulongValue - 1)) != 0)
                     continue;
 
                 if (count >= itemCount)
@@ -61,7 +67,12 @@ namespace SbuBot.Evaluation.Inspection
                 for (int j = 0; j < indentation + indentationDelta; j++)
                     builder.Append(' ');
 
-                builder.Append('|').Append(' ').Append(names[i]).Append('\n');
+                builder.Append('|')
+                    .Append(' ')
+                    .Append(@enum.HasFlag((Enum)value) ? SbuGlobals.BULLET : ' ')
+                    .Append(' ')
+                    .AppendLine(names[i]);
+
                 count++;
             }
 
