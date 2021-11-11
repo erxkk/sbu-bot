@@ -51,21 +51,8 @@ namespace SbuBot.Services
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            IReadOnlyList<SbuReminder> reminders = await FetchNextRemindersAsync();
-
             await Client.WaitUntilReadyAsync(stoppingToken);
-
-            await Task.WhenAll(
-                reminders.Select(
-                    reminder =>
-                    {
-                        if (reminder.DueAt + TimeSpan.FromSeconds(1) <= DateTimeOffset.Now)
-                            reminder.DueAt = DateTimeOffset.Now + TimeSpan.FromSeconds(5);
-
-                        return ScheduleAsync(reminder, false);
-                    }
-                )
-            );
+            await _fetchSuspendedTimersAsync();
         }
 
         private async Task<IReadOnlyList<SbuReminder>> FetchNextRemindersAsync()
