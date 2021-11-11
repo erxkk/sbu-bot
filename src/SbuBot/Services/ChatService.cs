@@ -97,6 +97,11 @@ namespace SbuBot.Services
             if (e.GuildId is null || e.Message.Author.IsBot)
                 return;
 
+            if (e.GuildId == SbuGlobals.Guild.SBU
+                && e.Channel is ICategorizableGuildChannel categorizable
+                && categorizable.CategoryId == SbuGlobals.Channel.CATEGORY_SERIOUS)
+                return;
+
             if (!_configService.GetValue(e.GuildId.Value, SbuGuildConfig.Respond))
                 return;
 
