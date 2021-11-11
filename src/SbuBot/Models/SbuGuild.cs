@@ -41,7 +41,7 @@ namespace SbuBot.Models
             Snowflake? archiveId = null,
             Snowflake? colorRoleTopId = null,
             Snowflake? colorRoleBottomId = null
-        ) : this(guild.Id, archiveId, colorRoleTopId, colorRoleBottomId, (SbuGuildConfig)255) { }
+        ) : this(guild.Id, archiveId, colorRoleTopId, colorRoleBottomId, SbuGuildConfig.None) { }
 
 #region EFCore
 

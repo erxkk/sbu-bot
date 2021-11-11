@@ -13,9 +13,7 @@ namespace SbuBot.Services
 
         protected override async ValueTask OnMessageReceived(BotMessageReceivedEventArgs e)
         {
-            if (e.GuildId != SbuGlobals.Guild.SBU
-                || e.Channel is not ICategorizableGuildChannel categorizable
-                || categorizable.CategoryId == SbuGlobals.Channel.CATEGORY_SERIOUS)
+            if (e.GuildId != SbuGlobals.Guild.SBU || e.Channel?.CategoryId == SbuGlobals.Channel.CATEGORY_SERIOUS)
                 return;
 
             switch (e.Message.Author.Id)
