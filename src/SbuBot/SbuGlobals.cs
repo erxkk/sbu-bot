@@ -90,7 +90,7 @@ namespace SbuBot
             public const ulong SENATE = 775427903206457365UL;
 
             // categories
-            public const ulong CATEGORY_SERIOUS = 775427903206457365UL;
+            public const ulong CATEGORY_SERIOUS = 732215815537164309UL;
 
             // notable channels
             public const ulong PIN_ARCHIVE = 775826206410407937UL;
