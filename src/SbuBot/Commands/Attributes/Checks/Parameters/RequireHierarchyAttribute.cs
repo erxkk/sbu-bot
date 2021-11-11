@@ -135,9 +135,9 @@ namespace SbuBot.Commands.Attributes.Checks.Parameters
         public override bool CheckType(Type type)
             => type.IsAssignableTo(typeof(IRole))
                 || type.IsAssignableTo(typeof(IMember))
-                || type.IsAssignableTo(typeof(SbuRole))
-                || type.IsAssignableTo(typeof(SbuColorRole))
-                || type.IsAssignableTo(typeof(SbuMember));
+                || type == typeof(SbuRole)
+                || type == typeof(SbuColorRole)
+                || type == typeof(SbuMember);
     }
 }
 

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -13,6 +14,7 @@ using Qmmands;
 using SbuBot.Commands.Attributes;
 using SbuBot.Commands.Attributes.Checks;
 using SbuBot.Commands.Attributes.Checks.Parameters;
+using SbuBot.Commands.Views;
 using SbuBot.Extensions;
 using SbuBot.Models;
 using SbuBot.Services;
@@ -175,8 +177,7 @@ namespace SbuBot.Commands.Modules
         [Description("Transfers the authors color role to the given member.")]
         [Usage("role transfer @user", "r transfer 352815253828141056", "r transfer Allah")]
         public async Task<DiscordCommandResult> TransferAsync(
-            [NotAuthor, RequireHierarchy(HierarchyComparison.Less, HierarchyComparisonContext.Bot)]
-            [Description("The member that should receive the color role.")]
+            [NotAuthor][Description("The member that should receive the color role.")]
             SbuMember receiver
         )
         {
@@ -194,6 +195,22 @@ namespace SbuBot.Commands.Modules
 
             if (Context.CurrentMember.GetHierarchy() <= role.Position)
                 return Reply(SbuUtility.Format.HasHigherHierarchy("transfer the role"));
+
+            ConfirmationState result = await ConfirmationAsync(receiver.Id, "Do you accept the role transfer?");
+
+            switch (result)
+            {
+                case ConfirmationState.None:
+                case ConfirmationState.Aborted:
+                case ConfirmationState.TimedOut:
+                    return Reply("Aborted.");
+
+                case ConfirmationState.Confirmed:
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
 
             await Context.Guild.GrantRoleAsync(receiver.Id, member.ColorRole.Id);
             await Context.Author.RevokeRoleAsync(member.ColorRole.Id);

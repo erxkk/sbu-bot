@@ -33,8 +33,12 @@ namespace SbuBot.Commands.Modules
         {
             if (tag.IsAll)
             {
-                ConfirmationState result = await ConfirmationAsync(
-                    "Tag Transfer",
+                ConfirmationState result = await AgreementAsync(
+                    new()
+                    {
+                        Context.Author.Id,
+                        receiver.Id,
+                    },
                     string.Format(
                         "Are you sure you want to transfer all your tags to {0}?",
                         Mention.User(receiver.Id)
@@ -72,13 +76,13 @@ namespace SbuBot.Commands.Modules
             }
             else
             {
-                ConfirmationState result = await ConfirmationAsync(
-                    "Tag Transfer",
-                    string.Format(
-                        "Are you sure you want to transfer `{0}` your tags to {1}?",
-                        tag.Value.Name,
-                        Mention.User(receiver.Id)
-                    )
+                ConfirmationState result = await AgreementAsync(
+                    new()
+                    {
+                        Context.Author.Id,
+                        receiver.Id,
+                    },
+                    "Do you accept the tag transfer?"
                 );
 
                 switch (result)

@@ -5,12 +5,14 @@ using System.Threading.Tasks;
 
 using Disqord;
 using Disqord.Bot;
+using Disqord.Extensions.Interactivity.Menus;
 using Disqord.Extensions.Interactivity.Menus.Paged;
 
 using Kkommon.Extensions.Enumerable;
 
 using Qmmands;
 
+using SbuBot.Commands.Menus;
 using SbuBot.Commands.Views;
 using SbuBot.Commands.Views.Help;
 
@@ -30,7 +32,14 @@ namespace SbuBot.Commands
             Func<LocalEmbed, LocalEmbed>? embedFactory = null
         ) => Pages(new DistributedPageProvider(contents, itemsPerPage, embedFactory));
 
+        protected Task<ConfirmationState> ConfirmationAsync(
+            string prompt,
+            string? description = null,
+            TimeSpan timeout = default
+        ) => ConfirmationAsync(Context.Author.Id, prompt, description, timeout);
+
         protected async Task<ConfirmationState> ConfirmationAsync(
+            Snowflake targetId,
             string prompt,
             string? description = null,
             TimeSpan timeout = default
@@ -40,7 +49,34 @@ namespace SbuBot.Commands
 
             try
             {
-                await View(confirmationView, timeout != default ? timeout : TimeSpan.FromSeconds(30));
+                await Menu(
+                    new DefaultMenu(confirmationView) { AuthorId = targetId },
+                    timeout != default ? timeout : TimeSpan.FromSeconds(30)
+                );
+            }
+            catch (OperationCanceledException)
+            {
+                return ConfirmationState.TimedOut;
+            }
+
+            return confirmationView.Result ? ConfirmationState.Confirmed : ConfirmationState.Aborted;
+        }
+
+        protected async Task<ConfirmationState> AgreementAsync(
+            HashSet<Snowflake> targetIds,
+            string prompt,
+            string? description = null,
+            TimeSpan timeout = default
+        )
+        {
+            MultipleConfirmationView confirmationView = new(targetIds, prompt, description);
+
+            try
+            {
+                await Menu(
+                    new MultipleMenu(confirmationView, targetIds),
+                    timeout != default ? timeout : TimeSpan.FromSeconds(30)
+                );
             }
             catch (OperationCanceledException)
             {
