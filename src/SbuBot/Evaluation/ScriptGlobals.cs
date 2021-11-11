@@ -65,7 +65,7 @@ namespace SbuBot.Evaluation
             => View(new CustomPagedView(pageProvider), timeSpan);
 
         public DiscordMenuCommandResult View(ViewBase view, TimeSpan timeSpan = default)
-            => new(Context, new DefaultMenu(view, Context.Author.Id), timeSpan);
+            => new(Context, new DefaultMenu(view) { AuthorId = Context.Author.Id }, timeSpan);
 
         public DiscordMenuCommandResult Menu(MenuBase menu, TimeSpan timeSpan = default)
             => new(Context, menu, timeSpan);
