@@ -19,7 +19,7 @@ namespace SbuBot.Commands.Parsing.TypeParsers
             TypeParser<IMessage> typeParser = context.Bot.Commands.GetTypeParser<IMessage>();
             TypeParserResult<IMessage> result = await typeParser.ParseAsync(parameter, value, context);
 
-            if (result.IsSuccessful)
+            if (!result.IsSuccessful)
                 return Failure(result.FailureReason);
 
             if (result.Value is IUserMessage userMessage)

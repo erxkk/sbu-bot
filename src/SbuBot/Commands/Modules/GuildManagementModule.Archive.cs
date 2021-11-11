@@ -38,8 +38,7 @@ namespace SbuBot.Commands.Modules
             [Usage(
                 "archive (with {@reply})",
                 "archive 836993360274784297",
-
-                // "archive https://discord.com/channels/732210852849123418/732231139233759324/836993360274784297",
+                "archive https://discord.com/channels/732210852849123418/732231139233759324/836993360274784297",
                 "archive all"
             )]
             public async Task<DiscordCommandResult> ArchiveMessageAsync(
@@ -69,10 +68,16 @@ namespace SbuBot.Commands.Modules
 
                 if (message is null)
                 {
-                    if (!Context.Message.ReferencedMessage.HasValue)
+                    if (Context.Message.Reference?.MessageId is null)
                         return Reply("You need to provide a message or reply to one.");
 
-                    await PinSingleMessageAsync(Context.Message.ReferencedMessage.Value, pinArchive, unpinOriginal);
+                    IMessage fetchedMessage = await Context.Channel
+                        .FetchMessageAsync(Context.Message.Reference.MessageId.Value);
+
+                    if (fetchedMessage is not IUserMessage referencedMessage)
+                        return Reply("Could not find message.");
+
+                    await PinSingleMessageAsync(referencedMessage, pinArchive, unpinOriginal);
                 }
                 else
                 {
