@@ -37,8 +37,9 @@ namespace SbuBot.Commands.Modules
                     )
                     .AddInlineField(
                         "Library",
-                        Markdown.Link("Github:quahu/disqord", SbuGlobals.Link.GH_DISQORD)
+                        Markdown.Link("Github:Quahu/Disqord", SbuGlobals.Link.GH_DISQORD)
                     )
+                    .AddBlankInlineField()
                     .AddInlineField(
                         "CLR",
                         $".NET {Environment.Version}"
