@@ -39,7 +39,7 @@ namespace SbuBot.Commands.Modules
                 context.Tags.Update(tag);
                 await context.SaveChangesAsync();
 
-                return Reply("The tag has been updated.");
+                return Response("The tag has been updated.");
             }
 
             [Command]
@@ -85,7 +85,7 @@ namespace SbuBot.Commands.Modules
                 context.Tags.Update(tag);
                 await context.SaveChangesAsync();
 
-                return Reply("The tag has been updated.");
+                return Response("The tag has been updated.");
             }
         }
     }

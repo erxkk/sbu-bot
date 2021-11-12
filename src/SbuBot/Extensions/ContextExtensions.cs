@@ -83,13 +83,16 @@ namespace SbuBot.Extensions
         public static async Task<Result<string, FollowUpError>> WaitFollowUpForAsync(
             this DiscordGuildCommandContext @this,
             string prompt,
+            bool withReply = false,
             bool yield = false
         )
         {
             await @this.Channel.SendMessageAsync(
-                new LocalMessage()
-                    .WithContent(prompt)
-                    .WithReference(new LocalMessageReference().WithMessageId(@this.Message.Id))
+                new()
+                {
+                    Content = prompt,
+                    Reference = withReply ? new LocalMessageReference().WithMessageId(@this.Message.Id) : null,
+                }
             );
 
             MessageReceivedEventArgs? args;

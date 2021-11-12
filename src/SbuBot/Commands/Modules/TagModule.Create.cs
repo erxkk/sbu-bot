@@ -38,7 +38,7 @@ namespace SbuBot.Commands.Modules
 
                 await context.SaveChangesAsync();
 
-                return Reply("Tag created.");
+                return Response("Tag created.");
             }
 
             [Command]
@@ -136,7 +136,7 @@ namespace SbuBot.Commands.Modules
 
                 await context.SaveChangesAsync();
 
-                return Reply("Tag created.");
+                return Response("Tag created.");
             }
         }
     }

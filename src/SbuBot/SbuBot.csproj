@@ -61,12 +61,6 @@
         <Compile Update="Commands\Modules\TagModule.Delete.cs">
             <DependentUpon>TagModule.cs</DependentUpon>
         </Compile>
-        <Compile Update="Commands\Modules\TagModule.Transfer.cs">
-            <DependentUpon>TagModule.cs</DependentUpon>
-        </Compile>
-        <Compile Update="Commands\Modules\TagModule.Claim.cs">
-            <DependentUpon>TagModule.cs</DependentUpon>
-        </Compile>
         <Compile Update="Commands\Modules\ReminderModule.Create.cs">
             <DependentUpon>ReminderModule.cs</DependentUpon>
         </Compile>

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -9,6 +10,9 @@ using Microsoft.EntityFrameworkCore;
 
 using Qmmands;
 
+using SbuBot.Commands.Attributes.Checks.Parameters;
+using SbuBot.Commands.Parsing.HelperTypes;
+using SbuBot.Commands.Views;
 using SbuBot.Extensions;
 using SbuBot.Models;
 
@@ -24,9 +28,112 @@ namespace SbuBot.Commands.Modules
         public DiscordCommandResult Get([Description("The tag to invoke.")] SbuTag tag)
             => Response(tag.Content);
 
+        [Command("claim")]
+        [Description("Claims the given tag if it has no owner.")]
+        public async Task<DiscordCommandResult> ClaimAsync(
+            [MustBeOwned(false)][Description("The tag to claim.")]
+            SbuTag tag
+        )
+        {
+            SbuDbContext context = Context.GetSbuDbContext();
+
+            tag.OwnerId = Context.Author.Id;
+            context.Tags.Update(tag);
+            await context.SaveChangesAsync();
+
+            return Reply("Tag claimed.");
+        }
+
+        [Command("transfer")]
+        [Description("Transfers ownership of a given tag(s) to the given member.")]
+        public async Task<DiscordCommandResult> TransferAsync(
+            [NotAuthor][Description("The member that should receive the given tag(s).")]
+            SbuMember receiver,
+            [AuthorMustOwn][Description("The tag that the given member should receive.")]
+            OneOrAll<SbuTag> tag
+        )
+        {
+            if (tag.IsAll)
+            {
+                ConfirmationState result = await AgreementAsync(
+                    new()
+                    {
+                        Context.Author.Id,
+                        receiver.Id,
+                    },
+                    string.Format(
+                        "Are you sure you want to transfer all your tags to {0}?",
+                        Mention.User(receiver.Id)
+                    )
+                );
+
+                switch (result)
+                {
+                    case ConfirmationState.None:
+                    case ConfirmationState.Aborted:
+                    case ConfirmationState.TimedOut:
+                        return Reply("Aborted.");
+
+                    case ConfirmationState.Confirmed:
+                        break;
+
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+
+                SbuDbContext context = Context.GetSbuDbContext();
+
+                List<SbuTag> tags = await context
+                    .Tags
+                    .Where(t => t.OwnerId == Context.Author.Id)
+                    .ToListAsync(Context.Bot.StoppingToken);
+
+                foreach (SbuTag dbTag in tags)
+                    dbTag.OwnerId = receiver.Id;
+
+                context.Tags.UpdateRange(tags);
+                await context.SaveChangesAsync();
+
+                return Response($"{Mention.User(receiver.Id)} now owns all of your tags.");
+            }
+            else
+            {
+                ConfirmationState result = await AgreementAsync(
+                    new()
+                    {
+                        Context.Author.Id,
+                        receiver.Id,
+                    },
+                    "Do you accept the tag transfer?"
+                );
+
+                switch (result)
+                {
+                    case ConfirmationState.None:
+                    case ConfirmationState.Aborted:
+                    case ConfirmationState.TimedOut:
+                        return Reply("Aborted.");
+
+                    case ConfirmationState.Confirmed:
+                        break;
+
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+
+                SbuDbContext context = Context.GetSbuDbContext();
+
+                tag.Value.OwnerId = receiver.Id;
+                context.Tags.Update(tag.Value);
+                await context.SaveChangesAsync();
+
+                return Response($"{Mention.User(receiver.Id)} now owns `{tag.Value.Name}`.");
+            }
+        }
+
         [Group("list")]
         [Description("A group of commands for listing tags.")]
-        public sealed class ListGroup : SbuModuleBase
+        public sealed class ListSubModule : SbuModuleBase
         {
             [Command]
             [Description("Lists the tags of a given member, or of the command author if no member is specified.")]
@@ -50,14 +157,16 @@ namespace SbuBot.Commands.Modules
                 }
 
                 return DistributedPages(
-                    tags.Select(t => $"{SbuGlobals.BULLET} {t.Name}\n`{t.Content}`\n"),
+                    tags.Select(t => $"{SbuGlobals.BULLET} `{t.Name}`\n{t.Content}\n"),
                     embedFactory: embed => embed.WithTitle(
                         $"{(notAuthor ? $"{Mention.User(owner.Id)}'s" : "Your")} Tags"
-                    )
+                    ),
+                    itemsPerPage: 20,
+                    maxPageLength: LocalEmbed.MaxDescriptionLength / 2
                 );
             }
 
-            [Command]
+            [Command("all")]
             [Description("Lists all tags.")]
             public async Task<DiscordCommandResult> ListAllAsync()
             {
@@ -69,14 +178,16 @@ namespace SbuBot.Commands.Modules
                 return DistributedPages(
                     tags.Select(
                         t => string.Format(
-                            "{0} {1}: {2}\n`{3}`\n",
+                            "{0} {1}: `{2}`\n{3}\n",
                             SbuGlobals.BULLET,
                             t.OwnerId is { } ? Mention.User(t.Owner!.Id) : "No owner",
                             t.Name,
                             t.Content
                         )
                     ),
-                    embedFactory: embed => embed.WithTitle("Tags")
+                    embedFactory: embed => embed.WithTitle("Tags"),
+                    itemsPerPage: 20,
+                    maxPageLength: LocalEmbed.MaxDescriptionLength / 2
                 );
             }
         }
