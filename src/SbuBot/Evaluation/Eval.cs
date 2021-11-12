@@ -16,6 +16,7 @@ namespace SbuBot.Evaluation
         public static readonly string[] IMPORTS =
         {
             "System",
+            "System.Collections.Generic",
             "System.Linq",
             "System.Threading",
             "Microsoft.EntityFrameworkCore",
