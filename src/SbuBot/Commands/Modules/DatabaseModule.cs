@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -12,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 using Qmmands;
 
 using SbuBot.Commands.Attributes.Checks.Parameters;
+using SbuBot.Commands.Views;
 using SbuBot.Extensions;
 using SbuBot.Models;
 
@@ -33,24 +35,55 @@ namespace SbuBot.Commands.Modules
             SbuMember newMember = dbContext.AddMember(member);
 
             if (member.GetColorRole() is { } colorRole)
-                dbContext.AddColorRole(colorRole, newMember.Id);
+            {
+                ConfirmationState result = await ConfirmationAsync(
+                    "Possible color role found",
+                    $"Add {colorRole.Mention} as their color role?"
+                );
+
+                switch (result)
+                {
+                    case ConfirmationState.None:
+                    case ConfirmationState.Aborted:
+                    case ConfirmationState.TimedOut:
+                        await Response("Skipping color role.");
+                        break;
+
+                    case ConfirmationState.Confirmed:
+                        await Response($"Registering {colorRole.Mention} as their color role.");
+                        dbContext.AddColorRole(colorRole, newMember.Id);
+                        break;
+
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
 
             await dbContext.SaveChangesAsync();
 
-            return Reply($"{member.Mention} is now registered in the database.");
+            return Response($"{member.Mention} is now registered in the database.");
         }
 
         [Command("init")]
         [RequireAuthorGuildPermissions(Permission.Administrator)]
-        [Description("Initializes the database for this guild, loading members and color roles into it.")]
+        [Description("Initializes the color roles for this guild, loading members and color roles into the database.")]
+        [Remarks(
+            "This will only include color roles with a position lower than the bot's hierarchy. This will override "
+            + "previous color roles witht he current ones for all members where it cna be determined."
+        )]
         public async Task<DiscordCommandResult> InitAsync()
         {
             SbuDbContext dbContext = Context.GetSbuDbContext();
             int userCount = 0, roleCount = 0;
+            int currentHierarchy = Context.CurrentMember.GetHierarchy();
 
-            IEnumerable<(IMember m, IRole?)> userRolePairs = Context.Guild.Members.Values
+            if (currentHierarchy == 0)
+                return Reply("The bot has a hierarchy of 0 meaning it wouldn't add any color roles. Aborted.");
+
+            IEnumerable<(IMember, IRole?)> userRolePairs = Context.Guild.Members.Values
                 .Where(m => !m.IsBot)
-                .Select(m => (m, m.GetColorRole()));
+                .Select(m => (m, m.GetColorRole()))
+                .Where(pair => (pair.Item2?.Position ?? int.MaxValue) < currentHierarchy);
 
             Dictionary<Snowflake, SbuMember> members = await dbContext.Members
                 .Where(m => m.GuildId == Context.Guild.Id)
@@ -83,8 +116,25 @@ namespace SbuBot.Commands.Modules
                 roleCount++;
             }
 
-            await dbContext.SaveChangesAsync();
-            return Reply($"Found {userCount} users, {roleCount} of which have a suitable color role.");
+            ConfirmationState result = await ConfirmationAsync(
+                "Confirm operation?",
+                $"Found {userCount} users, {roleCount} with a suitable color role, update all these users?"
+            );
+
+            switch (result)
+            {
+                case ConfirmationState.None:
+                case ConfirmationState.Aborted:
+                case ConfirmationState.TimedOut:
+                    return Reply("Aborted.");
+
+                case ConfirmationState.Confirmed:
+                    await dbContext.SaveChangesAsync();
+                    return Response("Users and their color roles have been added to the database.");
+
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
 
         [Command("transfer")]
@@ -131,10 +181,12 @@ namespace SbuBot.Commands.Modules
                 await Context.Author.RevokeRoleAsync(role.Id);
             }
 
-            if (tags.Count != 0 || hadRole)
-                await dbContext.SaveChangesAsync();
+            if (tags.Count == 0 && !hadRole)
+                return Reply("The member had nothing to transfer.");
 
-            return Reply(
+            await dbContext.SaveChangesAsync();
+
+            return Response(
                 string.Format(
                     "{0} now owns all of {1}'s db entries.",
                     Mention.User(receiver.Id),
@@ -143,6 +195,7 @@ namespace SbuBot.Commands.Modules
             );
         }
 
+        // TODO: simplify
         [Group("inspect")]
         [RequireBotOwner]
         [Description("Inspects a given entity's database entry, or the current guild if none is given.")]
@@ -173,13 +226,29 @@ namespace SbuBot.Commands.Modules
 
             [Command]
             public DiscordCommandResult InspectRole(
-                [Description("The role to inspect.")] SbuColorRole role,
+                [Description("The role to inspect.")] SbuRole role,
                 [Minimum(1)][Description("The depth of the inspection.")]
                 int depth = 1
             )
             {
                 LocalEmbed embed = new LocalEmbed()
                     .WithTitle("Role")
+                    .WithDescription(Markdown.CodeBlock("yml", role.GetInspection(depth)))
+                    .AddInlineField("Self", Mention.Role(role.Id));
+
+                return Reply(embed);
+            }
+
+            [Command]
+            public DiscordCommandResult InspectColorRole(
+                [Description("The color role to inspect.")]
+                SbuColorRole role,
+                [Minimum(1)][Description("The depth of the inspection.")]
+                int depth = 1
+            )
+            {
+                LocalEmbed embed = new LocalEmbed()
+                    .WithTitle("Color Role")
                     .WithDescription(Markdown.CodeBlock("yml", role.GetInspection(depth)))
                     .AddInlineField("Self", Mention.Role(role.Id))
                     .AddInlineField("Owner", role.OwnerId is { } ? Mention.User(role.OwnerId.Value) : "None");
@@ -232,8 +301,8 @@ namespace SbuBot.Commands.Modules
                     .WithTitle("Reminder")
                     .WithDescription(Markdown.CodeBlock("yml", reminder.GetInspection(depth)))
                     .AddInlineField("Owner", Mention.User(reminder.OwnerId.Value))
-                    .AddInlineField("CreatedAt", reminder.CreatedAt)
-                    .AddInlineField("DueAt", reminder.DueAt)
+                    .AddInlineField("CreatedAt", Markdown.Timestamp(reminder.CreatedAt))
+                    .AddInlineField("DueAt", Markdown.Timestamp(reminder.DueAt))
             );
         }
     }
