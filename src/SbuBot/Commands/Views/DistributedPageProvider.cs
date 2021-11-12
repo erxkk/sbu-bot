@@ -37,7 +37,6 @@ namespace SbuBot.Commands.Views
 
             foreach (string item in source)
             {
-                // TODO: split
                 if (item.Length + 1 > maxPageLength)
                 {
                     throw new ArgumentOutOfRangeException(

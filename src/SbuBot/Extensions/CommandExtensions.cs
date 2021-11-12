@@ -34,16 +34,17 @@ namespace SbuBot.Commands
         {
             Preconditions.NotNull(@this, nameof(@this));
             Preconditions.NotNull(builder, nameof(builder));
+            Preconditions.Greater(@this.FullAliases[0].Length, 0, "@this.FullAliases.Length");
 
             builder.Append(@this.FullAliases[0]);
         }
 
-        // TODO: no alias
         public static string Format(this Module @this)
         {
             Preconditions.NotNull(@this, nameof(@this));
+            Preconditions.Greater(@this.FullAliases[0].Length, 0, "@this.FullAliases.Length");
 
-            StringBuilder builder = new(@this.FullAliases[0].Length);
+            StringBuilder builder = new(@this.FullAliases[0]);
             @this.AppendTo(builder);
             return builder.ToString();
         }
@@ -56,6 +57,7 @@ namespace SbuBot.Commands
         {
             Preconditions.NotNull(@this, nameof(@this));
             Preconditions.NotNull(builder, nameof(builder));
+            Preconditions.Greater(@this.FullAliases[0].Length, 0, "@this.FullAliases.Length");
 
             builder.Append(@this.FullAliases[0]);
 
@@ -69,6 +71,7 @@ namespace SbuBot.Commands
         public static string Format(this Command @this, bool withDefaults = true)
         {
             Preconditions.NotNull(@this, nameof(@this));
+            Preconditions.Greater(@this.FullAliases[0].Length, 0, "@this.FullAliases.Length");
 
             StringBuilder builder = new(@this.FullAliases[0].Length + 16 * @this.Parameters.Count);
             @this.AppendTo(builder, withDefaults);
@@ -99,7 +102,7 @@ namespace SbuBot.Commands
             return builder.ToString();
         }
 
-        public static void AppendTo(this Parameter @this, StringBuilder builder, bool withDefault = true)
+        public static void AppendTo(this Parameter @this, StringBuilder builder, bool withMeta = true)
         {
             Preconditions.NotNull(@this, nameof(@this));
             Preconditions.NotNull(builder, nameof(builder));
@@ -110,7 +113,7 @@ namespace SbuBot.Commands
             {
                 builder.Append(SbuGlobals.ELLIPSES);
             }
-            else if (withDefault && @this.IsOptional)
+            else if (withMeta && @this.IsOptional)
             {
                 builder.Append(" = ");
 
@@ -134,11 +137,13 @@ namespace SbuBot.Commands
                 if (@this.Type.IsGenericType && @this.Type.GetGenericTypeDefinition() == typeof(OneOrAll<>))
                     builder.Append(" | all");
             }
-            else if (@this.Type.IsGenericType && @this.Type.GetGenericTypeDefinition() == typeof(OneOrAll<>))
+            else if (withMeta
+                && @this.Type.IsGenericType
+                && @this.Type.GetGenericTypeDefinition() == typeof(OneOrAll<>))
             {
                 builder.Append(" | all");
             }
-            else if (@this.Type == typeof(SbuReminder))
+            else if (withMeta && @this.Type == typeof(SbuReminder))
             {
                 // create type appender?
                 builder.Append(" | last");
