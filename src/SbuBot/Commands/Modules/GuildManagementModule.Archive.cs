@@ -25,7 +25,7 @@ namespace SbuBot.Commands.Modules
         [Group("archive")]
         [RequireGuildConfig(SbuGuildConfig.Archive)]
         [Description("A group of commands for sending pinned messages to an archive channel.")]
-        public sealed partial class ArchiveSubModule : SbuModuleBase
+        public sealed class ArchiveSubModule : SbuModuleBase
         {
             [Command]
             [RequireBotChannelPermissions(Permission.ManageMessages),
@@ -34,12 +34,6 @@ namespace SbuBot.Commands.Modules
             [Remarks(
                 "The Message are unpinned unless specified otherwise, specifying otherwise cannot be done when "
                 + "replying to the message. In this case the message id/link/`all` must be used as message argument."
-            )]
-            [UsageOverride(
-                "archive (with {@reply})",
-                "archive 836993360274784297",
-                "archive https://discord.com/channels/732210852849123418/732231139233759324/836993360274784297",
-                "archive all"
             )]
             public async Task<DiscordCommandResult> ArchiveMessageAsync(
                 [OverrideDefault("{@reply}")][Description("The message that should be archived.")]

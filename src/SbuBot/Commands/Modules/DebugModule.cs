@@ -1,14 +1,19 @@
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 
 using Disqord;
 using Disqord.Bot;
+using Disqord.Extensions.Interactivity.Menus.Paged;
 using Disqord.Gateway;
+
+using Kkommon.Extensions.Enumerable;
 
 using Qmmands;
 
 using SbuBot.Evaluation;
+using SbuBot.Extensions;
 
 namespace SbuBot.Commands.Modules
 {
@@ -86,7 +91,7 @@ namespace SbuBot.Commands.Modules
         [Description("Fucking kills the bot oh my god...")]
         public async Task KillAsync()
         {
-            await Response("");
+            await Response(SbuGlobals.Media.ADIOS);
             Environment.Exit(0);
         }
 

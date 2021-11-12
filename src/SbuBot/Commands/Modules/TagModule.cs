@@ -28,6 +28,15 @@ namespace SbuBot.Commands.Modules
         public DiscordCommandResult Get([Description("The tag to invoke.")] SbuTag tag)
             => Response(tag.Content);
 
+        [Command("owner")]
+        [Description("Returns the owner of the given tag.")]
+        public DiscordCommandResult GetOwner([Description("The tag to invoke.")] SbuTag tag)
+            => Response(
+                tag.OwnerId is null
+                    ? "Nobody owns this tag."
+                    : $"{Mention.User(tag.OwnerId.Value)} owns this tag."
+            );
+
         [Command("claim")]
         [Description("Claims the given tag if it has no owner.")]
         public async Task<DiscordCommandResult> ClaimAsync(
@@ -131,44 +140,40 @@ namespace SbuBot.Commands.Modules
             }
         }
 
-        [Group("list")]
-        [Description("A group of commands for listing tags.")]
-        public sealed class ListSubModule : SbuModuleBase
+        [Command("list")]
+        [Description("Lists the tags of a given member, or of the command author if no member is specified.")]
+        public async Task<DiscordCommandResult> ListFromOwnerAsync(
+            [Description("The member who's tags should be listed.")]
+            OneOrAll<SbuMember>? owner = null
+        )
         {
-            [Command]
-            [Description("Lists the tags of a given member, or of the command author if no member is specified.")]
-            public async Task<DiscordCommandResult> ListFromOwnerAsync(
-                [Description("The member who's tags should be listed.")]
-                SbuMember owner
-            )
+            if (owner is null || !owner.IsAll)
             {
-                bool notAuthor = owner.Id != Context.Author.Id;
+                Snowflake ownerId = (owner?.Value?.Id ?? Context.Author.Id);
+                bool notAuthor = ownerId != Context.Author.Id;
 
                 List<SbuTag> tags = await Context.GetSbuDbContext()
                     .Tags
-                    .Where(t => t.OwnerId == owner.Id)
+                    .Where(t => t.OwnerId == ownerId)
                     .ToListAsync(Context.Bot.StoppingToken);
 
                 if (tags.Count == 0)
                 {
                     return Reply(
-                        $"{(notAuthor ? Mention.User(owner.Id) + "doesn't" : "You don't")} own any tags."
+                        $"{(notAuthor ? Mention.User(ownerId) + "doesn't" : "You don't")} own any tags."
                     );
                 }
 
                 return DistributedPages(
                     tags.Select(t => $"{SbuGlobals.BULLET} `{t.Name}`\n{t.Content}\n"),
                     embedFactory: embed => embed.WithTitle(
-                        $"{(notAuthor ? $"{Mention.User(owner.Id)}'s" : "Your")} Tags"
+                        $"{(notAuthor ? $"{Mention.User(ownerId)}'s" : "Your")} Tags"
                     ),
                     itemsPerPage: 20,
                     maxPageLength: LocalEmbed.MaxDescriptionLength / 2
                 );
             }
-
-            [Command("all")]
-            [Description("Lists all tags.")]
-            public async Task<DiscordCommandResult> ListAllAsync()
+            else
             {
                 List<SbuTag> tags = await Context.GetTagsFullAsync();
 

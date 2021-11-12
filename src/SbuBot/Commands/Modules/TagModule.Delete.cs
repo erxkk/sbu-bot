@@ -20,147 +20,143 @@ namespace SbuBot.Commands.Modules
 {
     public sealed partial class TagModule
     {
-        [Group("delete")]
+        [Command("delete")]
         [Description("Removes a given tag.")]
-        public sealed class TagGroup : SbuModuleBase
+        public async Task<DiscordCommandResult> RemoveAsync(
+            [AuthorMustOwn][Description("The tag that should be removed.")]
+            OneOrAll<SbuTag> tag
+        )
         {
-            [Command]
-            public async Task<DiscordCommandResult> RemoveAsync(
-                [AuthorMustOwn][Description("The tag that should be removed.")]
-                OneOrAll<SbuTag> tag
-            )
+            if (tag.IsAll)
             {
-                if (tag.IsAll)
+                ConfirmationState result = await ConfirmationAsync(
+                    "Tag Removal",
+                    "Are you sure you want to remove all your tags?"
+                );
+
+                switch (result)
                 {
-                    ConfirmationState result = await ConfirmationAsync(
-                        "Tag Removal",
-                        "Are you sure you want to remove all your tags?"
-                    );
+                    case ConfirmationState.None:
+                    case ConfirmationState.Aborted:
+                    case ConfirmationState.TimedOut:
+                        return Reply("Aborted.");
 
-                    switch (result)
-                    {
-                        case ConfirmationState.None:
-                        case ConfirmationState.Aborted:
-                        case ConfirmationState.TimedOut:
-                            return Reply("Aborted.");
+                    case ConfirmationState.Confirmed:
+                        break;
 
-                        case ConfirmationState.Confirmed:
-                            break;
-
-                        default:
-                            throw new ArgumentOutOfRangeException();
-                    }
-
-                    SbuDbContext context = Context.GetSbuDbContext();
-
-                    List<SbuTag> tags = await context.Tags
-                        .Where(t => t.OwnerId == Context.Author.Id && t.GuildId == Context.GuildId)
-                        .ToListAsync(Context.Bot.StoppingToken);
-
-                    context.Tags.RemoveRange(tags);
-                    await context.SaveChangesAsync();
-
-                    return Response("All tags removed.");
+                    default:
+                        throw new ArgumentOutOfRangeException();
                 }
-                else
-                {
-                    ConfirmationState result = await ConfirmationAsync(
-                        "Tag Removal",
-                        "Are you sure you want to remove this tag?"
-                    );
 
-                    switch (result)
-                    {
-                        case ConfirmationState.None:
-                        case ConfirmationState.Aborted:
-                        case ConfirmationState.TimedOut:
-                            return Reply("Aborted.");
+                SbuDbContext context = Context.GetSbuDbContext();
 
-                        case ConfirmationState.Confirmed:
-                            break;
+                List<SbuTag> tags = await context.Tags
+                    .Where(t => t.OwnerId == Context.Author.Id && t.GuildId == Context.GuildId)
+                    .ToListAsync(Context.Bot.StoppingToken);
 
-                        default:
-                            throw new ArgumentOutOfRangeException();
-                    }
+                context.Tags.RemoveRange(tags);
+                await context.SaveChangesAsync();
 
-                    SbuDbContext context = Context.GetSbuDbContext();
-
-                    context.Tags.Remove(tag.Value);
-                    await context.SaveChangesAsync();
-
-                    return Response("Tag removed.");
-                }
+                return Response("All tags removed.");
             }
-
-            [Command]
-            [RequireAuthorChannelPermissions(Permission.Administrator)]
-            [Description("Removes a given tag.")]
-            [Remarks("Requires Administrator Permission.")]
-            public async Task<DiscordCommandResult> RemoveOverrideAsync(
-                [Description("The tag that should be removed.")]
-                OneOrAll<SbuTag> tag
-            )
+            else
             {
-                if (tag.IsAll)
+                ConfirmationState result = await ConfirmationAsync(
+                    "Tag Removal",
+                    "Are you sure you want to remove this tag?"
+                );
+
+                switch (result)
                 {
-                    ConfirmationState result = await ConfirmationAsync(
-                        "Complete Tag Removal",
-                        "Are you sure you want to remove **all** tags?"
-                    );
+                    case ConfirmationState.None:
+                    case ConfirmationState.Aborted:
+                    case ConfirmationState.TimedOut:
+                        return Reply("Aborted.");
 
-                    switch (result)
-                    {
-                        case ConfirmationState.None:
-                        case ConfirmationState.Aborted:
-                        case ConfirmationState.TimedOut:
-                            return Reply("Aborted.");
+                    case ConfirmationState.Confirmed:
+                        break;
 
-                        case ConfirmationState.Confirmed:
-                            break;
-
-                        default:
-                            throw new ArgumentOutOfRangeException();
-                    }
-
-                    SbuDbContext context = Context.GetSbuDbContext();
-
-                    List<SbuTag> tags = await context.Tags
-                        .Where(t => t.GuildId == Context.GuildId)
-                        .ToListAsync(Context.Bot.StoppingToken);
-
-                    context.Tags.RemoveRange(tags);
-                    await context.SaveChangesAsync();
-
-                    return Response("All tags removed.");
+                    default:
+                        throw new ArgumentOutOfRangeException();
                 }
-                else
+
+                SbuDbContext context = Context.GetSbuDbContext();
+
+                context.Tags.Remove(tag.Value);
+                await context.SaveChangesAsync();
+
+                return Response("Tag removed.");
+            }
+        }
+
+        [Command("purge")]
+        [RequireAuthorChannelPermissions(Permission.Administrator)]
+        [Description("Removes a given tag without owner restrictions.")]
+        [Remarks("Requires Administrator Permission.")]
+        public async Task<DiscordCommandResult> RemoveOverrideAsync(
+            [Description("The tag that should be removed.")]
+            OneOrAll<SbuTag> tag
+        )
+        {
+            if (tag.IsAll)
+            {
+                ConfirmationState result = await ConfirmationAsync(
+                    "Complete Tag Removal",
+                    "Are you sure you want to remove **all** tags?"
+                );
+
+                switch (result)
                 {
-                    ConfirmationState result = await ConfirmationAsync(
-                        "Tag Removal",
-                        "Are you sure you want to remove this tag?"
-                    );
+                    case ConfirmationState.None:
+                    case ConfirmationState.Aborted:
+                    case ConfirmationState.TimedOut:
+                        return Reply("Aborted.");
 
-                    switch (result)
-                    {
-                        case ConfirmationState.None:
-                        case ConfirmationState.Aborted:
-                        case ConfirmationState.TimedOut:
-                            return Reply("Aborted.");
+                    case ConfirmationState.Confirmed:
+                        break;
 
-                        case ConfirmationState.Confirmed:
-                            break;
-
-                        default:
-                            throw new ArgumentOutOfRangeException();
-                    }
-
-                    SbuDbContext context = Context.GetSbuDbContext();
-
-                    context.Tags.Remove(tag.Value);
-                    await context.SaveChangesAsync();
-
-                    return Response("Tag removed.");
+                    default:
+                        throw new ArgumentOutOfRangeException();
                 }
+
+                SbuDbContext context = Context.GetSbuDbContext();
+
+                List<SbuTag> tags = await context.Tags
+                    .Where(t => t.GuildId == Context.GuildId)
+                    .ToListAsync(Context.Bot.StoppingToken);
+
+                context.Tags.RemoveRange(tags);
+                await context.SaveChangesAsync();
+
+                return Response("All tags removed.");
+            }
+            else
+            {
+                ConfirmationState result = await ConfirmationAsync(
+                    "Tag Removal",
+                    "Are you sure you want to remove this tag?"
+                );
+
+                switch (result)
+                {
+                    case ConfirmationState.None:
+                    case ConfirmationState.Aborted:
+                    case ConfirmationState.TimedOut:
+                        return Reply("Aborted.");
+
+                    case ConfirmationState.Confirmed:
+                        break;
+
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+
+                SbuDbContext context = Context.GetSbuDbContext();
+
+                context.Tags.Remove(tag.Value);
+                await context.SaveChangesAsync();
+
+                return Response("Tag removed.");
             }
         }
     }

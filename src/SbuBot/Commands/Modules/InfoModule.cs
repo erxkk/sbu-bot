@@ -7,6 +7,8 @@ using Disqord;
 using Disqord.Bot;
 using Disqord.Rest;
 
+using Kkommon.Extensions.Prototyping;
+
 using Qmmands;
 
 using SbuBot.Commands.Attributes;
@@ -108,31 +110,39 @@ namespace SbuBot.Commands.Modules
                 );
             }
 
+            // BUG: modules return command + sub module == 0 even though they do have some
+            // when inspected they behave fine
+            // GuildManagementModule
+            //     ArchiveSubModule
+            //     ConfigSubModule
+            //     RequestSubModule
             [Command("list")]
             [Description("Lists all commands.")]
             public DiscordCommandResult List()
             {
                 IReadOnlySet<Module> modules = Context.Bot.Commands.TopLevelModules;
 
-                static IEnumerable<string> appendChildren(Module module, int depth = 1)
+                static IEnumerable<string> children(Module module, int depth = 1)
                 {
                     return module.Submodules.Select(
                             subModule => string.Format(
                                 "{0}{1} {2}{3}{4}",
                                 string.Join("", Enumerable.Repeat(GuideStatic.INDENT, depth)),
                                 SbuGlobals.BULLET_2,
-                                subModule.Name,
-                                subModule.Submodules.Count + module.Commands.Count == 0 ? "" : "\n",
-                                appendChildren(subModule, depth + 1).ToNewLines()
+                                module.IsEnabled ? subModule.Name : $"~~{subModule.Name}~~",
+                                module.IsEnabled && subModule.Submodules.Count + module.Commands.Count != 0 ? "\n" : "",
+                                module.IsEnabled && subModule.Submodules.Count + module.Commands.Count != 0
+                                    ? children(subModule, depth + 1).ToNewLines()
+                                    : null
                             )
                         )
                         .Concat(
                             module.Commands.Select(
                                 command => string.Format(
-                                    "{0}{1} `{2}`",
+                                    "{0}{1} {2}",
                                     string.Join("", Enumerable.Repeat(GuideStatic.INDENT, depth)),
                                     SbuGlobals.BULLET,
-                                    command.Format(false)
+                                    module.IsEnabled ? $"`{command.Format(false)}`" : $"~~`{command.Format(false)}`~~"
                                 )
                             )
                         );
@@ -140,18 +150,20 @@ namespace SbuBot.Commands.Modules
 
                 return DistributedPages(
                     modules.Select(
-                        module => module.IsEnabled
-                            ? string.Format(
-                                "{0} {1}{2}{3}\n",
-                                SbuGlobals.BULLET_2,
-                                module.Name,
-                                module.Submodules.Count + module.Commands.Count == 0 ? "" : "\n",
-                                appendChildren(module).ToNewLines()
-                            )
-                            : $"~~{module.Name}~~"
+                        module => string.Format(
+                            "{0} {1}{2}{3}\n",
+                            SbuGlobals.BULLET_2,
+                            module.IsEnabled ? module.Name : $"~~{module.Name}~~",
+                            module.IsEnabled && module.Submodules.Count + module.Commands.Count != 0 ? "\n" : "",
+                            module.IsEnabled && module.Submodules.Count + module.Commands.Count != 0
+                                ? children(module).ToNewLines()
+                                : null
+                        )
                     ),
-                    maxPageLength: LocalEmbed.MaxDescriptionLength / 2,
-                    embedFactory: embed => embed.WithTitle("Commands")
+                    maxPageLength:
+                    LocalEmbed.MaxDescriptionLength / 2,
+                    embedFactory:
+                    embed => embed.WithTitle("Commands")
                 );
             }
         }
@@ -170,31 +182,31 @@ namespace SbuBot.Commands.Modules
             {
                 IReadOnlySet<Module> modules = Context.Bot.Commands.TopLevelModules;
 
-                static IEnumerable<string> appendSubModules(Module module, int depth = 1)
+                static IEnumerable<string> subModules(Module module, int depth = 1)
                 {
                     return module.Submodules.Select(
                         subModule => string.Format(
                             "{0}{1} {2}{3}{4}",
                             string.Join("", Enumerable.Repeat(GuideStatic.INDENT, depth)),
                             SbuGlobals.BULLET,
-                            subModule.Name,
-                            subModule.Submodules.Count == 0 ? "" : "\n",
-                            appendSubModules(subModule, depth + 1).ToNewLines()
+                            subModule.IsEnabled ? subModule.Name : $"~~{subModule.Name}~~",
+                            subModule.IsEnabled && subModule.Submodules.Count != 0 ? "\n" : "",
+                            subModule.IsEnabled && subModule.Submodules.Count != 0
+                                ? subModules(subModule, depth + 1).ToNewLines()
+                                : null
                         )
                     );
                 }
 
                 return DistributedPages(
                     modules.Select(
-                        module => module.IsEnabled
-                            ? string.Format(
-                                "{0} {1}{2}{3}\n",
-                                SbuGlobals.BULLET,
-                                module.Name,
-                                module.Submodules.Count == 0 ? "" : "\n",
-                                appendSubModules(module).ToNewLines()
-                            )
-                            : $"~~{module.Name}~~"
+                        module => string.Format(
+                            "{0} {1}{2}{3}\n",
+                            SbuGlobals.BULLET,
+                            module.IsEnabled ? module.Name : $"~~{module.Name}~~",
+                            module.IsEnabled && module.Submodules.Count != 0 ? "\n" : "",
+                            module.IsEnabled && module.Submodules.Count != 0 ? subModules(module).ToNewLines() : null
+                        )
                     ),
                     maxPageLength: LocalEmbed.MaxDescriptionLength / 2,
                     embedFactory: embed => embed.WithTitle("Modules")
