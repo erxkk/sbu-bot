@@ -184,10 +184,11 @@ namespace SbuBot.Commands.Modules
 
             public static readonly string SYNTAX_SEMANTICS
                 = "**Brackets in help commands indicate parameter importance**\n"
-                + "• `<param>` a required parameter, it cannot be left out\n"
-                + "• `[param = default]` an optional parameter, if left out the default value will be used\n"
-                + "• `[params…]` a collection of values, if left out none will be passed\n"
-                + "• `{object}` non-string-literals\n"
+                + $"{SbuGlobals.BULLET} `<param>` a required parameter, it cannot be left out\n"
+                + $"{SbuGlobals.BULLET} `[param = default]` an optional parameter, if left out the default value will "
+                + "be used\n"
+                + $"{SbuGlobals.BULLET} `[params…]` a collection of values, if left out none will be passed\n"
+                + $"{SbuGlobals.BULLET} `{{object}}` non-string-literals\n"
                 + $"{GuideStatic.INDENT}- `{{-cmd}}` invokes `sbu cmd` instead\n"
                 + $"{GuideStatic.INDENT}- `{{!state}}` negation of state\n"
                 + $"{GuideStatic.INDENT}- `{{@user}}` user-mention\n"
@@ -197,47 +198,51 @@ namespace SbuBot.Commands.Modules
                 + "Arguments are separated by spaces, wrap an argument in quotes `\"\"` if it contains spaces, this is "
                 + "not necessary for the last non-collection parameter.";
 
-            public const string PARSING
+            public static readonly string PARSING
                 = "**Quotes and backslashes receive special handling when parsing**\n"
-                + "• Quotes `\"counts as one\"` indicate the start and end of an argument that contains spaces and is "
+                + $"{SbuGlobals.BULLET} Quotes `\"counts as one\"` indicate the start and end of an argument that "
+                + "contains spaces and is "
                 + "not the last argument, they are parsed normally on the last argument.\n"
-                + "• Backslashes escape the following character to not receive any special handling.\n"
-                + "• To use quotes or slashes as literal values anywhere they have to be escaped `\\\"` will be parsed "
-                + "as `\"`.\n"
-                + "• Descriptors are used to make parsing easier, a descriptor separates arguments by `::` and "
-                + "discards leading and trailing whitspace.";
+                + $"{SbuGlobals.BULLET} Backslashes escape the following character to not receive any special "
+                + $"handling.\n"
+                + $"{SbuGlobals.BULLET} To use quotes or slashes as literal values anywhere they have to be escaped "
+                + $"`\\\"` will be parsed as `\"`.\n"
+                + $"{SbuGlobals.BULLET} Descriptors are used to make parsing easier, a descriptor separates arguments "
+                + $"by `{SbuGlobals.DESCRIPTOR_SEPARATOR}` and discards leading and trailing whitespace.";
 
             public static readonly string PARSING_EXAMPLES
-                = "• **Optional argument**\n"
+                = $"{SbuGlobals.BULLET} **Optional argument**\n"
                 + $"{GuideStatic.INDENT}- command `ban <user> [reason = \"beaned\"]`\n"
                 + $"{GuideStatic.INDENT}- used like `sbu ban @joemama`\n"
                 + $"{GuideStatic.INDENT}- bans `@joemama` with `beaned` as the reason\n"
                 + "\n"
-                + "• **Optional argument not omitted**\n"
+                + $"{SbuGlobals.BULLET} **Optional argument not omitted**\n"
                 + $"{GuideStatic.INDENT}- command `ban <user> [reason = \"beaned\"]`\n"
                 + $"{GuideStatic.INDENT}- used like `sbu ban @joemama you're a retard`\n"
                 + $"{GuideStatic.INDENT}- bans `@joemama` with `you're a retard` as the reason\n"
                 + "\n"
-                + "• **Additional argument omitted**\n"
+                + $"{SbuGlobals.BULLET} **Additional argument omitted**\n"
                 + $"{GuideStatic.INDENT}- command `gift <user> <tag> [additional tags…]`\n"
                 + $"{GuideStatic.INDENT}- used like `sbu gift @joemama tag1`\n"
                 + $"{GuideStatic.INDENT}- gifts `@joemama` `tag1`\n"
                 + "\n"
-                + "• **Additional argument not omitted**\n"
+                + $"{SbuGlobals.BULLET} **Additional argument not omitted**\n"
                 + $"{GuideStatic.INDENT}- command `gift <user> <tag> [additional tags…]`\n"
                 + $"{GuideStatic.INDENT}- used like `sbu gift @joemama tag1 \"tag2 with spaces\" tag3`\n"
                 + $"{GuideStatic.INDENT}- gifts `@joemama` `tag1`, `tag2 with spaces and tag3`";
 
             public static readonly string ESCAPING_EXAMPLES
-                = "• **Escaping a quote to include it in the argument**\n"
+                = $"{SbuGlobals.BULLET} **Escaping a quote to include it in the argument**\n"
                 + $"{GuideStatic.INDENT}- command `tag <name> <conent>`\n"
                 + $"{GuideStatic.INDENT}- used like `sbu tag \\\"\\\"\\\"them\\\"\\\"\\\" ||da juice||`\n"
                 + $"{GuideStatic.INDENT}- creates a tag with `\"\"\"them\"\"\"` as name and `||da juice||` as content\n"
                 + "\n"
-                + "• **Using a descriptor for the same tag**\n"
+                + $"{SbuGlobals.BULLET} **Using a descriptor for the same tag**\n"
                 + $"{GuideStatic.INDENT}- command `tag <tagDescriptor>`\n"
-                + $"{GuideStatic.INDENT}- used like `sbu tag \"\"\"them\"\"\" :: ||da juice||`\n"
-                + $"{GuideStatic.INDENT}- creates a tag with `\"\"\"them\"\"\"` as name and `||da juice||` as content";
+                + $"{GuideStatic.INDENT}- used like `sbu tag \"\"\"lmaoo\"\"\" {SbuGlobals.DESCRIPTOR_SEPARATOR} "
+                + "||not funny||`\n"
+                + $"{GuideStatic.INDENT}- creates a tag with `\"\"\"lmaoo\"\"\"` as name and `||not funny||` as "
+                + "content";
         }
     }
 }
