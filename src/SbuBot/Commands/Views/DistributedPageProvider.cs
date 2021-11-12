@@ -17,10 +17,11 @@ namespace SbuBot.Commands.Views
         public DistributedPageProvider(
             IEnumerable<string> content,
             int maxItemsPerPage = -1,
+            int maxPageLength = LocalEmbed.MaxDescriptionLength,
             Func<LocalEmbed, LocalEmbed>? embedFactory = null
         )
         {
-            Pages = DistributedPageProvider.FillPages(content, maxItemsPerPage)
+            Pages = DistributedPageProvider.FillPages(content, maxItemsPerPage, maxPageLength)
                 .Select(str => new Page().WithEmbeds((embedFactory?.Invoke(new()) ?? new()).WithDescription(str)))
                 .ToList();
         }
@@ -36,6 +37,7 @@ namespace SbuBot.Commands.Views
 
             foreach (string item in source)
             {
+                // TODO: split
                 if (item.Length + 1 > maxPageLength)
                 {
                     throw new ArgumentOutOfRangeException(

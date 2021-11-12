@@ -7,6 +7,9 @@ namespace SbuBot
     public static class SbuGlobals
     {
         public const string BULLET = "•";
+        public const string BULLET_2 = "-";
+        public const string BULLET_3 = "*";
+        public const string BULLET_4 = "+";
         public const string ELLIPSES = "…";
         public const string DESCRIPTOR_SEPARATOR = "::";
         public const string DEFAULT_PREFIX = "sbu";

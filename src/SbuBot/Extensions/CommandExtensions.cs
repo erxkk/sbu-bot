@@ -38,6 +38,7 @@ namespace SbuBot.Commands
             builder.Append(@this.FullAliases[0]);
         }
 
+        // TODO: no alias
         public static string Format(this Module @this)
         {
             Preconditions.NotNull(@this, nameof(@this));

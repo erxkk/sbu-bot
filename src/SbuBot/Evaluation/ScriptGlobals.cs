@@ -78,8 +78,9 @@ namespace SbuBot.Evaluation
         public DiscordMenuCommandResult DistributedPages(
             IEnumerable<string> contents,
             int itemsPerPage = -1,
+            int maxPageLength = LocalEmbed.MaxDescriptionLength,
             Func<LocalEmbed, LocalEmbed>? embedFactory = null
-        ) => Pages(new DistributedPageProvider(contents, itemsPerPage, embedFactory));
+        ) => Pages(new DistributedPageProvider(contents, itemsPerPage, maxPageLength, embedFactory));
 
         public async Task<ConfirmationState> ConfirmationAsync(
             string prompt,

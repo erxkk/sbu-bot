@@ -83,14 +83,10 @@ namespace SbuBot.Commands.Modules
                 .WithDescription(GuideStatic.ESCAPING_EXAMPLES)
         );
 
-        [Group("command", "commands")]
+        [Group("command", "commands", "cmd")]
         [Description("A group of commands for displaying command information.")]
         public sealed class CommandSubModule : SbuModuleBase
         {
-            [Command("modules")]
-            [Description("Finds all commands that would match the given input.")]
-            public DiscordCommandResult Modules() => HelpView();
-
             [Command("find")]
             [Description("Finds all commands that would match the given input.")]
             [UsageOverride("command find role edit name", "command find help")]
@@ -106,7 +102,9 @@ namespace SbuBot.Commands.Modules
                         .Select(
                             cmd => cmd.IsEnabled ? $"{SbuGlobals.BULLET} `{cmd.Format()}`" : $"~~`{cmd.Format()}`~~"
                         ),
-                    embedFactory: embed => embed.WithTitle("Matched commands")
+                    maxPageLength: LocalEmbed.MaxDescriptionLength / 2,
+                    embedFactory: embed => embed.WithTitle("Matched commands"),
+                    itemsPerPage: 20
                 );
             }
 
@@ -114,26 +112,113 @@ namespace SbuBot.Commands.Modules
             [Description("Lists all commands.")]
             public DiscordCommandResult List()
             {
-                IReadOnlyList<Command> commands = Context.Bot.Commands.GetAllCommands();
+                IReadOnlySet<Module> modules = Context.Bot.Commands.TopLevelModules;
+
+                static IEnumerable<string> appendChildren(Module module, int depth = 1)
+                {
+                    return module.Submodules.Select(
+                            subModule => string.Format(
+                                "{0}{1} {2}{3}{4}",
+                                string.Join("", Enumerable.Repeat(GuideStatic.INDENT, depth)),
+                                SbuGlobals.BULLET_2,
+                                subModule.Name,
+                                subModule.Submodules.Count + module.Commands.Count == 0 ? "" : "\n",
+                                appendChildren(subModule, depth + 1).ToNewLines()
+                            )
+                        )
+                        .Concat(
+                            module.Commands.Select(
+                                command => string.Format(
+                                    "{0}{1} `{2}`",
+                                    string.Join("", Enumerable.Repeat(GuideStatic.INDENT, depth)),
+                                    SbuGlobals.BULLET,
+                                    command.Format(false)
+                                )
+                            )
+                        );
+                }
 
                 return DistributedPages(
-                    commands.Select(
-                        cmd => cmd.IsEnabled ? $"{SbuGlobals.BULLET} `{cmd.Format()}`" : $"~~`{cmd.Format()}`~~"
+                    modules.Select(
+                        module => module.IsEnabled
+                            ? string.Format(
+                                "{0} {1}{2}{3}\n",
+                                SbuGlobals.BULLET_2,
+                                module.Name,
+                                module.Submodules.Count + module.Commands.Count == 0 ? "" : "\n",
+                                appendChildren(module).ToNewLines()
+                            )
+                            : $"~~{module.Name}~~"
                     ),
+                    maxPageLength: LocalEmbed.MaxDescriptionLength / 2,
                     embedFactory: embed => embed.WithTitle("Commands")
                 );
             }
         }
 
+        [Group("module", "modules", "mod")]
+        [Description("A group of commands for displaying module information.")]
+        public sealed class ModuleSubModule : SbuModuleBase
+        {
+            [Command]
+            [Description("Finds all commands that would match the given input.")]
+            public DiscordCommandResult Modules() => HelpView();
+
+            [Command("list")]
+            [Description("Lists all modules.")]
+            public DiscordCommandResult List()
+            {
+                IReadOnlySet<Module> modules = Context.Bot.Commands.TopLevelModules;
+
+                static IEnumerable<string> appendSubModules(Module module, int depth = 1)
+                {
+                    return module.Submodules.Select(
+                        subModule => string.Format(
+                            "{0}{1} {2}{3}{4}",
+                            string.Join("", Enumerable.Repeat(GuideStatic.INDENT, depth)),
+                            SbuGlobals.BULLET,
+                            subModule.Name,
+                            subModule.Submodules.Count == 0 ? "" : "\n",
+                            appendSubModules(subModule, depth + 1).ToNewLines()
+                        )
+                    );
+                }
+
+                return DistributedPages(
+                    modules.Select(
+                        module => module.IsEnabled
+                            ? string.Format(
+                                "{0} {1}{2}{3}\n",
+                                SbuGlobals.BULLET,
+                                module.Name,
+                                module.Submodules.Count == 0 ? "" : "\n",
+                                appendSubModules(module).ToNewLines()
+                            )
+                            : $"~~{module.Name}~~"
+                    ),
+                    maxPageLength: LocalEmbed.MaxDescriptionLength / 2,
+                    embedFactory: embed => embed.WithTitle("Modules")
+                );
+            }
+        }
+
         [Command("help")]
-        [Description(
-            "Interactively displays information about for a given command/module, or displays all modules if non is "
-            + "given."
-        )]
+        [Description("Interactively displays information about for a given command/module, or displays general help.")]
         public DiscordCommandResult Help(string? command = null)
         {
             if (command is null)
-                return HelpView();
+            {
+                return Reply(
+                    new LocalEmbed().WithDescription(
+                        $"{SbuGlobals.BULLET} Use `sbu help [command path]` to get info about a specific command.\n"
+                        + $"{SbuGlobals.BULLET} Use `sbu module list` to get a complete list of modules.\n"
+                        + $"{SbuGlobals.BULLET} Use `sbu command list` to get a complete list of commands.\n"
+                        + "\n"
+                        + "A command/module path is just the full name of a command without the prefix.\n"
+                        + "For a command used like this: `sbu db inspect @role` the path is `db inspect`."
+                    )
+                );
+            }
 
             IReadOnlyList<CommandMatch> matches = Context.Bot.Commands.FindCommands(command);
 
@@ -175,7 +260,7 @@ namespace SbuBot.Commands.Modules
 
         private static class GuideStatic
         {
-            private const string INDENT = "\u200B \u200B \u200B \u200B ";
+            public const string INDENT = "\u200B \u200B \u200B \u200B ";
 
             public const string COMMANDS
                 = "To use Commands ping the bot or send a message that starts with `sbu`, the space between the prefix "
