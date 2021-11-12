@@ -45,7 +45,7 @@ namespace SbuBot.Commands.Modules
 
                 await context.SaveChangesAsync();
 
-                return Reply(
+                return Response(
                     string.Format(
                         "Set role as {0} separator.",
                         type switch
@@ -83,7 +83,7 @@ namespace SbuBot.Commands.Modules
 
                 await context.SaveChangesAsync();
 
-                return Reply(
+                return Response(
                     string.Format(
                         "Unset {0} separator.",
                         type switch

@@ -56,7 +56,7 @@ namespace SbuBot.Commands.Modules
                 }
 
                 await Task.WhenAll(emoteSet.Select(e => e.DeleteAsync()));
-                return Reply("Removed all emotes.");
+                return Response("Removed all emotes.");
             }
 
             [Command]
@@ -97,7 +97,7 @@ namespace SbuBot.Commands.Modules
                 }
 
                 await Task.WhenAll(emoteSet.Select(e => Context.Guild.DeleteEmojiAsync(e)));
-                return Reply("Removed all emotes.");
+                return Response("Removed all emotes.");
             }
         }
     }

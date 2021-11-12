@@ -48,7 +48,7 @@ namespace SbuBot.Commands.Modules
                         descriptor.Response
                     );
 
-                    return Reply("Auto response created.");
+                    return Response("Auto response created.");
                 }
 
                 [Command]
@@ -151,7 +151,7 @@ namespace SbuBot.Commands.Modules
                         response
                     );
 
-                    return Reply("Auto response created.");
+                    return Response("Auto response created.");
                 }
             }
         }

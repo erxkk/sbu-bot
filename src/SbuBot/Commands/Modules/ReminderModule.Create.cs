@@ -45,7 +45,7 @@ namespace SbuBot.Commands.Modules
 
                 await Context.Services.GetRequiredService<ReminderService>().ScheduleAsync(newReminder);
 
-                return Reply(
+                return Response(
                     new LocalEmbed()
                         .WithTitle("Reminder Scheduled")
                         .WithDescription(
@@ -96,7 +96,7 @@ namespace SbuBot.Commands.Modules
 
                 await Context.Services.GetRequiredService<ReminderService>().ScheduleAsync(newReminder);
 
-                return Reply(
+                return Response(
                     new LocalEmbed()
                         .WithTitle("Reminder Scheduled")
                         .WithDescription($"{message}\n\n{Markdown.Link("Original Message", newReminder.GetJumpUrl())}")

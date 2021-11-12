@@ -42,7 +42,7 @@ namespace SbuBot.Commands.Modules
         {
             SbuBot bot = (Context.Bot as SbuBot)!;
             bot.IsLocked = set ?? !bot.IsLocked;
-            return Reply($"{(bot.IsLocked ? "Locked" : "Unlocked")} the bot.");
+            return Response($"{(bot.IsLocked ? "Locked" : "Unlocked")} the bot.");
         }
 
         [Command("toggle")]
@@ -223,7 +223,7 @@ namespace SbuBot.Commands.Modules
 
                 case ConfirmationState.Confirmed:
                     action();
-                    return Reply($"{(isEnabled ? "Disabled" : "Enabled")} `{alias}`.");
+                    return Response($"{(isEnabled ? "Disabled" : "Enabled")} `{alias}`.");
 
                 default:
                     throw new ArgumentOutOfRangeException();

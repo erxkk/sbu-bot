@@ -26,7 +26,7 @@ namespace SbuBot.Commands.Modules
             SbuGuild? guild = await Context.GetSbuDbContext()
                 .GetGuildAsync(Context.Guild, q => q.Include(g => g.Roles));
 
-            return Reply(
+            return Response(
                 new LocalEmbed()
                     .WithTitle("Available Roles")
                     .WithDescription(
@@ -57,7 +57,7 @@ namespace SbuBot.Commands.Modules
 
             await Context.Author.GrantRoleAsync(role.Id);
 
-            return Reply($"You now have {role.Mention}.");
+            return Response($"You now have {role.Mention}.");
         }
 
         [Command("leave")]
@@ -79,7 +79,7 @@ namespace SbuBot.Commands.Modules
 
             await Context.Author.RevokeRoleAsync(role.Id);
 
-            return Reply($"You no longer have {role.Mention}.");
+            return Response($"You no longer have {role.Mention}.");
         }
     }
 }

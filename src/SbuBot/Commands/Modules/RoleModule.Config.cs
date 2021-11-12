@@ -32,7 +32,7 @@ namespace SbuBot.Commands.Modules
             context.AddRole(role, description);
             await context.SaveChangesAsync();
 
-            return Reply($"{Mention.Role(role.Id)} was added to the requestable roles.");
+            return Response($"{Mention.Role(role.Id)} was added to the requestable roles.");
         }
 
         [Command("delete")]
@@ -52,7 +52,7 @@ namespace SbuBot.Commands.Modules
             context.Roles.Remove(sbuRole);
             await context.SaveChangesAsync();
 
-            return Reply($"{Mention.Role(role.Id)} was removed form the requestable roles.");
+            return Response($"{Mention.Role(role.Id)} was removed form the requestable roles.");
         }
     }
 }

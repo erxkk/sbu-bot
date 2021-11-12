@@ -58,6 +58,15 @@ namespace SbuBot
             public const string GH_DISQORD = "https://github.com/quahu/disqord";
         }
 
+        public static class Media
+        {
+            public const string RAFAEL
+                = "https://cdn.discordapp.com/attachments/908422577456828436/908449232711716914/unknown.png";
+
+            public const string ADIOS
+                = "https://cdn.discordapp.com/attachments/908422577456828436/908770507070001192/unknown.png";
+        }
+
         public static class Guild
         {
             public const ulong SBU = 732210852849123418UL;

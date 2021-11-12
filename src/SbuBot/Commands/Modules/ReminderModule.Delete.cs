@@ -52,7 +52,7 @@ namespace SbuBot.Commands.Modules
                 IReadOnlyList<SbuReminder> cancelled = await Context.Services.GetRequiredService<ReminderService>()
                     .CancelAsync(r => r.OwnerId == Context.Author.Id);
 
-                return Reply(
+                return Response(
                     new LocalEmbed()
                         .WithTitle("Cancelled all reminders.")
                         .WithDescription(
@@ -91,7 +91,7 @@ namespace SbuBot.Commands.Modules
 
                 await Context.Services.GetRequiredService<ReminderService>().CancelAsync(reminder.Value.MessageId);
 
-                return Reply(
+                return Response(
                     new LocalEmbed()
                         .WithTitle("Reminder Cancelled")
                         .WithDescription(

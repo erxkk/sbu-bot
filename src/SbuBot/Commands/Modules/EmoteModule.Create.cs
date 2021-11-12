@@ -90,14 +90,14 @@ namespace SbuBot.Commands.Modules
             {
                 emoteSet.ExceptWith(createdEmotes);
 
-                await Reply(
+                await Response(
                     new LocalEmbed()
                         .WithTitle($"Download failed for {emoteSet.Count} emotes.")
                         .WithDescription(string.Join(", ", emoteSet.Select(e => $"`{e.Name} {e.Id}`")))
                 );
             }
 
-            return Reply(
+            return Response(
                 new LocalEmbed()
                     .WithTitle($"Added {createdEmotes.Count} emotes.")
                     .WithDescription(string.Join("", createdEmotes.Select(e => e.Tag)))
@@ -148,7 +148,7 @@ namespace SbuBot.Commands.Modules
                     emote = await Context.Guild.CreateEmojiAsync(name, uploadBuffer, cancellationToken: cts.Token);
                 }
 
-                return Reply($"Created emote: {emote.Tag}");
+                return Response($"Created emote: {emote.Tag}");
             }
 
             [Command]
@@ -197,7 +197,7 @@ namespace SbuBot.Commands.Modules
                     emote = await Context.Guild.CreateEmojiAsync(name, uploadBuffer, cancellationToken: cts.Token);
                 }
 
-                return Reply($"Created emote: {emote.Tag}");
+                return Response($"Created emote: {emote.Tag}");
             }
         }
     }

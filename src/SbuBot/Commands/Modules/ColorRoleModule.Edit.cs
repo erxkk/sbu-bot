@@ -50,7 +50,7 @@ namespace SbuBot.Commands.Modules
                     }
                 );
 
-                return Reply("Your role has been modified.");
+                return Response("Your role has been modified.");
             }
 
             [Command("name")]
@@ -75,7 +75,7 @@ namespace SbuBot.Commands.Modules
                     return Reply(SbuUtility.Format.HasHigherHierarchy("modify the role"));
 
                 await role.ModifyAsync(r => r.Name = name);
-                return Reply("Your role has been modified.");
+                return Response("Your role has been modified.");
             }
 
             [Command("color")]
@@ -94,7 +94,7 @@ namespace SbuBot.Commands.Modules
                     return Reply(SbuUtility.Format.HasHigherHierarchy("modify the role"));
 
                 await role.ModifyAsync(r => r.Color = color);
-                return Reply("Your role has been modified.");
+                return Response("Your role has been modified.");
             }
         }
     }

@@ -103,7 +103,39 @@ namespace SbuBot.Commands.Modules
                     }
                 }
 
-                return Reply("Done.");
+                return Response("Archived.");
+            }
+
+            [Command("set")]
+            [RequireAuthorGuildPermissions(Permission.Administrator)]
+            [Description("Sets the current pin archive.")]
+            [UsageOverride("archive set #channel", "archive set 836993360274784297")]
+            public async Task<DiscordCommandResult> SetArchiveAsync(
+                [Description("The channel that should be the new archive.")]
+                ITextChannel archive
+            )
+            {
+                SbuDbContext context = Context.GetSbuDbContext();
+
+                SbuGuild? guild = await context.GetGuildAsync(Context.Guild);
+                guild!.ArchiveId = archive.Id;
+                await context.SaveChangesAsync();
+
+                return Response($"{archive} is now the pin archive.");
+            }
+
+            [Command("list")]
+            [Description("Lists the current pin archive.")]
+            [UsageOverride("archive list")]
+            public async Task<DiscordCommandResult> GetArchiveAsync()
+            {
+                SbuGuild guild = await Context.GetDbGuildAsync();
+
+                return Response(
+                    guild.ArchiveId is null
+                        ? "This guild doesn't have a pin archive channel set up. see `sbu help archive set`"
+                        : $"{Mention.Channel(guild.ArchiveId.Value)} is the pin archive."
+                );
             }
 
             private async Task<Result<Unit, string>> PinSingleMessageAsync(

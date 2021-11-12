@@ -34,7 +34,7 @@ namespace SbuBot.Commands.Modules
         [Command]
         [Description("Displays information about your current color role.")]
         public DiscordCommandResult Role() => Context.Author.GetColorRole() is { } role
-            ? Reply(
+            ? Response(
                 new LocalEmbed()
                     .WithColor(role.Color)
                     .AddField("Name", role.Name)
@@ -78,7 +78,7 @@ namespace SbuBot.Commands.Modules
                         if (error.Value == FollowUpError.Aborted)
                             return Reply("Aborted");
 
-                        await Reply("You didn't provide a role name so i just named it after yourself.");
+                        await Response("You didn't provide a role name so i just named it after yourself.");
 
                         name = Context.Author.Nick ?? Context.Author.Name;
                         break;
@@ -114,7 +114,7 @@ namespace SbuBot.Commands.Modules
             context.AddColorRole(role, Context.Author.Id);
             await context.SaveChangesAsync();
 
-            return Reply($"{role.Mention} is your new color role.");
+            return Response($"{role.Mention} is your new color role.");
         }
 
         [Command("delete")]
@@ -129,11 +129,11 @@ namespace SbuBot.Commands.Modules
 
             if (Context.Guild.Roles.GetValueOrDefault(member.ColorRole!.Id) is not { } role)
             {
-                await Reply(SbuUtility.Format.DoesNotExist("The role"));
+                await Response(SbuUtility.Format.DoesNotExist("The role"));
             }
             else if (Context.CurrentMember.GetHierarchy() <= role.Position)
             {
-                await Reply(SbuUtility.Format.HasHigherHierarchy("delete the role"));
+                await Response(SbuUtility.Format.HasHigherHierarchy("delete the role"));
             }
             else
             {
@@ -144,7 +144,7 @@ namespace SbuBot.Commands.Modules
             context.ColorRoles.Remove(member.ColorRole);
             await context.SaveChangesAsync();
 
-            return Reply("Your color role has been removed.");
+            return Response("Your color role has been removed.");
         }
 
         [Command("claim")]
@@ -168,7 +168,7 @@ namespace SbuBot.Commands.Modules
             context.ColorRoles.Update(role);
             await context.SaveChangesAsync();
 
-            return Reply("Color role claimed.");
+            return Response("Color role claimed.");
         }
 
         [Command("transfer")]
@@ -216,7 +216,7 @@ namespace SbuBot.Commands.Modules
             context.ColorRoles.Update(member.ColorRole);
             await context.SaveChangesAsync();
 
-            return Reply($"You transferred your color role to {Mention.User(receiver.Id)}.");
+            return Response($"You transferred your color role to {Mention.User(receiver.Id)}.");
         }
     }
 }

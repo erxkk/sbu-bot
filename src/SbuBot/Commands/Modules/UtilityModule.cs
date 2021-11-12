@@ -14,12 +14,9 @@ namespace SbuBot.Commands.Modules
     [Description("A collection of utility commands.")]
     public sealed class UtilityModule : SbuModuleBase
     {
-        public const string RAFAEL
-            = "https://cdn.discordapp.com/attachments/908422577456828436/908449232711716914/unknown.png";
-
         [Command("ping")]
         [Description("Replies with `Pong!`.")]
-        public DiscordCommandResult Ping() => Reply("Pong!");
+        public DiscordCommandResult Ping() => Response("Pong!");
 
         [Command("color")]
         [Description("Replies with the given color as an embed or a random color if non is given.")]
@@ -29,7 +26,7 @@ namespace SbuBot.Commands.Modules
         )
         {
             color ??= Color.Random;
-            return Reply(new LocalEmbed().WithTitle(color.ToString()).WithColor(color));
+            return Response(new LocalEmbed().WithTitle(color.ToString()).WithColor(color));
         }
 
         [Command("rafael")]
@@ -49,7 +46,7 @@ namespace SbuBot.Commands.Modules
 
                 return Response(
                     new LocalMessage().WithReply(Context.Message.Reference.MessageId.Value)
-                        .WithContent(UtilityModule.RAFAEL)
+                        .WithContent(SbuGlobals.Media.RAFAEL)
                 );
             }
 
@@ -64,7 +61,11 @@ namespace SbuBot.Commands.Modules
             }
 
             await Context.Message.DeleteAsync();
-            await channel.SendMessageAsync(new LocalMessage().WithReply(message.Id).WithContent(UtilityModule.RAFAEL));
+
+            await channel.SendMessageAsync(
+                new LocalMessage().WithReply(message.Id).WithContent(SbuGlobals.Media.RAFAEL)
+            );
+
             return null!;
         }
     }

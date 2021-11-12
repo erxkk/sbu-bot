@@ -73,14 +73,8 @@
         <Compile Update="Commands\Modules\GuildManagementModule.AutoResponse.Create.cs">
             <DependentUpon>GuildManagementModule.AutoResponse.cs</DependentUpon>
         </Compile>
-        <Compile Update="Commands\Modules\GuildManagementModule.AutoResponse.Delete.cs">
-            <DependentUpon>GuildManagementModule.AutoResponse.cs</DependentUpon>
-        </Compile>
         <Compile Update="Commands\Modules\ColorRoleModule.Edit.cs">
             <DependentUpon>ColorRoleModule.cs</DependentUpon>
-        </Compile>
-        <Compile Update="Commands\Modules\GuildManagementModule.Archive.Config.cs">
-            <DependentUpon>GuildManagementModule.Archive.cs</DependentUpon>
         </Compile>
         <Compile Update="Commands\Modules\ColorRoleModule.Config.cs">
             <DependentUpon>ColorRoleModule.cs</DependentUpon>

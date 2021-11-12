@@ -46,23 +46,27 @@ namespace SbuBot.Commands.Modules
                         .AppendLine(config.HasFlag(values[i]) ? "enabled" : "disabled");
                 }
 
-                return Reply(new LocalEmbed().WithDescription(builder.ToString()));
+                return Response(new LocalEmbed().WithDescription(builder.ToString()));
             }
 
             [Command("set")]
             [Description("Sets a config value.")]
-            public async Task<DiscordCommandResult> SetAsync(SbuGuildConfig value)
+            public async Task<DiscordCommandResult> SetAsync(
+                [Description("The value to set.")] SbuGuildConfig value
+            )
             {
                 await _configService.SetValueAsync(Context.GuildId, value);
-                return Reply($"Enabled {value}.");
+                return Response($"Enabled {value}.");
             }
 
             [Command("unset")]
             [Description("Unsets a config value.")]
-            public async Task<DiscordCommandResult> UnsetAsync(SbuGuildConfig value)
+            public async Task<DiscordCommandResult> UnsetAsync(
+                [Description("The value to unset.")] SbuGuildConfig value
+            )
             {
                 await _configService.SetValueAsync(Context.GuildId, value, false);
-                return Reply($"Disabled {value}.");
+                return Response($"Disabled {value}.");
             }
         }
     }

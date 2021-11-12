@@ -79,14 +79,14 @@ namespace SbuBot.Commands.Modules
                 await Context.Bot.Chunker.ChunkAsync(Context.Guild);
             }
 
-            return Reply("Big Chunkus.");
+            return Response("Big Chunkus.");
         }
 
         [Command("kill")]
         [Description("Fucking kills the bot oh my god...")]
         public async Task KillAsync()
         {
-            await Reply("Gn kid.");
+            await Response("");
             Environment.Exit(0);
         }
 

@@ -28,7 +28,7 @@ namespace SbuBot.Commands.Modules
             await Context.Services.GetRequiredService<ReminderService>()
                 .RescheduleAsync(reminder.MessageId, newTimestamp);
 
-            return Reply(
+            return Response(
                 new LocalEmbed()
                     .WithTitle("Reminder Rescheduled")
                     .WithDescription(

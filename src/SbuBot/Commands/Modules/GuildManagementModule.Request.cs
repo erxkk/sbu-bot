@@ -30,7 +30,7 @@ namespace SbuBot.Commands.Modules
                 try
                 {
                     MessageReceivedEventArgs waitMessageResult;
-                    await Reply($"Send your message in {Mention.Channel(SbuGlobals.Channel.SENATE)}.");
+                    await Response($"Send your message in {Mention.Channel(SbuGlobals.Channel.SENATE)}.");
 
                     await using (Context.BeginYield())
                     {
@@ -86,7 +86,7 @@ namespace SbuBot.Commands.Modules
 
                 try
                 {
-                    await Reply($"Send your message in {Mention.Channel(SbuGlobals.Channel.SHIT_SBU_SAYS)}.");
+                    await Response($"Send your message in {Mention.Channel(SbuGlobals.Channel.SHIT_SBU_SAYS)}.");
                     MessageReceivedEventArgs waitMessageResult;
 
                     await using (Context.BeginYield())
@@ -137,7 +137,7 @@ namespace SbuBot.Commands.Modules
                 try
                 {
                     MessageReceivedEventArgs waitMessageResult;
-                    await Reply($"Send your message in {Mention.Channel(SbuGlobals.Channel.ANNOUNCEMENTS)}.");
+                    await Response($"Send your message in {Mention.Channel(SbuGlobals.Channel.ANNOUNCEMENTS)}.");
 
                     await using (Context.BeginYield())
                     {
