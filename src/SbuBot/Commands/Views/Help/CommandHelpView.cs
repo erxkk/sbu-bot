@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,7 +8,6 @@ using Disqord.Extensions.Interactivity.Menus;
 
 using Qmmands;
 
-using SbuBot.Commands.Attributes;
 using SbuBot.Extensions;
 
 namespace SbuBot.Commands.Views.Help

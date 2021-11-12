@@ -4,8 +4,6 @@ using System.Threading.Tasks;
 using Disqord;
 using Disqord.Bot;
 
-using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
-
 using Qmmands;
 
 using SbuBot.Extensions;

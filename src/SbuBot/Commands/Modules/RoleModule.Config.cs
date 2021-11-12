@@ -5,14 +5,13 @@ using Disqord.Bot;
 
 using Qmmands;
 
-using SbuBot.Commands.Attributes.Checks;
 using SbuBot.Commands.Attributes.Checks.Parameters;
 using SbuBot.Extensions;
 using SbuBot.Models;
 
 namespace SbuBot.Commands.Modules
 {
-    public sealed partial class RoleModule : SbuModuleBase
+    public sealed partial class RoleModule
     {
         [Command("create")]
         [RequireAuthorGuildPermissions(Permission.ManageRoles)]

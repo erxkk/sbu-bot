@@ -9,7 +9,6 @@ using Microsoft.EntityFrameworkCore;
 
 using Qmmands;
 
-using SbuBot.Commands.Attributes.Checks;
 using SbuBot.Commands.Attributes.Checks.Parameters;
 using SbuBot.Extensions;
 using SbuBot.Models;

@@ -4,7 +4,6 @@ using Disqord.Bot;
 
 using Qmmands;
 
-using SbuBot.Commands.Attributes;
 using SbuBot.Commands.Attributes.Checks.Parameters;
 using SbuBot.Extensions;
 using SbuBot.Models;

@@ -7,7 +7,6 @@ using Kkommon;
 
 using Qmmands;
 
-using SbuBot.Commands.Attributes;
 using SbuBot.Commands.Attributes.Checks.Parameters;
 using SbuBot.Commands.Parsing.Descriptors;
 using SbuBot.Extensions;

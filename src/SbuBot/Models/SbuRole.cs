@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 using Destructurama.Attributed;
 
 using Disqord;

@@ -2,7 +2,6 @@ using System.Threading.Tasks;
 
 using Disqord;
 using Disqord.Bot;
-using Disqord.Rest;
 
 using Qmmands;
 

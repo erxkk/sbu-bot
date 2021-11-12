@@ -10,7 +10,6 @@ using Disqord.Extensions.Interactivity.Menus;
 
 using Qmmands;
 
-using SbuBot.Commands.Attributes;
 using SbuBot.Extensions;
 
 namespace SbuBot.Commands.Views.Help

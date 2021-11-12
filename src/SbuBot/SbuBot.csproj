@@ -8,29 +8,29 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\kkommon\src\Kkommon\Kkommon.csproj" />
+        <ProjectReference Include="..\..\kkommon\src\Kkommon\Kkommon.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Disqord.Bot" Version="1.0.0-10312021-144" />
-        <PackageReference Include="EFCoreSecondLevelCacheInterceptor" Version="3.1.0" />
-        <PackageReference Include="HumanTimeParser.English" Version="2.0.1-dev-835860444" />
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="3.10.0-3.final" />
+        <PackageReference Include="Disqord.Bot" Version="1.0.0-10312021-144"/>
+        <PackageReference Include="EFCoreSecondLevelCacheInterceptor" Version="3.1.0"/>
+        <PackageReference Include="HumanTimeParser.English" Version="2.0.1-dev-835860444"/>
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="3.10.0-3.final"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.6">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
-        <PackageReference Include="Microsoft.Extensions.Http" Version="5.0.0" />
-        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="5.0.6" />
-        <PackageReference Include="Serilog.Extensions.Hosting" Version="4.1.2" />
-        <PackageReference Include="Serilog.Extras.Attributed" Version="2.0.0" />
-        <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
-        <PackageReference Include="Serilog.Sinks.File" Version="4.1.0" />
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0"/>
+        <PackageReference Include="Microsoft.Extensions.Http" Version="5.0.0"/>
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="5.0.6"/>
+        <PackageReference Include="Serilog.Extensions.Hosting" Version="4.1.2"/>
+        <PackageReference Include="Serilog.Extras.Attributed" Version="2.0.0"/>
+        <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1"/>
+        <PackageReference Include="Serilog.Sinks.File" Version="4.1.0"/>
     </ItemGroup>
 
     <ItemGroup>
-        <Folder Include="Migrations" />
+        <Folder Include="Migrations"/>
     </ItemGroup>
 
     <ItemGroup>
@@ -98,7 +98,7 @@
             <DependentUpon>EmoteModule.cs</DependentUpon>
         </Compile>
         <Compile Update="Commands\Modules\RoleModule.Config.cs">
-          <DependentUpon>RoleModule.cs</DependentUpon>
+            <DependentUpon>RoleModule.cs</DependentUpon>
         </Compile>
     </ItemGroup>
 

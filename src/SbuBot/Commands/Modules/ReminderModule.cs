@@ -7,7 +7,6 @@ using Microsoft.Extensions.DependencyInjection;
 
 using Qmmands;
 
-using SbuBot.Commands.Attributes;
 using SbuBot.Commands.Attributes.Checks.Parameters;
 using SbuBot.Models;
 using SbuBot.Services;

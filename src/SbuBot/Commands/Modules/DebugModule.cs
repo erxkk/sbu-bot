@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 
 using Disqord;
 using Disqord.Bot;
-using Disqord.Extensions.Interactivity.Menus.Prompt;
 using Disqord.Gateway;
 using Disqord.Rest;
 
