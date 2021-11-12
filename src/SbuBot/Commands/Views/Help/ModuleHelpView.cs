@@ -77,14 +77,18 @@ namespace SbuBot.Commands.Views.Help
             {
                 description.Append('\n')
                     .AppendLine("**Checks:**")
-                    .AppendLine(failedResult.FailedChecks.Select((c => $"• {c.Result.FailureReason}")).ToNewLines());
+                    .AppendLine(
+                        failedResult.FailedChecks
+                            .Select((c => $"{SbuGlobals.BULLET} {c.Result.FailureReason}"))
+                            .ToNewLines()
+                    );
             }
             else
             {
-                description.Append('\n').AppendLine("**You can execute commands in this module.**");
+                description.Append('\n')
+                    .Append(LocalEmoji.Custom(SbuGlobals.Emote.Menu.STOP))
+                    .AppendLine("**You can execute commands in this module.**");
             }
-
-            description.Append('\n');
 
             SelectionViewComponent moduleSelection = new(_selectModule);
             SelectionViewComponent commandSelection = new(_selectCommand);
