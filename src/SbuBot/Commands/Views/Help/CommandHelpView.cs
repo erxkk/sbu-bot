@@ -56,6 +56,7 @@ namespace SbuBot.Commands.Views.Help
             {
                 description.Append('\n')
                     .Append(LocalEmoji.Custom(SbuGlobals.Emote.Menu.STOP))
+                    .Append(' ')
                     .AppendLine("**You can execute this command.**");
             }
 
