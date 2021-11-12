@@ -22,7 +22,6 @@ namespace SbuBot.Commands.Modules
     {
         [Command]
         [Description("Responds with the given tag's content.")]
-        [Usage("tag tagggg", "t whomstve")]
         public DiscordCommandResult Get([Description("The tag to invoke.")] SbuTag tag)
             => Response(tag.Content);
 
@@ -32,7 +31,6 @@ namespace SbuBot.Commands.Modules
         {
             [Command]
             [Description("Lists the tags of a given member, or of the command author if no member is specified.")]
-            [Usage("tag list me", "t list @user", "tag list 352815253828141056", "tag list Allah")]
             public async Task<DiscordCommandResult> ListFromOwnerAsync(
                 [Description("The member who's tags should be listed.")]
                 SbuMember owner
@@ -83,17 +81,5 @@ namespace SbuBot.Commands.Modules
                 );
             }
         }
-
-        [Command("reserved")]
-        [Description(
-            "Lists the reserved keywords, tags are not allowed to be any of these keywords, but can start with, end "
-            + "with or contain them."
-        )]
-        public DiscordCommandResult GetReservedKeywords() => Reply(
-            string.Format(
-                "The following keywords are not allowed to be tags, but tags may contain them:\n{0}",
-                SbuGlobals.Keyword.ALL_RESERVED.Select(rn => $"> `{rn}`").ToNewLines()
-            )
-        );
     }
 }

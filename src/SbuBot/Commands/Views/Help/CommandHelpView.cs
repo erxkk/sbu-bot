@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -36,11 +37,10 @@ namespace SbuBot.Commands.Views.Help
             description.Append('`').Append('\n').Append('\n');
 
             description.AppendLine("**Description:**")
-                .AppendLine(_command.Description ?? _command.Module.Description)
-                .Append('\n');
+                .AppendLine(_command.Description ?? _command.Module.Description);
 
             if ((_command.Remarks ?? _command.Module.Remarks) is { } remarks)
-                description.AppendLine("**Remarks:**").AppendLine(remarks).Append('\n');
+                description.Append('\n').AppendLine("**Remarks:**").AppendLine(remarks);
 
             var result = await _command.RunChecksAsync(Context);
 
@@ -61,22 +61,18 @@ namespace SbuBot.Commands.Views.Help
                     .AppendLine("**You can execute this command.**");
             }
 
-            if ((_command.Attributes.OfType<UsageAttribute>().FirstOrDefault()
-                ?? _command.Module.Attributes.OfType<UsageAttribute>().FirstOrDefault()) is { } usage)
-            {
-                description.AppendLine("**Examples:**");
+            description.Append('\n').AppendLine("**Examples:**");
 
-                foreach (string example in usage.Values)
-                {
-                    description.Append(SbuGlobals.BULLET)
-                        .Append(' ')
-                        .Append('`')
-                        .Append(SbuGlobals.DEFAULT_PREFIX)
-                        .Append(' ')
-                        .Append(example)
-                        .Append('`')
-                        .Append('\n');
-                }
+            foreach (string example in Usage.GetUsages(_command))
+            {
+                description.Append(SbuGlobals.BULLET)
+                    .Append(' ')
+                    .Append('`')
+                    .Append(SbuGlobals.DEFAULT_PREFIX)
+                    .Append(' ')
+                    .Append(example)
+                    .Append('`')
+                    .Append('\n');
             }
 
             if (_command.Aliases.Count != 0)

@@ -21,7 +21,6 @@ namespace SbuBot.Commands.Modules
     {
         [Command("list")]
         [Description("Lists the given reminder or all if non is given.")]
-        [Usage("reminder list", "reminder list last", "reminder list 936DA01F-9ABD-4d 9d-80C7-02AF85C822A8")]
         public DiscordCommandResult List(
             [AuthorMustOwn]
             [Description("The reminder that should be listed.")]

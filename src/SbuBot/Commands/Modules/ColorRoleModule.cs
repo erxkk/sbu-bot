@@ -45,12 +45,12 @@ namespace SbuBot.Commands.Modules
 
         [Command("create")]
         [Description("Creates a new color role.")]
-        [Usage("role create #afafaf my gray role", "r make green dream role dream role")]
         public async Task<DiscordCommandResult> CreateAsync(
             [Description("The role color.")] Color color,
             [Maximum(SbuColorRole.MAX_NAME_LENGTH)]
             [Description("The role name.")]
             [Remarks("Cannot be longer than 100 characters.")]
+            [UsageOverride("my role name", "funny role")]
             string? name = null
         )
         {
@@ -150,7 +150,6 @@ namespace SbuBot.Commands.Modules
 
         [Command("claim")]
         [Description("Claims the given color role if it has no owner.")]
-        [Usage("role claim some role name", "r take 732234804384366602", "r claim @SBU-Bot")]
         public async Task<DiscordCommandResult> ClaimAsync(
             [MustBeOwned(false), RequireHierarchy(HierarchyComparison.Less, HierarchyComparisonContext.Bot)]
             [Description("The role to claim.")]
@@ -175,7 +174,6 @@ namespace SbuBot.Commands.Modules
 
         [Command("transfer")]
         [Description("Transfers the authors color role to the given member.")]
-        [Usage("role transfer @user", "r transfer 352815253828141056", "r transfer Allah")]
         public async Task<DiscordCommandResult> TransferAsync(
             [NotAuthor][Description("The member that should receive the color role.")]
             SbuMember receiver

@@ -19,7 +19,6 @@ namespace SbuBot.Commands.Modules
     {
         [Command("edit")]
         [Description("Reschedules the given reminder.")]
-        [Usage("reminder edit last in 2 days", "reminder change 936DA01F in 5 seconds")]
         public async Task<DiscordCommandResult> EditAsync(
             [AuthorMustOwn][Description("The reminder to reschedule.")]
             SbuReminder reminder,

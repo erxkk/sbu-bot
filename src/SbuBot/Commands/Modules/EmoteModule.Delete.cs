@@ -23,7 +23,7 @@ namespace SbuBot.Commands.Modules
         public sealed class DeleteGroup : SbuModuleBase
         {
             [Command]
-            [Usage("emote remove {emote}", "emote remove {emote1} {emote2} {emote3}")]
+            [UsageOverride("emote remove {emote}", "emote remove {emote1} {emote2} {emote3}")]
             public async Task<DiscordCommandResult> DeleteAsync(
                 [Description("The emote to remove.")] IGuildEmoji emote,
                 [Description("Optional additional emotes to remove.")]
@@ -60,7 +60,7 @@ namespace SbuBot.Commands.Modules
             }
 
             [Command]
-            [Usage(
+            [UsageOverride(
                 "emote remove 855415802139901962",
                 "emote remove 855415802139901962 356017256481685506 215883207642447872"
             )]

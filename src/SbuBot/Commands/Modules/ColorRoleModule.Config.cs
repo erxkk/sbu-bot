@@ -21,11 +21,6 @@ namespace SbuBot.Commands.Modules
         public sealed class ConfigSubModule : SbuModuleBase
         {
             [Command("set")]
-            [Usage(
-                "role separator set top some role name",
-                "r separator set top 732234804384366602",
-                "r separator set bottom @SBU-Bot"
-            )]
             public async Task<DiscordCommandResult> AddAsync(
                 ColorRoleSeparatorType type,
                 [Description("The role to use as a color separator.")]
@@ -66,7 +61,6 @@ namespace SbuBot.Commands.Modules
             }
 
             [Command("unset")]
-            [Usage("role separator unset top", "r separator unset top", "r separator unset bottom")]
             public async Task<DiscordCommandResult> RemoveAsync(
                 [Description("The role to use as a color separator.")]
                 ColorRoleSeparatorType type

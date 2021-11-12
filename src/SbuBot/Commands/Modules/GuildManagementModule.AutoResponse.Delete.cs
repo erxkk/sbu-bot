@@ -21,7 +21,7 @@ namespace SbuBot.Commands.Modules
         {
             [Command("delete")]
             [Description("Removes a given auto response.")]
-            [Usage("auto remove what da dog doin", "auto delete h", "auto rm all")]
+            [UsageOverride("auto remove what da dog doin", "auto delete h", "auto rm all")]
             public async Task<DiscordCommandResult> DeleteAsync(
                 [Description("The auto response that should be removed.")]
                 OneOrAll<SbuAutoResponse> autoResponse

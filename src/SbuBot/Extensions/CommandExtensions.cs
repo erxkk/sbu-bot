@@ -27,6 +27,9 @@ namespace SbuBot.Commands
 
         public static bool IsGroup(this Module @this) => @this.Name.EndsWith("Group");
 
+        public static Command? GetDefaultCommand(this Module @this)
+            => @this.Commands.FirstOrDefault(c => !c.Aliases.Any());
+
         public static void AppendTo(this Module @this, StringBuilder builder)
         {
             Preconditions.NotNull(@this, nameof(@this));

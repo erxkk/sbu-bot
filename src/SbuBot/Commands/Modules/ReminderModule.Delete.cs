@@ -24,7 +24,6 @@ namespace SbuBot.Commands.Modules
     {
         [Command("delete")]
         [Description("Cancels the given reminder.")]
-        [Usage("reminder remove last", "reminder delete 936DA01F", "reminder cancel all")]
         public async Task<DiscordCommandResult> DeleteAsync(
             [AuthorMustOwn][Description("The reminder that should be canceled.")]
             OneOrAll<SbuReminder> reminder

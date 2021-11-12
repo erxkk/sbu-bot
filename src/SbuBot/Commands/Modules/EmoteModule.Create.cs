@@ -26,7 +26,7 @@ namespace SbuBot.Commands.Modules
         [RequireBotGuildPermissions(Permission.ManageEmojisAndStickers),
          RequireAuthorGuildPermissions(Permission.ManageEmojisAndStickers)]
         [Description("Adds the given emote(s) to the server.")]
-        [Usage("emote add {emote}", "emote yoink {emote1} {emote2} {emote3}")]
+        [UsageOverride("emote add {emote}", "emote yoink {emote1} {emote2} {emote3}")]
         public async Task<DiscordCommandResult> AddAsync(
             [Description("The emote to add.")] ICustomEmoji emote,
             [Description("Optional additional emotes to add.")]
@@ -112,7 +112,7 @@ namespace SbuBot.Commands.Modules
         {
             [Command]
             [RequireAttachment]
-            [Usage("emote create", "emote mk NewEmote")]
+            [UsageOverride("emote create", "emote mk NewEmote")]
             public async Task<DiscordCommandResult> CreateFromAttachmentAsync(
                 [Range(3, 32, true, true)]
                 [Description("The optional name of the new emote.")]
@@ -152,7 +152,7 @@ namespace SbuBot.Commands.Modules
             }
 
             [Command]
-            [Usage("emote create https://...", "emote mk https://... NewEmote")]
+            [UsageOverride("emote create https://...", "emote mk https://... NewEmote")]
             public async Task<DiscordCommandResult> CreateFromAttachmentAsync(
                 [Description("The image url of the new emote.")]
                 Uri url,

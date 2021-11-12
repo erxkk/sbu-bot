@@ -23,7 +23,6 @@ namespace SbuBot.Commands.Modules
     {
         [Command("transfer")]
         [Description("Transfers ownership of a given tag to the given member.")]
-        [Usage("tag transfer @user da dog", "t transfer 352815253828141056 h", "t mv @user all")]
         public async Task<DiscordCommandResult> TransferAsync(
             [NotAuthor][Description("The member that should receive the given tag.")]
             SbuMember receiver,

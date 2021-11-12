@@ -20,12 +20,10 @@ namespace SbuBot.Commands.Modules
 
         [Command("ping")]
         [Description("Replies with `Pong!`.")]
-        [Usage("ping")]
         public DiscordCommandResult Ping() => Reply("Pong!");
 
         [Command("color")]
         [Description("Replies with the given color as an embed or a random color if non is given.")]
-        [Usage("color green", "color #afafaf")]
         public DiscordCommandResult ShowColor(
             [Description("The optional color to reply with.")]
             Color? color = null
@@ -38,11 +36,6 @@ namespace SbuBot.Commands.Modules
         [Command("rafael")]
         [RequireBotGuildPermissions(Permission.ManageMessages)]
         [Description("Rafael.")]
-        [Usage(
-            "rafael (with {@reply})",
-            "rafael 836993360274784297",
-            "rafael https://discord.com/channels/732210852849123418/732231139233759324/836993360274784297"
-        )]
         public async Task<DiscordCommandResult> RafaelAsync(
             [OverrideDefault("{@reply}")][Description("Rafael.")]
             IUserMessage? message = null

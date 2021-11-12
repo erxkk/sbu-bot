@@ -2,6 +2,7 @@
 using System.IO;
 
 using Disqord;
+using Disqord.Bot;
 using Disqord.Bot.Hosting;
 
 using EFCoreSecondLevelCacheInterceptor;
@@ -16,6 +17,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 using SbuBot;
+using SbuBot.Commands;
 using SbuBot.Logging;
 using SbuBot.Models;
 
@@ -65,6 +67,7 @@ try
                 .AddSingleton<SbuConfiguration>()
                 .AddSingleton(typeof(ILogger<>), typeof(ShortContextLogger<>))
                 .AddSingleton(_ => new EnglishTimeParser(new(new("en-US"), ClockType.TwentyFourHour)))
+                .AddCommands(commands => commands.NullableNouns = Usage.NULLABLE_NOUNS)
         )
         .ConfigureDiscordBot<SbuBot.SbuBot>(
             (ctx, bot) =>

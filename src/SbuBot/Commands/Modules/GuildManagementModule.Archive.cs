@@ -35,7 +35,7 @@ namespace SbuBot.Commands.Modules
                 "The Message are unpinned unless specified otherwise, specifying otherwise cannot be done when "
                 + "replying to the message. In this case the message id/link/`all` must be used as message argument."
             )]
-            [Usage(
+            [UsageOverride(
                 "archive (with {@reply})",
                 "archive 836993360274784297",
                 "archive https://discord.com/channels/732210852849123418/732231139233759324/836993360274784297",

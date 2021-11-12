@@ -26,7 +26,7 @@ namespace SbuBot.Commands.Modules
             public sealed class CreateGroup : SbuModuleBase
             {
                 [Command]
-                [Usage(
+                [UsageOverride(
                     "auto create refuses to elaborate :: https://cdn.discordapp.com/attachments/820403561526722570/"
                     + "848874138587758592/Screenshot_20210530_010226.png",
                     "auto make what da dog doin :: what is the canine partaking in",

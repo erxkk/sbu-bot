@@ -18,7 +18,7 @@ namespace SbuBot.Commands.Modules
             [Command("set")]
             [RequireAuthorGuildPermissions(Permission.Administrator)]
             [Description("Sets the current pin archive.")]
-            [Usage("archive set #channel", "archive set 836993360274784297")]
+            [UsageOverride("archive set #channel", "archive set 836993360274784297")]
             public async Task<DiscordCommandResult> SetArchiveAsync(
                 [Description("The channel that should be the new archive.")]
                 ITextChannel archive
@@ -35,7 +35,7 @@ namespace SbuBot.Commands.Modules
 
             [Command("list")]
             [Description("Lists the current pin archive.")]
-            [Usage("archive list")]
+            [UsageOverride("archive list")]
             public async Task<DiscordCommandResult> GetArchiveAsync()
             {
                 SbuGuild guild = await Context.GetDbGuildAsync();

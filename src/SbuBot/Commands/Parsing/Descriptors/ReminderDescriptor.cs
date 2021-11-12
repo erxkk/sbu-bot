@@ -6,6 +6,12 @@ namespace SbuBot.Commands.Parsing.Descriptors
 {
     public readonly struct ReminderDescriptor : IDescriptor
     {
+        public static readonly Type[] TYPES =
+        {
+            typeof(DateTimeOffset),
+            typeof(string),
+        };
+
         public static readonly string REMARKS = "This is a 2-part descriptor. The timestamp must be int he future, the "
             + $"message can be at most {SbuReminder.MAX_MESSAGE_LENGTH} characters long.";
 

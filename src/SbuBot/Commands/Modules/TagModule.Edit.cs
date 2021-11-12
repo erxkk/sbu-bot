@@ -22,7 +22,6 @@ namespace SbuBot.Commands.Modules
         public sealed class EditGroup : SbuModuleBase
         {
             [Command]
-            [Usage("tag edit da dog :: what da dog doin now", "t change h :: h!!!")]
             public async Task<DiscordCommandResult> EditAsync(
                 [Description("The tag descriptor.")] TagDescriptor tagDescriptor
             )
@@ -45,7 +44,6 @@ namespace SbuBot.Commands.Modules
             }
 
             [Command]
-            [Usage("tag edit da dog", "t change h")]
             public async Task<DiscordCommandResult> EditInteractiveAsync(
                 [AuthorMustOwn][Description("The tag that should be modified.")]
                 SbuTag tag

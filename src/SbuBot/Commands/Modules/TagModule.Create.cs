@@ -21,7 +21,6 @@ namespace SbuBot.Commands.Modules
         public sealed class CreateGroup : SbuModuleBase
         {
             [Command]
-            [Usage("tag create tagggg :: new tag who dis", "t make da dog :: what da dog doin", "tag mk h :: h")]
             public async Task<DiscordCommandResult> CreateAsync(
                 [Description("The tag descriptor.")] TagDescriptor descriptor
             )

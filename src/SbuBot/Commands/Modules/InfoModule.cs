@@ -51,6 +51,18 @@ namespace SbuBot.Commands.Modules
             );
         }
 
+        [Command("reserved")]
+        [Description(
+            "Lists the reserved keywords, tags are not allowed to be any of these keywords, but can start with, end "
+            + "with or contain them."
+        )]
+        public DiscordCommandResult GetReservedKeywords() => Reply(
+            string.Format(
+                "The following keywords are not allowed to be tags, but tags may contain them:\n{0}",
+                SbuGlobals.Keyword.ALL_RESERVED.Select(rn => $"> `{rn}`").ToNewLines()
+            )
+        );
+
         [Command("guide")]
         [Description("Displays an interactive guide that explains bot usage and help syntax.")]
         public DiscordCommandResult Guide() => Pages(
@@ -81,7 +93,7 @@ namespace SbuBot.Commands.Modules
 
             [Command("find")]
             [Description("Finds all commands that would match the given input.")]
-            [Usage("command find role edit name", "command find help")]
+            [UsageOverride("command find role edit name", "command find help")]
             public DiscordCommandResult Find(string command)
             {
                 IReadOnlyList<CommandMatch> matches = Context.Bot.Commands.FindCommands(command);
@@ -118,7 +130,6 @@ namespace SbuBot.Commands.Modules
             "Interactively displays information about for a given command/module, or displays all modules if non is "
             + "given."
         )]
-        [Usage("help role edit name", "how role edit", "h role")]
         public DiscordCommandResult Help(string? command = null)
         {
             if (command is null)

@@ -25,7 +25,7 @@ namespace SbuBot.Commands.Modules
         public sealed class CreateGroup : SbuModuleBase
         {
             [Command]
-            [Usage(
+            [UsageOverride(
                 "reminder create in 3 days :: do the thing",
                 "reminder make tomorrow at 15:00 :: do the thing",
                 "remind me in 3 days :: do the thing"
@@ -57,7 +57,6 @@ namespace SbuBot.Commands.Modules
             }
 
             [Command]
-            [Usage("reminder create do the thing", "reminder make do the thing", "remind me do the thing")]
             public async Task<DiscordCommandResult> CreateInteractiveAsync(
                 [Maximum(SbuReminder.MAX_MESSAGE_LENGTH)][Description("The optional message of the reminder.")]
                 string? message = null

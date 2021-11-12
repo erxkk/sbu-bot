@@ -23,7 +23,6 @@ namespace SbuBot.Commands.Modules
     {
         [Command("delete")]
         [Description("Removes a given tag.")]
-        [Usage("tag remove da dog", "t delete h", "t rm all")]
         public async Task<DiscordCommandResult> RemoveAsync(
             [AuthorMustOwn][Description("The tag that should be removed.")]
             OneOrAll<SbuTag> tag
@@ -95,7 +94,6 @@ namespace SbuBot.Commands.Modules
         [RequireAuthorChannelPermissions(Permission.Administrator)]
         [Description("Removes a given tag.")]
         [Remarks("Requires Administrator Permission.")]
-        [Usage("tag remove da dog", "t delete h", "t rm all")]
         public async Task<DiscordCommandResult> RemoveAsync(
             [Description("The tag that should be removed.")]
             SbuTag tag

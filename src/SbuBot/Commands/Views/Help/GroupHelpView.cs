@@ -57,10 +57,10 @@ namespace SbuBot.Commands.Views.Help
                 selection.Options.Add(new(command.Format(false).TrimOrSelf(25), id.ToString()));
             }
 
-            description.Append('\n').AppendLine("**Description:**").AppendLine(_group.Description).Append('\n');
+            description.Append('\n').AppendLine("**Description:**").AppendLine(_group.Description);
 
             if (_group.Remarks is { })
-                description.AppendLine("**Remarks:**").AppendLine(_group.Remarks);
+                description.Append('\n').AppendLine("**Remarks:**").AppendLine(_group.Remarks);
 
             var result = await _group.RunChecksAsync(Context);
 
@@ -81,21 +81,18 @@ namespace SbuBot.Commands.Views.Help
                     .AppendLine("**You can execute these commands.**");
             }
 
-            if (_group.Attributes.OfType<UsageAttribute>().FirstOrDefault() is { } usage)
-            {
-                description.AppendLine("**Examples:**");
+            description.Append('\n').AppendLine("**Examples:**");
 
-                foreach (string example in usage.Values)
-                {
-                    description.Append(SbuGlobals.BULLET)
-                        .Append(' ')
-                        .Append('`')
-                        .Append(SbuGlobals.DEFAULT_PREFIX)
-                        .Append(' ')
-                        .Append(example)
-                        .Append('`')
-                        .Append('\n');
-                }
+            foreach (string example in Usage.GetUsages(_group))
+            {
+                description.Append(SbuGlobals.BULLET)
+                    .Append(' ')
+                    .Append('`')
+                    .Append(SbuGlobals.DEFAULT_PREFIX)
+                    .Append(' ')
+                    .Append(example)
+                    .Append('`')
+                    .Append('\n');
             }
 
             if (_group.Aliases.Count != 0)

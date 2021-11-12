@@ -15,7 +15,6 @@ namespace SbuBot.Commands.Modules
     {
         [Command("claim")]
         [Description("Claims the given tag if it has no owner.")]
-        [Usage("tag claim tagggg", "t take whomstve")]
         public async Task<DiscordCommandResult> ClaimAsync(
             [MustBeOwned(false)][Description("The tag to claim.")]
             SbuTag tag
