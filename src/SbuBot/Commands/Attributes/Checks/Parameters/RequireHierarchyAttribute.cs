@@ -28,7 +28,7 @@ namespace SbuBot.Commands.Attributes.Checks.Parameters
         public RequireHierarchyAttribute(HierarchyComparison comparison, HierarchyComparisonContext comparisonContext)
         {
             if (comparisonContext == HierarchyComparisonContext.Literal)
-                throw new ArgumentException("Literal is implicitly set giving the attribute an integer value");
+                throw new ArgumentException("Literal is implicitly set when giving the attribute an integer value");
 
             ComparisonContext = comparisonContext;
             Comparison = comparison;
@@ -41,17 +41,17 @@ namespace SbuBot.Commands.Attributes.Checks.Parameters
 
             switch (argument)
             {
-                case IRole iRole:
+                case IRole role:
                 {
                     argumentType = "role";
-                    argumentHierarchy = iRole.Position;
+                    argumentHierarchy = role.Position;
                     break;
                 }
 
-                case IMember iMember:
+                case IMember member:
                 {
                     argumentType = "member";
-                    argumentHierarchy = iMember.GetHierarchy();
+                    argumentHierarchy = member.GetHierarchy();
                     break;
                 }
 
@@ -141,22 +141,19 @@ namespace SbuBot.Commands.Attributes.Checks.Parameters
     }
 }
 
-namespace SbuBot.Commands.Attributes.Checks
+public enum HierarchyComparisonContext : byte
 {
-    public enum HierarchyComparisonContext : byte
-    {
-        Bot,
-        Author,
-        Literal,
-    }
+    Bot,
+    Author,
+    Literal,
+}
 
-    public enum HierarchyComparison : byte
-    {
-        Greater,
-        GreaterThanOrEqual,
-        Less,
-        LessThanOrEqual,
-        Equal,
-        Unequal,
-    }
+public enum HierarchyComparison : byte
+{
+    Greater,
+    GreaterThanOrEqual,
+    Less,
+    LessThanOrEqual,
+    Equal,
+    Unequal,
 }

@@ -27,7 +27,7 @@ namespace SbuBot.Commands.Attributes.Checks.Parameters
                     ? Success()
                     : Failure(
                         string.Format(
-                            "You must {0}to be the owner of the given {1}.",
+                            "You must {0}be the owner of the given {1}.",
                             AuthorMustOwn ? "" : "not ",
                             argument switch
                             {
@@ -52,7 +52,7 @@ namespace SbuBot.Commands.Attributes.Checks.Parameters
                     ? Success()
                     : Failure(
                         string.Format(
-                            "You must {0}to be the owner of the given {1}.",
+                            "You must {0}be the owner of the given {1}.",
                             AuthorMustOwn ? "" : "not ",
                             oneOrAll.Value switch
                             {
@@ -65,11 +65,7 @@ namespace SbuBot.Commands.Attributes.Checks.Parameters
                     );
             }
 
-            throw new ArgumentOutOfRangeException(
-                nameof(argument),
-                argument,
-                $"Invalid argument type: {argument.GetType()}"
-            );
+            throw new ArgumentOutOfRangeException();
         }
 
         public override bool CheckType(Type type)
