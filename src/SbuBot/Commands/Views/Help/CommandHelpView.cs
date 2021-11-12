@@ -38,14 +38,16 @@ namespace SbuBot.Commands.Views.Help
                 .AppendLine(_command.Description ?? _command.Module.Description);
 
             if ((_command.Remarks ?? _command.Module.Remarks) is { } remarks)
-                description.Append('\n').AppendLine("**Remarks:**").AppendLine(remarks);
+                description.AppendLine("**Remarks:**").AppendLine(remarks);
 
-            var result = await _command.RunChecksAsync(Context);
+            IResult result = await _command.RunChecksAsync(Context);
 
             if (result is ChecksFailedResult failedResult)
             {
                 description.Append('\n')
-                    .AppendLine("**Checks:**")
+                    .Append(LocalEmoji.Custom(SbuGlobals.Emote.Menu.CONFIRM))
+                    .Append(' ')
+                    .AppendLine("**Failed Checks:**")
                     .AppendLine(
                         failedResult.FailedChecks
                             .Select((c => $"{SbuGlobals.BULLET} {c.Result.FailureReason}"))
@@ -55,7 +57,7 @@ namespace SbuBot.Commands.Views.Help
             else
             {
                 description.Append('\n')
-                    .Append(LocalEmoji.Custom(SbuGlobals.Emote.Menu.STOP))
+                    .Append(LocalEmoji.Custom(SbuGlobals.Emote.Menu.CONFIRM))
                     .Append(' ')
                     .AppendLine("**You can execute this command.**");
             }
@@ -76,7 +78,7 @@ namespace SbuBot.Commands.Views.Help
 
             if (_command.Aliases.Count != 0)
             {
-                description
+                description.Append('\n')
                     .AppendLine("**Aliases:**")
                     .AppendLine(string.Join(", ", _command.Aliases.Select(Markdown.Code)));
             }

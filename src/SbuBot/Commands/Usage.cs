@@ -120,7 +120,7 @@ namespace SbuBot.Commands
                 return usage.Values;
 
             if (command.Parameters.Count == 0)
-                return new[] { $"{command.FullAliases[0]}" };
+                return new[] { command.FullAliases[0] };
 
             // we want to get at least as many usages as the parameter usage max in this example `a`
             // and for all parameters with less we just fill out the last known usage
