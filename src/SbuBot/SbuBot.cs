@@ -39,6 +39,7 @@ namespace SbuBot
             Commands.AddTypeParser(new GuidTypeParser());
             Commands.AddTypeParser(new UriTypeParser());
 
+            Commands.AddTypeParser(new RoleTypeParser());
             Commands.AddTypeParser(new ColorRoleTypeParser());
             Commands.AddTypeParser(new MemberTypeReader());
 
