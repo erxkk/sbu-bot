@@ -17,6 +17,9 @@ namespace SbuBot.Commands.Parsing.TypeParsers
             DiscordCommandContext context
         )
         {
+            // TODO: investigate parser failure on tag list all
+            // System.InvalidOperationException: No type parser found for parameter owner (SbuBot.Commands.Parsing.HelperTypes.OneOrAll`1[SbuBot.Models.SbuMember]).
+
             if (value.Equals("all", StringComparison.OrdinalIgnoreCase))
                 return Success(OneOrAll<T>.All());
 

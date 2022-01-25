@@ -2,8 +2,6 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace SbuBot.Commands.Parsing.HelperTypes
 {
-    // this is for non-generic pattern matching
-
     // never assign default value
     public sealed class OneOrAll<T> : IOneOrAll
     {

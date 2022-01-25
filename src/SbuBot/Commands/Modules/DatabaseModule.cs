@@ -195,6 +195,7 @@ namespace SbuBot.Commands.Modules
             );
         }
 
+        // TODO: no author if null
         // TODO: simplify
         [Group("inspect")]
         [RequireBotOwner]
