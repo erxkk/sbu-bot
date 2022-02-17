@@ -50,7 +50,7 @@ namespace SbuBot.Commands.Modules
                         SbuGlobals.BULLET,
                         Markdown.Link(r.GetFormattedId(), r.GetJumpUrl()),
                         Markdown.Timestamp(r.DueAt),
-                        r.Message is { } ? $"{r.Message}" : "`No Message`"
+                        r.Message is { } ? $"{SbuUtility.Truncate(r.Message, 256)}" : "`No Message`"
                     )
                 ),
                 embedFactory: embed => embed.WithTitle("Your Reminders")

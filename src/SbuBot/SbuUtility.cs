@@ -73,6 +73,13 @@ namespace SbuBot
             return false;
         }
 
+        public static string Truncate(string text, int length)
+        {
+            Preconditions.Greater(length, 0, nameof(length));
+
+            return text.Length >= length + 1 ? text.Substring(0, length - 1) + SbuGlobals.ELLIPSES : text;
+        }
+
         public static class Format
         {
             public static string DoesNotExist(string value, string? suffix = null)

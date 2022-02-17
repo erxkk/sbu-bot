@@ -187,7 +187,7 @@ namespace SbuBot.Commands.Modules
                             SbuGlobals.BULLET,
                             t.OwnerId is { } ? Mention.User(t.Owner!.Id) : "No owner",
                             t.Name,
-                            t.Content
+                            SbuUtility.Truncate(t.Content, 256)
                         )
                     ),
                     embedFactory: embed => embed.WithTitle("Tags"),
