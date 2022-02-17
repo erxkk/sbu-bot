@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Threading.Tasks;
 
 using Disqord;
 using Disqord.Bot;
@@ -20,7 +21,7 @@ namespace SbuBot.Commands.Modules
     {
         [Command("list")]
         [Description("Lists the given reminder or all if non is given.")]
-        public DiscordCommandResult List(
+        public async Task<DiscordCommandResult> ListAsync(
             [AuthorMustOwn]
             [Description("The reminder that should be listed.")]
             [Remarks("Lists all reminders if none is specified.")]
@@ -29,7 +30,7 @@ namespace SbuBot.Commands.Modules
         {
             if (reminder is { })
             {
-                return Reply(
+                return Response(
                     new LocalEmbed()
                         .WithTitle("Reminder")
                         .WithDescription(reminder.Message)
@@ -38,22 +39,20 @@ namespace SbuBot.Commands.Modules
                 );
             }
 
-            if (Context.Services.GetRequiredService<ReminderService>().GetReminders()
-                is not { Count: > 0 } reminders)
+            if (await Context.Services.GetRequiredService<ReminderService>()
+                    .FetchRemindersAsync(Context.Author.Id, Context.GuildId) is not { Count: > 0 } reminders)
                 return Reply("You have no reminders.");
 
             return DistributedPages(
-                reminders.Values
-                    .Where(r => r.OwnerId == Context.Author.Id)
-                    .Select(
-                        r => string.Format(
-                            "{0} {1} {2}\n{3}\n",
-                            SbuGlobals.BULLET,
-                            Markdown.Link(r.GetFormattedId(), r.GetJumpUrl()),
-                            Markdown.Timestamp(r.DueAt),
-                            r.Message is { } ? $"{r.Message}" : "`No Message`"
-                        )
-                    ),
+                reminders.Values.Select(
+                    r => string.Format(
+                        "{0} {1} {2}\n{3}\n",
+                        SbuGlobals.BULLET,
+                        Markdown.Link(r.GetFormattedId(), r.GetJumpUrl()),
+                        Markdown.Timestamp(r.DueAt),
+                        r.Message is { } ? $"{r.Message}" : "`No Message`"
+                    )
+                ),
                 embedFactory: embed => embed.WithTitle("Your Reminders")
             );
         }

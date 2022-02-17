@@ -36,7 +36,7 @@ namespace SbuBot.Commands.Modules
             )
             {
                 // avoid disposal of the current context by waiting until the command completed
-                var tcs = new TaskCompletionSource();
+                TaskCompletionSource tcs = new();
 
                 Context.Bot.Queue.Post(
                     new DiscordGuildCommandContext(

@@ -33,7 +33,7 @@ namespace SbuBot.Commands.Modules
 
                 StringBuilder builder = new();
 
-                for (var i = 0; i < names.Length; i++)
+                for (int i = 0; i < names.Length; i++)
                 {
                     if (values[i] is SbuGuildConfig.None or SbuGuildConfig.All)
                         continue;

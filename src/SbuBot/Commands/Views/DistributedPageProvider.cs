@@ -32,8 +32,8 @@ namespace SbuBot.Commands.Views
             int maxPageLength = LocalEmbed.MaxDescriptionLength
         )
         {
-            var builder = new StringBuilder();
-            var elements = 0;
+            StringBuilder builder = new StringBuilder();
+            int elements = 0;
 
             foreach (string item in source)
             {

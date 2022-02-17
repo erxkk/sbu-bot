@@ -165,17 +165,17 @@ namespace SbuBot.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            var snowflakeConverter = new ValueConverter<Snowflake, ulong>(
+            ValueConverter<Snowflake, ulong> snowflakeConverter = new(
                 static snowflake => snowflake.RawValue,
                 static @ulong => new(@ulong)
             );
 
-            var colorConverter = new ValueConverter<Color, int>(
+            ValueConverter<Color, int> colorConverter = new(
                 static color => color.RawValue,
                 static @int => new(@int)
             );
 
-            var datetimeConverter = new ValueConverter<DateTimeOffset, long>(
+            ValueConverter<DateTimeOffset, long> datetimeConverter = new(
                 static datetime => datetime.ToUnixTimeMilliseconds(),
                 static @long => DateTimeOffset.FromUnixTimeMilliseconds(@long)
             );

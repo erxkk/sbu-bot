@@ -25,7 +25,9 @@ namespace SbuBot.Commands.Parsing.TypeParsers
         )
         {
             ReminderService service = context.Services.GetRequiredService<ReminderService>();
-            IReadOnlyDictionary<Snowflake, SbuReminder> reminders = service.GetReminders();
+
+            IReadOnlyDictionary<Snowflake, SbuReminder> reminders
+                = await service.FetchRemindersAsync(null, context.GuildId);
 
             if (value.Equals("last", StringComparison.OrdinalIgnoreCase))
             {
@@ -39,14 +41,14 @@ namespace SbuBot.Commands.Parsing.TypeParsers
             if (await snowflakeParser.ParseAsync(parameter, value, context)
                 is { IsSuccessful: true } snowflakeParseResult)
             {
-                return reminders.TryGetValue(snowflakeParseResult.Value, out var reminder)
+                return reminders.TryGetValue(snowflakeParseResult.Value, out SbuReminder? reminder)
                     ? Success(reminder)
                     : Failure("Could not find reminder.");
             }
 
             if (ulong.TryParse(value, NumberStyles.HexNumber, NumberFormatInfo.CurrentInfo, out ulong ulongId))
             {
-                return reminders.TryGetValue(ulongId, out var reminder)
+                return reminders.TryGetValue(ulongId, out SbuReminder? reminder)
                     ? Success(reminder)
                     : Failure("Could not find reminder.");
             }

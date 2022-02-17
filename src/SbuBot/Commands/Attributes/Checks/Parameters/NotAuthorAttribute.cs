@@ -14,7 +14,7 @@ namespace SbuBot.Commands.Attributes.Checks.Parameters
     {
         public override ValueTask<CheckResult> CheckAsync(object argument, DiscordCommandContext context)
         {
-            var id = argument switch
+            Snowflake id = argument switch
             {
                 IMember member => member.Id,
                 Snowflake snowflake => snowflake,

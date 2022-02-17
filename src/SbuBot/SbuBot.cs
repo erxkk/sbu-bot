@@ -18,6 +18,7 @@ using SbuBot.Commands;
 using SbuBot.Commands.Parsing.Descriptors;
 using SbuBot.Commands.Parsing.TypeParsers;
 using SbuBot.Extensions;
+using SbuBot.Models;
 
 namespace SbuBot
 {
@@ -36,12 +37,12 @@ namespace SbuBot
 
         protected override ValueTask AddTypeParsersAsync(CancellationToken cancellationToken = default)
         {
-            Commands.AddTypeParser(new GuidTypeParser());
-            Commands.AddTypeParser(new UriTypeParser());
+            Commands.AddTypeParserVariants(new GuidTypeParser());
+            Commands.AddTypeParserVariants(new UriTypeParser());
 
-            Commands.AddTypeParser(new RoleTypeParser());
-            Commands.AddTypeParser(new ColorRoleTypeParser());
-            Commands.AddTypeParser(new MemberTypeReader());
+            Commands.AddTypeParserVariants(new RoleTypeParser());
+            Commands.AddTypeParserVariants(new ColorRoleTypeParser());
+            Commands.AddTypeParserVariants(new MemberTypeReader());
 
             Commands.AddTypeParser(new TimeSpanTypeParser());
             Commands.AddTypeParser(new DateTimeTypeParser());
@@ -50,14 +51,12 @@ namespace SbuBot
             Commands.AddTypeParserVariants(new ReminderTypeParser());
             Commands.AddTypeParserVariants(new AutoResponseTypeParser());
 
-            Commands.AddTypeParser(new MessageTypeParser());
-            Commands.AddTypeParser(new UserMessageTypeParser());
+            Commands.AddTypeParserVariants(new MessageTypeParser());
+            Commands.AddTypeParserVariants(new UserMessageTypeParser());
 
             Commands.AddTypeParser(new TagDescriptorTypeParser());
             Commands.AddTypeParser(new ReminderDescriptorTypeParser());
             Commands.AddTypeParser(new AutoResponseDescriptorTypeParser());
-
-            Commands.AddTypeParserVariants<IUserMessage>();
 
             return base.AddTypeParsersAsync(cancellationToken);
         }

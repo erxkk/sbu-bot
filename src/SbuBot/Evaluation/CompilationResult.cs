@@ -42,7 +42,7 @@ namespace SbuBot.Evaluation
 
             public async Task<ScriptResult> RunAsync()
             {
-                var sw = Stopwatch.StartNew();
+                Stopwatch sw = Stopwatch.StartNew();
                 ScriptState<object> res = await _script.RunAsync(_globalsInstance, _ => true);
                 sw.Stop();
 

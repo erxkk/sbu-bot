@@ -95,7 +95,7 @@ namespace SbuBot.Commands.Modules
 
             foreach ((IMember member, IRole? role) in userRolePairs)
             {
-                if (!members.TryGetValue(member.Id, out var dbMember))
+                if (!members.TryGetValue(member.Id, out SbuMember? dbMember))
                     dbMember = dbContext.AddMember(member);
 
                 userCount++;
@@ -103,7 +103,7 @@ namespace SbuBot.Commands.Modules
                 if (role is null)
                     continue;
 
-                if (colorRoles.TryGetValue(role.Id, out var dbRole))
+                if (colorRoles.TryGetValue(role.Id, out SbuColorRole? dbRole))
                 {
                     dbRole.OwnerId = dbMember.Id;
                     dbContext.ColorRoles.Update(dbRole);
@@ -195,7 +195,6 @@ namespace SbuBot.Commands.Modules
             );
         }
 
-        // TODO: no author if null
         // TODO: simplify
         [Group("inspect")]
         [RequireBotOwner]
@@ -217,13 +216,21 @@ namespace SbuBot.Commands.Modules
                 SbuMember member,
                 [Minimum(1)][Description("The depth of the inspection.")]
                 int depth = 1
-            ) => Reply(
-                new LocalEmbed()
-                    .WithAuthor(Context.Guild.GetMember(member.Id))
+            )
+            {
+                LocalEmbed embed = new LocalEmbed()
                     .WithDescription(Markdown.CodeBlock("yml", member.GetInspection(depth)))
                     .AddInlineField("Self", Mention.User(member.Id))
-                    .AddInlineField("ColorRole", member.ColorRole is { } ? Mention.Role(member.ColorRole.Id) : "None")
-            );
+                    .AddInlineField(
+                        "ColorRole",
+                        member.ColorRole is { } ? Mention.Role(member.ColorRole.Id) : "None"
+                    );
+
+                if (Context.Guild.GetMember(member.Id) is { } cachedMember)
+                    embed.WithAuthor(cachedMember);
+
+                return Reply(embed);
+            }
 
             [Command]
             public DiscordCommandResult InspectRole(
@@ -254,8 +261,8 @@ namespace SbuBot.Commands.Modules
                     .AddInlineField("Self", Mention.Role(role.Id))
                     .AddInlineField("Owner", role.OwnerId is { } ? Mention.User(role.OwnerId.Value) : "None");
 
-                if (role.OwnerId is { })
-                    embed.WithAuthor(Context.Guild.GetMember(role.OwnerId.Value));
+                if (role.OwnerId is { } && Context.Guild.GetMember(role.OwnerId.Value) is { } cachedOwner)
+                    embed.WithAuthor(cachedOwner);
 
                 return Reply(embed);
             }
@@ -272,8 +279,8 @@ namespace SbuBot.Commands.Modules
                     .WithDescription(Markdown.CodeBlock("yml", tag.GetInspection(depth)))
                     .AddInlineField("Owner", tag.OwnerId is { } ? Mention.User(tag.OwnerId.Value) : "None");
 
-                if (tag.OwnerId is { })
-                    embed.WithAuthor(Context.Guild.GetMember(tag.OwnerId.Value));
+                if (tag.OwnerId is { } && Context.Guild.GetMember(tag.OwnerId.Value) is { } cachedOwner)
+                    embed.WithAuthor(cachedOwner);
 
                 return Reply(embed);
             }
@@ -296,15 +303,20 @@ namespace SbuBot.Commands.Modules
                 SbuReminder reminder,
                 [Minimum(1)][Description("The depth of the inspection.")]
                 int depth = 1
-            ) => Reply(
-                new LocalEmbed()
-                    .WithAuthor(Context.Guild.GetMember(reminder.OwnerId.Value))
+            )
+            {
+                LocalEmbed embed = new LocalEmbed()
                     .WithTitle("Reminder")
                     .WithDescription(Markdown.CodeBlock("yml", reminder.GetInspection(depth)))
                     .AddInlineField("Owner", Mention.User(reminder.OwnerId.Value))
                     .AddInlineField("CreatedAt", Markdown.Timestamp(reminder.CreatedAt))
-                    .AddInlineField("DueAt", Markdown.Timestamp(reminder.DueAt))
-            );
+                    .AddInlineField("DueAt", Markdown.Timestamp(reminder.DueAt));
+
+                if (Context.Guild.GetMember(reminder.OwnerId.Value) is { } cachedOwner)
+                    embed.WithAuthor(cachedOwner);
+
+                return Reply(embed);
+            }
         }
     }
 }

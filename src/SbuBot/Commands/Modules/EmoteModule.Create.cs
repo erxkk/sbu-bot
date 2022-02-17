@@ -20,6 +20,8 @@ using SbuBot.Extensions;
 
 namespace SbuBot.Commands.Modules
 {
+    // TODO: inspect return values of various discord media headers and fix the underlying checks that prevent adding emotes
+    [Disabled]
     public sealed partial class EmoteModule
     {
         [Command("add", "yoink")]
@@ -170,8 +172,8 @@ namespace SbuBot.Commands.Modules
                 CancellationTokenSource cts = CancellationTokenSource
                     .CreateLinkedTokenSource(Context.Bot.StoppingToken);
 
-                var response = await client.SendAsync(new(HttpMethod.Head, url), cts.Token);
-                var mediaType = response.Content.Headers.ContentType?.MediaType;
+                HttpResponseMessage response = await client.SendAsync(new(HttpMethod.Head, url), cts.Token);
+                string? mediaType = response.Content.Headers.ContentType?.MediaType;
 
                 if (mediaType is null)
                     return Reply("The server didn't answer with with the `Content-Type` header.");

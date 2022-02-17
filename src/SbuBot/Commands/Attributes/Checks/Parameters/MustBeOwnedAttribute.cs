@@ -17,7 +17,7 @@ namespace SbuBot.Commands.Attributes.Checks.Parameters
 
         public override ValueTask<CheckResult> CheckAsync(object argument, DiscordGuildCommandContext context)
         {
-            var ownedEntity = (argument as ISbuOwnedEntity)!;
+            ISbuOwnedEntity ownedEntity = (argument as ISbuOwnedEntity)!;
 
             return (ownedEntity.OwnerId is { }) == MustBeOwned
                 ? Success()

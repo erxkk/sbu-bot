@@ -20,6 +20,7 @@ namespace SbuBot.Evaluation
             "System.Linq",
             "System.Threading",
             "Microsoft.EntityFrameworkCore",
+            "Microsoft.Extensions.DependencyInjection",
             "Disqord",
             "Disqord.Bot",
             "Disqord.Gateway",
@@ -46,7 +47,7 @@ namespace SbuBot.Evaluation
         {
             Script<object> script = CSharpScript.Create(code, SCRIPT_OPTIONS, typeof(ScriptGlobals));
 
-            var sw = Stopwatch.StartNew();
+            Stopwatch sw = Stopwatch.StartNew();
             ImmutableArray<Diagnostic> diagnostics = script.Compile();
             sw.Stop();
 
