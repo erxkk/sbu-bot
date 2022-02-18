@@ -40,7 +40,7 @@ namespace SbuBot.Commands.Modules
             bool? set = null
         )
         {
-            SbuBot bot = (Context.Bot as SbuBot)!;
+            SbuBot bot = (Bot as SbuBot)!;
             bot.IsLocked = set ?? !bot.IsLocked;
             return Response($"{(bot.IsLocked ? "Locked" : "Unlocked")} the bot.");
         }
@@ -67,7 +67,7 @@ namespace SbuBot.Commands.Modules
             {
                 case "command" or "c":
                 {
-                    IReadOnlyList<CommandMatch> matches = Context.Bot.Commands.FindCommands(path);
+                    IReadOnlyList<CommandMatch> matches = Bot.Commands.FindCommands(path);
 
                     switch (matches.Count)
                     {
@@ -100,7 +100,7 @@ namespace SbuBot.Commands.Modules
 
                 case "module" or "m":
                 {
-                    Module[] moduleMatches = Context.Bot.Commands.GetAllModules()
+                    Module[] moduleMatches = Bot.Commands.GetAllModules()
                         .Where(
                             mod => mod.FullAliases.Any(a => a.Equals(path, StringComparison.OrdinalIgnoreCase))
                                 || mod.Name.Equals(path, StringComparison.OrdinalIgnoreCase)
@@ -138,9 +138,9 @@ namespace SbuBot.Commands.Modules
 
                 case null:
                 {
-                    IReadOnlyList<CommandMatch> matches = Context.Bot.Commands.FindCommands(query);
+                    IReadOnlyList<CommandMatch> matches = Bot.Commands.FindCommands(query);
 
-                    Module[] moduleMatches = Context.Bot.Commands.GetAllModules()
+                    Module[] moduleMatches = Bot.Commands.GetAllModules()
                         .Where(
                             mod => mod.FullAliases.Any(a => a.Equals(path, StringComparison.OrdinalIgnoreCase))
                                 || mod.Name.Equals(path, StringComparison.OrdinalIgnoreCase)
@@ -250,13 +250,13 @@ namespace SbuBot.Commands.Modules
                     return;
                 }
 
-                await Context.Bot.SetPresenceAsync(new LocalActivity(value, type));
+                await Bot.SetPresenceAsync(new LocalActivity(value, type));
             }
 
             [Command("unset")]
             [Description("Set the epic bot status.")]
             public Task UnsetStatusAsync()
-                => Context.Bot.SetPresenceAsync(null);
+                => Bot.SetPresenceAsync(null);
         }
     }
 }

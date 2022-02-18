@@ -31,7 +31,7 @@ namespace SbuBot.Commands.Modules
                 "remind me in 3 days :: do the thing"
             )]
             public async Task<DiscordCommandResult> CreateAsync(
-                [Description("The reminder descriptor.")]
+                [Description("The reminder descriptor `<timestamp> :: <text>`.")]
                 ReminderDescriptor descriptor
             )
             {
@@ -48,58 +48,24 @@ namespace SbuBot.Commands.Modules
                 return Response(
                     new LocalEmbed()
                         .WithTitle("Reminder Scheduled")
-                        .WithDescription(
-                            $"{descriptor.Message}\n\n{Markdown.Link("Original Message", newReminder.GetJumpUrl())}"
-                        )
                         .WithFooter(newReminder.GetFormattedId())
                         .WithTimestamp(newReminder.DueAt)
                 );
             }
 
             [Command]
-            public async Task<DiscordCommandResult> CreateInteractiveAsync(
-                [Maximum(SbuReminder.MAX_MESSAGE_LENGTH)][Description("The optional message of the reminder.")]
-                string? message = null
+            public async Task<DiscordCommandResult> CreateNoMessageAsync(
+                [Description("The time at which to remind you.")]
+                DateTimeOffset timestamp
             )
             {
-                TypeParser<DateTime> parser = Context.Bot.Commands.GetTypeParser<DateTime>();
-
-                string? timestamp;
-
-                switch (await Context.WaitFollowUpForAsync("When do you want to be reminded?"))
-                {
-                    case Result<string, FollowUpError>.Success followUp:
-                        timestamp = followUp.Value;
-                        break;
-
-                    case Result<string, FollowUpError>.Error error:
-                        return Reply(
-                            error.Value == FollowUpError.Aborted
-                                ? "Aborted."
-                                : "Aborted: You did not provide a timestamp."
-                        );
-
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-
-                TypeParserResult<DateTime>? parseResult = await parser.ParseAsync(
-                    null,
-                    timestamp,
-                    Context
-                );
-
-                if (!parseResult.IsSuccessful)
-                    return Reply($"Aborted: {parseResult.FailureReason}.");
-
-                SbuReminder newReminder = new(Context, Context.Author.Id, Context.Guild.Id, message, parseResult.Value);
+                SbuReminder newReminder = new(Context, Context.Author.Id, Context.Guild.Id, null, timestamp);
 
                 await Context.Services.GetRequiredService<ReminderService>().ScheduleAsync(newReminder);
 
                 return Response(
                     new LocalEmbed()
                         .WithTitle("Reminder Scheduled")
-                        .WithDescription($"{message}\n\n{Markdown.Link("Original Message", newReminder.GetJumpUrl())}")
                         .WithFooter(newReminder.GetFormattedId())
                         .WithTimestamp(newReminder.DueAt)
                 );

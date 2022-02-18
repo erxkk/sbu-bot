@@ -37,13 +37,15 @@ namespace SbuBot.Commands.Modules
                 {
                     ConfirmationState result = await ConfirmationAsync(
                         "Emote Removal",
-                        "Are you sure you want to remove all those emotes?"
+                        "Are you sure you want to remove **all** those emotes?"
                     );
 
                     switch (result)
                     {
                         case ConfirmationState.None:
                         case ConfirmationState.Aborted:
+                            return null!;
+
                         case ConfirmationState.TimedOut:
                             return Reply("Aborted.");
 
@@ -78,13 +80,15 @@ namespace SbuBot.Commands.Modules
                 {
                     ConfirmationState result = await ConfirmationAsync(
                         "Emote Removal",
-                        "Are you sure you want to remove all those emotes?"
+                        "Are you sure you want to remove **all** those emotes?"
                     );
 
                     switch (result)
                     {
                         case ConfirmationState.None:
                         case ConfirmationState.Aborted:
+                            return null!;
+
                         case ConfirmationState.TimedOut:
                             return Reply("Aborted.");
 

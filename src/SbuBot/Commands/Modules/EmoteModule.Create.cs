@@ -54,7 +54,7 @@ namespace SbuBot.Commands.Modules
             foreach (ICustomEmoji customEmoji in emoteSet)
             {
                 CancellationTokenSource cts = CancellationTokenSource
-                    .CreateLinkedTokenSource(Context.Bot.StoppingToken);
+                    .CreateLinkedTokenSource(Bot.StoppingToken);
 
                 cts.CancelAfter(TimeSpan.FromSeconds(5));
 
@@ -78,7 +78,7 @@ namespace SbuBot.Commands.Modules
                 }
                 catch (OperationCanceledException)
                 {
-                    if (Context.Bot.StoppingToken.IsCancellationRequested)
+                    if (Bot.StoppingToken.IsCancellationRequested)
                         throw;
                 }
                 finally
@@ -136,7 +136,7 @@ namespace SbuBot.Commands.Modules
                     return Reply($"Invalid or unhandled file type `{attachment.ContentType ?? "unknown"}`.");
 
                 CancellationTokenSource cts = CancellationTokenSource
-                    .CreateLinkedTokenSource(Context.Bot.StoppingToken);
+                    .CreateLinkedTokenSource(Bot.StoppingToken);
 
                 IGuildEmoji emote;
 
@@ -170,7 +170,7 @@ namespace SbuBot.Commands.Modules
                 HttpClient client = Context.Services.GetRequiredService<HttpClient>();
 
                 CancellationTokenSource cts = CancellationTokenSource
-                    .CreateLinkedTokenSource(Context.Bot.StoppingToken);
+                    .CreateLinkedTokenSource(Bot.StoppingToken);
 
                 HttpResponseMessage response = await client.SendAsync(new(HttpMethod.Head, url), cts.Token);
                 string? mediaType = response.Content.Headers.ContentType?.MediaType;

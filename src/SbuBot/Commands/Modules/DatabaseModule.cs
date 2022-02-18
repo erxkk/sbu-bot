@@ -45,6 +45,8 @@ namespace SbuBot.Commands.Modules
                 {
                     case ConfirmationState.None:
                     case ConfirmationState.Aborted:
+                        break;
+
                     case ConfirmationState.TimedOut:
                         await Response("Skipping color role.");
                         break;
@@ -69,7 +71,7 @@ namespace SbuBot.Commands.Modules
         [Description("Initializes the color roles for this guild, loading members and color roles into the database.")]
         [Remarks(
             "This will only include color roles with a position lower than the bot's hierarchy. This will override "
-            + "previous color roles witht he current ones for all members where it cna be determined."
+            + "previous color roles with the current ones for all members where it cna be determined."
         )]
         public async Task<DiscordCommandResult> InitAsync()
         {
@@ -87,11 +89,11 @@ namespace SbuBot.Commands.Modules
 
             Dictionary<Snowflake, SbuMember> members = await dbContext.Members
                 .Where(m => m.GuildId == Context.Guild.Id)
-                .ToDictionaryAsync(k => k.Id, v => v, Context.Bot.StoppingToken);
+                .ToDictionaryAsync(k => k.Id, v => v, Bot.StoppingToken);
 
             Dictionary<Snowflake, SbuColorRole> colorRoles = await dbContext.ColorRoles
                 .Where(cr => cr.GuildId == Context.Guild.Id)
-                .ToDictionaryAsync(k => k.Id, v => v, Context.Bot.StoppingToken);
+                .ToDictionaryAsync(k => k.Id, v => v, Bot.StoppingToken);
 
             foreach ((IMember member, IRole? role) in userRolePairs)
             {
@@ -118,13 +120,15 @@ namespace SbuBot.Commands.Modules
 
             ConfirmationState result = await ConfirmationAsync(
                 "Confirm operation?",
-                $"Found {userCount} users, {roleCount} with a suitable color role, update all these users?"
+                $"Found {userCount} users, {roleCount} with a suitable color role, update **all** these users?"
             );
 
             switch (result)
             {
                 case ConfirmationState.None:
                 case ConfirmationState.Aborted:
+                    return null!;
+
                 case ConfirmationState.TimedOut:
                     return Reply("Aborted.");
 
@@ -154,7 +158,7 @@ namespace SbuBot.Commands.Modules
 
             List<SbuTag> tags = await dbContext.Tags
                 .Where(t => t.OwnerId == owner.Id)
-                .ToListAsync(Context.Bot.StoppingToken);
+                .ToListAsync(Bot.StoppingToken);
 
             foreach (SbuTag tag in tags)
                 tag.OwnerId = receiver.Id;

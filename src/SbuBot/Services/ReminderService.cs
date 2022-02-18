@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -109,7 +110,7 @@ namespace SbuBot.Services
                     SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
 
                     context.Reminders.Add(reminder);
-                    await context.SaveChangesAsync();
+                    await context.SaveChangesAsync(Bot.StoppingToken);
                 }
 
                 if (reminder.DueAt >= now + ReminderService.MAX_UNSUSPENDED_TIMESPAN)
@@ -185,18 +186,20 @@ namespace SbuBot.Services
                 SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
 
                 context.Reminders.Remove(reminder);
-                await context.SaveChangesAsync();
+                await context.SaveChangesAsync(Bot.StoppingToken);
             }
 
             Logger.LogDebug("Cancelled: {@Reminder}", reminder);
             return true;
         }
 
-        public async Task<IReadOnlyList<SbuReminder>> CancelAsync(Func<SbuReminder, bool> query)
+        public async Task<IReadOnlyList<SbuReminder>> CancelAsync(Expression<Func<SbuReminder, bool>> query)
         {
             List<SbuReminder> removed = new();
 
-            IEnumerable<KeyValuePair<Snowflake, Entry>> filtered = _scheduleEntries.Where(e => query(e.Value.Reminder));
+            IEnumerable<KeyValuePair<Snowflake, Entry>> filtered
+                = _scheduleEntries.Where(e => query.Compile()(e.Value.Reminder));
+
             IEnumerable<SbuReminder> reminders = filtered.Select(e => e.Value.Reminder);
 
             foreach ((Snowflake _, (SbuReminder reminder, Timer timer)) in filtered)
@@ -209,8 +212,10 @@ namespace SbuBot.Services
             {
                 SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
 
+                reminders = await context.Reminders.Where(query).ToListAsync(Bot.StoppingToken);
                 context.Reminders.RemoveRange(reminders);
-                await context.SaveChangesAsync();
+
+                await context.SaveChangesAsync(Bot.StoppingToken);
             }
 
             Logger.LogDebug("Cancelled: {@Reminders}", reminders);
@@ -226,10 +231,7 @@ namespace SbuBot.Services
                     .WithEmbeds(
                         new LocalEmbed()
                             .WithTitle("Reminder")
-                            .WithDescription(
-                                (reminder.Message ?? "`No Message`")
-                                + $"\n\n{Markdown.Link("Original Message", reminder.GetJumpUrl())}"
-                            )
+                            .WithDescription(reminder.Message)
                             .WithTimestamp(reminder.CreatedAt)
                     )
             );

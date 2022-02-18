@@ -88,7 +88,7 @@ namespace SbuBot.Commands
         }
 
         protected DiscordMenuCommandResult HelpView()
-            => View(new RootHelpView(Context, Context.Bot.Commands));
+            => View(new RootHelpView(Context, Bot.Commands));
 
         protected DiscordMenuCommandResult HelpView(Command? command) => command is { }
             ? View(

@@ -22,7 +22,7 @@ namespace SbuBot.Commands.Modules
             [AuthorMustOwn][Description("The reminder to reschedule.")]
             SbuReminder reminder,
             [MustBeFuture][Description("The new timestamp.")]
-            DateTime newTimestamp
+            DateTimeOffset newTimestamp
         )
         {
             await Context.Services.GetRequiredService<ReminderService>()
@@ -31,9 +31,6 @@ namespace SbuBot.Commands.Modules
             return Response(
                 new LocalEmbed()
                     .WithTitle("Reminder Rescheduled")
-                    .WithDescription(
-                        $"{reminder.Message}\n\n{Markdown.Link("Original Message", reminder.GetJumpUrl())}"
-                    )
                     .WithFooter(reminder.GetFormattedId())
                     .WithTimestamp(newTimestamp)
             );

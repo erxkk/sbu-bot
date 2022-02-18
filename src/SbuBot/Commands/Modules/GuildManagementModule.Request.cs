@@ -37,7 +37,7 @@ namespace SbuBot.Commands.Modules
                         waitMessageResult = await await Task.WhenAny(
                             new[]
                             {
-                                Context.Bot.WaitForMessageAsync(
+                                Bot.WaitForMessageAsync(
                                     SbuGlobals.Channel.SENATE,
                                     e => e.Member.Id == Context.Author.Id,
                                     TimeSpan.FromMinutes(3)
@@ -94,7 +94,7 @@ namespace SbuBot.Commands.Modules
                         waitMessageResult = await await Task.WhenAny(
                             new[]
                             {
-                                Context.Bot.WaitForMessageAsync(
+                                Bot.WaitForMessageAsync(
                                     SbuGlobals.Channel.SHIT_SBU_SAYS,
                                     e => e.Member.Id == Context.Author.Id,
                                     TimeSpan.FromMinutes(3)
@@ -144,7 +144,7 @@ namespace SbuBot.Commands.Modules
                         waitMessageResult = await await Task.WhenAny(
                             new[]
                             {
-                                Context.Bot.WaitForMessageAsync(
+                                Bot.WaitForMessageAsync(
                                     SbuGlobals.Channel.ANNOUNCEMENTS,
                                     e => e.Member.Id == Context.Author.Id,
                                     TimeSpan.FromMinutes(3)

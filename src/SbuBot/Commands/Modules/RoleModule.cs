@@ -39,7 +39,7 @@ namespace SbuBot.Commands.Modules
         }
 
         [Command("get")]
-        [Description("Add a role to yourself.")]
+        [Description("Acquire a role membership.")]
         public async Task<DiscordCommandResult> GetAsync(
             [RequireHierarchy(HierarchyComparison.Less, HierarchyComparisonContext.Bot)]
             [Description("The role to add.")]
@@ -61,7 +61,7 @@ namespace SbuBot.Commands.Modules
         }
 
         [Command("leave")]
-        [Description("Remove a role from yourself.")]
+        [Description("Leave role membership.")]
         public async Task<DiscordCommandResult> LeaveAsync(
             [RequireHierarchy(HierarchyComparison.Less, HierarchyComparisonContext.Bot)]
             [Description("The role to remove.")]

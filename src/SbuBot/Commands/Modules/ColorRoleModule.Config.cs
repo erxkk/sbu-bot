@@ -20,6 +20,7 @@ namespace SbuBot.Commands.Modules
         {
             [Command("set")]
             public async Task<DiscordCommandResult> AddAsync(
+                [Description("The type to set this separator as.")]
                 ColorRoleSeparatorType type,
                 [Description("The role to use as a color separator.")]
                 [RequireHierarchy(HierarchyComparison.Less, HierarchyComparisonContext.Bot)]
@@ -60,7 +61,7 @@ namespace SbuBot.Commands.Modules
 
             [Command("unset")]
             public async Task<DiscordCommandResult> RemoveAsync(
-                [Description("The role to use as a color separator.")]
+                [Description("The type of separator to unset.")]
                 ColorRoleSeparatorType type
             )
             {

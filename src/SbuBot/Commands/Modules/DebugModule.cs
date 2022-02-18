@@ -1,19 +1,14 @@
 using System;
 using System.Diagnostics;
-using System.Linq;
 using System.Threading.Tasks;
 
 using Disqord;
 using Disqord.Bot;
-using Disqord.Extensions.Interactivity.Menus.Paged;
 using Disqord.Gateway;
-
-using Kkommon.Extensions.Enumerable;
 
 using Qmmands;
 
 using SbuBot.Evaluation;
-using SbuBot.Extensions;
 
 namespace SbuBot.Commands.Modules
 {
@@ -38,9 +33,9 @@ namespace SbuBot.Commands.Modules
                 // avoid disposal of the current context by waiting until the command completed
                 TaskCompletionSource tcs = new();
 
-                Context.Bot.Queue.Post(
+                Bot.Queue.Post(
                     new DiscordGuildCommandContext(
-                        Context.Bot,
+                        Bot,
                         Context.Prefix,
                         command,
                         new ProxyMessage(Context.Message, command, member, channel.Id),
@@ -49,7 +44,7 @@ namespace SbuBot.Commands.Modules
                     ),
                     async context =>
                     {
-                        await context.Bot.ExecuteAsync(context);
+                        await Bot.ExecuteAsync(context);
                         tcs.SetResult();
                     }
                 );
@@ -81,7 +76,7 @@ namespace SbuBot.Commands.Modules
         {
             await using (Context.BeginYield())
             {
-                await Context.Bot.Chunker.ChunkAsync(Context.Guild);
+                await Bot.Chunker.ChunkAsync(Context.Guild);
             }
 
             return Response("Big Chunkus.");
@@ -161,7 +156,7 @@ ptime | user | {8,16:N1} ms
             // we never parse strings, so using them as sentinels for failure is fine
             string script = string.Format(
                 @"
-                    var parser = Context.Bot.Commands.GetTypeParser<{0}>();
+                    var parser = Bot.Commands.GetTypeParser<{0}>();
                     return parser is {{ }}
                         ? await parser.ParseAsync(null, ""{1}"", Context) is {{ IsSuccessful: true }} result
                             ? (object) result.Value

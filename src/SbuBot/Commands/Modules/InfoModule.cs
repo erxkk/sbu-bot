@@ -23,7 +23,7 @@ namespace SbuBot.Commands.Modules
         [Description("Displays information about the bot.")]
         public async Task<DiscordCommandResult> AboutAsync()
         {
-            IApplication application = await Context.Bot.FetchCurrentApplicationAsync();
+            IApplication application = await Bot.FetchCurrentApplicationAsync();
 
             return Reply(
                 new LocalEmbed()
@@ -94,7 +94,7 @@ namespace SbuBot.Commands.Modules
             [UsageOverride("command find role edit name", "command find help")]
             public DiscordCommandResult Find(string command)
             {
-                IReadOnlyList<CommandMatch> matches = Context.Bot.Commands.FindCommands(command);
+                IReadOnlyList<CommandMatch> matches = Bot.Commands.FindCommands(command);
 
                 if (matches.Count == 0)
                     return Reply("Couldn't find any commands for the given input.");
@@ -120,7 +120,7 @@ namespace SbuBot.Commands.Modules
             [Description("Lists all commands.")]
             public DiscordCommandResult List()
             {
-                IReadOnlySet<Module> modules = Context.Bot.Commands.TopLevelModules;
+                IReadOnlySet<Module> modules = Bot.Commands.TopLevelModules;
 
                 static IEnumerable<string> children(Module module, int depth = 1)
                 {
@@ -180,7 +180,7 @@ namespace SbuBot.Commands.Modules
             [Description("Lists all modules.")]
             public DiscordCommandResult List()
             {
-                IReadOnlySet<Module> modules = Context.Bot.Commands.TopLevelModules;
+                IReadOnlySet<Module> modules = Bot.Commands.TopLevelModules;
 
                 static IEnumerable<string> subModules(Module module, int depth = 1)
                 {
@@ -232,17 +232,17 @@ namespace SbuBot.Commands.Modules
                 );
             }
 
-            IReadOnlyList<CommandMatch> matches = Context.Bot.Commands.FindCommands(command);
+            IReadOnlyList<CommandMatch> matches = Bot.Commands.FindCommands(command);
 
             switch (matches.Count)
             {
                 case 0:
                 {
-                    Module[] moduleMatches = Context.Bot.Commands.GetAllModules()
-                        .Where(c => c.Aliases.Any(a => a.Equals(command, StringComparison.OrdinalIgnoreCase)))
+                    Module[] moduleMatches = Bot.Commands.GetAllModules()
+                        .Where(m => m.Aliases.Any(a => a.Equals(command, StringComparison.OrdinalIgnoreCase)))
                         .ToArray();
 
-                    Command[] commandMatches = Context.Bot.Commands.GetAllCommands()
+                    Command[] commandMatches = Bot.Commands.GetAllCommands()
                         .Where(c => c.Aliases.Any(a => a.Equals(command, StringComparison.OrdinalIgnoreCase)))
                         .ToArray();
 
@@ -268,6 +268,51 @@ namespace SbuBot.Commands.Modules
                 default:
                     return HelpView(matches.Select(c => c.Command));
             }
+        }
+
+        [Command("example")]
+        public DiscordCommandResult Example(string path)
+        {
+            IReadOnlyList<CommandMatch> matches = Bot.Commands.FindCommands(path);
+
+            object[] allMatches = (matches.Count) switch
+            {
+                0 => Enumerable.Empty<object>()
+                    .Concat(
+                        Bot.Commands.GetAllModules()
+                            .Where(m => m.Aliases.Any(a => a.Equals(path, StringComparison.OrdinalIgnoreCase)))
+                    )
+                    .Concat(
+                        Bot.Commands.GetAllCommands()
+                            .Where(c => c.Aliases.Any(a => a.Equals(path, StringComparison.OrdinalIgnoreCase)))
+                    )
+                    .ToArray(),
+
+                _ => matches.Select(c => c.Command as object).ToArray(),
+            };
+
+            if (allMatches.Length == 0)
+                return Reply($"No commands or modules found for `{path}`");
+
+            return DistributedPages(
+                allMatches.Select(
+                        com =>
+                        {
+                            return com switch
+                            {
+                                Module m => (m.FullAliases[0], Usage.GetUsages(m)),
+                                Command c => (c.FullAliases[0], Usage.GetUsages(c)),
+                                _ => throw new ArgumentOutOfRangeException()
+                            };
+                        }
+                    )
+                    .Select(
+                        nameAndAttr
+                            => $"{SbuGlobals.BULLET} `sbu {nameAndAttr.Item1}`\n{Markdown.CodeBlock(nameAndAttr.Item2.ToNewLines())}"
+                    ),
+                maxPageLength: LocalEmbed.MaxDescriptionLength / 2,
+                embedFactory: embed => embed.WithTitle("Examples")
+            );
         }
 
         private static class GuideStatic

@@ -58,7 +58,7 @@ namespace SbuBot.Commands.Modules
                 {
                     ConfirmationState result = await ConfirmationAsync(
                         "Auto Response Removal",
-                        "Are you sure you want to remove all auto responses?"
+                        "Are you sure you want to remove **all** auto responses?"
                     );
 
                     switch (result)

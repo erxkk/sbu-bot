@@ -48,7 +48,7 @@ namespace SbuBot.Commands.Modules
                     return Reply("This guild doesn't have a pin archive channel set up. see `sbu help archive set`");
 
                 ITextChannel? pinArchive = Context.Guild.GetChannel(guild.ArchiveId.Value) as ITextChannel
-                    ?? await Context.Bot.FetchChannelAsync(guild.ArchiveId.Value) as ITextChannel;
+                    ?? await Bot.FetchChannelAsync(guild.ArchiveId.Value) as ITextChannel;
 
                 if (pinArchive is null)
                     return Reply($"Could not find required pin archive channel ({guild.ArchiveId.Value}).");
@@ -81,7 +81,7 @@ namespace SbuBot.Commands.Modules
 
                         foreach (IUserMessage pinnedMessage in pins.OrderBy(m => m.CreatedAt()))
                         {
-                            if (Context.Bot.StoppingToken.IsCancellationRequested)
+                            if (Bot.StoppingToken.IsCancellationRequested)
                                 throw new OperationCanceledException();
 
                             if (await PinSingleMessageAsync(pinnedMessage, pinArchive, unpinOriginal)

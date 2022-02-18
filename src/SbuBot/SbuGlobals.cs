@@ -35,9 +35,11 @@ namespace SbuBot
                     ["set"] = Array.Empty<string>(),
                     ["get"] = Array.Empty<string>(),
                     ["edit"] = new[] { "change" },
-                    ["list"] = new[] { "ls" },
+                    ["list"] = new[] { "ls", "show" },
                     ["delete"] = new[] { "remove", "rm" },
                     ["transfer"] = new[] { "move", "mv" },
+                    ["owner"] = Array.Empty<string>(),
+                    ["for"] = Array.Empty<string>(),
                 };
 
                 SbuGlobals.Keyword.ALL_RESERVED = SbuGlobals.Keyword.COMMAND_ALIASES
