@@ -7,6 +7,7 @@ using Kkommon;
 using Qmmands;
 
 using SbuBot.Commands.Attributes;
+using SbuBot.Commands.Parsing.Descriptors;
 using SbuBot.Commands.Parsing.HelperTypes;
 using SbuBot.Commands.Parsing.TypeParsers;
 using SbuBot.Models;
@@ -52,7 +53,8 @@ namespace SbuBot.Commands
         public static void AppendTo(
             this Command @this,
             StringBuilder builder,
-            bool withDefaults = true
+            bool withMeta = true,
+            bool skipDescriptors = false
         )
         {
             Preconditions.NotNull(@this, nameof(@this));
@@ -65,27 +67,32 @@ namespace SbuBot.Commands
                 return;
 
             builder.Append(' ');
-            @this.AppendParametersTo(builder, withDefaults);
+            @this.AppendParametersTo(builder, withMeta, skipDescriptors);
         }
 
-        public static string Format(this Command @this, bool withDefaults = true)
+        public static string Format(this Command @this, bool withMeta = true, bool skipDescriptors = false)
         {
             Preconditions.NotNull(@this, nameof(@this));
             Preconditions.Greater(@this.FullAliases[0].Length, 0, "@this.FullAliases.Length");
 
             StringBuilder builder = new(@this.FullAliases[0].Length + 16 * @this.Parameters.Count);
-            @this.AppendTo(builder, withDefaults);
+            @this.AppendTo(builder, withMeta, skipDescriptors);
             return builder.ToString();
         }
 
-        public static void AppendParametersTo(this Command @this, StringBuilder builder, bool withDefaults = true)
+        public static void AppendParametersTo(
+            this Command @this,
+            StringBuilder builder,
+            bool withMeta = true,
+            bool skipDescriptors = false
+        )
         {
             Preconditions.NotNull(@this, nameof(@this));
             Preconditions.NotNull(builder, nameof(builder));
 
             foreach (Parameter parameter in @this.Parameters)
             {
-                parameter.AppendTo(builder, withDefaults);
+                parameter.AppendTo(builder, withMeta, skipDescriptors);
                 builder.Append(' ');
             }
 
@@ -93,71 +100,90 @@ namespace SbuBot.Commands
                 builder.Remove(builder.Length - 1, 1);
         }
 
-        public static string FormatParameters(this Command @this, bool withDefaults = true)
+        public static string FormatParameters(
+            this Command @this,
+            bool withMeta = true,
+            bool skipDescriptors = false
+        )
         {
             Preconditions.NotNull(@this, nameof(@this));
 
             StringBuilder builder = new(16 * @this.Parameters.Count);
-            @this.AppendParametersTo(builder, withDefaults);
+            @this.AppendParametersTo(builder, withMeta, skipDescriptors);
             return builder.ToString();
         }
 
-        public static void AppendTo(this Parameter @this, StringBuilder builder, bool withMeta = true)
+        public static void AppendTo(
+            this Parameter @this,
+            StringBuilder builder,
+            bool withMeta = true,
+            bool skipDescriptors = false
+        )
         {
             Preconditions.NotNull(@this, nameof(@this));
             Preconditions.NotNull(builder, nameof(builder));
 
-            builder.Append(@this.IsOptional ? '[' : '<').Append(@this.Name);
+            builder.Append(@this.IsOptional ? '[' : '<');
 
-            if (@this.IsMultiple)
+            if (!skipDescriptors && @this.Type.IsAssignableTo(typeof(IDescriptor)))
             {
-                builder.Append(SbuGlobals.ELLIPSES);
+                // descriptors are always required and always the last lone non params arg
+                builder.Append(string.Join("> :: <", IDescriptor.GetParts(@this.Type).Keys));
             }
-            else if (withMeta && @this.IsOptional)
+            else
             {
-                builder.Append(" = ");
+                builder.Append(@this.Name);
 
-                object defaultValue = @this.Attributes
-                    .OfType<OverrideDefaultAttribute>()
-                    .FirstOrDefault() is { } overrideDefault
-                    ? overrideDefault.Value
-                    : @this.DefaultValue;
+                if (@this.IsMultiple)
+                {
+                    builder.Append(SbuGlobals.ELLIPSES);
+                }
+                else if (withMeta && @this.IsOptional)
+                {
+                    builder.Append(" = ");
 
-                builder.Append(
-                    defaultValue switch
-                    {
-                        null => "{none}",
-                        true => "{true}",
-                        false => "{false}",
-                        string str when !str.StartsWith('{') => $"\"{str}\"",
-                        { } value => value,
-                    }
-                );
+                    object defaultValue = @this.Attributes
+                        .OfType<OverrideDefaultAttribute>()
+                        .FirstOrDefault() is { } overrideDefault
+                        ? overrideDefault.Value
+                        : @this.DefaultValue;
 
-                if (@this.Type.IsGenericType && @this.Type.GetGenericTypeDefinition() == typeof(OneOrAll<>))
+                    builder.Append(
+                        defaultValue switch
+                        {
+                            null => "{none}",
+                            true => "{true}",
+                            false => "{false}",
+                            string str when !str.StartsWith('{') => $"\"{str}\"",
+                            { } value => value,
+                        }
+                    );
+
+                    if (@this.Type.IsGenericType && @this.Type.GetGenericTypeDefinition() == typeof(OneOrAll<>))
+                        builder.Append(" | all");
+                }
+                else if (withMeta
+                         && @this.Type.IsGenericType
+                         && @this.Type.GetGenericTypeDefinition() == typeof(OneOrAll<>))
+                {
                     builder.Append(" | all");
-            }
-            else if (withMeta
-                && @this.Type.IsGenericType
-                && @this.Type.GetGenericTypeDefinition() == typeof(OneOrAll<>))
-            {
-                builder.Append(" | all");
-            }
-            else if (withMeta && @this.Type == typeof(SbuReminder))
-            {
-                // create type appender?
-                builder.Append(" | last");
+                }
+                else if (withMeta && @this.Type == typeof(SbuReminder))
+                {
+                    // create type appender?
+                    builder.Append(" | last");
+                }
             }
 
             builder.Append(@this.IsOptional ? ']' : '>');
         }
 
-        public static string Format(this Parameter @this, bool withDefault = true)
+        public static string Format(this Parameter @this, bool withMeta = true, bool skipDescriptors = true)
         {
             Preconditions.NotNull(@this, nameof(@this));
 
-            StringBuilder builder = new(2 + @this.Name.Length + (withDefault && @this.IsOptional ? 8 : 0));
-            @this.AppendTo(builder);
+            StringBuilder builder = new(2 + @this.Name.Length + (withMeta && @this.IsOptional ? 8 : 0));
+            @this.AppendTo(builder, withMeta, skipDescriptors);
             return builder.ToString();
         }
     }

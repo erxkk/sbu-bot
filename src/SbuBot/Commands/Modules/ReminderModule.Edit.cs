@@ -22,7 +22,7 @@ namespace SbuBot.Commands.Modules
             [AuthorMustOwn][Description("The reminder to reschedule.")]
             SbuReminder reminder,
             [MustBeFuture][Description("The new timestamp.")]
-            DateTimeOffset newTimestamp
+            DateTime newTimestamp
         )
         {
             await Context.Services.GetRequiredService<ReminderService>()

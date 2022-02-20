@@ -43,22 +43,28 @@ namespace SbuBot.Services
         }
 
         public async Task<IReadOnlyDictionary<Snowflake, SbuReminder>> FetchRemindersAsync(
-            Snowflake? userId,
-            Snowflake? guildId
+            Func<IQueryable<SbuReminder>, IQueryable<SbuReminder>> query
         )
         {
             using (IServiceScope scope = Bot.Services.CreateScope())
             {
                 SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
-                IQueryable<SbuReminder> query = context.Reminders;
+                IQueryable<SbuReminder> queryable = query(context.Reminders);
 
-                if (userId is { })
-                    query = query.Where(r => r.OwnerId == userId.Value);
+                return await queryable.ToDictionaryAsync(r => r.MessageId, Bot.StoppingToken);
+            }
+        }
 
-                if (guildId is { })
-                    query = query.Where(r => r.GuildId == guildId.Value);
+        public async Task<SbuReminder> FetchReminderAsync(
+            Func<IQueryable<SbuReminder>, IQueryable<SbuReminder>> query
+        )
+        {
+            using (IServiceScope scope = Bot.Services.CreateScope())
+            {
+                SbuDbContext context = scope.ServiceProvider.GetRequiredService<SbuDbContext>();
+                IQueryable<SbuReminder> queryable = query(context.Reminders);
 
-                return await query.ToDictionaryAsync(r => r.MessageId, Bot.StoppingToken);
+                return await queryable.FirstOrDefaultAsync(Bot.StoppingToken);
             }
         }
 

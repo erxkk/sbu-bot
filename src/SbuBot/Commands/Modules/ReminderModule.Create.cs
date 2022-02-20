@@ -56,7 +56,7 @@ namespace SbuBot.Commands.Modules
             [Command]
             public async Task<DiscordCommandResult> CreateNoMessageAsync(
                 [Description("The time at which to remind you.")]
-                DateTimeOffset timestamp
+                DateTime timestamp
             )
             {
                 SbuReminder newReminder = new(Context, Context.Author.Id, Context.Guild.Id, null, timestamp);

@@ -91,7 +91,7 @@ namespace SbuBot.Commands.Views.Help
             {
                 TemplateMessage.Embeds[0]
                     .AddInlineField(
-                        parameter.Format(),
+                        parameter.Format(skipDescriptors: true),
                         string.Format(
                             "**Description:**\n{0}{1}",
                             parameter.Description,

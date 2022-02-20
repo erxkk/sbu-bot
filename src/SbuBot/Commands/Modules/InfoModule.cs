@@ -216,9 +216,9 @@ namespace SbuBot.Commands.Modules
 
         [Command("help")]
         [Description("Interactively displays information about for a given command/module, or displays general help.")]
-        public DiscordCommandResult Help(string? command = null)
+        public DiscordCommandResult Help(string? path = null)
         {
-            if (command is null)
+            if (path is null)
             {
                 return Reply(
                     new LocalEmbed().WithDescription(
@@ -232,18 +232,29 @@ namespace SbuBot.Commands.Modules
                 );
             }
 
-            IReadOnlyList<CommandMatch> matches = Bot.Commands.FindCommands(command);
+            int maxLength = 0;
+
+            IReadOnlyList<CommandMatch> matches = Bot.Commands.FindCommands(path)
+                .OrderByDescending(m => m.Path.Count)
+                .TakeWhile(
+                    m =>
+                    {
+                        maxLength = Math.Max(m.Path.Count, maxLength);
+                        return m.Path.Count >= maxLength;
+                    }
+                )
+                .ToList();
 
             switch (matches.Count)
             {
                 case 0:
                 {
                     Module[] moduleMatches = Bot.Commands.GetAllModules()
-                        .Where(m => m.Aliases.Any(a => a.Equals(command, StringComparison.OrdinalIgnoreCase)))
+                        .Where(m => m.Aliases.Any(a => a.Equals(path, StringComparison.OrdinalIgnoreCase)))
                         .ToArray();
 
                     Command[] commandMatches = Bot.Commands.GetAllCommands()
-                        .Where(c => c.Aliases.Any(a => a.Equals(command, StringComparison.OrdinalIgnoreCase)))
+                        .Where(c => c.Aliases.Any(a => a.Equals(path, StringComparison.OrdinalIgnoreCase)))
                         .ToArray();
 
                     switch ((moduleMatches.Length, commandMatches.Length))
@@ -273,7 +284,18 @@ namespace SbuBot.Commands.Modules
         [Command("example")]
         public DiscordCommandResult Example(string path)
         {
-            IReadOnlyList<CommandMatch> matches = Bot.Commands.FindCommands(path);
+            int maxLength = 0;
+
+            IReadOnlyList<CommandMatch> matches = Bot.Commands.FindCommands(path)
+                .OrderByDescending(m => m.Path.Count)
+                .TakeWhile(
+                    m =>
+                    {
+                        maxLength = Math.Max(m.Path.Count, maxLength);
+                        return m.Path.Count >= maxLength;
+                    }
+                )
+                .ToList();
 
             object[] allMatches = (matches.Count) switch
             {
@@ -300,15 +322,22 @@ namespace SbuBot.Commands.Modules
                         {
                             return com switch
                             {
-                                Module m => (m.FullAliases[0], Usage.GetUsages(m)),
-                                Command c => (c.FullAliases[0], Usage.GetUsages(c)),
+                                Module m => (m.Format(), Usage.GetUsages(m)),
+                                Command c => (c.Format(), Usage.GetUsages(c)),
                                 _ => throw new ArgumentOutOfRangeException()
                             };
                         }
                     )
                     .Select(
-                        nameAndAttr
-                            => $"{SbuGlobals.BULLET} `sbu {nameAndAttr.Item1}`\n{Markdown.CodeBlock(nameAndAttr.Item2.ToNewLines())}"
+                        formatAndUsage
+                            => string.Format(
+                                "`sbu {0}`\n{1}",
+                                formatAndUsage.Item1,
+                                Markdown.CodeBlock(
+                                    "md",
+                                    formatAndUsage.Item2.Select(u => $"{SbuGlobals.BULLET} {u}").ToNewLines()
+                                )
+                            )
                     ),
                 maxPageLength: LocalEmbed.MaxDescriptionLength / 2,
                 embedFactory: embed => embed.WithTitle("Examples")

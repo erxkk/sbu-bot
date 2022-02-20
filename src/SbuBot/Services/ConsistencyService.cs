@@ -110,7 +110,8 @@ namespace SbuBot.Services
 
         protected override async ValueTask OnMessageReceived(BotMessageReceivedEventArgs e)
         {
-            if (e.GuildId is null || e.Member.IsBot)
+            // BUG: unknown exception, may have been null ref on cached member
+            if (e.GuildId is null || e.Member is null || e.Member.IsBot)
                 return;
 
             using (IServiceScope scope = Bot.Services.CreateScope())

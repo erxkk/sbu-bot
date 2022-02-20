@@ -40,7 +40,10 @@ namespace SbuBot.Commands.Modules
             }
 
             if (await Context.Services.GetRequiredService<ReminderService>()
-                    .FetchRemindersAsync(Context.Author.Id, Context.GuildId) is not { Count: > 0 } reminders)
+                    .FetchRemindersAsync(
+                        query => query.Where(r => r.OwnerId == Context.Author.Id && r.GuildId == Context.GuildId)
+                    )
+                is not { Count: > 0 } reminders)
                 return Reply("You have no reminders.");
 
             return DistributedPages(

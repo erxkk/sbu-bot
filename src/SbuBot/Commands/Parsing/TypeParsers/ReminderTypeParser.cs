@@ -24,31 +24,39 @@ namespace SbuBot.Commands.Parsing.TypeParsers
             DiscordGuildCommandContext context
         )
         {
+            // BUG: exception in some task on aggregate accessor?
+            // see: log20220219.txt [18:49]
+            // this might not fix the issue but expose it in the logs next time it happens
             ReminderService service = context.Services.GetRequiredService<ReminderService>();
-
-            IReadOnlyDictionary<Snowflake, SbuReminder> reminders
-                = await service.FetchRemindersAsync(null, context.GuildId);
 
             if (value.Equals("last", StringComparison.OrdinalIgnoreCase))
             {
-                return reminders.Values.FirstOrDefault(r => r.OwnerId == context.Author.Id) is { } queriedReminder
+                return await service.FetchReminderAsync(
+                    query => query
+                        .OrderByDescending(r => r.CreatedAt)
+                        .Where(r => r.GuildId == context.GuildId && r.OwnerId == context.Author.Id)
+                ) is { } queriedReminder
                     ? Success(queriedReminder)
                     : Failure("Could not find reminder.");
             }
 
             TypeParser<Snowflake> snowflakeParser = context.Bot.Commands.GetTypeParser<Snowflake>();
 
+            // in rare cases this can fail if all digits in the hex string are valid decimal
             if (await snowflakeParser.ParseAsync(parameter, value, context)
                 is { IsSuccessful: true } snowflakeParseResult)
             {
-                return reminders.TryGetValue(snowflakeParseResult.Value, out SbuReminder? reminder)
+                return await service.FetchReminderAsync(
+                    query => query.Where(r => r.MessageId == snowflakeParseResult.Value)
+                ) is { } reminder
                     ? Success(reminder)
                     : Failure("Could not find reminder.");
             }
 
             if (ulong.TryParse(value, NumberStyles.HexNumber, NumberFormatInfo.CurrentInfo, out ulong ulongId))
             {
-                return reminders.TryGetValue(ulongId, out SbuReminder? reminder)
+                return await service.FetchReminderAsync(query => query.Where(r => r.MessageId == ulongId))
+                    is { } reminder
                     ? Success(reminder)
                     : Failure("Could not find reminder.");
             }

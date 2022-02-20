@@ -25,10 +25,10 @@ namespace SbuBot.Commands.Modules
         [Description("Modifies the content of a given tag.")]
         public async Task<DiscordCommandResult> EditAsync(
             [Description("The tag descriptor `<name> :: <content>`.")]
-            TagDescriptor tagDescriptor
+            TagDescriptor descriptor
         )
         {
-            SbuTag? tag = await Context.GetTagAsync(tagDescriptor.Name);
+            SbuTag? tag = await Context.GetTagAsync(descriptor.Name);
 
             if (tag is null)
                 return Reply("No tag found.");
@@ -38,7 +38,7 @@ namespace SbuBot.Commands.Modules
 
             SbuDbContext context = Context.GetSbuDbContext();
 
-            tag.Content = tagDescriptor.Content;
+            tag.Content = descriptor.Content;
             context.Tags.Update(tag);
             await context.SaveChangesAsync();
 

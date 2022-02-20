@@ -87,10 +87,10 @@ namespace SbuBot.Commands
             // TODO: randomize which descriptor sub type usage is returned here + return more then one
             if (type.IsAssignableTo(typeof(IDescriptor)))
             {
-                Type[] types = (Type[])type.GetField("TYPES")!.GetValue(null)!;
+                IReadOnlyDictionary<string, Type> parts = IDescriptor.GetParts(type);
 
                 // throw if non existent
-                IEnumerable<string> typeUsages = types.Select(t => Usage.TYPE_PARSING_EXAMPLES[t][0]);
+                IEnumerable<string> typeUsages = parts.Select(t => Usage.TYPE_PARSING_EXAMPLES[t.Value][0]);
                 return Enumerable.Repeat(string.Join(" :: ", typeUsages), 1).ToList();
             }
 
